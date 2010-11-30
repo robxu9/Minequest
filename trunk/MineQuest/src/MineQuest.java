@@ -22,7 +22,12 @@ public class MineQuest extends Plugin {
             this,
             PluginListener.Priority.MEDIUM);
         etc.getLoader().addListener(
-                PluginLoader.Hook.MOB_SPAWN,
+                PluginLoader.Hook.LOGIN,
+                listener,
+                this,
+                PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(
+                PluginLoader.Hook.COMMAND,
                 listener,
                 this,
                 PluginListener.Priority.MEDIUM);
