@@ -1,6 +1,7 @@
 
 public class Ability {
 	private String name;
+	@SuppressWarnings("unused")
 	private boolean enabled;
 	private int type;
 	
@@ -32,8 +33,7 @@ public class Ability {
 	}
 	
 	public boolean equals(String name) {
-		// TODO: write Ability.equals(name);
-		return false;
+		return name.equals(this.name);
 	}
 	
 	public String getName() {

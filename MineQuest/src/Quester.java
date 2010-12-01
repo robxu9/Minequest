@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Random;
 
 
 public class Quester {
@@ -8,12 +9,84 @@ public class Quester {
 	private int health;
 	private int max_health;
 	private mysql_interface sql_server;
+	@SuppressWarnings("unused")
 	private Item last_used;
 	private boolean enabled;
 	private String name;
 	private SkillClass classes[];
 	
 	public Quester(String name, int x, mysql_interface sql) {
+		this.name = name;
+		sql_server = sql;
+		create();
+		update();
+	}
+	
+	public Quester(String name, mysql_interface sql) {
+		sql_server = sql;
+		this.name = name;
+		update();
+	}
+	
+	public void attack(Player player, Mob mob) {
+		int i;
+		
+		if (!enabled) return;
+
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isClassItem(player.getItemInHand())) {
+				classes[i].attack(player, mob, this);
+				exp += 5;
+				if (exp > 100 * (level + 1)) {
+					levelUp();
+					player.sendMessage("Congradulations " + name + ", you are now a level " + level + " character");
+				}
+				return;
+			}
+		}
+	}
+	
+	public void defend(Player player, Mob mob) {
+		if (!enabled) return;
+		// TODO: write Quester.defend(player, mob);
+		player.sendMessage("Your health was " + player.getHealth());
+		player.setHealth(player.getHealth() - 5);
+		player.sendMessage("Now it is " + player.getHealth());
+	}
+	
+	private void levelUp() {
+		Random generator = new Random();
+		int add_health = generator.nextInt(3) + 1;
+		level++;
+		exp = 0;
+		max_health += add_health;
+		health += add_health;
+	}
+	
+	public void addHealth(int addition) {
+		health += addition;
+		max_health += addition;
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	public void enable() {
+		enabled = true;
+		
+		return;
+	}
+	
+	public void disable() {
+		enabled = false;
+		
+		return;
+	}
+	
+	public void create() {
+		int i, num;
+		ResultSet results;
 		String class_names[] = {
 				"Warrior",
 				"Archer",
@@ -24,18 +97,14 @@ public class Quester {
 				"Digger",
 				"Farmer"
 		};
-		this.name = name;
-		sql_server = sql;
-		int i, num;
-		ResultSet results;
 		
 		String update_string = "INSERT INTO questers (name, exp, level, health, maxhealth, classes) VALUES('"
-			+ name + "', '0', '0', '50', '50', '";
+			+ name + "', '0', '0', '10', '10', '";
 		update_string = update_string + class_names[0];
 		for (i = 1; i < class_names.length; i++) {
 			update_string = update_string + ", " + class_names[i];
 		}
-		update_string = update_string + "'";
+		update_string = update_string + "')";
 		try {
 			sql_server.update(update_string);
 		} catch (SQLException e) {
@@ -65,55 +134,24 @@ public class Quester {
 				e.printStackTrace();
 			}
 		}
-		update();
-	}
-	
-	public Quester(String name, mysql_interface sql) {
-		sql_server = sql;
-		this.name = name;
-		update();
-	}
-	
-	public void attack(Player player, Mob mob) {
-		// TODO: write Quester.attack(player, mob);
-	}
-	
-	public void defend(Player player, Mob mob) {
-		// TODO: write Quester.defend(player, mob);
-	}
-	
-	private void levelUp() {
-		// TODO: write Quester.levelUp();
-	}
-	
-	public void addHealth(int addition) {
-		// TODO: write Quester.addHealth(addition);
-	}
-	
-	public boolean isEnabled() {
-		// TODO: write Quester.isEnabled();
-		return false;
-	}
-	
-	public void enable() {
-		// TODO: write Quester.enable();
-	}
-	
-	public void disable() {
-		// TODO: write Quester.disable();
-	}
-	
-	public void create() {
-		// TODO: write Quester.create();
 	}
 	
 	public int getHealth() {
-		// TODO: write Quester.getHealth();
-		return 0;
+		return health;
 	}
 	
 	public void save() {
-		// TODO: write Quester.save();
+		try {
+			int i;
+			
+			sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
+					+ health + "', maxhealth='" + max_health + "' WHERE name='" + name + "'");
+			for (i = 0; i < classes.length; i++) {
+				classes[i].save();
+			}
+		} catch (SQLException e) {
+			System.out.println("Unable to save " + name + " to database");
+		}
 	}
 	
 	public void update() {
@@ -131,7 +169,6 @@ public class Quester {
 		}
 		try {
 			split = results.getString("classes").split(", ");
-			this.name = name;
 			exp = results.getInt("exp");
 			level = results.getInt("level");
 			health = results.getInt("health");
@@ -147,7 +184,7 @@ public class Quester {
 		
 		classes = new SkillClass[split.length];
 		for (i = 0; i < split.length; i++) {
-			classes[i] = new SkillClass(name, sql_server);
+			classes[i] = new SkillClass(split[i], name, sql_server);
 		}
 	}
 
@@ -164,10 +201,13 @@ public class Quester {
 	}
 
 	public void healthChange(Player player, int oldValue, int newValue) {
-		// TODO Auto-generated method stub
+		if (!enabled) return;
+		
+		player.setHealth((100 * health) / max_health);
 	}
 
 	public void destroyBlock(Player player, Block block) {
+		if (!enabled) return;
 		// TODO Auto-generated method stub
 		
 	}
