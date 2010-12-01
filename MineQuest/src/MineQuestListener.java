@@ -27,26 +27,6 @@ public class MineQuestListener extends PluginListener {
 		
 		getQuesters();
 	}
-    private Quester questers[];
-	private mysql_interface sql_server;
-	private PropertiesFile prop;
-
-	public void setup() {
-		String url, port, db, user, pass;
-		
-        log = Logger.getLogger("Minecraft");
-
-		prop = new PropertiesFile("minequest.properties");
-		url = prop.getString("url", "localhost");
-		port = prop.getString("port", "3306");
-		db = prop.getString("db", "cubonomy");
-		user = prop.getString("user", "root");
-		pass = prop.getString("pass", "root");
-		sql_server = new mysql_interface();
-		sql_server.setup(url, port, db, user, pass);
-		
-		getQuesters();
-	}
 	
 	public boolean onCommand(Player player, String[] split) {
 		if (split[0].equals("/char")) {
@@ -105,21 +85,6 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
     
-	public void onDisconnect(Player player) {
-		lookupQuester(player.getName()).save();
-	}
-	
-	@Override
-	public boolean onBlockDestroy(Player player, Block block) {
-		lookupQuester(player.getName()).destroyBlock(player, block);
-		return false;
-	}
-	
-	public boolean onHealthChange(Player player, int oldValue, int newValue) {
-		lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
-		return true;
-	}
-    
 	public boolean onDamage(BaseEntity attacker, BaseEntity defender) {
 		int attack = 1;
 		int defend = 0;
@@ -162,7 +127,6 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 
-
 	private Quester lookupQuester(String name) {
 		int i;
 		for (i = 0; i < questers.length; i++) {
@@ -196,5 +160,4 @@ public class MineQuestListener extends PluginListener {
 			e.printStackTrace();
 		}
 	}
-
 }
