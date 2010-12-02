@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Random;
 
 
@@ -19,8 +20,13 @@ public class SkillClass {
 		update();
 	}
 	
-	public void attack(Player player, Mob mob, Quester quester) {
-		mob.setHealth(mob.getHealth() - 10);
+	public void attack(Player player, BaseEntity defender, Quester quester) {
+		LivingEntity defend = getLiveEnt(defender);
+		System.out.println("Call to " + name + ".attack()");
+		if (defend == null) {
+			System.out.println("oops");
+		}
+		defend.setHealth(defend.getHealth() - 10);
 		
 		exp += 10;
 		if (exp > 100 * (level + 1)) {
@@ -29,6 +35,18 @@ public class SkillClass {
 		}
 	}
 	
+	private LivingEntity getLiveEnt(BaseEntity defender) {
+		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
+		int i;
+		for (i = 0; i < entity_list.size(); i++) {
+			if (defender.getId() == entity_list.get(i).getId()) {
+				return entity_list.get(i);
+			}
+		}
+		
+		return null;
+	}
+
 	public void defend(Player player, Mob mob) {
 		// TODO: write SkillClass.defend(player, mob);
 	}
@@ -98,10 +116,11 @@ public class SkillClass {
 	
 	public boolean isClassItem(int item_id) {
 		if (type.equals("Warrior")) { // Warrior
-			if (item_id == 272) return true;			// Stone
+			return true;
+			/*if (item_id == 272) return true;			// Stone
 			else if (item_id == 276) return true;	// Diamond
 			else if (item_id == 283) return true;	// Gold
-			else if (item_id == 267) return true;	// Iron
+			else if (item_id == 267) return true;	// Iron*/
 		} else if (type.equals("Miner")) {
 			if (item_id == 274) return true;			// Stone
 			else if (item_id == 278) return true;	// Diamond
@@ -142,7 +161,7 @@ public class SkillClass {
 	public void save() {
 		try {
 			sql_server.update("UPDATE " + type + " SET exp='" + exp + "', level='" + level + 
-								" WHERE name='" + name + "'");
+								"' WHERE name='" + name + "'");
 		} catch (SQLException e) {
 			System.out.println("Save failed for class " + type + " of player " + name);
 			e.printStackTrace();
@@ -177,7 +196,7 @@ public class SkillClass {
 		Ability list[];
 		int i;
 		int count = 0;
-		ResultSet results = sql_server.query("SELECT * FROM abilities WHERE abil_list_id='" + abilId + "'");
+		/*ResultSet results = sql_server.query("SELECT * FROM abilities WHERE abil_list_id='" + abilId + "'");
 		
 		for (i = 0; i < 10; i++) {
 			if (results.getString("abil" + i) != null) {
@@ -191,7 +210,8 @@ public class SkillClass {
 			list[i] = new Ability(getAbilName(AbilID), AbilID);
 		}
 		
-		return list;
+		return list;*/
+		return null;
 	}
 
 	private String getAbilName(int abilID) throws SQLException {
@@ -200,6 +220,10 @@ public class SkillClass {
 		results = sql_server.query("SELECT * from abilnames WHERE abilid='" + abilID + "'");
 		
 		return results.getString("name");
+	}
+
+	public String getType() {
+		return type;
 	}	
 	
 	

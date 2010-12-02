@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Random;
 
 
@@ -28,14 +29,18 @@ public class Quester {
 		update();
 	}
 	
-	public void attack(Player player, Mob mob) {
+	public void attack(Player player, BaseEntity defender) {
 		int i;
+		System.out.println("Call to Quester.attack()");
 		
 		if (!enabled) return;
 
+		player.sendMessage("Attack from " + player.getName() + " to " + defender.getName());
 		for (i = 0; i < classes.length; i++) {
+			System.out.println("Checking " + classes[i].getType());
 			if (classes[i].isClassItem(player.getItemInHand())) {
-				classes[i].attack(player, mob, this);
+				classes[i].attack(player, defender, this);
+				player.sendMessage("In class " + classes[i].getName());
 				exp += 5;
 				if (exp > 100 * (level + 1)) {
 					levelUp();
@@ -46,7 +51,8 @@ public class Quester {
 		}
 	}
 	
-	public void defend(Player player, Mob mob) {
+	public void defend(Player player, BaseEntity attacker) {
+		System.out.println("Call to Quester.defend()");
 		if (!enabled) return;
 		// TODO: write Quester.defend(player, mob);
 		player.sendMessage("Your health was " + player.getHealth());
@@ -74,12 +80,14 @@ public class Quester {
 	
 	public void enable() {
 		enabled = true;
+		etc.getServer().getPlayer(name).sendMessage("MineQuest is now enabled for your character");
 		
 		return;
 	}
 	
 	public void disable() {
 		enabled = false;
+		etc.getServer().getPlayer(name).sendMessage("MineQuest is now disabled for your character");
 		
 		return;
 	}
@@ -90,8 +98,8 @@ public class Quester {
 		String class_names[] = {
 				"Warrior",
 				"Archer",
-				"War Mage",
-				"Peace Mage",
+				//"WarMage",
+				//"PeaceMage",
 				"Miner",
 				"Lumberjack",
 				"Digger",
@@ -128,7 +136,7 @@ public class Quester {
 								+ name + "', '0', '0', '" + (num + i) + "')";
 			try {
 				sql_server.update(update_string);
-				sql_server.update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
+				//sql_server.update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
 			} catch (SQLException e) {
 				System.out.println("Unable to insert");
 				e.printStackTrace();
@@ -186,6 +194,7 @@ public class Quester {
 		for (i = 0; i < split.length; i++) {
 			classes[i] = new SkillClass(split[i], name, sql_server);
 		}
+		enabled = true;
 	}
 
 	public int getExp() {
@@ -201,9 +210,34 @@ public class Quester {
 	}
 
 	public void healthChange(Player player, int oldValue, int newValue) {
+		System.out.println("Call to healthChange");
+		
 		if (!enabled) return;
 		
-		player.setHealth((100 * health) / max_health);
+		health -= (oldValue - newValue);
+		
+		LivingEntity pl = getLiveEnt(player);
+		
+		if (pl == null) {
+			System.out.println("Failed to get Live Entity");
+		} else {
+			System.out.println("Got Player");
+		}
+		player.sendMessage("health is currently " + pl.getHealth());
+		
+		pl.setHealth(19);
+	}
+	
+	private LivingEntity getLiveEnt(Player player) {
+		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
+		int i;
+		for (i = 0; i < entity_list.size(); i++) {
+			if (player.getName() == entity_list.get(i).getName()) {
+				return entity_list.get(i);
+			}
+		}
+		
+		return null;
 	}
 
 	public void destroyBlock(Player player, Block block) {

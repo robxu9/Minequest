@@ -17,17 +17,27 @@ public class MineQuest extends Plugin {
         listener.setup();
         log.info(name + " " + version + " initialized");
         etc.getLoader().addListener(
-            PluginLoader.Hook.DAMAGE,
-            listener,
-            this,
-            PluginListener.Priority.MEDIUM);
-        etc.getLoader().addListener(
                 PluginLoader.Hook.LOGIN,
                 listener,
                 this,
                 PluginListener.Priority.MEDIUM);
         etc.getLoader().addListener(
                 PluginLoader.Hook.COMMAND,
+                listener,
+                this,
+                PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(
+                PluginLoader.Hook.DISCONNECT,
+                listener,
+                this,
+                PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(
+                PluginLoader.Hook.DAMAGE,
+                listener,
+                this,
+                PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(
+                PluginLoader.Hook.HEALTH_CHANGE,
                 listener,
                 this,
                 PluginListener.Priority.MEDIUM);

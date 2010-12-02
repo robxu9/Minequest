@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -46,6 +47,29 @@ public class MineQuestListener extends PluginListener {
 		} else if (split[0].equals("/noquest")) {
 			lookupQuester(player.getName()).disable();
 			return true;
+		} else if (split[0].equals("/entities")) {
+			List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
+			int i;
+			int zombie = 0;
+			int creeper = 0;
+			int spider = 0;
+			int skeleton = 0;
+			for (i = 0; i < entity_list.size(); i++) {
+				if (entity_list.get(i).getName().equals("Spider")) {
+					spider++;
+				} else if (entity_list.get(i).getName().equals("Skeleton")) {
+					skeleton++;
+				} else if (entity_list.get(i).getName().equals("Zombie")) {
+					zombie++;
+				} else if (entity_list.get(i).getName().equals("Creeper")) {
+					creeper++;
+				} else if (entity_list.get(i).isMob()) {
+					player.sendMessage(entity_list.get(i).getName() + " is a mob");
+				}
+			}
+			player.sendMessage("There are " + creeper + " Creepers " + zombie + " Zombies " + skeleton + " Skeletons and " + spider + " Spiders of " + entity_list.size());
+			
+			return true;
 		}
 		return false;
 	}
@@ -78,25 +102,39 @@ public class MineQuestListener extends PluginListener {
 	}
 	
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
+		System.out.println("Call to onHealthChange");
+		System.out.println(player.getName());
 		if (lookupQuester(player.getName()).isEnabled()) {
 			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
 			return true;
 		}
 		return false;
 	}
-    
-	public boolean onDamage(BaseEntity attacker, BaseEntity defender) {
+	
+	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
+			BaseEntity defender, int amount) {
 		int attack = 1;
 		int defend = 0;
 		int i;
 		int mobid = 0;
-		List<Mob> mob_list = etc.getServer().getMobList();
 		
+		if (type != PluginLoader.DamageType.ENTITY) {
+			return false;
+		}
+		
+		if (defender.isAnimal()) {
+			Player player = attacker.getPlayer();
+			player.sendMessage("You attacked an Animal " + defender.getName());
+			return false;
+		}
 		if (attacker.getPlayer() != null) {
 			if (defender.isMob()) {
 				mobid = defender.getId();
+				System.out.println("Got mob id " + mobid);
+			} else {
+				attack = 0;
 			}
-		} else if (attacker.getPlayer() != null) {
+		} else if (defender.getPlayer() != null) {
 			attack = 0;
 			if (attacker.isMob()) {
 				defend = 1;
@@ -105,22 +143,14 @@ public class MineQuestListener extends PluginListener {
 		}
 		
 		if (attack == 1) {
-			for (i = 0; i < mob_list.size(); i++) {
-				if (mob_list.get(i).getId() == mobid) {
-					Player player = attacker.getPlayer();
-					lookupQuester(player.getName()).attack(attacker.getPlayer(), mob_list.get(i));
-				}
-			}
+			Player player = attacker.getPlayer();
+			lookupQuester(player.getName()).attack(player, defender);
 			return true;
 		}
 
 		if (defend == 1) {
-			for (i = 0; i < mob_list.size(); i++) {
-				if (mob_list.get(i).getId() == mobid) {
-					Player player = attacker.getPlayer();
-					lookupQuester(player.getName()).defend(attacker.getPlayer(), mob_list.get(i));
-				}
-			}
+			Player player = defender.getPlayer();
+			lookupQuester(player.getName()).defend(player, attacker);
 			return true;
 		}
 		
@@ -131,9 +161,11 @@ public class MineQuestListener extends PluginListener {
 		int i;
 		for (i = 0; i < questers.length; i++) {
 			if (questers[i].getName().equals(name)) {
+				System.out.println("Found Quester " + name);
 				return questers[i];
 			}
 		}
+		System.out.println("No Quester Found");
 		return null;
 	}
 
@@ -141,6 +173,7 @@ public class MineQuestListener extends PluginListener {
 	
 	public void getQuesters() {
 		int num, i;
+		String names[];
 		ResultSet results;
 		try {
 			// TODO: Check on sql query
@@ -151,9 +184,13 @@ public class MineQuestListener extends PluginListener {
 			results.first();
 			
 			questers = new Quester[num];
+			names = new String[num];
 			for (i = 0; i < num; i++) {
-				questers[i] = new Quester(results.getString("name"), sql_server);
+				names[i] = results.getString("name");
 				results.next();
+			}
+			for (i = 0; i < num; i++) {
+				questers[i] = new Quester(names[i], sql_server);
 			}
 		} catch (SQLException e) {
 			System.out.println("Failed to get questers - things are not going to work");
