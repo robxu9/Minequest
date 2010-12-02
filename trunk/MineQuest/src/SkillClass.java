@@ -21,6 +21,28 @@ public class SkillClass {
 		update();
 	}
 	
+	private Ability[] abilListSQL(int abilId) throws SQLException {
+		Ability list[];
+		int i;
+		int count = 0;
+		ResultSet results = sql_server.query("SELECT * FROM abilities WHERE abil_list_id='" + abilId + "'");
+		
+		results.next();
+		
+		for (i = 0; i < 10; i++) {
+			if (!results.getString("abil" + i).equals("0")) {
+				count++;
+			}
+		}
+		list = new Ability[count];
+		
+		for (i = 0; i < count; i++) {
+			list[i] = new Ability(results.getString("abil" + i), this);
+		}
+		
+		return list;
+	}
+
 	public void attack(Player player, BaseEntity defender, Quester quester) {
 		int i;
 		
@@ -37,106 +59,29 @@ public class SkillClass {
 		}
 		
 		
-		defend.setHealth(defend.getHealth() - getDamage(defender.getName()));
+		defend.setHealth(defend.getHealth() - getDamage(defend.getName(), quester.getLevel(), MineQuestListener.getAdjustment()));
 		
-		expAdd(getExpMob(defender.getName()), quester);
+		expAdd(getExpMob(defend.getName()), quester);
 		
 	}
 
-	private int getExpMob(String name2) {
-		if (name2.equals("Creeper")) {
-			if (type.equals("Warrior")) {
-				return 10;
-			} else {
-				return 5;
-			}
-		} else if (name2.equals("Spider")) {
-			if (type.equals("WarMage")) {
-				return 10;
-			} else {
-				return 5;
-			}
-		} else if (name2.equals("Skeleton")) {
-			if (type.equals("PeaceMage")) {
-				return 10;
-			} else {
-				return 5;
-			}
-		} else if (name2.equals("Zombie")) {
-			if (type.equals("Archer")) {
-				return 10;
-			} else {
-				return 5;
-			}
-		}
-		return 3;
-	}
-
-	private int getDamage(String name2) {
-		return 2;
-	}
-
-	private LivingEntity getLiveEnt(BaseEntity defender) {
-		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
+	public void blockDestroy(Player player, Block block, Quester quester) {
 		int i;
-		for (i = 0; i < entity_list.size(); i++) {
-			if (defender.getId() == entity_list.get(i).getId()) {
-				return entity_list.get(i);
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBound(player.getItemInHand())) {
+				ability_list[i].parseLeftClick(player, block, quester);
+				return;
 			}
 		}
 		
-		return null;
-	}
-
-	public void defend(Player player, Mob mob) {
-		// TODO: write SkillClass.defend(player, mob);
-	}
-	
-	private void expAdd(int expNum, Quester quester) {
-		// TODO Auto-generated method stub
-		exp += expNum;
-		if (exp >= 400 * (level + 1)) {
-			levelUp(quester);
-		}
-	}
-	
-	public void levelUp(Quester quester) {
-		Random generator = new Random();
-		int add_health;
-		int size;
-		level++;
-		exp -= 400 * (level);
-		if (!isCombatClass()) return;
-		if (type.equals("Warrior")) {
-			size = 10;
-		} else if (type.equals("Archer") || type.equals("PeaceMage")) {
-			size = 6;
+		if (isClassItem(block.getType())) {
+			expAdd(2, quester);
 		} else {
-			size = 4;
+			expAdd(1, quester);
 		}
-		
-		add_health = generator.nextInt(size) + 1;
-		
-		if (isCombatClass()) {
-			quester.addHealth(add_health);
-		}
-
-		quester.getPlayer().sendMessage("Congratulations on becoming a level " + level + " " + type);
-	}
-	
-	private boolean isCombatClass() {
-		return type.equals("Warrior") || type.equals("Archer")
-				|| type.equals("War Mage") || type.equals("Peace Mage");
 	}
 
-	public void enableAbility() {
-		// TODO: write SkillClass.enableAbility();
-	}
-	
-	public void disableAbility() {
-		// TODO: write SkillClass.disableAbility();
-	}
-	
 	public boolean canUse(int item_id) {
 		if (type.equals("Warrior")) { // Warrior
 			if (item_id == 272) return (level > 4);			// Stone
@@ -165,148 +110,6 @@ public class SkillClass {
 			else if (item_id == 291) return (level > 19);	// Iron
 		}
 		return true;
-	}
-	
-	public boolean isClassItem(int item_id) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(item_id)) {
-				return true;
-			}
-		}
-		
-		if (type.equals("Warrior")) { // Warrior
-			if (item_id == 272) return true;			// Stone
-			else if (item_id == 276) return true;	// Diamond
-			else if (item_id == 283) return true;	// Gold
-			else if (item_id == 267) return true;	// Iron
-		} else if (type.equals("Archer")) {
-			if (item_id == 261) return true;
-		} else if (type.equals("Miner")) {
-			if (item_id == 274) return true;			// Stone
-			else if (item_id == 278) return true;	// Diamond
-			else if (item_id == 285) return true;	// Gold
-			else if (item_id == 257) return true;	// Iron
-		} else if (type.equals("Lumberjack")) { 
-			if (item_id == 275) return true;			// Stone
-			else if (item_id == 279) return true;	// Diamond
-			else if (item_id == 286) return true;	// Gold
-			else if (item_id == 258) return true;	// Iron
-		} else if (type.equals("Digger")) {
-			if (item_id == 273) return true;			// Stone
-			else if (item_id == 277) return true;	// Diamond
-			else if (item_id == 284) return true;	// Gold
-			else if (item_id == 284) return true;	// Iron
-		} else if (type.equals("Farmer")) { 
-			if (item_id == 292) return true;			// Stone
-			else if (item_id == 293) return true;	// Diamond
-			else if (item_id == 294) return true;	// Gold
-			else if (item_id == 291) return true;	// Iron
-		}
-		return false;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public void blockDestroy(Player player, Block block, Quester quester) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(player.getItemInHand())) {
-				ability_list[i].parseLeftClick(player, block, quester);
-				return;
-			}
-		}
-		
-		if (isClassItem(block.getType())) {
-			expAdd(2, quester);
-		} else {
-			expAdd(1, quester);
-		}
-	}
-	
-	public Ability getAbility(String name) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].getName().equals(name)) {
-				return ability_list[i];
-			}
-		}
-		
-		return null;
-	}
-
-	public void save() {
-		try {
-			sql_server.update("UPDATE " + type + " SET exp='" + exp + "', level='" + level + 
-								"' WHERE name='" + name + "'");
-		} catch (SQLException e) {
-			System.out.println("Save failed for class " + type + " of player " + name);
-			e.printStackTrace();
-		}
-	}
-	
-	public void update() {
-		ResultSet results;
-		int abil_id;
-		
-		try {
-			results = sql_server.query("SELECT * from " + type + " WHERE name='" + name + "'");
-		} catch (SQLException e) {
-			System.out.println("Query failed for class " + type + " for " + name);
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			results.next();
-			exp = results.getInt("exp");
-			level = results.getInt("level");
-			abil_id = results.getInt("abil_list_id");
-			ability_list = abilListSQL(abil_id);
-		} catch (SQLException e) {
-			System.out.println("Problem reading Ability");
-			e.printStackTrace();
-		}
-	}
-
-	private Ability[] abilListSQL(int abilId) throws SQLException {
-		Ability list[];
-		int i;
-		int count = 0;
-		ResultSet results = sql_server.query("SELECT * FROM abilities WHERE abil_list_id='" + abilId + "'");
-		
-		results.next();
-		
-		for (i = 0; i < 10; i++) {
-			if (!results.getString("abil" + i).equals("0")) {
-				count++;
-			}
-		}
-		list = new Ability[count];
-		
-		for (i = 0; i < count; i++) {
-			list[i] = new Ability(results.getString("abil" + i));
-		}
-		
-		return list;
-	}
-
-	@SuppressWarnings("unused")
-	private String getAbilName(int abilID) throws SQLException {
-		ResultSet results;
-		
-		results = sql_server.query("SELECT * from abilnames WHERE abilid='" + abilID + "'");
-		
-		return results.getString("name");
-	}
-
-	public String getType() {
-		return type;
 	}
 
 	public void checkEquip(Player player, Inventory equip, Inventory inven) {
@@ -369,6 +172,186 @@ public class SkillClass {
 		
 		return;
 	}
+	
+	public int defend(Player player, BaseEntity mob, int amount) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isDefending(player, mob)) {
+				return ability_list[i].parseDefend(player, mob, amount);
+			}
+		}
+		
+		return 0;
+	}
+	
+	public void disableAbility() {
+		// TODO: write SkillClass.disableAbility();
+	}
+	
+	public void display(Player player) {
+		player.sendMessage("You are a level " + level + " " + type + " with " + exp + "/" + (400*(level+1)) + " Exp to next level");
+		
+		return;
+	}
+
+	public void enableAbility() {
+		// TODO: write SkillClass.enableAbility();
+	}
+	
+	public void expAdd(int expNum, Quester quester) {
+		exp += expNum;
+		if (exp >= 400 * (level + 1)) {
+			levelUp(quester);
+		}
+	}
+	
+	public Ability getAbility(String name) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].getName().equals(name)) {
+				return ability_list[i];
+			}
+		}
+		
+		return null;
+	}
+	
+	@SuppressWarnings("unused")
+	private String getAbilName(int abilID) throws SQLException {
+		ResultSet results;
+		
+		results = sql_server.query("SELECT * from abilnames WHERE abilid='" + abilID + "'");
+		
+		return results.getString("name");
+	}
+	
+	private int getDamage(String name2, int plLevel, int adjustment) {
+		int damage = 2;
+		damage += (plLevel / 10);
+		damage += (level / 5);
+		damage -= adjustment;
+		return damage;
+	}
+	
+	private int getExpMob(String name2) {
+		if (name2.equals("Creeper")) {
+			if (type.equals("Warrior")) {
+				return 10;
+			} else {
+				return 5;
+			}
+		} else if (name2.equals("Spider")) {
+			if (type.equals("WarMage")) {
+				return 10;
+			} else {
+				return 5;
+			}
+		} else if (name2.equals("Skeleton")) {
+			if (type.equals("PeaceMage")) {
+				return 10;
+			} else {
+				return 5;
+			}
+		} else if (name2.equals("Zombie")) {
+			if (type.equals("Archer")) {
+				return 10;
+			} else {
+				return 5;
+			}
+		}
+		return 3;
+	}
+	
+	private LivingEntity getLiveEnt(BaseEntity defender) {
+		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
+		int i;
+		for (i = 0; i < entity_list.size(); i++) {
+			if (defender.getId() == entity_list.get(i).getId()) {
+				return entity_list.get(i);
+			}
+		}
+		
+		return null;
+	}
+
+	public String getName() {
+		return name;
+	}
+	
+	public String getType() {
+		return type;
+	}
+
+	public boolean isClassItem(int item_id) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBound(item_id)) {
+				return true;
+			}
+		}
+		
+		if (type.equals("Warrior")) { // Warrior
+			if (item_id == 272) return true;			// Stone
+			else if (item_id == 276) return true;	// Diamond
+			else if (item_id == 283) return true;	// Gold
+			else if (item_id == 267) return true;	// Iron
+		} else if (type.equals("Archer")) {
+			if (item_id == 261) return true;
+		} else if (type.equals("Miner")) {
+			if (item_id == 274) return true;			// Stone
+			else if (item_id == 278) return true;	// Diamond
+			else if (item_id == 285) return true;	// Gold
+			else if (item_id == 257) return true;	// Iron
+		} else if (type.equals("Lumberjack")) { 
+			if (item_id == 275) return true;			// Stone
+			else if (item_id == 279) return true;	// Diamond
+			else if (item_id == 286) return true;	// Gold
+			else if (item_id == 258) return true;	// Iron
+		} else if (type.equals("Digger")) {
+			if (item_id == 273) return true;			// Stone
+			else if (item_id == 277) return true;	// Diamond
+			else if (item_id == 284) return true;	// Gold
+			else if (item_id == 284) return true;	// Iron
+		} else if (type.equals("Farmer")) { 
+			if (item_id == 292) return true;			// Stone
+			else if (item_id == 293) return true;	// Diamond
+			else if (item_id == 294) return true;	// Gold
+			else if (item_id == 291) return true;	// Iron
+		}
+		return false;
+	}
+
+	private boolean isCombatClass() {
+		return type.equals("Warrior") || type.equals("Archer")
+				|| type.equals("War Mage") || type.equals("Peace Mage");
+	}
+
+	public void levelUp(Quester quester) {
+		Random generator = new Random();
+		int add_health;
+		int size;
+		level++;
+		exp -= 400 * (level);
+		quester.getPlayer().sendMessage("Congratulations on becoming a level " + level + " " + type);
+		if (!isCombatClass()) return;
+		if (type.equals("Warrior")) {
+			size = 10;
+		} else if (type.equals("Archer") || type.equals("PeaceMage")) {
+			size = 6;
+		} else {
+			size = 4;
+		}
+		
+		add_health = generator.nextInt(size) + 1;
+		
+		if (isCombatClass()) {
+			quester.addHealth(add_health);
+		}
+
+	}
 
 	public void rightClick(Player player, Block blockClicked, Item item, Quester quester) {
 		int i;
@@ -382,10 +365,38 @@ public class SkillClass {
 		return;
 	}
 
-	public void display(Player player) {
-		player.sendMessage("You are a level " + level + " " + type + " with " + exp + "/" + (100*(level+1)) + " Exp to next level");
+	public void save() {
+		try {
+			sql_server.update("UPDATE " + type + " SET exp='" + exp + "', level='" + level + 
+								"' WHERE name='" + name + "'");
+		} catch (SQLException e) {
+			System.out.println("Save failed for class " + type + " of player " + name);
+			e.printStackTrace();
+		}
+	}
+
+	public void update() {
+		ResultSet results;
+		int abil_id;
 		
-		return;
+		try {
+			results = sql_server.query("SELECT * from " + type + " WHERE name='" + name + "'");
+		} catch (SQLException e) {
+			System.out.println("Query failed for class " + type + " for " + name);
+			e.printStackTrace();
+			return;
+		}
+		
+		try {
+			results.next();
+			exp = results.getInt("exp");
+			level = results.getInt("level");
+			abil_id = results.getInt("abil_list_id");
+			ability_list = abilListSQL(abil_id);
+		} catch (SQLException e) {
+			System.out.println("Problem reading Ability");
+			e.printStackTrace();
+		}
 	}	
 	
 	

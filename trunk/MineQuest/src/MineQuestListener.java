@@ -5,33 +5,77 @@ import java.util.logging.Logger;
 
 
 public class MineQuestListener extends PluginListener {
+    public static int getAdjustment() {
+		int i;
+		int avgLevel = 0;
+		for (i = 0; i < questers.length; i++) {
+			avgLevel += questers[i].getLevel();
+		}
+		avgLevel /= questers.length;
+		
+		return (avgLevel / 10);
+	}
     @SuppressWarnings("unused")
 	private Logger log;
-    private Quester questers[];
+	static private Quester questers[];
 	private mysql_interface sql_server;
+
 	private PropertiesFile prop;
-
-	public void setup() {
-		String url, port, db, user, pass;
-		
-        log = Logger.getLogger("Minecraft");
-
-		prop = new PropertiesFile("minequest.properties");
-		url = prop.getString("url", "localhost");
-		port = prop.getString("port", "3306");
-		db = prop.getString("db", "cubonomy");
-		user = prop.getString("user", "root");
-		pass = prop.getString("pass", "root");
-		sql_server = new mysql_interface();
-		sql_server.setup(url, port, db, user, pass);
-		
-		getQuesters();
+	
+	public void getQuesters() {
+		int num, i;
+		String names[];
+		ResultSet results;
+		try {
+			// TODO: Check on sql query
+			results = sql_server.query("SELECT * FROM questers");
+			
+			results.last();
+			num = results.getRow();
+			results.first();
+			
+			questers = new Quester[num];
+			names = new String[num];
+			for (i = 0; i < num; i++) {
+				names[i] = results.getString("name");
+				results.next();
+			}
+			for (i = 0; i < num; i++) {
+				questers[i] = new Quester(names[i], sql_server);
+			}
+		} catch (SQLException e) {
+			System.out.println("Failed to get questers - things are not going to work");
+			e.printStackTrace();
+		}
+	}
+	
+	private Quester lookupQuester(String name) {
+		int i;
+		for (i = 0; i < questers.length; i++) {
+			if (questers[i].getName().equals(name)) {
+				return questers[i];
+			}
+		}
+		System.out.println("No Quester Found");
+		return null;
+	}
+	
+	public void onArmSwing(Player player) {
+		lookupQuester(player.getName()).checkItemInHand(player);
+	}
+	
+	public boolean onBlockDestroy(Player player, Block block) {
+		return lookupQuester(player.getName()).destroyBlock(player, block);
+	}
+	
+	public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
+		lookupQuester(player.getName()).rightClick(player, blockClicked, item);
 	}
 	
 	public boolean onCommand(Player player, String[] split) {
 		if (split[0].equals("/char")) {
 			Quester quester = lookupQuester(player.getName());
-			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (100 * (quester.getLevel() + 1)) + " Exp");
+			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 			
 			return true;
 		} else if (split[0].equals("/save")) {
@@ -89,55 +133,6 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 	
-	public void onLogin(Player player) {
-		Quester new_questers[];
-		int i;
-		
-		
-		if (lookupQuester(player.getName()) == null) {
-			
-			new_questers = new Quester[questers.length + 1];
-			for (i = 0; i < questers.length; i++) {
-				new_questers[i] = questers[i];
-			}
-			new_questers[questers.length] = new Quester(player.getName(), 0, sql_server);
-			questers = new_questers;
-		} else {
-			lookupQuester(player.getName()).update();
-		}
-	}
-	
-	public void onDisconnect(Player player) {
-		lookupQuester(player.getName()).save();
-	}
-	
-	public boolean onBlockDestroy(Player player, Block block) {
-		return lookupQuester(player.getName()).destroyBlock(player, block);
-	}
-	
-	public boolean onHealthChange(Player player, int oldValue, int newValue) {
-		System.out.println("Call to onHealthChange " + oldValue + " " + newValue);
-		System.out.println(player.getName());
-		if (lookupQuester(player.getName()).isEnabled()) {
-			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
-			return false;
-		}
-		return false;
-	}
-	
-	public boolean onEquipmentChange(Player player) {
-		lookupQuester(player.getName()).checkEquip(player);
-		return super.onEquipmentChange(player);
-	}
-	
-	public void onArmSwing(Player player) {
-		lookupQuester(player.getName()).checkItemInHand(player);
-	}
-	
-	public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
-		lookupQuester(player.getName()).rightClick(player, blockClicked, item);
-	}
-	
 	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
 			BaseEntity defender, int amount) {
 		int attack = 1;
@@ -150,7 +145,7 @@ public class MineQuestListener extends PluginListener {
 		
 		if (defender.isAnimal()) {
 			Player player = attacker.getPlayer();
-			player.sendMessage("You attacked an Animal " + defender.getName() + " with a " + player.getItemInHand());
+			player.sendMessage("You attacked an Animal with a " + player.getItemInHand());
 			return false;
 		}
 		if (attacker.getPlayer() != null) {
@@ -170,57 +165,72 @@ public class MineQuestListener extends PluginListener {
 		
 		if (attack == 1) {
 			Player player = attacker.getPlayer();
-			lookupQuester(player.getName()).attack(player, defender);
-			return true;
+			return lookupQuester(player.getName()).attack(player, defender);
 		}
 
 		if (defend == 1) {
 			Player player = defender.getPlayer();
 			player.sendMessage("Defend!");
-			lookupQuester(player.getName()).defend(player, attacker);
+			lookupQuester(player.getName()).defend(player, attacker, amount);
 			return true;
 		}
 		
 		return false;
 	}
+	
+	public void onDisconnect(Player player) {
+		lookupQuester(player.getName()).save();
+	}
+	
+	public boolean onEquipmentChange(Player player) {
+		lookupQuester(player.getName()).checkEquip(player);
+		return super.onEquipmentChange(player);
+	}
 
-	private Quester lookupQuester(String name) {
-		int i;
-		for (i = 0; i < questers.length; i++) {
-			if (questers[i].getName().equals(name)) {
-				return questers[i];
-			}
+	public boolean onHealthChange(Player player, int oldValue, int newValue) {
+		System.out.println("Call to onHealthChange " + oldValue + " " + newValue);
+		System.out.println(player.getName());
+		if (lookupQuester(player.getName()).isEnabled()) {
+			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
+			return false;
 		}
-		System.out.println("No Quester Found");
-		return null;
+		return false;
 	}
 
 
 	
-	public void getQuesters() {
-		int num, i;
-		String names[];
-		ResultSet results;
-		try {
-			// TODO: Check on sql query
-			results = sql_server.query("SELECT * FROM questers");
+	public void onLogin(Player player) {
+		Quester new_questers[];
+		int i;
+		
+		
+		if (lookupQuester(player.getName()) == null) {
 			
-			results.last();
-			num = results.getRow();
-			results.first();
-			
-			questers = new Quester[num];
-			names = new String[num];
-			for (i = 0; i < num; i++) {
-				names[i] = results.getString("name");
-				results.next();
+			new_questers = new Quester[questers.length + 1];
+			for (i = 0; i < questers.length; i++) {
+				new_questers[i] = questers[i];
 			}
-			for (i = 0; i < num; i++) {
-				questers[i] = new Quester(names[i], sql_server);
-			}
-		} catch (SQLException e) {
-			System.out.println("Failed to get questers - things are not going to work");
-			e.printStackTrace();
+			new_questers[questers.length] = new Quester(player.getName(), 0, sql_server);
+			questers = new_questers;
+		} else {
+			lookupQuester(player.getName()).update();
 		}
+	}
+
+	public void setup() {
+		String url, port, db, user, pass;
+		
+        log = Logger.getLogger("Minecraft");
+
+		prop = new PropertiesFile("minequest.properties");
+		url = prop.getString("url", "localhost");
+		port = prop.getString("port", "3306");
+		db = prop.getString("db", "cubonomy");
+		user = prop.getString("user", "root");
+		pass = prop.getString("pass", "root");
+		sql_server = new mysql_interface();
+		sql_server.setup(url, port, db, user, pass);
+		
+		getQuesters();
 	}
 }
