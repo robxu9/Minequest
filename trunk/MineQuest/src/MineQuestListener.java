@@ -1,6 +1,5 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -46,6 +45,22 @@ public class MineQuestListener extends PluginListener {
 			return true;
 		} else if (split[0].equals("/noquest")) {
 			lookupQuester(player.getName()).disable();
+			return true;
+		} else if (split[0].equals("/bind")) {
+			if (split.length < 3) {
+				player.sendMessage("Usage: /bind <ability> <l or r>");
+				return true;
+			}
+			lookupQuester(player.getName()).bind(player, split[1], split[2]);
+			return true;
+		} else if (split[0].equals("/class")) {
+			if (split.length < 2) {
+				player.sendMessage("Usage: /class <class_name>");
+				return true;
+			}
+			lookupQuester(player.getName()).getClass(split[1]).display(player);
+			return true;
+		} else if (split[0].equals("/health")) {
 			return true;
 		} else if (split[0].equals("/entities")) {
 			List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
@@ -97,25 +112,36 @@ public class MineQuestListener extends PluginListener {
 	}
 	
 	public boolean onBlockDestroy(Player player, Block block) {
-		lookupQuester(player.getName()).destroyBlock(player, block);
-		return false;
+		return lookupQuester(player.getName()).destroyBlock(player, block);
 	}
 	
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
-		System.out.println("Call to onHealthChange");
+		System.out.println("Call to onHealthChange " + oldValue + " " + newValue);
 		System.out.println(player.getName());
 		if (lookupQuester(player.getName()).isEnabled()) {
 			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
-			return true;
+			return false;
 		}
 		return false;
+	}
+	
+	public boolean onEquipmentChange(Player player) {
+		lookupQuester(player.getName()).checkEquip(player);
+		return super.onEquipmentChange(player);
+	}
+	
+	public void onArmSwing(Player player) {
+		lookupQuester(player.getName()).checkItemInHand(player);
+	}
+	
+	public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
+		lookupQuester(player.getName()).rightClick(player, blockClicked, item);
 	}
 	
 	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
 			BaseEntity defender, int amount) {
 		int attack = 1;
 		int defend = 0;
-		int i;
 		int mobid = 0;
 		
 		if (type != PluginLoader.DamageType.ENTITY) {
@@ -124,7 +150,7 @@ public class MineQuestListener extends PluginListener {
 		
 		if (defender.isAnimal()) {
 			Player player = attacker.getPlayer();
-			player.sendMessage("You attacked an Animal " + defender.getName());
+			player.sendMessage("You attacked an Animal " + defender.getName() + " with a " + player.getItemInHand());
 			return false;
 		}
 		if (attacker.getPlayer() != null) {
@@ -150,6 +176,7 @@ public class MineQuestListener extends PluginListener {
 
 		if (defend == 1) {
 			Player player = defender.getPlayer();
+			player.sendMessage("Defend!");
 			lookupQuester(player.getName()).defend(player, attacker);
 			return true;
 		}
@@ -161,7 +188,6 @@ public class MineQuestListener extends PluginListener {
 		int i;
 		for (i = 0; i < questers.length; i++) {
 			if (questers[i].getName().equals(name)) {
-				System.out.println("Found Quester " + name);
 				return questers[i];
 			}
 		}

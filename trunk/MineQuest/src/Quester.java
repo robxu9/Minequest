@@ -10,11 +10,10 @@ public class Quester {
 	private int health;
 	private int max_health;
 	private mysql_interface sql_server;
-	@SuppressWarnings("unused")
-	private Item last_used;
 	private boolean enabled;
 	private String name;
 	private SkillClass classes[];
+	private int mana = 50000;
 	
 	public Quester(String name, int x, mysql_interface sql) {
 		this.name = name;
@@ -34,6 +33,8 @@ public class Quester {
 		System.out.println("Call to Quester.attack()");
 		
 		if (!enabled) return;
+		
+		if (checkItemInHand(player)) return;
 
 		player.sendMessage("Attack from " + player.getName() + " to " + defender.getName());
 		for (i = 0; i < classes.length; i++) {
@@ -41,16 +42,21 @@ public class Quester {
 			if (classes[i].isClassItem(player.getItemInHand())) {
 				classes[i].attack(player, defender, this);
 				player.sendMessage("In class " + classes[i].getName());
-				exp += 5;
-				if (exp > 100 * (level + 1)) {
-					levelUp();
-					player.sendMessage("Congradulations " + name + ", you are now a level " + level + " character");
-				}
+				expGain(5);
 				return;
 			}
 		}
 	}
 	
+	
+	
+	private void expGain(int i) {
+		exp += i;
+		if (exp > 100 * (level + 1)) {
+			levelUp();
+		}
+	}
+
 	public void defend(Player player, BaseEntity attacker) {
 		System.out.println("Call to Quester.defend()");
 		if (!enabled) return;
@@ -67,6 +73,8 @@ public class Quester {
 		exp = 0;
 		max_health += add_health;
 		health += add_health;
+		
+		getPlayer().sendMessage("Congratulations on reaching character level " + level);
 	}
 	
 	public void addHealth(int addition) {
@@ -98,8 +106,8 @@ public class Quester {
 		String class_names[] = {
 				"Warrior",
 				"Archer",
-				//"WarMage",
-				//"PeaceMage",
+				"WarMage",
+				"PeaceMage",
 				"Miner",
 				"Lumberjack",
 				"Digger",
@@ -136,7 +144,7 @@ public class Quester {
 								+ name + "', '0', '0', '" + (num + i) + "')";
 			try {
 				sql_server.update(update_string);
-				//sql_server.update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
+				sql_server.update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
 			} catch (SQLException e) {
 				System.out.println("Unable to insert");
 				e.printStackTrace();
@@ -181,7 +189,6 @@ public class Quester {
 			level = results.getInt("level");
 			health = results.getInt("health");
 			max_health = results.getInt("maxhealth");
-			last_used = null;
 			enabled = true;
 			
 		} catch (SQLException e) {
@@ -223,9 +230,8 @@ public class Quester {
 		} else {
 			System.out.println("Got Player");
 		}
-		player.sendMessage("health is currently " + pl.getHealth());
 		
-		pl.setHealth(19);
+		newValue = 10;
 	}
 	
 	private LivingEntity getLiveEnt(Player player) {
@@ -240,9 +246,172 @@ public class Quester {
 		return null;
 	}
 
-	public void destroyBlock(Player player, Block block) {
-		if (!enabled) return;
-		// TODO Auto-generated method stub
+	public boolean destroyBlock(Player player, Block block) {
+		if (!enabled) return false;
 		
+		if (checkItemInHand(player)) {
+			return true;
+		}
+		
+		int i;
+		
+		switch (blockToClass(block)) {
+		case 0: // Miner
+			getClass("Miner").blockDestroy(player, block, this);
+			expGain(1);
+			return false;
+		case 1: // Lumberjack
+			getClass("Lumberjack").blockDestroy(player, block, this);
+			expGain(1);
+			return false;
+		case 2: // Digger
+			getClass("Digger").blockDestroy(player, block, this);
+			expGain(1);
+			return false;
+		case 3: // Farmer
+			getClass("Farmer").blockDestroy(player, block, this);
+			expGain(1);
+			return false;
+		default:
+			break;
+		}
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isClassItem(player.getItemInHand())) {
+				classes[i].blockDestroy(player, block, this);
+				expGain(1);
+				return false;
+			}
+		}
+		
+		return false;
+	}
+	
+	public int blockToClass(Block block) {
+		int miner[] = {
+			1,
+			4,
+			14,
+			15,
+			16,
+			41,42,43,44,45,
+			56, 57,
+			73, 74, 48, 49
+		};
+		int lumber[] = {
+			5,17,18,47,50,53,
+			58,63,64,65,68
+		};
+		int digger[] = {
+			2,3,6,12,13,60,78,
+			82
+		};
+		int farmer[] = {
+			37, 38, 39, 40,
+			81, 83, 281, 282,
+			295, 296, 297, 332
+		};
+		int i;
+		
+		for (i = 0; i < miner.length; i++) {
+			if (block.getType() == miner[i]) {
+				return 0;
+			}
+		}
+		for (i = 0; i < lumber.length; i++) {
+			if (block.getType() == lumber[i]) {
+				return 1;
+			}
+		}
+		for (i = 0; i < digger.length; i++) {
+			if (block.getType() == digger[i]) {
+				return 2;
+			}
+		}
+		for (i = 0; i < farmer.length; i++) {
+			if (block.getType() == farmer[i]) {
+				return 3;
+			}
+		}
+		return 4;
+	}
+
+	public SkillClass getClass(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getType().equals(string)) {
+				return classes[i];
+			}
+		}
+		
+		return null;
+	}
+
+	public boolean checkItemInHand(Player player) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (!classes[i].canUse(player.getItemInHand())) {
+				int id = player.getItemInHand();
+				player.getInventory().removeItem(new Item(id, 1));
+				player.getInventory().updateInventory();
+				player.giveItemDrop(new Item(id, 1));
+				player.sendMessage("You are not high enough level to use that weapon");
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public void checkEquip(Player player) {
+		if (!enabled) return;
+		
+		Inventory equip = player.getEquipment();
+		Inventory inven = player.getInventory();
+		
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].checkEquip(player, equip, inven);
+		}
+		
+	}
+
+	public void rightClick(Player player, Block blockClicked, Item item) {
+		if (!enabled) return;
+		
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].rightClick(player, blockClicked, item, this);
+		}
+	}
+
+	public Player getPlayer() {
+		return etc.getServer().getPlayer(name);
+	}
+	
+	public void bind(Player player, String name, String lr) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getAbility(name) != null) {
+				if (lr.equals("l")) {
+					classes[i].getAbility(name).bindl(player, new Item(player.getItemInHand(), 1));
+				} else {
+					classes[i].getAbility(name).bindr(player, new Item(player.getItemInHand(), 1));
+				}
+			}
+		}
+	}
+
+	public boolean canCast(int i) {
+		if (mana >= i) {
+			mana -= i;
+			return true;
+		}
+		return false;
 	}
 }
