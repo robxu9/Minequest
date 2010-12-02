@@ -5,52 +5,12 @@ public class Ability {
 	private boolean enabled;
 	private int bindl;
 	private int bindr;
+	private SkillClass myclass;
 	
-	public Ability(String name) {
+	public Ability(String name, SkillClass myclass) {
 		this.name = name;
 		enabled = false;
-	}
-	
-	public void parseAttack(Player player, LivingEntity defend, Quester quester) {
-		if (name.equals("Fireball")) {
-			if (player.getItemInHand() == bindr) {
-				if (quester.canCast(50)) {
-					etc.getServer().setBlockAt(1, (int)defend.getX(), (int)defend.getY(), (int)defend.getZ());
-					player.sendMessage("Casting Fireball");
-				}
-			}
-		}
-	}
-	
-	public void parseDefend(Player player, Mob mob) {
-		// TODO: write Ability.parseDefend(player, mob);
-	}
-	
-	public void parseLeftClick(Player player, Block block, Quester quester) {
-		if (name.equals("Fireball")) {
-			if (player.getItemInHand() == bindl) {
-				if (quester.canCast(50)) {
-					Block nblock = new Block(1, block.getX() + 1, block.getY() + 1, block.getZ() + 1);
-					nblock.update();
-					player.sendMessage("Casting Fireball 1");
-				}
-			}
-		}
-	}
-	
-	public void parseRightClick(Player player, Block block, Quester quester) {
-		if (name.equals("Fireball")) {
-			if (player.getItemInHand() == bindr) {
-				if (quester.canCast(50)) {
-					etc.getServer().setBlockAt(1, block.getX(), block.getY() + 1, block.getZ());
-					player.sendMessage("Casting Fireball");
-				}
-			}
-		}
-	}
-	
-	public boolean isBound(int id) {
-		return (bindl == id) || (bindr == id);
+		this.myclass = myclass;
 	}
 	
 	public void bindl(Player player, Item item) {
@@ -63,23 +23,16 @@ public class Ability {
 		player.sendMessage(name + " is now bound to Right " + item.getItemId());
 	}
 	
-	public void unbind(Player player) {
-		bindl = 0;
-		bindr = 0;
-		player.sendMessage(name + " is now unbound");
-	}
-	
-	public void enable() {
-		// TODO: write Ability.enable();
+	public void blockDestroy() {
+		// TODO: write Ability.blockDestroy();
 	}
 	
 	public void disable() {
 		// TODO: write Ability.disable();
 	}
 	
-	public boolean isEnabled() {
-		// TODO: write Ability.isEnabled();
-		return false;
+	public void enable() {
+		// TODO: write Ability.enable();
 	}
 	
 	public boolean equals(String name) {
@@ -90,7 +43,54 @@ public class Ability {
 		return name;
 	}
 	
-	public void blockDestroy() {
-		// TODO: write Ability.blockDestroy();
+	public boolean isBound(int id) {
+		return (bindl == id) || (bindr == id);
+	}
+	
+	public boolean isDefending(Player player, BaseEntity mob) {
+		return false;
+	}
+	
+	public boolean isEnabled() {
+		// TODO: write Ability.isEnabled();
+		return false;
+	}
+	
+	public void parseAttack(Player player, LivingEntity defend, Quester quester) {
+		useAbility(player, new Block(1, (int)defend.getX(), (int)defend.getY(), (int)defend.getZ()), quester, 1);
+	}
+	
+	public int parseDefend(Player player, BaseEntity mob, int amount) {
+		// TODO: write Ability.parseDefend(player, mob);
+		return 0;
+	}
+	
+	public void parseLeftClick(Player player, Block block, Quester quester) {
+		useAbility(player, block, quester, 1);
+	}
+	
+	public void parseRightClick(Player player, Block block, Quester quester) {
+		useAbility(player, block, quester, 0);
+	}
+	
+	public void unbind(Player player) {
+		bindl = 0;
+		bindr = 0;
+		player.sendMessage(name + " is now unbound");
+	}
+	
+	public void useAbility(Player player, Block block, Quester quester, int l) {
+		Block nblock = new Block(1, block.getX() + 1, block.getY() + 1, block.getZ() + 1);
+		if (name.equals("Fireball")) {
+			if (player.getItemInHand() == ((l == 1)?bindl:bindr)) {
+				if (quester.canCast(50)) {
+					nblock.update();
+					etc.getServer().setBlock(nblock);
+					nblock.update();
+					player.sendMessage("Casting Fireball 1");
+					myclass.expAdd(15, quester);
+				}
+			}
+		}
 	}
 }

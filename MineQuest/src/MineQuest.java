@@ -51,10 +51,10 @@ public class MineQuest extends Plugin {
                 listener,
                 this,
                 PluginListener.Priority.MEDIUM);
-        /*etc.getLoader().addListener(
+        etc.getLoader().addListener(
                 PluginLoader.Hook.HEALTH_CHANGE,
                 listener,
                 this,
-                PluginListener.Priority.MEDIUM);*/
+                PluginListener.Priority.MEDIUM);
     }
 }

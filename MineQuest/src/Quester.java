@@ -28,76 +28,136 @@ public class Quester {
 		update();
 	}
 	
-	public void attack(Player player, BaseEntity defender) {
+	public void addHealth(int addition) {
+		health += addition;
+		max_health += addition;
+	}
+
+	public boolean attack(Player player, BaseEntity defender) {
 		int i;
+		
+		LivingEntity defend = getLiveEnt(defender);
+		
 		System.out.println("Call to Quester.attack()");
 		
-		if (!enabled) return;
+		if (!enabled) return false;
 		
-		if (checkItemInHand(player)) return;
+		if (checkItemInHand(player)) return false;
 
-		player.sendMessage("Attack from " + player.getName() + " to " + defender.getName());
+		player.sendMessage("Attack from " + player.getName() + " to " + defend.getName());
 		for (i = 0; i < classes.length; i++) {
 			System.out.println("Checking " + classes[i].getType());
 			if (classes[i].isClassItem(player.getItemInHand())) {
 				classes[i].attack(player, defender, this);
 				player.sendMessage("In class " + classes[i].getName());
 				expGain(5);
-				return;
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public void bind(Player player, String name, String lr) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getAbility(name) != null) {
+				if (lr.equals("l")) {
+					classes[i].getAbility(name).bindl(player, new Item(player.getItemInHand(), 1));
+				} else {
+					classes[i].getAbility(name).bindr(player, new Item(player.getItemInHand(), 1));
+				}
 			}
 		}
 	}
-	
-	
-	
-	private void expGain(int i) {
-		exp += i;
-		if (exp > 100 * (level + 1)) {
-			levelUp();
-		}
-	}
 
-	public void defend(Player player, BaseEntity attacker) {
-		System.out.println("Call to Quester.defend()");
+	public int blockToClass(Block block) {
+		int miner[] = {
+			1,
+			4,
+			14,
+			15,
+			16,
+			41,42,43,44,45,
+			56, 57,
+			73, 74, 48, 49
+		};
+		int lumber[] = {
+			5,17,18,47,50,53,
+			58,63,64,65,68
+		};
+		int digger[] = {
+			2,3,6,12,13,60,78,
+			82
+		};
+		int farmer[] = {
+			37, 38, 39, 40,
+			81, 83, 281, 282,
+			295, 296, 297, 332
+		};
+		int i;
+		
+		for (i = 0; i < miner.length; i++) {
+			if (block.getType() == miner[i]) {
+				return 0;
+			}
+		}
+		for (i = 0; i < lumber.length; i++) {
+			if (block.getType() == lumber[i]) {
+				return 1;
+			}
+		}
+		for (i = 0; i < digger.length; i++) {
+			if (block.getType() == digger[i]) {
+				return 2;
+			}
+		}
+		for (i = 0; i < farmer.length; i++) {
+			if (block.getType() == farmer[i]) {
+				return 3;
+			}
+		}
+		return 4;
+	}
+	
+	public boolean canCast(int i) {
+		if (mana >= i) {
+			mana -= i;
+			return true;
+		}
+		return false;
+	}
+	
+	public void checkEquip(Player player) {
 		if (!enabled) return;
-		// TODO: write Quester.defend(player, mob);
-		player.sendMessage("Your health was " + player.getHealth());
-		player.setHealth(player.getHealth() - 5);
-		player.sendMessage("Now it is " + player.getHealth());
-	}
-	
-	private void levelUp() {
-		Random generator = new Random();
-		int add_health = generator.nextInt(3) + 1;
-		level++;
-		exp = 0;
-		max_health += add_health;
-		health += add_health;
 		
-		getPlayer().sendMessage("Congratulations on reaching character level " + level);
-	}
-	
-	public void addHealth(int addition) {
-		health += addition;
-		max_health += addition;
-	}
-	
-	public boolean isEnabled() {
-		return enabled;
-	}
-	
-	public void enable() {
-		enabled = true;
-		etc.getServer().getPlayer(name).sendMessage("MineQuest is now enabled for your character");
+		Inventory equip = player.getEquipment();
+		Inventory inven = player.getInventory();
 		
-		return;
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].checkEquip(player, equip, inven);
+		}
+		
 	}
 	
-	public void disable() {
-		enabled = false;
-		etc.getServer().getPlayer(name).sendMessage("MineQuest is now disabled for your character");
+	public boolean checkItemInHand(Player player) {
+		int i;
 		
-		return;
+		for (i = 0; i < classes.length; i++) {
+			if (!classes[i].canUse(player.getItemInHand())) {
+				int id = player.getItemInHand();
+				player.getInventory().removeItem(new Item(id, 1));
+				player.getInventory().updateInventory();
+				player.giveItemDrop(new Item(id, 1));
+				player.sendMessage("You are not high enough level to use that weapon");
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public void create() {
@@ -152,100 +212,26 @@ public class Quester {
 		}
 	}
 	
-	public int getHealth() {
-		return health;
-	}
-	
-	public void save() {
-		try {
-			int i;
-			
-			sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
-					+ health + "', maxhealth='" + max_health + "' WHERE name='" + name + "'");
-			for (i = 0; i < classes.length; i++) {
-				classes[i].save();
-			}
-		} catch (SQLException e) {
-			System.out.println("Unable to save " + name + " to database");
-		}
-	}
-	
-	public void update() {
-		ResultSet results;
-		String split[];
-		int i;
-		
-		try {
-			results = sql_server.query("SELECT * FROM questers WHERE name='" + name + "'");
-			results.next();
-		} catch (SQLException e) {
-			System.out.println("Issue querying name");
-			e.printStackTrace();
-			return;
-		}
-		try {
-			split = results.getString("classes").split(", ");
-			exp = results.getInt("exp");
-			level = results.getInt("level");
-			health = results.getInt("health");
-			max_health = results.getInt("maxhealth");
-			enabled = true;
-			
-		} catch (SQLException e) {
-			System.out.println("Issue getting parameters");
-			e.printStackTrace();
-			return;
-		}
-		
-		classes = new SkillClass[split.length];
-		for (i = 0; i < split.length; i++) {
-			classes[i] = new SkillClass(split[i], name, sql_server);
-		}
-		enabled = true;
-	}
-
-	public int getExp() {
-		return exp;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void healthChange(Player player, int oldValue, int newValue) {
-		System.out.println("Call to healthChange");
-		
+	public void defend(Player player, BaseEntity attacker, int amount) {
+		System.out.println("Call to Quester.defend()");
 		if (!enabled) return;
+		// TODO: write Quester.defend(player, mob);
 		
-		health -= (oldValue - newValue);
+		int i, sum = 0;
 		
-		LivingEntity pl = getLiveEnt(player);
-		
-		if (pl == null) {
-			System.out.println("Failed to get Live Entity");
-		} else {
-			System.out.println("Got Player");
+		for (i = 0; i < classes.length; i++) {
+			sum += classes[i].defend(player, attacker, amount);
 		}
 		
-		newValue = 10;
+		amount -= sum;
+		
+		if (amount < 0) {
+			amount = 0;
+		}
+		
+		player.setHealth(player.getHealth() - amount);
 	}
 	
-	private LivingEntity getLiveEnt(Player player) {
-		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
-		int i;
-		for (i = 0; i < entity_list.size(); i++) {
-			if (player.getName() == entity_list.get(i).getName()) {
-				return entity_list.get(i);
-			}
-		}
-		
-		return null;
-	}
-
 	public boolean destroyBlock(Player player, Block block) {
 		if (!enabled) return false;
 		
@@ -287,53 +273,25 @@ public class Quester {
 		return false;
 	}
 	
-	public int blockToClass(Block block) {
-		int miner[] = {
-			1,
-			4,
-			14,
-			15,
-			16,
-			41,42,43,44,45,
-			56, 57,
-			73, 74, 48, 49
-		};
-		int lumber[] = {
-			5,17,18,47,50,53,
-			58,63,64,65,68
-		};
-		int digger[] = {
-			2,3,6,12,13,60,78,
-			82
-		};
-		int farmer[] = {
-			37, 38, 39, 40,
-			81, 83, 281, 282,
-			295, 296, 297, 332
-		};
-		int i;
+	public void disable() {
+		enabled = false;
+		etc.getServer().getPlayer(name).sendMessage("MineQuest is now disabled for your character");
 		
-		for (i = 0; i < miner.length; i++) {
-			if (block.getType() == miner[i]) {
-				return 0;
-			}
+		return;
+	}
+	
+	public void enable() {
+		enabled = true;
+		etc.getServer().getPlayer(name).sendMessage("MineQuest is now enabled for your character");
+		
+		return;
+	}
+	
+	private void expGain(int i) {
+		exp += i;
+		if (exp > 400 * (level + 1)) {
+			levelUp();
 		}
-		for (i = 0; i < lumber.length; i++) {
-			if (block.getType() == lumber[i]) {
-				return 1;
-			}
-		}
-		for (i = 0; i < digger.length; i++) {
-			if (block.getType() == digger[i]) {
-				return 2;
-			}
-		}
-		for (i = 0; i < farmer.length; i++) {
-			if (block.getType() == farmer[i]) {
-				return 3;
-			}
-		}
-		return 4;
 	}
 
 	public SkillClass getClass(String string) {
@@ -348,35 +306,87 @@ public class Quester {
 		return null;
 	}
 
-	public boolean checkItemInHand(Player player) {
+	public int getExp() {
+		return exp;
+	}
+
+	public int getHealth() {
+		return health;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+	
+	private LivingEntity getLiveEnt(BaseEntity defender) {
+		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
 		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (!classes[i].canUse(player.getItemInHand())) {
-				int id = player.getItemInHand();
-				player.getInventory().removeItem(new Item(id, 1));
-				player.getInventory().updateInventory();
-				player.giveItemDrop(new Item(id, 1));
-				player.sendMessage("You are not high enough level to use that weapon");
-				return true;
+		for (i = 0; i < entity_list.size(); i++) {
+			if (defender.getId() == entity_list.get(i).getId()) {
+				return entity_list.get(i);
 			}
 		}
 		
-		return false;
+		return null;
 	}
 
-	public void checkEquip(Player player) {
-		if (!enabled) return;
-		
-		Inventory equip = player.getEquipment();
-		Inventory inven = player.getInventory();
-		
+	@SuppressWarnings("unused")
+	private LivingEntity getLiveEnt(Player player) {
+		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
 		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].checkEquip(player, equip, inven);
+		for (i = 0; i < entity_list.size(); i++) {
+			if (player.getName() == entity_list.get(i).getName()) {
+				return entity_list.get(i);
+			}
 		}
 		
+		return null;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public Player getPlayer() {
+		return etc.getServer().getPlayer(name);
+	}
+
+	public void healthChange(Player player, int oldValue, int newValue) {
+		if (!enabled) return;
+		
+		if ((oldValue > 20) || (oldValue < -10)) {
+			oldValue = 20;
+		}
+		
+		health -= (oldValue - newValue);
+		
+		newValue = 20 * health / max_health;
+		
+		if (newValue == 0) {
+			newValue++;
+		}
+		
+		player.setHealth(newValue);
+		
+		if (health < 0) {
+			health = max_health;
+		}
+		System.out.println("Health is " + health + "/" + max_health);
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	private void levelUp() {
+		Random generator = new Random();
+		int add_health = generator.nextInt(3) + 1;
+		level++;
+		exp -= (400 * level);
+		max_health += add_health;
+		health += add_health;
+		
+		getPlayer().sendMessage("Congratulations on reaching character level " + level);
 	}
 
 	public void rightClick(Player player, Block blockClicked, Item item) {
@@ -388,30 +398,52 @@ public class Quester {
 			classes[i].rightClick(player, blockClicked, item, this);
 		}
 	}
-
-	public Player getPlayer() {
-		return etc.getServer().getPlayer(name);
-	}
 	
-	public void bind(Player player, String name, String lr) {
+	public void save() {
+		try {
+			int i;
+			
+			sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
+					+ health + "', maxhealth='" + max_health + "' WHERE name='" + name + "'");
+			for (i = 0; i < classes.length; i++) {
+				classes[i].save();
+			}
+		} catch (SQLException e) {
+			System.out.println("Unable to save " + name + " to database");
+		}
+	}
+
+	public void update() {
+		ResultSet results;
+		String split[];
 		int i;
 		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getAbility(name) != null) {
-				if (lr.equals("l")) {
-					classes[i].getAbility(name).bindl(player, new Item(player.getItemInHand(), 1));
-				} else {
-					classes[i].getAbility(name).bindr(player, new Item(player.getItemInHand(), 1));
-				}
-			}
+		try {
+			results = sql_server.query("SELECT * FROM questers WHERE name='" + name + "'");
+			results.next();
+		} catch (SQLException e) {
+			System.out.println("Issue querying name");
+			e.printStackTrace();
+			return;
 		}
-	}
-
-	public boolean canCast(int i) {
-		if (mana >= i) {
-			mana -= i;
-			return true;
+		try {
+			split = results.getString("classes").split(", ");
+			exp = results.getInt("exp");
+			level = results.getInt("level");
+			health = results.getInt("health");
+			max_health = results.getInt("maxhealth");
+			enabled = true;
+			
+		} catch (SQLException e) {
+			System.out.println("Issue getting parameters");
+			e.printStackTrace();
+			return;
 		}
-		return false;
+		
+		classes = new SkillClass[split.length];
+		for (i = 0; i < split.length; i++) {
+			classes[i] = new SkillClass(split[i], name, sql_server);
+		}
+		enabled = true;
 	}
 }
