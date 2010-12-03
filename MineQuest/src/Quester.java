@@ -13,7 +13,8 @@ public class Quester {
 	private boolean enabled;
 	private String name;
 	private SkillClass classes[];
-	private int mana = 50000;
+	private int mana;
+	private int max_mana;
 	
 	public Quester(String name, int x, mysql_interface sql) {
 		this.name = name;
@@ -96,6 +97,7 @@ public class Quester {
 			81, 83, 281, 282,
 			295, 296, 297, 332
 		};
+		
 		int i;
 		
 		for (i = 0; i < miner.length; i++) {
@@ -174,13 +176,13 @@ public class Quester {
 				"Farmer"
 		};
 		
-		String update_string = "INSERT INTO questers (name, exp, level, health, maxhealth, classes) VALUES('"
+		String update_string = "INSERT INTO questers (name, exp, level, health, maxhealth, classes, mana, maxmana) VALUES('"
 			+ name + "', '0', '0', '10', '10', '";
 		update_string = update_string + class_names[0];
 		for (i = 1; i < class_names.length; i++) {
 			update_string = update_string + ", " + class_names[i];
 		}
-		update_string = update_string + "')";
+		update_string = update_string + "', '10', '10')";
 		try {
 			sql_server.update(update_string);
 		} catch (SQLException e) {
@@ -213,7 +215,13 @@ public class Quester {
 	}
 	
 	public void defend(Player player, BaseEntity attacker, int amount) {
-		System.out.println("Call to Quester.defend()");
+		int levelAdj = MineQuestListener.getAdjustment();
+		if (levelAdj == 0) {
+			levelAdj = 1;
+		}
+		amount *= levelAdj * 3;
+		
+		System.out.println("Damage to " + name + " is " + amount);
 		if (!enabled) return;
 		// TODO: write Quester.defend(player, mob);
 		
@@ -228,8 +236,6 @@ public class Quester {
 		if (amount < 0) {
 			amount = 0;
 		}
-		
-		player.setHealth(player.getHealth() - amount);
 	}
 	
 	public boolean destroyBlock(Player player, Block block) {
@@ -359,13 +365,19 @@ public class Quester {
 	}
 
 	public void healthChange(Player player, int oldValue, int newValue) {
+		System.out.println(oldValue + " " + newValue);
 		if (!enabled) return;
-		
-		if ((oldValue > 20) || (oldValue < -10)) {
+
+		if ((oldValue <= 0) && (newValue == 20)) {
+			health = max_health;
+		} else if ((oldValue > 20) || (oldValue < -30)) {
 			oldValue = 20;
+			health -= (oldValue - newValue);
+		} else {
+			health -= (oldValue - newValue);
 		}
 		
-		health -= (oldValue - newValue);
+		
 		
 		newValue = 20 * health / max_health;
 		
@@ -374,11 +386,8 @@ public class Quester {
 		}
 		
 		player.setHealth(newValue);
-		
-		if (health < 0) {
-			health = max_health;
-		}
-		System.out.println("Health is " + health + "/" + max_health);
+
+		System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
 	}
 
 	public boolean isEnabled() {
@@ -396,14 +405,18 @@ public class Quester {
 		getPlayer().sendMessage("Congratulations on reaching character level " + level);
 	}
 
-	public void rightClick(Player player, Block blockClicked, Item item) {
-		if (!enabled) return;
+	public boolean rightClick(Player player, Block blockClicked, Item item) {
+		if (!enabled) return false;
 		
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
-			classes[i].rightClick(player, blockClicked, item, this);
+			if (classes[i].rightClick(player, blockClicked, item, this)) {
+				return true;
+			}
 		}
+		
+		return false;
 	}
 	
 	public void save() {
@@ -411,7 +424,8 @@ public class Quester {
 			int i;
 			
 			sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
-					+ health + "', maxhealth='" + max_health + "' WHERE name='" + name + "'");
+					+ health + "', maxhealth='" + max_health + "', mana='" + mana + "', maxmana='" + max_mana
+					+ "' WHERE name='" + name + "'");
 			for (i = 0; i < classes.length; i++) {
 				classes[i].save();
 			}
@@ -439,6 +453,8 @@ public class Quester {
 			level = results.getInt("level");
 			health = results.getInt("health");
 			max_health = results.getInt("maxhealth");
+			mana = results.getInt("mana");
+			max_mana = results.getInt("maxmana");
 			enabled = true;
 			
 		} catch (SQLException e) {

@@ -18,11 +18,9 @@ public class MineQuestListener extends PluginListener {
     @SuppressWarnings("unused")
 	private Logger log;
 	static private Quester questers[];
-	private mysql_interface sql_server;
+	static private mysql_interface sql_server;
 
-	private PropertiesFile prop;
-	
-	public void getQuesters() {
+	static public void getQuesters() {
 		int num, i;
 		String names[];
 		ResultSet results;
@@ -49,6 +47,8 @@ public class MineQuestListener extends PluginListener {
 		}
 	}
 	
+	private PropertiesFile prop;
+	
 	private Quester lookupQuester(String name) {
 		int i;
 		for (i = 0; i < questers.length; i++) {
@@ -68,6 +68,12 @@ public class MineQuestListener extends PluginListener {
 	
 	public boolean onBlockDestroy(Player player, Block block) {
 		return lookupQuester(player.getName()).destroyBlock(player, block);
+	}
+	
+	@Override
+	public boolean onBlockPlace(Player player, Block blockPlaced,
+			Block blockClicked, Item itemInHand) {
+		return lookupQuester(player.getName()).rightClick(player, blockClicked, itemInHand);
 	}
 	
 	public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
@@ -139,7 +145,6 @@ public class MineQuestListener extends PluginListener {
 			BaseEntity defender, int amount) {
 		int attack = 1;
 		int defend = 0;
-		int mobid = 0;
 		
 		if (type != PluginLoader.DamageType.ENTITY) {
 			return false;
@@ -147,22 +152,11 @@ public class MineQuestListener extends PluginListener {
 		
 		if (defender.isAnimal()) {
 			Player player = attacker.getPlayer();
-			player.sendMessage("You attacked an Animal with a " + player.getItemInHand());
 			return false;
 		}
-		if (attacker.getPlayer() != null) {
-			if (defender.isMob()) {
-				mobid = defender.getId();
-				System.out.println("Got mob id " + mobid);
-			} else {
-				attack = 0;
-			}
-		} else if (defender.getPlayer() != null) {
+		if ((attacker.getPlayer() == null) && (defender.getPlayer() != null)) {
 			attack = 0;
-			if (attacker.isMob()) {
-				defend = 1;
-				mobid = attacker.getId();
-			}
+			defend = 1;
 		}
 		
 		if (attack == 1) {
@@ -180,6 +174,8 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 	
+	
+	
 	public void onDisconnect(Player player) {
 		lookupQuester(player.getName()).save();
 	}
@@ -190,8 +186,6 @@ public class MineQuestListener extends PluginListener {
 	}
 
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
-		System.out.println("Call to onHealthChange " + oldValue + " " + newValue);
-		System.out.println(player.getName());
 		if (lookupQuester(player.getName()).isEnabled()) {
 			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
 			return false;
