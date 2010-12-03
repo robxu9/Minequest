@@ -80,13 +80,16 @@ public class Ability {
 	}
 	
 	public void useAbility(Player player, Block block, Quester quester, int l) {
-		Block nblock = new Block(1, block.getX() + 1, block.getY() + 1, block.getZ() + 1);
 		if (name.equals("Fireball")) {
 			if (player.getItemInHand() == ((l == 1)?bindl:bindr)) {
 				if (quester.canCast(50)) {
+					Block nblock = new Block(51);
+					nblock.setX(block.getX());
+					nblock.setY(block.getY());
+					nblock.setZ(block.getZ());
 					nblock.update();
-					etc.getServer().setBlock(nblock);
-					nblock.update();
+					player.sendMessage("Created block at " + nblock.getX() + " " + nblock.getY() + " " + nblock.getZ());
+					player.sendMessage("Created block at " + block.getX() + " " + block.getY() + " " + block.getZ());
 					player.sendMessage("Casting Fireball 1");
 					myclass.expAdd(15, quester);
 				}
