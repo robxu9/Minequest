@@ -7,17 +7,17 @@ import java.util.Random;
 public class SkillClass {
 	private int exp;
 	private int level;
-	@SuppressWarnings("unused")
 	private Ability ability_list[];
 	private String name;
 	private String type;
-	private int mana;
 	private mysql_interface sql_server;
+	Random generator;
 	
 	public SkillClass(String type, String name, mysql_interface sql) {
 		this.name = name;
 		sql_server = sql;
 		this.type = type;
+		generator = new Random();
 		update();
 	}
 	
@@ -43,6 +43,23 @@ public class SkillClass {
 		return list;
 	}
 
+	private double armorBlockChance(int[] armor) {
+		switch (armor[0]) {
+		case 302:
+			return .25;
+		case 310:
+			return .20;
+		case 306:
+			return .15;
+		case 314:
+			return .10;
+		case 298: 
+			return .05;
+		}
+		
+		return 0;
+	}
+
 	public void attack(Player player, BaseEntity defender, Quester quester) {
 		int i;
 		
@@ -51,18 +68,16 @@ public class SkillClass {
 		if (defend == null) {
 			System.out.println("oops");
 		}
-		
+
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i].isBound(player.getItemInHand())) {
 				ability_list[i].parseAttack(player, defend, quester);
 			}
 		}
-		
-		
+
 		defend.setHealth(defend.getHealth() - getDamage(defend.getName(), quester.getLevel(), MineQuestListener.getAdjustment()));
-		
+
 		expAdd(getExpMob(defend.getName()), quester);
-		
 	}
 
 	public void blockDestroy(Player player, Block block, Quester quester) {
@@ -111,7 +126,7 @@ public class SkillClass {
 		}
 		return true;
 	}
-
+	
 	public void checkEquip(Player player, Inventory equip, Inventory inven) {
 		int item_ids[];
 		int i;
@@ -120,26 +135,12 @@ public class SkillClass {
 			return;
 		}
 		
-		if (type.equals("Warrior")) {
-			item_ids = new int[4];
-			item_ids[0] = 310;
-			item_ids[1] = 311;
-			item_ids[2] = 312;
-			item_ids[3] = 313;
-		} else if (type.equals("Archer")) {
-			item_ids = new int[4];
-			item_ids[0] = 306;
-			item_ids[1] = 307;
-			item_ids[2] = 308;
-			item_ids[3] = 309;
-		} else if (type.equals("WarMage") || type.equals("PeaceMage")) {
-			item_ids = new int[4];
-			item_ids[0] = 314;
-			item_ids[1] = 315;
-			item_ids[2] = 316;
-			item_ids[3] = 317;
-		} else {
+		item_ids = getClassArmorIds();
+		if (item_ids == null) {
 			return;
+		}
+		if (!isCombatClass()) {
+			if (level > 1) return;
 		}
 		
 		for (i = 0; i < item_ids.length; i++) {
@@ -152,51 +153,69 @@ public class SkillClass {
 			}
 		}
 		
-		if (level <= 2) {
-			item_ids = new int[4];
-			item_ids[0] = 298;
-			item_ids[1] = 299;
-			item_ids[2] = 300;
-			item_ids[3] = 301;
-		}
-
-		for (i = 0; i < item_ids.length; i++) {
-			if (equip.hasItem(item_ids[i], 1, 10000)) {
-				equip.removeItem(new Item(item_ids[i], 1));
-				player.giveItemDrop(item_ids[i], 1);
-				equip.updateInventory();
-				inven.updateInventory();
-				player.sendMessage("You are not high enough level to use that");
-			}
-		}
-		
 		return;
 	}
 	
 	public int defend(Player player, BaseEntity mob, int amount) {
 		int i;
+		int armor[] = getClassArmorIds();
+		boolean flag = true;
+		int sum = 0;
+		
+		if (armor == null) return 0;
+		
+		for (i = 0; i < armor.length; i++) {
+			if (isWearing(player, armor[i])) {
+				if (generator.nextDouble() < (.05 * i)) {
+					sum++;
+					System.out.println("Reduce Damage!");
+				}
+			} else {
+				flag = false;
+			}
+		}
+		System.out.println("Done Checking Armor");
+		if (flag) {
+			if (generator.nextDouble() < .4) {
+				sum++;
+				System.out.println("Reduce Damage Better!");
+			}
+			
+			if (generator.nextDouble() < armorBlockChance(armor)) {
+				return amount;
+			}
+		}
+		System.out.println("Done Checking Armor Full");
 		
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i].isDefending(player, mob)) {
-				return ability_list[i].parseDefend(player, mob, amount);
+				System.out.println("Found " + ability_list[i].getName());
+				return sum + ability_list[i].parseDefend(player, mob, amount - sum);
 			}
 		}
+		System.out.println("Abilities");
 		
-		return 0;
+		return sum;
 	}
-	
-	public void disableAbility() {
-		// TODO: write SkillClass.disableAbility();
+
+	public void disableAbility(String abil_name) {
+		Ability abil = getAbility(abil_name);
+		if (abil != null) {
+			abil.disable();
+		}
 	}
-	
+
 	public void display(Player player) {
 		player.sendMessage("You are a level " + level + " " + type + " with " + exp + "/" + (400*(level+1)) + " Exp to next level");
 		
 		return;
 	}
 
-	public void enableAbility() {
-		// TODO: write SkillClass.enableAbility();
+	public void enableAbility(String abil_name) {
+		Ability abil = getAbility(abil_name);
+		if (abil != null) {
+			abil.disable();
+		}
 	}
 	
 	public void expAdd(int expNum, Quester quester) {
@@ -205,7 +224,7 @@ public class SkillClass {
 			levelUp(quester);
 		}
 	}
-	
+
 	public Ability getAbility(String name) {
 		int i;
 		
@@ -227,14 +246,62 @@ public class SkillClass {
 		return results.getString("name");
 	}
 	
+	public int[] getClassArmorIds() {
+		int[] item_ids;
+		
+		if (type.equals("Warrior")) {
+			item_ids = new int[4];
+			item_ids[0] = 310;
+			item_ids[1] = 313;
+			item_ids[2] = 312;
+			item_ids[3] = 311;
+		} else if (type.equals("Archer")) {
+			item_ids = new int[4];
+			item_ids[0] = 306;
+			item_ids[1] = 309;
+			item_ids[2] = 308;
+			item_ids[3] = 307;
+		} else if (type.equals("WarMage") || type.equals("PeaceMage")) {
+			item_ids = new int[4];
+			item_ids[0] = 314;
+			item_ids[1] = 317;
+			item_ids[2] = 316;
+			item_ids[3] = 315;
+		} else if (type.equals("Miner")) {
+			item_ids = new int[4];
+			item_ids[0] = 298;
+			item_ids[1] = 301;
+			item_ids[2] = 300;
+			item_ids[3] = 299;
+		} else {
+			item_ids = null;
+		}
+		
+		return item_ids;
+	}
+	
+	private double getCritChance() {
+		if ((getAbility("Deathblow") != null) && (getAbility("Deathblow").isEnabled())) {
+			return 0.1;
+		}
+		
+		return 0.05;
+	}
+	
 	private int getDamage(String name2, int plLevel, int adjustment) {
 		int damage = 2;
 		damage += (plLevel / 10);
 		damage += (level / 5);
 		damage -= adjustment;
+		
+		if (generator.nextDouble() < getCritChance()) {
+			damage *= 2;
+			etc.getServer().getPlayer(name).sendMessage("Critical Hit!");
+		}
+		
 		return damage;
 	}
-	
+
 	private int getExpMob(String name2) {
 		if (name2.equals("Creeper")) {
 			if (type.equals("Warrior")) {
@@ -275,13 +342,25 @@ public class SkillClass {
 		
 		return null;
 	}
-
+	
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getType() {
 		return type;
+	}
+	
+	public boolean isAbilityItem(int itemInHand) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBound(itemInHand)) {
+				return true;
+			}
+		}
+		
+		return true;
 	}
 
 	public boolean isClassItem(int item_id) {
@@ -329,8 +408,13 @@ public class SkillClass {
 				|| type.equals("War Mage") || type.equals("Peace Mage");
 	}
 
+	private boolean isWearing(Player player, int i) {
+		Inventory equip = player.getEquipment();
+		
+		return equip.hasItem(i, 1, 10000);
+	}
+
 	public void levelUp(Quester quester) {
-		Random generator = new Random();
 		int add_health;
 		int size;
 		level++;
@@ -353,16 +437,17 @@ public class SkillClass {
 
 	}
 
-	public void rightClick(Player player, Block blockClicked, Item item, Quester quester) {
+	public boolean rightClick(Player player, Block blockClicked, Item item, Quester quester) {
 		int i;
 		
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i].isBound(player.getItemInHand())) {
 				ability_list[i].parseRightClick(player, blockClicked, quester);
+				return true;
 			}
 		}
 		
-		return;
+		return false;
 	}
 
 	public void save() {
@@ -398,17 +483,13 @@ public class SkillClass {
 			e.printStackTrace();
 		}
 	}
+	
+	public Random getGenerator() {
+		return generator;
+	}
 
-	public boolean isAbilityItem(int itemInHand) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(itemInHand)) {
-				return true;
-			}
-		}
-		
-		return true;
+	public int getLevel() {
+		return level;
 	}	
 	
 	

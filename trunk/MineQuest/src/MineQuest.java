@@ -56,5 +56,10 @@ public class MineQuest extends Plugin {
                 listener,
                 this,
                 PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(
+                PluginLoader.Hook.BLOCK_RIGHTCLICKED,
+                listener,
+                this,
+                PluginListener.Priority.MEDIUM);
     }
 }
