@@ -397,6 +397,18 @@ public class SkillClass {
 			System.out.println("Problem reading Ability");
 			e.printStackTrace();
 		}
+	}
+
+	public boolean isAbilityItem(int itemInHand) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBound(itemInHand)) {
+				return true;
+			}
+		}
+		
+		return true;
 	}	
 	
 	

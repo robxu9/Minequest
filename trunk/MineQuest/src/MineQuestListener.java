@@ -64,6 +64,8 @@ public class MineQuestListener extends PluginListener {
 		lookupQuester(player.getName()).checkItemInHand(player);
 	}
 	
+	
+	
 	public boolean onBlockDestroy(Player player, Block block) {
 		return lookupQuester(player.getName()).destroyBlock(player, block);
 	}

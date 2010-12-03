@@ -241,6 +241,21 @@ public class Quester {
 		
 		int i;
 		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())) {
+				classes[i].blockDestroy(player, block, this);
+				return false;
+			}
+		}
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isClassItem(player.getItemInHand())) {
+				classes[i].blockDestroy(player, block, this);
+				expGain(2);
+				return false;
+			}
+		}
+		
 		switch (blockToClass(block)) {
 		case 0: // Miner
 			getClass("Miner").blockDestroy(player, block, this);
@@ -260,14 +275,6 @@ public class Quester {
 			return false;
 		default:
 			break;
-		}
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isClassItem(player.getItemInHand())) {
-				classes[i].blockDestroy(player, block, this);
-				expGain(1);
-				return false;
-			}
 		}
 		
 		return false;
