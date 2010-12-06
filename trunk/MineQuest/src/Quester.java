@@ -157,6 +157,10 @@ public class Quester {
 				player.sendMessage("You are not high enough level to use that weapon");
 				return true;
 			}
+			if (classes[i].isAbilityItem(player.getItemInHand())) {
+				player.sendMessage("Calling left click on");
+				return classes[i].leftClick(player, new Block(1, 0, 0, 0), player.getItemInHand(), this);
+			}
 		}
 		
 		return false;
@@ -377,8 +381,6 @@ public class Quester {
 			health -= (oldValue - newValue);
 		}
 		
-		
-		
 		newValue = 20 * health / max_health;
 		
 		if (newValue == 0) {
@@ -468,5 +470,30 @@ public class Quester {
 			classes[i] = new SkillClass(split[i], name, sql_server);
 		}
 		enabled = true;
+		mana = 10000;
+	}
+
+	public void enableabil(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].enableAbility(string, this);
+		}
+	}
+
+	public void disableabil(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].disableAbility(string);
+		}
+	}
+
+	public void listAbil(Player player) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].listAbil(player);
+		}
 	}
 }

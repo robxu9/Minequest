@@ -75,9 +75,9 @@ public class SkillClass {
 			}
 		}
 
-		defend.setHealth(defend.getHealth() - getDamage(defend.getName(), quester.getLevel(), MineQuestListener.getAdjustment()));
+		MineQuestListener.damageEntity(defend, getDamage(defend.getName(), quester.getLevel()));
 
-		expAdd(getExpMob(defend.getName()), quester);
+		expAdd(getExpMob(defend.getName()) + MineQuestListener.getAdjustment(), quester);
 	}
 
 	public void blockDestroy(Player player, Block block, Quester quester) {
@@ -168,32 +168,26 @@ public class SkillClass {
 			if (isWearing(player, armor[i])) {
 				if (generator.nextDouble() < (.05 * i)) {
 					sum++;
-					System.out.println("Reduce Damage!");
 				}
 			} else {
 				flag = false;
 			}
 		}
-		System.out.println("Done Checking Armor");
 		if (flag) {
 			if (generator.nextDouble() < .4) {
 				sum++;
-				System.out.println("Reduce Damage Better!");
 			}
 			
 			if (generator.nextDouble() < armorBlockChance(armor)) {
 				return amount;
 			}
 		}
-		System.out.println("Done Checking Armor Full");
 		
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i].isDefending(player, mob)) {
-				System.out.println("Found " + ability_list[i].getName());
 				return sum + ability_list[i].parseDefend(player, mob, amount - sum);
 			}
 		}
-		System.out.println("Abilities");
 		
 		return sum;
 	}
@@ -211,10 +205,10 @@ public class SkillClass {
 		return;
 	}
 
-	public void enableAbility(String abil_name) {
+	public void enableAbility(String abil_name, Quester quester) {
 		Ability abil = getAbility(abil_name);
 		if (abil != null) {
-			abil.disable();
+			abil.enable(quester);
 		}
 	}
 	
@@ -235,15 +229,6 @@ public class SkillClass {
 		}
 		
 		return null;
-	}
-	
-	@SuppressWarnings("unused")
-	private String getAbilName(int abilID) throws SQLException {
-		ResultSet results;
-		
-		results = sql_server.query("SELECT * from abilnames WHERE abilid='" + abilID + "'");
-		
-		return results.getString("name");
 	}
 	
 	public int[] getClassArmorIds() {
@@ -288,11 +273,10 @@ public class SkillClass {
 		return 0.05;
 	}
 	
-	private int getDamage(String name2, int plLevel, int adjustment) {
+	private int getDamage(String name2, int plLevel) {
 		int damage = 2;
 		damage += (plLevel / 10);
 		damage += (level / 5);
-		damage -= adjustment;
 		
 		if (generator.nextDouble() < getCritChance()) {
 			damage *= 2;
@@ -331,6 +315,14 @@ public class SkillClass {
 		return 3;
 	}
 	
+	public Random getGenerator() {
+		return generator;
+	}
+	
+	public int getLevel() {
+		return level;
+	}
+
 	private LivingEntity getLiveEnt(BaseEntity defender) {
 		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
 		int i;
@@ -350,7 +342,7 @@ public class SkillClass {
 	public String getType() {
 		return type;
 	}
-	
+
 	public boolean isAbilityItem(int itemInHand) {
 		int i;
 		
@@ -360,7 +352,7 @@ public class SkillClass {
 			}
 		}
 		
-		return true;
+		return false;
 	}
 
 	public boolean isClassItem(int item_id) {
@@ -414,6 +406,20 @@ public class SkillClass {
 		return equip.hasItem(i, 1, 10000);
 	}
 
+	public boolean leftClick(Player player, Block block, int itemInHand,
+			Quester quester) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBound(player.getItemInHand())) {
+				ability_list[i].parseLeftClick(player, block, quester);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	public void levelUp(Quester quester) {
 		int add_health;
 		int size;
@@ -435,6 +441,14 @@ public class SkillClass {
 			quester.addHealth(add_health);
 		}
 
+	}
+	
+	public void listAbil(Player player) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			player.sendMessage(ability_list[i].getName());
+		}
 	}
 
 	public boolean rightClick(Player player, Block blockClicked, Item item, Quester quester) {
@@ -483,13 +497,9 @@ public class SkillClass {
 			e.printStackTrace();
 		}
 	}
-	
-	public Random getGenerator() {
-		return generator;
-	}
 
-	public int getLevel() {
-		return level;
+	public int getCasterLevel() {
+		return (level + 1) / 2;
 	}	
 	
 	

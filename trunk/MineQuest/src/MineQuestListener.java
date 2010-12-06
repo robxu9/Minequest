@@ -95,6 +95,23 @@ public class MineQuestListener extends PluginListener {
 		} else if (split[0].equals("/quest")) {
 			lookupQuester(player.getName()).enable();
 			return true;
+		} else if (split[0].equals("/abillist")) {
+			lookupQuester(player.getName()).listAbil(player);
+			return true;
+		} else if (split[0].equals("/enableabil")) {
+			if (split.length < 2) return false;
+			String abil = split[1];
+			int i;
+			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
+			lookupQuester(player.getName()).enableabil(abil);
+			return true;
+		} else if (split[0].equals("/disableabil")) {
+			if (split.length < 2) return false;
+			String abil = split[1];
+			int i;
+			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
+			lookupQuester(player.getName()).disableabil(abil);
+			return true;
 		} else if (split[0].equals("/noquest")) {
 			lookupQuester(player.getName()).disable();
 			return true;
@@ -103,7 +120,10 @@ public class MineQuestListener extends PluginListener {
 				player.sendMessage("Usage: /bind <ability> <l or r>");
 				return true;
 			}
-			lookupQuester(player.getName()).bind(player, split[1], split[2]);
+			String abil = split[1];
+			int i;
+			for (i = 2; i < split.length - 1; i++) abil = abil + " " + split[i];
+			lookupQuester(player.getName()).bind(player, abil, split[split.length - 1]);
 			return true;
 		} else if (split[0].equals("/class")) {
 			if (split.length < 2) {
@@ -168,7 +188,7 @@ public class MineQuestListener extends PluginListener {
 			Player player = defender.getPlayer();
 			player.sendMessage("Defend!");
 			lookupQuester(player.getName()).defend(player, attacker, amount);
-			return true;
+			return false;
 		}
 		
 		return false;
@@ -228,5 +248,17 @@ public class MineQuestListener extends PluginListener {
 		sql_server.setup(url, port, db, user, pass);
 		
 		getQuesters();
+	}
+
+	public static void damageEntity(LivingEntity entity, int i) {
+		int levelAdj = getAdjustment();
+		
+		if (levelAdj <= 0) {
+			levelAdj = 1;
+		}
+		
+		i /= levelAdj;
+		
+		entity.setHealth(entity.getHealth() - i);
 	}
 }
