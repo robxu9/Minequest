@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 
+
 public class MineQuestListener extends PluginListener {
     public static int getAdjustment() {
 		int i;
@@ -25,7 +26,6 @@ public class MineQuestListener extends PluginListener {
 		String names[];
 		ResultSet results;
 		try {
-			// TODO: Check on sql query
 			results = sql_server.query("SELECT * FROM questers");
 			
 			results.last();
@@ -49,7 +49,7 @@ public class MineQuestListener extends PluginListener {
 	
 	private PropertiesFile prop;
 	
-	private Quester lookupQuester(String name) {
+	private static Quester lookupQuester(String name) {
 		int i;
 		for (i = 0; i < questers.length; i++) {
 			if (questers[i].getName().equals(name)) {
@@ -62,6 +62,7 @@ public class MineQuestListener extends PluginListener {
 	
 	public void onArmSwing(Player player) {
 		lookupQuester(player.getName()).checkItemInHand(player);
+		lookupQuester(player.getName()).checkItemInHandAbil(player);
 	}
 	
 	
@@ -166,14 +167,14 @@ public class MineQuestListener extends PluginListener {
 		int attack = 1;
 		int defend = 0;
 		
+		if ((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) {
+			Player player = attacker.getPlayer();
+			lookupQuester(player.getName()).parseFire(type, amount);
+		}
 		if (type != PluginLoader.DamageType.ENTITY) {
 			return false;
 		}
 		
-		if (defender.isAnimal()) {
-			Player player = attacker.getPlayer();
-			return false;
-		}
 		if ((attacker.getPlayer() == null) && (defender.getPlayer() != null)) {
 			attack = 0;
 			defend = 1;
@@ -186,7 +187,6 @@ public class MineQuestListener extends PluginListener {
 
 		if (defend == 1) {
 			Player player = defender.getPlayer();
-			player.sendMessage("Defend!");
 			lookupQuester(player.getName()).defend(player, attacker, amount);
 			return false;
 		}
@@ -260,5 +260,9 @@ public class MineQuestListener extends PluginListener {
 		i /= levelAdj;
 		
 		entity.setHealth(entity.getHealth() - i);
+	}
+
+	public static Quester getQuester(String name) {
+		return lookupQuester(name);
 	}
 }
