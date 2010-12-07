@@ -1,6 +1,5 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Random;
 
 
@@ -8,6 +7,7 @@ public class SkillClass {
 	private int exp;
 	private int level;
 	private Ability ability_list[];
+	private int abil_list_id;
 	private String name;
 	private String type;
 	private mysql_interface sql_server;
@@ -19,8 +19,40 @@ public class SkillClass {
 		this.type = type;
 		generator = new Random();
 		update();
+		if ((name.equals("WarMage") || name.equals("PeaceMage")) && (ability_list.length == 0)) {
+			if (name.equals("WarMage")) {
+				addAbility("Fireball");
+			} else {
+				addAbility("Heal");
+				addAbility("Heal Other");
+			}
+		}
 	}
 	
+	private void addAbility(String string) {
+		Ability[] new_list = new Ability[ability_list.length + 1];
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			new_list[i] = ability_list[i];
+		}
+		new_list[i] = new Ability(string, this);
+		
+		try {
+			sql_server.update("UPDATE abilities SET abil" + ability_list.length + "='" + string
+					+ "' WHERE abil_list_id='" + abil_list_id + "'");
+		} catch (SQLException e) {
+			System.out.println("Failed to add ability " + string + " to mysql server");
+			e.printStackTrace();
+		}
+		
+		ability_list = new_list;
+		
+		etc.getServer().getPlayer(name).sendMessage("Gained ability " + string);
+		
+		return;
+	}
+
 	private Ability[] abilListSQL(int abilId) throws SQLException {
 		Ability list[];
 		int i;
@@ -328,14 +360,8 @@ public class SkillClass {
 		return level;
 	}
 
+	@SuppressWarnings("unused")
 	private LivingEntity getLiveEnt(BaseEntity defender) {
-		/*List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
-		int i;
-		for (i = 0; i < entity_list.size(); i++) {
-			if (defender.getId() == entity_list.get(i).getId()) {
-				return entity_list.get(i);
-			}
-		}*/
 		if (defender instanceof LivingEntity) {
 			return (LivingEntity)defender;
 		}
@@ -449,6 +475,81 @@ public class SkillClass {
 			quester.addHealth(add_health);
 		}
 
+		if (name.equals("Warrior")) {
+			switch (level) {
+			case 3:
+				addAbility("PowerStrike");
+				break;
+			case 1:
+				addAbility("Dodge");
+				break;
+			case 12:
+				addAbility("Deathblow");
+				break;
+			case 5:
+				addAbility("Sprint");
+				break;
+			default:
+				break;
+			}
+		} else if (name.equals("Archer")) {
+			switch (level) {
+			case 1:
+				addAbility("Dodge");
+				break;
+			case 3:
+				addAbility("Sprint");
+				break;
+			case 5:
+				addAbility("Hail of Arrows");
+				break;
+			case 7:
+				addAbility("Fire Arrow");
+				break;
+			case 10:
+				addAbility("Repulsion");
+				break;
+			default:
+				break;
+			}
+		} else if (name.equals("WarMage")) {
+			switch (level) {
+			case 2:
+				addAbility("Trap");
+				break;
+			case 3:
+				addAbility("Drain Life");
+				break;
+			case 5:
+				addAbility("Wall of Fire");
+				break;
+			case 7:
+				addAbility("IceSphere");
+				break;
+			case 10:
+				addAbility("FireChain");
+				break;
+			default:
+				break;
+			}
+		} else if (name.equals("PeaceMage")) {
+			switch (level) {
+			case 2:
+				addAbility("Trap");
+				break;
+			case 3:
+				addAbility("Wall of Water");
+				break;
+			case 7:
+				addAbility("Heal Aura");
+				break;
+			case 8:
+				addAbility("Damage Aura");
+				break;
+			default:
+				break;
+			}
+		}
 	}
 	
 	public void listAbil(Player player) {
@@ -484,7 +585,6 @@ public class SkillClass {
 
 	public void update() {
 		ResultSet results;
-		int abil_id;
 		
 		try {
 			results = sql_server.query("SELECT * from " + type + " WHERE name='" + name + "'");
@@ -498,8 +598,8 @@ public class SkillClass {
 			results.next();
 			exp = results.getInt("exp");
 			level = results.getInt("level");
-			abil_id = results.getInt("abil_list_id");
-			ability_list = abilListSQL(abil_id);
+			abil_list_id = results.getInt("abil_list_id");
+			ability_list = abilListSQL(abil_list_id);
 		} catch (SQLException e) {
 			System.out.println("Problem reading Ability");
 			e.printStackTrace();
