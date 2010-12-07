@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 
+
 public class Quester {
 	private int exp;
 	private int level;
@@ -41,15 +42,28 @@ public class Quester {
 		
 		System.out.println("Call to Quester.attack()");
 		
+		if (defend == null) {
+			player.sendMessage("Not Live Entity");
+		}
+		
 		if (!enabled) return false;
 		
 		if (checkItemInHand(player)) return false;
 
-		player.sendMessage("Attack from " + player.getName() + " to " + defend.getName());
+		player.sendMessage("Attack from " + player.getName() + " to " + ((defend != null)?defend.getName():null));
+		for (i = 0; i < classes.length; i++) {
+			System.out.println("Checking " + classes[i].getType());
+			if (classes[i].isAbilityItem(player.getItemInHand())) {
+				if (classes[i].attack(player, defend, this)) {
+					return true;
+				}
+			}
+		}
+		
 		for (i = 0; i < classes.length; i++) {
 			System.out.println("Checking " + classes[i].getType());
 			if (classes[i].isClassItem(player.getItemInHand())) {
-				classes[i].attack(player, defender, this);
+				classes[i].attack(player, defend, this);
 				player.sendMessage("In class " + classes[i].getName());
 				expGain(5);
 				return true;
@@ -60,7 +74,11 @@ public class Quester {
 	}
 	
 	public void bind(Player player, String name, String lr) {
-		int i;
+		int i, j;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
+		}
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].getAbility(name) != null) {
@@ -144,7 +162,7 @@ public class Quester {
 		}
 		
 	}
-	
+
 	public boolean checkItemInHand(Player player) {
 		int i;
 		
@@ -157,12 +175,23 @@ public class Quester {
 				player.sendMessage("You are not high enough level to use that weapon");
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	public boolean checkItemInHandAbil(Player player) {
+		int i;
+		
+		if ((player.getItemInHand() == 261) || (player.getItemInHand() == 332)) {
+			return false;
+		}
+
+		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())) {
-				player.sendMessage("Calling left click on");
 				return classes[i].leftClick(player, new Block(1, 0, 0, 0), player.getItemInHand(), this);
 			}
 		}
-		
 		return false;
 	}
 	
@@ -246,6 +275,9 @@ public class Quester {
 		if (!enabled) return false;
 		
 		if (checkItemInHand(player)) {
+			return true;
+		}
+		if (checkItemInHandAbil(player)) {
 			return true;
 		}
 		
@@ -336,12 +368,15 @@ public class Quester {
 	}
 	
 	private LivingEntity getLiveEnt(BaseEntity defender) {
-		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
+		/*List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
 		int i;
 		for (i = 0; i < entity_list.size(); i++) {
 			if (defender.getId() == entity_list.get(i).getId()) {
 				return entity_list.get(i);
 			}
+		}*/
+		if (defender instanceof LivingEntity) {
+			return (LivingEntity)defender;
 		}
 		
 		return null;
@@ -383,7 +418,7 @@ public class Quester {
 		
 		newValue = 20 * health / max_health;
 		
-		if (newValue == 0) {
+		if ((newValue == 0) && (health > 0)) {
 			newValue++;
 		}
 		
@@ -494,6 +529,35 @@ public class Quester {
 		
 		for (i = 0; i < classes.length; i++) {
 			classes[i].listAbil(player);
+		}
+	}
+
+	public void setHealth(int i) {
+		int newValue;
+		
+		health = i;
+		if (health > max_health) {
+			health = max_health;
+		}
+		
+		newValue = 20 * health / max_health;
+		
+		if ((newValue == 0) && (health > 0)) {
+			newValue++;
+		}
+		
+		etc.getServer().getPlayer(name).setHealth(newValue);
+		
+	}
+
+	public void parseFire(PluginLoader.DamageType type, int amount) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if ((classes[i].getAbility("Fire Resistance") != null) && classes[i].getAbility("Fire Resistance").isEnabled()) {
+				classes[i].getAbility("Fire Resistance").parseFire(type, amount);
+				return;
+			}
 		}
 	}
 }

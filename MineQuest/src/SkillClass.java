@@ -60,24 +60,29 @@ public class SkillClass {
 		return 0;
 	}
 
-	public void attack(Player player, BaseEntity defender, Quester quester) {
+	public boolean attack(Player player, LivingEntity defend, Quester quester) {
 		int i;
 		
-		LivingEntity defend = getLiveEnt(defender);
 		System.out.println("Call to " + name + ".attack()");
+		
 		if (defend == null) {
-			System.out.println("oops");
+			player.sendMessage("Not Live Entity");
+			return false;
 		}
 
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i].isBound(player.getItemInHand())) {
-				ability_list[i].parseAttack(player, defend, quester);
+				if (ability_list[i].parseAttack(player, defend, quester)) {
+					return true;
+				}
 			}
 		}
 
 		MineQuestListener.damageEntity(defend, getDamage(defend.getName(), quester.getLevel()));
 
 		expAdd(getExpMob(defend.getName()) + MineQuestListener.getAdjustment(), quester);
+		
+		return true;
 	}
 
 	public void blockDestroy(Player player, Block block, Quester quester) {
@@ -324,12 +329,15 @@ public class SkillClass {
 	}
 
 	private LivingEntity getLiveEnt(BaseEntity defender) {
-		List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
+		/*List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
 		int i;
 		for (i = 0; i < entity_list.size(); i++) {
 			if (defender.getId() == entity_list.get(i).getId()) {
 				return entity_list.get(i);
 			}
+		}*/
+		if (defender instanceof LivingEntity) {
+			return (LivingEntity)defender;
 		}
 		
 		return null;
@@ -500,7 +508,18 @@ public class SkillClass {
 
 	public int getCasterLevel() {
 		return (level + 1) / 2;
+	}
+
+	public void unBind(int itemInHand, boolean l) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (l && (ability_list[i].isBoundL(itemInHand))) {
+				ability_list[i].unBindL();
+			} else if (ability_list[i].isBoundR(itemInHand)) {
+				ability_list[i].unBindR();
+			}
+		}
 	}	
-	
 	
 }
