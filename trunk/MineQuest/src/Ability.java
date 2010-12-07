@@ -92,36 +92,58 @@ public class Ability {
 		return 15;
 	}
 	
-	public int getManaCost(Player player, LivingEntity entity) {
-		int adj = 0;
+	public List<Item> getManaCost(Player player, LivingEntity entity) {
+		List<Item> list = new ArrayList<Item>();
 		
-		if (entity != null) {
-			adj = getDistance(player, entity);
-		}
+		//if (!name.equals("Fireball")) {
+			//list.add(new Item(331, 1));
+		//}
 		
 		if (name.equals("Dodge")) {
-			return 10 + adj;
+			list.add(new Item(288, 5));
 		} else if (name.equals("Fireball")) {
-			return 10 + adj;
+			list.add(new Item(263, 1));
 		} else if (name.equals("Deathblow")) {
-			return 30 + adj;
+			list.add(new Item(265, 2));
 		} else if (name.equals("Sprint")) {
-			return 3 + adj;
+			list.add(new Item(288, 1));
 		} else if (name.equals("PowerStrike")) {
-			return 7 + adj;
+			list.add(new Item(268, 1));
 		} else if (name.equals("Hail of Arrows")) {
-			return 15 + adj;
+			list.add(new Item(262, 10));
 		} else if (name.equals("Fire Arrow")) {
-			return 10 + adj;
+			list.add(new Item(263, 1));
 		} else if (name.equals("Repulsion")) {
-			return 12;
+			list.add(new Item(50, 1));
+			list.add(new Item(81, 1));
 		} else if (name.equals("FireChain")) {
-			return 40 + adj;
+			list.add(new Item(263, 5));
 		} else if (name.equals("Wall of Fire")) {
-			return 20;
+			list.add(new Item(263, 3));
+			list.add(new Item(2, 7));
+		} else if (name.equals("IceSphere")) {
+			list.add(new Item(332, 5));
+		} else if (name.equals("Drain Life")) {
+			list.add(new Item(89, 1));
+		} else if (name.equals("Fire Resistance")) {
+			list.add(new Item(87, 1));
+		} else if (name.equals("Trap")) {
+			list.add(new Item(3, 6));
+			list.add(new Item(269, 1));
+		} else if (name.equals("Heal")) {
+			list.add(new Item(326, 1));
+		} else if (name.equals("Heal Other")) {
+			list.add(new Item(326, 1));
+		} else if (name.equals("Wall of Water")) {
+			list.add(new Item(326, 2));
+			list.add(new Item(3, 7));
+		} else if (name.equals("Heal Aura")) {
+			list.add(new Item(297, 2));
+		} else if (name.equals("Damage Aura")) {
+			list.add(new Item(259, 1));
 		}
 		
-		return 10 + adj;
+		return list;
 	}
 	
 	public String getName() {
@@ -294,6 +316,7 @@ public class Ability {
 			if (player.getItemInHand() == ((l == 1)?bindl:bindr)) {
 				if (name.equals("Fireball")) {
 					if ((block.getX() == 0) && (block.getY() == 0) && (block.getZ() == 0)) {
+						giveManaCost(player);
 						return;
 					}
 					
@@ -311,6 +334,7 @@ public class Ability {
 					if (entity != null) {
 						MineQuestListener.damageEntity(entity, 5);
 					} else {
+						giveManaCost(player);
 						player.sendMessage("PowerStrike must be bound to an attack");
 						return;
 					}
@@ -338,6 +362,7 @@ public class Ability {
 							}
 						}
 					} else {
+						giveManaCost(player);
 						player.sendMessage("Hail of Arrows must be bound to an attack - Recommended that it is ranged");
 						return;
 					}
@@ -349,6 +374,7 @@ public class Ability {
 						nblock.setZ((int)entity.getZ());
 						nblock.update();
 					} else {
+						giveManaCost(player);
 						player.sendMessage("Fire Arrow must be bound to a bow attack - Recommended that it is ranged");
 						return;
 					}
@@ -373,6 +399,7 @@ public class Ability {
 							}
 						}
 					} else {
+						giveManaCost(player);
 						player.sendMessage("FireChain must be bound to an attack");
 						return;
 					}		
@@ -420,6 +447,9 @@ public class Ability {
 					int x_change, z_change;
 					int x, z;
 					int i;
+					
+					player.giveItem(new Item(326, 2));
+					
 					while (rot < 0) rot += 360;
 					
 					
@@ -455,11 +485,21 @@ public class Ability {
 						z += z_change;
 					}
 				} else if (name.equals("Heal")) {
+					player.giveItem(new Item(326, 2));
 					quester.setHealth(quester.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
+				} else if (name.equals("Drain Life")) {
+					int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
+					if (entity != null) {
+						entity.setHealth(entity.getHealth() - drain);
+						quester.setHealth(quester.getHealth() + drain);
+					} else {
+						player.sendMessage("Must be called on an Entity");
+					}
 				} else if (name.equals("Trap")) {
 					int i, j, k;
 					int x, y, z;
 					if (entity == null) {
+						giveManaCost(player);
 						player.sendMessage("Trap must be used on a livint entity");
 						return;
 					}
@@ -482,9 +522,12 @@ public class Ability {
 					if (entity.isPlayer()) {
 						Quester other = MineQuestListener.getQuester(entity.getName());
 						if (other != null) {
+							player.giveItem(new Item(326, 2));
 							other.setHealth(other.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 						} else {
+							giveManaCost(player);
 							player.sendMessage(entity.getName() + " is not a Quester");
+							return;
 						}
 					} else {
 						player.sendMessage(name + " must be cast on another player");
@@ -492,6 +535,7 @@ public class Ability {
 				} else if (name.equals("IceSphere")) {
 					int j,k;
 					if (entity == null) {
+						giveManaCost(player);
 						return;
 					}
 					
@@ -512,6 +556,15 @@ public class Ability {
 			}
 		} else {
 			player.sendMessage("Not enough mana");
+		}
+	}
+
+	private void giveManaCost(Player player) {
+		List<Item> cost = getManaCost(player, null);
+		int i;
+		
+		for (i = 0; i < cost.size(); i++) {
+			player.giveItem(cost.get(i));
 		}
 	}
 

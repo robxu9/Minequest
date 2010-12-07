@@ -74,7 +74,7 @@ public class Quester {
 	}
 	
 	public void bind(Player player, String name, String lr) {
-		int i, j;
+		int i;
 		
 		for (i = 0; i < classes.length; i++) {
 			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
@@ -141,12 +141,21 @@ public class Quester {
 		return 4;
 	}
 	
-	public boolean canCast(int i) {
-		if (mana >= i) {
-			mana -= i;
-			return true;
+	public boolean canCast(List<Item> list) {
+		int i;
+		Inventory inven = etc.getServer().getPlayer(name).getInventory();
+		
+		for (i = 0; i < list.size(); i++) {
+			if (inven.hasItem(list.get(i).getItemId(), list.get(i).getAmount(), 10000)) {
+				inven.removeItem(list.get(i));
+			} else {
+				while (i-- > 0) {
+					inven.addItem(list.get(i));
+				}
+				return false;
+			}
 		}
-		return false;
+		return true;
 	}
 	
 	public void checkEquip(Player player) {
@@ -559,5 +568,18 @@ public class Quester {
 				return;
 			}
 		}
+	}
+
+	public void unBind(int itemInHand) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].unBind(itemInHand, true);
+			classes[i].unBind(itemInHand, false);
+		}
+	}
+
+	public int getMaxHealth() {
+		return max_health;
 	}
 }

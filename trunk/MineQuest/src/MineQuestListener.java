@@ -87,6 +87,21 @@ public class MineQuestListener extends PluginListener {
 			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 			
 			return true;
+		} else if (split[0].equals("/minequest")) {
+			player.sendMessage("Minequest Commands:");
+			player.sendMessage("    /save - save progress of character");
+			player.sendMessage("    /load - load progress - removing unsaved experience/levels");
+			player.sendMessage("    /quest - enable minequest for your character (enabled by default)");
+			player.sendMessage("    /noquest - disable minequest for your character");
+			player.sendMessage("    /char - information about your character level");
+			player.sendMessage("    /class <classname> - information about a specific class");
+			player.sendMessage("    /health - display your health");
+			player.sendMessage("    /abillist [classname] - display all abilities or for a specific class");
+			player.sendMessage("    /enableabil <ability name> - enable an ability (enabled by default)");
+			player.sendMessage("    /disableabil <ability name> - disable an ability");
+			player.sendMessage("    /bind <ability name> <l or r> - bind an ability to current item");
+			player.sendMessage("    /unbind - unbind current item from all abilities");
+			return true;
 		} else if (split[0].equals("/save")) {
 			lookupQuester(player.getName()).save();
 			return true;
@@ -97,7 +112,14 @@ public class MineQuestListener extends PluginListener {
 			lookupQuester(player.getName()).enable();
 			return true;
 		} else if (split[0].equals("/abillist")) {
-			lookupQuester(player.getName()).listAbil(player);
+			if (split.length < 2) {
+				lookupQuester(player.getName()).listAbil(player);
+			} else {
+				lookupQuester(player.getName()).getClass(split[1]);
+			}
+			return true;
+		} else if (split[0].equals("/unbind")) {
+			lookupQuester(player.getName()).unBind(player.getItemInHand());
 			return true;
 		} else if (split[0].equals("/enableabil")) {
 			if (split.length < 2) return false;
@@ -134,6 +156,7 @@ public class MineQuestListener extends PluginListener {
 			lookupQuester(player.getName()).getClass(split[1]).display(player);
 			return true;
 		} else if (split[0].equals("/health")) {
+			player.sendMessage("Your health is " + lookupQuester(player.getName()).getHealth() + "/" + lookupQuester(player.getName()).getMaxHealth());
 			return true;
 		} else if (split[0].equals("/entities")) {
 			List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
@@ -167,8 +190,8 @@ public class MineQuestListener extends PluginListener {
 		int attack = 1;
 		int defend = 0;
 		
-		if ((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) {
-			Player player = attacker.getPlayer();
+		if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && defender.isPlayer()) {
+			Player player = defender.getPlayer();
 			lookupQuester(player.getName()).parseFire(type, amount);
 		}
 		if (type != PluginLoader.DamageType.ENTITY) {
