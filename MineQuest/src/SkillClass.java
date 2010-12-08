@@ -19,36 +19,33 @@ public class SkillClass {
 		this.type = type;
 		generator = new Random();
 		update();
-		if ((name.equals("WarMage") || name.equals("PeaceMage")) && (ability_list.length == 0)) {
-			if (name.equals("WarMage")) {
-				addAbility("Fireball");
-			} else {
-				addAbility("Heal");
-				addAbility("Heal Other");
-			}
-		}
 	}
 	
 	private void addAbility(String string) {
-		Ability[] new_list = new Ability[ability_list.length + 1];
 		int i;
+		/*Ability[] new_list = new Ability[ability_list.length + 1];
 		
+		System.out.println("" + ability_list.length);
 		for (i = 0; i < ability_list.length; i++) {
 			new_list[i] = ability_list[i];
 		}
-		new_list[i] = new Ability(string, this);
+		System.out.println("" + i);
+		new_list[i] = new Ability(string, this);*/
 		
 		try {
 			sql_server.update("UPDATE abilities SET abil" + ability_list.length + "='" + string
 					+ "' WHERE abil_list_id='" + abil_list_id + "'");
+			ability_list = abilListSQL(abil_list_id);
 		} catch (SQLException e) {
 			System.out.println("Failed to add ability " + string + " to mysql server");
 			e.printStackTrace();
 		}
 		
-		ability_list = new_list;
+		/*ability_list = new_list;*/
 		
-		etc.getServer().getPlayer(name).sendMessage("Gained ability " + string);
+		if (etc.getServer().getPlayer(name) != null) {
+			etc.getServer().getPlayer(name).sendMessage("Gained ability " + string);
+		}
 		
 		return;
 	}
@@ -403,6 +400,7 @@ public class SkillClass {
 			else if (item_id == 276) return true;	// Diamond
 			else if (item_id == 283) return true;	// Gold
 			else if (item_id == 267) return true;	// Iron
+			else if (item_id == 268) return true;	// Wooden
 		} else if (type.equals("Archer")) {
 			if (item_id == 261) return true;
 		} else if (type.equals("Miner")) {
@@ -410,21 +408,25 @@ public class SkillClass {
 			else if (item_id == 278) return true;	// Diamond
 			else if (item_id == 285) return true;	// Gold
 			else if (item_id == 257) return true;	// Iron
+			else if (item_id == 270) return true;	// Wooden
 		} else if (type.equals("Lumberjack")) { 
 			if (item_id == 275) return true;			// Stone
 			else if (item_id == 279) return true;	// Diamond
 			else if (item_id == 286) return true;	// Gold
 			else if (item_id == 258) return true;	// Iron
+			else if (item_id == 271) return true;	// Wooden
 		} else if (type.equals("Digger")) {
 			if (item_id == 273) return true;			// Stone
 			else if (item_id == 277) return true;	// Diamond
 			else if (item_id == 284) return true;	// Gold
 			else if (item_id == 284) return true;	// Iron
+			else if (item_id == 269) return true;	// Wooden
 		} else if (type.equals("Farmer")) { 
 			if (item_id == 292) return true;			// Stone
 			else if (item_id == 293) return true;	// Diamond
 			else if (item_id == 294) return true;	// Gold
 			else if (item_id == 291) return true;	// Iron
+			else if (item_id == 290) return true;	// Wooden
 		}
 		return false;
 	}
@@ -475,7 +477,7 @@ public class SkillClass {
 			quester.addHealth(add_health);
 		}
 
-		if (name.equals("Warrior")) {
+		if (type.equals("Warrior")) {
 			switch (level) {
 			case 3:
 				addAbility("PowerStrike");
@@ -492,7 +494,7 @@ public class SkillClass {
 			default:
 				break;
 			}
-		} else if (name.equals("Archer")) {
+		} else if (type.equals("Archer")) {
 			switch (level) {
 			case 1:
 				addAbility("Dodge");
@@ -512,7 +514,7 @@ public class SkillClass {
 			default:
 				break;
 			}
-		} else if (name.equals("WarMage")) {
+		} else if (type.equals("WarMage")) {
 			switch (level) {
 			case 2:
 				addAbility("Trap");
@@ -532,7 +534,7 @@ public class SkillClass {
 			default:
 				break;
 			}
-		} else if (name.equals("PeaceMage")) {
+		} else if (type.equals("PeaceMage")) {
 			switch (level) {
 			case 2:
 				addAbility("Trap");
@@ -603,6 +605,20 @@ public class SkillClass {
 		} catch (SQLException e) {
 			System.out.println("Problem reading Ability");
 			e.printStackTrace();
+		}
+		if ((type.equals("WarMage") || type.equals("PeaceMage"))) {
+			if (type.equals("WarMage")) {
+				if (getAbility("Fireball") == null) {
+					addAbility("Fireball");
+				}
+			} else {
+				if (getAbility("Heal") == null) {
+					addAbility("Heal");
+				}
+				if (getAbility("Heal Other") == null) {
+					addAbility("Heal Other");
+				}
+			}
 		}
 	}
 

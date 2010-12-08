@@ -35,6 +35,9 @@ public class Ability {
 		this.myclass = myclass;
 		etc.getServer().setTimer("Ability " + name, 300);
 		count = 0;
+		if (name.equals("Dodge")) {
+			enabled = false;
+		}
 	}
 	
 	public void bindl(Player player, Item item) {
@@ -449,6 +452,7 @@ public class Ability {
 					int i;
 					
 					player.giveItem(new Item(326, 2));
+					player.getInventory().updateInventory();
 					
 					while (rot < 0) rot += 360;
 					
@@ -485,7 +489,8 @@ public class Ability {
 						z += z_change;
 					}
 				} else if (name.equals("Heal")) {
-					player.giveItem(new Item(326, 2));
+					player.giveItem(new Item(325, 1));
+					player.getInventory().updateInventory();
 					quester.setHealth(quester.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 				} else if (name.equals("Drain Life")) {
 					int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
@@ -522,7 +527,8 @@ public class Ability {
 					if (entity.isPlayer()) {
 						Quester other = MineQuestListener.getQuester(entity.getName());
 						if (other != null) {
-							player.giveItem(new Item(326, 2));
+							player.giveItem(new Item(325, 1));
+							player.getInventory().updateInventory();
 							other.setHealth(other.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 						} else {
 							giveManaCost(player);
