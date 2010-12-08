@@ -101,6 +101,7 @@ public class MineQuestListener extends PluginListener {
 			player.sendMessage("    /disableabil <ability name> - disable an ability");
 			player.sendMessage("    /bind <ability name> <l or r> - bind an ability to current item");
 			player.sendMessage("    /unbind - unbind current item from all abilities");
+			player.sendMessage("    /spellcomp <ability name> - list the components required for an ability");
 			return true;
 		} else if (split[0].equals("/save")) {
 			lookupQuester(player.getName()).save();
@@ -158,6 +159,12 @@ public class MineQuestListener extends PluginListener {
 		} else if (split[0].equals("/health")) {
 			player.sendMessage("Your health is " + lookupQuester(player.getName()).getHealth() + "/" + lookupQuester(player.getName()).getMaxHealth());
 			return true;
+		} else if (split[0].equals("/spellcomp")) {
+			if (split.length < 2) {
+				return false;
+			}
+			player.sendMessage(listSpellComps(split[1]));
+			return true;
 		} else if (split[0].equals("/entities")) {
 			List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
 			int i;
@@ -185,6 +192,49 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 	
+	public String listSpellComps(String string) {
+		
+		if (string.equals("PowerStrike")) {
+			return "Wooden Sword";
+		} else if (string.equals("Dodge")) {
+			return "5 Feathers";
+		} else if (string.equals("Deathblow")) {
+			return "2 Steel";
+		} else if (string.equals("Sprint")) {
+			return "Feather";
+		} else if (string.equals("Fire Arrow")) {
+			return "Coal";
+		} else if (string.equals("Hail of Arrows")) {
+			return "10 Arrows";
+		} else if (string.equals("Repulsion")) {
+			return "Torch + Cactus";
+		} else if (string.equals("Fireball")) {
+			return "Coal";
+		} else if (string.equals("FireChain")) {
+			return "5 Coal";
+		} else if (string.equals("Wall of Fire")) {
+			return "7 Dirt + 3 Coal";
+		} else if (string.equals("IceSphere")) {
+			return "5 Snow";
+		} else if (string.equals("Drain Life")) {
+			return "Lightstone";
+		} else if (string.equals("Fire Resistance")) {
+			return "Netherstone";
+		} else if (string.equals("Trap")) {
+			return "6 Dirt + Shovel";
+		} else if (string.equals("Heal")) {
+			return "Water";
+		} else if (string.equals("Heal Other")) {
+			return "Water";
+		} else if (string.equals("Heal Aura")) {
+			return "2 Bread";
+		} else if (string.equals("Damage Aura")) {
+			return "Flint and Steel";
+		}
+		
+		return "Unknown Ability";
+	}
+
 	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
 			BaseEntity defender, int amount) {
 		int attack = 1;
@@ -205,7 +255,7 @@ public class MineQuestListener extends PluginListener {
 		
 		if (attack == 1) {
 			Player player = attacker.getPlayer();
-			return lookupQuester(player.getName()).attack(player, defender);
+			return lookupQuester(player.getName()).attack(player, defender, amount);
 		}
 
 		if (defend == 1) {

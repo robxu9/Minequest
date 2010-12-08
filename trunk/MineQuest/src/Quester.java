@@ -3,8 +3,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Random;
 
-
-
 public class Quester {
 	private int exp;
 	private int level;
@@ -35,7 +33,7 @@ public class Quester {
 		max_health += addition;
 	}
 
-	public boolean attack(Player player, BaseEntity defender) {
+	public boolean attack(Player player, BaseEntity defender, int amount) {
 		int i;
 		
 		LivingEntity defend = getLiveEnt(defender);
@@ -55,7 +53,8 @@ public class Quester {
 			System.out.println("Checking " + classes[i].getType());
 			if (classes[i].isAbilityItem(player.getItemInHand())) {
 				if (classes[i].attack(player, defend, this)) {
-					return true;
+					amount = 0;
+					return false;
 				}
 			}
 		}
@@ -64,9 +63,10 @@ public class Quester {
 			System.out.println("Checking " + classes[i].getType());
 			if (classes[i].isClassItem(player.getItemInHand())) {
 				classes[i].attack(player, defend, this);
-				player.sendMessage("In class " + classes[i].getName());
+				player.sendMessage("In class " + classes[i].getType());
 				expGain(5);
-				return true;
+				amount = 0;
+				return false;
 			}
 		}
 		
@@ -152,9 +152,11 @@ public class Quester {
 				while (i-- > 0) {
 					inven.addItem(list.get(i));
 				}
+				inven.updateInventory();
 				return false;
 			}
 		}
+		inven.updateInventory();
 		return true;
 	}
 	
@@ -234,9 +236,9 @@ public class Quester {
 		}
 		
 		try {
-			results = sql_server.query("SELECT MAX(abil_id) FROM abilities");
-			results.next();
-			num = results.getInt("id");
+			results = sql_server.query("SELECT * FROM abilities");
+			results.last();
+			num = results.getRow();
 		} catch (SQLException e) {
 			System.out.println("Unable to get max ability id");
 			num = 0;
@@ -338,13 +340,29 @@ public class Quester {
 		return;
 	}
 	
+	public void disableabil(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].disableAbility(string);
+		}
+	}
+	
 	public void enable() {
 		enabled = true;
 		etc.getServer().getPlayer(name).sendMessage("MineQuest is now enabled for your character");
 		
 		return;
 	}
-	
+
+	public void enableabil(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].enableAbility(string, this);
+		}
+	}
+
 	private void expGain(int i) {
 		exp += i;
 		if (exp > 400 * (level + 1)) {
@@ -367,7 +385,7 @@ public class Quester {
 	public int getExp() {
 		return exp;
 	}
-
+	
 	public int getHealth() {
 		return health;
 	}
@@ -403,7 +421,11 @@ public class Quester {
 		
 		return null;
 	}
-	
+
+	public int getMaxHealth() {
+		return max_health;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -435,7 +457,7 @@ public class Quester {
 
 		System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
 	}
-
+	
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -451,6 +473,25 @@ public class Quester {
 		getPlayer().sendMessage("Congratulations on reaching character level " + level);
 	}
 
+	public void listAbil(Player player) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].listAbil(player);
+		}
+	}
+
+	public void parseFire(PluginLoader.DamageType type, int amount) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if ((classes[i].getAbility("Fire Resistance") != null) && classes[i].getAbility("Fire Resistance").isEnabled()) {
+				classes[i].getAbility("Fire Resistance").parseFire(type, amount);
+				return;
+			}
+		}
+	}
+
 	public boolean rightClick(Player player, Block blockClicked, Item item) {
 		if (!enabled) return false;
 		
@@ -464,7 +505,7 @@ public class Quester {
 		
 		return false;
 	}
-	
+
 	public void save() {
 		try {
 			int i;
@@ -477,6 +518,33 @@ public class Quester {
 			}
 		} catch (SQLException e) {
 			System.out.println("Unable to save " + name + " to database");
+		}
+	}
+
+	public void setHealth(int i) {
+		int newValue;
+		
+		health = i;
+		if (health > max_health) {
+			health = max_health;
+		}
+		
+		newValue = 20 * health / max_health;
+		
+		if ((newValue == 0) && (health > 0)) {
+			newValue++;
+		}
+		
+		etc.getServer().getPlayer(name).setHealth(newValue);
+		
+	}
+
+	public void unBind(int itemInHand) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].unBind(itemInHand, true);
+			classes[i].unBind(itemInHand, false);
 		}
 	}
 
@@ -515,71 +583,5 @@ public class Quester {
 		}
 		enabled = true;
 		mana = 10000;
-	}
-
-	public void enableabil(String string) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].enableAbility(string, this);
-		}
-	}
-
-	public void disableabil(String string) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].disableAbility(string);
-		}
-	}
-
-	public void listAbil(Player player) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].listAbil(player);
-		}
-	}
-
-	public void setHealth(int i) {
-		int newValue;
-		
-		health = i;
-		if (health > max_health) {
-			health = max_health;
-		}
-		
-		newValue = 20 * health / max_health;
-		
-		if ((newValue == 0) && (health > 0)) {
-			newValue++;
-		}
-		
-		etc.getServer().getPlayer(name).setHealth(newValue);
-		
-	}
-
-	public void parseFire(PluginLoader.DamageType type, int amount) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if ((classes[i].getAbility("Fire Resistance") != null) && classes[i].getAbility("Fire Resistance").isEnabled()) {
-				classes[i].getAbility("Fire Resistance").parseFire(type, amount);
-				return;
-			}
-		}
-	}
-
-	public void unBind(int itemInHand) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].unBind(itemInHand, true);
-			classes[i].unBind(itemInHand, false);
-		}
-	}
-
-	public int getMaxHealth() {
-		return max_health;
 	}
 }
