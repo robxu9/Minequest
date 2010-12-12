@@ -267,7 +267,6 @@ public class Quester {
 		
 		System.out.println("Damage to " + name + " is " + amount);
 		if (!enabled) return;
-		// TODO: write Quester.defend(player, mob);
 		
 		int i, sum = 0;
 		
@@ -437,6 +436,11 @@ public class Quester {
 	public void healthChange(Player player, int oldValue, int newValue) {
 		System.out.println(oldValue + " " + newValue);
 		if (!enabled) return;
+		
+		if (oldValue - newValue >= 20) {
+			health = -1;
+			return;
+		}
 
 		if ((oldValue <= 0) && (newValue == 20)) {
 			health = max_health;
@@ -499,6 +503,7 @@ public class Quester {
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].rightClick(player, blockClicked, item, this)) {
+				blockClicked.setType(0);
 				return true;
 			}
 		}

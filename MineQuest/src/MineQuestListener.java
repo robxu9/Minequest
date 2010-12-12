@@ -163,7 +163,10 @@ public class MineQuestListener extends PluginListener {
 			if (split.length < 2) {
 				return false;
 			}
-			player.sendMessage(listSpellComps(split[1]));
+			String abil = split[1];
+			int i;
+			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
+			player.sendMessage(listSpellComps(abil));
 			return true;
 		} else if (split[0].equals("/entities")) {
 			List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
