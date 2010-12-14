@@ -314,7 +314,7 @@ public class SkillClass {
 		int i;
 		
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].getName().equals(name)) {
+			if (ability_list[i].getName().equalsIgnoreCase(name)) {
 				return ability_list[i];
 			}
 		}
