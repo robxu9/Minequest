@@ -11,7 +11,7 @@ public class SkillClass {
 	private String name;
 	private String type;
 	private mysql_interface sql_server;
-	Random generator;
+	private Random generator;
 	
 	public SkillClass(String type, String name, mysql_interface sql) {
 		this.name = name;
@@ -28,6 +28,7 @@ public class SkillClass {
 			sql_server.update("UPDATE abilities SET abil" + ability_list.length + "='" + string
 					+ "' WHERE abil_list_id='" + abil_list_id + "'");
 			ability_list = abilListSQL(abil_list_id);
+			MineQuestListener.getQuester(name).getPlayer().sendMessage("You gained the ability " + string);
 		} catch (SQLException e) {
 			System.out.println("Failed to add ability " + string + " to mysql server");
 			e.printStackTrace();
@@ -97,7 +98,7 @@ public class SkillClass {
 			}
 		}
 
-		MineQuestListener.damageEntity(defend, getDamage(defend, defend.getName(), quester.getLevel()));
+		MineQuestListener.damageEntity(defend, getDamage(player, defend, defend.getName(), quester.getLevel()));
 
 		expAdd(getExpMob(defend.getName()) + MineQuestListener.getAdjustment(), quester);
 		
@@ -364,14 +365,10 @@ public class SkillClass {
 		return 0.05;
 	}
 	
-	private int getDamage(LivingEntity defend, String name2, int plLevel) {
+	private int getDamage(Player player, LivingEntity defend, String name2, int plLevel) {
 		int damage = 2;
 		damage += (plLevel / 10);
 		damage += (level / 5);
-		
-		if (MineQuestListener.getSpecialList().contains(defend)) {
-			damage /= 2;
-		}
 		
 		if (generator.nextDouble() < getCritChance()) {
 			damage *= 2;
@@ -379,6 +376,10 @@ public class SkillClass {
 		}
 		if (!isCombatClass()) {
 			damage /= 4;
+		}
+		
+		if (MineQuestListener.isSpecial(defend)) {
+			return MineQuestListener.getSpecial(defend).defend(player, damage);
 		}
 		
 		return damage;

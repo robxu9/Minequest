@@ -8,12 +8,11 @@ import java.util.logging.Logger;
 
 
 public class MineQuestListener extends PluginListener {
-    static private List<LivingEntity> entity_list;
-    
-    static private Quester questers[];
-    
-    static private List<LivingEntity> special_list;
+    static private List<LivingEntity> entity_list; 
+    static private Quester questers[];    
+    static private List<SpecialMob> special_list;
 	static private mysql_interface sql_server;
+	
 	public static void damageEntity(LivingEntity entity, int i) {
 		int levelAdj = getAdjustment();
 		
@@ -25,19 +24,24 @@ public class MineQuestListener extends PluginListener {
 		
 		entity.setHealth(entity.getHealth() - i);
 	}
+	
 	public static int getAdjustment() {
 		int i;
 		int avgLevel = 0;
 		for (i = 0; i < questers.length; i++) {
-			avgLevel += questers[i].getLevel();
+			if (questers[i].isEnabled()) {
+				avgLevel += questers[i].getLevel();
+			}
 		}
 		avgLevel /= questers.length;
 		
 		return (avgLevel / 10);
 	}
+	
 	public static Quester getQuester(String name) {
 		return lookupQuester(name);
 	}
+	
 	static public void getQuesters() {
 		int num, i;
 		String names[];
@@ -64,7 +68,7 @@ public class MineQuestListener extends PluginListener {
 		}
 	}
 
-	public static List<LivingEntity> getSpecialList() {
+	public static List<SpecialMob> getSpecialList() {
     	return special_list;
     }
 	
@@ -87,11 +91,6 @@ public class MineQuestListener extends PluginListener {
 	
 	
 	private PropertiesFile prop;
-	
-	private void deadSpecial(LivingEntity livingEntity) {
-		// TODO: extra drops for special mobs
-		return;
-	}
 	
 	public String listSpellComps(String string) {
 		
@@ -366,34 +365,25 @@ public class MineQuestListener extends PluginListener {
 		List<LivingEntity> remove_list = new ArrayList<LivingEntity>();
 		int i;
 		
+		getQuester(player.getName()).move(from, to);
+		
 		for (i = 0; i < list.size(); i++) {
 			if (!listContains(entity_list, list.get(i))) {
 				entity_list.add(list.get(i));
-				if (generator.nextDouble() < (getAdjustment() / 300.0)) {
-					special_list.add(list.get(i));
+				if ((generator.nextDouble() < (getAdjustment() / 100.0)) && (list.get(i).isMob())) {
+					special_list.add(new SpecialMob(list.get(i)));
 				}
 			}
 		}
 		
 		for (i = 0; i < special_list.size(); i++) {
-			LivingEntity mob = special_list.get(i);
-			Block nblock = etc.getServer().getBlockAt((int)mob.getX(), Ability.getNearestY((int)mob.getX(), (int)mob.getY() - 5, (int)mob.getZ()) - 1, (int)mob.getZ());
-			if (etc.getServer().getBlockAt(nblock.getX(), nblock.getY() + 1, nblock.getZ()).getType() == 78) {
-				nblock = etc.getServer().getBlockAt(nblock.getX(), nblock.getY() + 1, nblock.getZ());
-				nblock.setType(0);
-				nblock.update();
-				nblock = etc.getServer().getBlockAt(nblock.getX(), nblock.getY() - 1, nblock.getZ());
-			}
-			if ((nblock.getType() != 9) && (nblock.getType() != 8) && (nblock.getType() != 10)) { // can't walk across liquid
-				nblock.setType(3);
-				nblock.update();
-			}
-			if (special_list.get(i).getHealth() < 0) {
-				remove_list.add(special_list.get(i));
+			special_list.get(i).updatePos();
+			if (special_list.get(i).getMob().getHealth() <= 0) {
+				remove_list.add(special_list.get(i).getMob());
+				special_list.get(i).dropLoot();
 			}
 		}
 		for (i = 0; i < remove_list.size(); i++) {
-			deadSpecial(remove_list.get(i));
 			special_list.remove(remove_list.get(i));
 		}
 	}
@@ -427,6 +417,30 @@ public class MineQuestListener extends PluginListener {
 		getQuesters();
 		generator = new Random();
 		entity_list = new ArrayList<LivingEntity>();
-		special_list = new ArrayList<LivingEntity>();
+		special_list = new ArrayList<SpecialMob>();
+	}
+	
+	public static boolean isSpecial(LivingEntity defend) {
+		int i;
+		
+		for (i = 0; i < special_list.size(); i++) {
+			if (special_list.get(i).is(defend)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public static SpecialMob getSpecial(LivingEntity defend) {
+		int i;
+		
+		for (i = 0; i < special_list.size(); i++) {
+			if (special_list.get(i).is(defend)) {
+				return special_list.get(i);
+			}
+		}
+		
+		return null;
 	}
 }

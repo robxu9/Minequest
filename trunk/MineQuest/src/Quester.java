@@ -14,18 +14,24 @@ public class Quester {
 	private SkillClass classes[];
 	private int mana;
 	private int max_mana;
+	private int poison_timer;
+	private double distance;
+	long last_time = etc.getServer().getTime();
 	
 	public Quester(String name, int x, mysql_interface sql) {
 		this.name = name;
 		sql_server = sql;
 		create();
 		update();
+		distance = 0;
+		enabled = false;
 	}
 	
 	public Quester(String name, mysql_interface sql) {
 		sql_server = sql;
 		this.name = name;
 		update();
+		enabled = false;
 	}
 	
 	public void addHealth(int addition) {
@@ -172,14 +178,17 @@ public class Quester {
 	public boolean checkItemInHand(Player player) {
 		int i;
 		
-		for (i = 0; i < classes.length; i++) {
-			if (!classes[i].canUse(player.getItemInHand())) {
-				int id = player.getItemInHand();
-				player.getInventory().removeItem(new Item(id, 1));
-				player.getInventory().updateInventory();
-				player.giveItemDrop(new Item(id, 1));
-				player.sendMessage("You are not high enough level to use that weapon");
-				return true;
+		if ((etc.getServer().getTime() - last_time) > 10) {
+			last_time = etc.getServer().getTime();
+			for (i = 0; i < classes.length; i++) {
+				if (!classes[i].canUse(player.getItemInHand())) {
+					int id = player.getItemInHand();
+					player.getInventory().removeItem(new Item(id, 1));
+					player.getInventory().updateInventory();
+					player.giveItemDrop(new Item(id, 1));
+					player.sendMessage("You are not high enough level to use that weapon");
+					return true;
+				}
 			}
 		}
 
@@ -259,8 +268,8 @@ public class Quester {
 			levelAdj = 1;
 		}
 		amount *= levelAdj * 3;
-		if (MineQuestListener.getSpecialList().contains((LivingEntity)attacker)) {
-			amount *= 2;
+		if (MineQuestListener.isSpecial((LivingEntity)attacker)) {
+			amount = MineQuestListener.getSpecial((LivingEntity)attacker).attack(this, player, amount);
 		}
 		
 		System.out.println("Damage to " + name + " is " + amount);
@@ -523,6 +532,7 @@ public class Quester {
 			sql_server.reconnect();
 			System.out.println("Unable to save " + name + " to database");
 		}
+		enabled = false;
 	}
 
 	public void setHealth(int i) {
@@ -595,6 +605,29 @@ public class Quester {
 	public void parseExplosion(BaseEntity attacker, Player player, int amount) {
 		if (MineQuestListener.getSpecialList().contains((LivingEntity)attacker)) {
 			amount *= 2;
+		}
+	}
+
+	public void poison() {
+		poison_timer += 5;
+	}
+	
+	public boolean isPoisoned() {
+		return (poison_timer > 0);
+	}
+
+	public void move(Location from, Location to) {
+		double move, x, y, z;
+		if (poison_timer > 0) {
+			x = from.x - to.x;
+			y = from.y - to.y;
+			z = from.z - to.z;
+			move = Math.sqrt(x*x + y*y + z*z);
+			distance += move;
+		}
+		while ((distance > 5) && (poison_timer > 0)) {
+			distance -= 5;
+			poison_timer -= 1;
 		}
 	}
 }
