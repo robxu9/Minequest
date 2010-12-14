@@ -281,7 +281,7 @@ public class Ability {
 				double rot = player.getRotation() % 360;
 				while (rot < 0) rot += 360;
 				
-				if ((rot  < 45) && (rot < 315)) {
+				if ((rot  < 45) && (rot > 315)) {
 					player.sendMessage("Dodging1");
 					player.teleportTo(player.getX() - 1, 
 							getNearestY((int)player.getX(), (int)player.getY(), (int)player.getZ()),
@@ -404,7 +404,7 @@ public class Ability {
 						double rot = player.getRotation() % 360 - 90;
 						while (rot < 0) rot += 360;
 						
-						if ((rot  < 45) && (rot < 315)) {
+						if ((rot  < 45) && (rot > 315)) {
 							player.teleportTo(player.getX() - 1, player.getY(), player.getZ(), player.getRotation(), player.getPitch());
 						} else if ((rot > 45) && (rot < 135)) {
 							player.teleportTo(player.getX(), player.getY(), player.getZ() - 1, player.getRotation(), player.getPitch());
@@ -473,7 +473,7 @@ public class Ability {
 						while (rot < 0) rot += 360;
 						
 						
-						if ((rot  < 45) && (rot < 315)) {
+						if ((rot  < 45) && (rot > 315)) {
 							x_change = 0;
 							z_change = 1;
 							x = (int)player.getX() - 3;
@@ -517,7 +517,7 @@ public class Ability {
 						while (rot < 0) rot += 360;
 						
 						
-						if ((rot  < 45) && (rot < 315)) {
+						if ((rot  < 45) && (rot > 315)) {
 							x_change = 0;
 							z_change = 1;
 							x = (int)player.getX() - 3;
