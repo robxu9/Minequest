@@ -38,7 +38,6 @@ public class Quester {
 		
 		LivingEntity defend = getLiveEnt(defender);
 		
-		System.out.println("Call to Quester.attack()");
 		
 		if (defend == null) {
 			player.sendMessage("Not Live Entity");
@@ -48,9 +47,7 @@ public class Quester {
 		
 		if (checkItemInHand(player)) return false;
 
-		player.sendMessage("Attack from " + player.getName() + " to " + ((defend != null)?defend.getName():null));
 		for (i = 0; i < classes.length; i++) {
-			System.out.println("Checking " + classes[i].getType());
 			if (classes[i].isAbilityItem(player.getItemInHand())) {
 				if (classes[i].attack(player, defend, this)) {
 					amount = 0;
@@ -60,10 +57,8 @@ public class Quester {
 		}
 		
 		for (i = 0; i < classes.length; i++) {
-			System.out.println("Checking " + classes[i].getType());
 			if (classes[i].isClassItem(player.getItemInHand())) {
 				classes[i].attack(player, defend, this);
-				player.sendMessage("In class " + classes[i].getType());
 				expGain(5);
 				amount = 0;
 				return false;
@@ -264,6 +259,9 @@ public class Quester {
 			levelAdj = 1;
 		}
 		amount *= levelAdj * 3;
+		if (MineQuestListener.getSpecialList().contains((LivingEntity)attacker)) {
+			amount *= 2;
+		}
 		
 		System.out.println("Damage to " + name + " is " + amount);
 		if (!enabled) return;
@@ -276,6 +274,9 @@ public class Quester {
 		
 		amount -= sum;
 		
+		if (amount >= 20) {
+			amount = 19;
+		}
 		if (amount < 0) {
 			amount = 0;
 		}
@@ -303,7 +304,7 @@ public class Quester {
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isClassItem(player.getItemInHand())) {
 				classes[i].blockDestroy(player, block, this);
-				expGain(2);
+				expGain(1);
 				return false;
 			}
 		}
@@ -311,19 +312,15 @@ public class Quester {
 		switch (blockToClass(block)) {
 		case 0: // Miner
 			getClass("Miner").blockDestroy(player, block, this);
-			expGain(1);
 			return false;
 		case 1: // Lumberjack
 			getClass("Lumberjack").blockDestroy(player, block, this);
-			expGain(1);
 			return false;
 		case 2: // Digger
 			getClass("Digger").blockDestroy(player, block, this);
-			expGain(1);
 			return false;
 		case 3: // Farmer
 			getClass("Farmer").blockDestroy(player, block, this);
-			expGain(1);
 			return false;
 		default:
 			break;
@@ -373,7 +370,7 @@ public class Quester {
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getType().equals(string)) {
+			if (classes[i].getType().equalsIgnoreCase(string)) {
 				return classes[i];
 			}
 		}
@@ -522,25 +519,30 @@ public class Quester {
 				classes[i].save();
 			}
 		} catch (SQLException e) {
+			etc.getServer().getPlayer(name).sendMessage("Unable to save properly, please try again");
+			sql_server.reconnect();
 			System.out.println("Unable to save " + name + " to database");
 		}
 	}
 
 	public void setHealth(int i) {
-		int newValue;
+
+		/*int newValue;
 		
-		health = i;
-		if (health > max_health) {
-			health = max_health;
+		
+
+		if (i > max_health) {
+			i = max_health;
 		}
+		health = i;
 		
 		newValue = 20 * health / max_health;
 		
 		if ((newValue == 0) && (health > 0)) {
 			newValue++;
-		}
+		}*/
 		
-		etc.getServer().getPlayer(name).setHealth(newValue);
+		etc.getServer().getPlayer(name).setHealth(i);
 		
 	}
 
@@ -588,5 +590,11 @@ public class Quester {
 		}
 		enabled = true;
 		mana = 10000;
+	}
+
+	public void parseExplosion(BaseEntity attacker, Player player, int amount) {
+		if (MineQuestListener.getSpecialList().contains((LivingEntity)attacker)) {
+			amount *= 2;
+		}
 	}
 }

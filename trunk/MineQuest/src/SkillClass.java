@@ -23,14 +23,6 @@ public class SkillClass {
 	
 	private void addAbility(String string) {
 		int i;
-		/*Ability[] new_list = new Ability[ability_list.length + 1];
-		
-		System.out.println("" + ability_list.length);
-		for (i = 0; i < ability_list.length; i++) {
-			new_list[i] = ability_list[i];
-		}
-		System.out.println("" + i);
-		new_list[i] = new Ability(string, this);*/
 		
 		try {
 			sql_server.update("UPDATE abilities SET abil" + ability_list.length + "='" + string
@@ -40,8 +32,6 @@ public class SkillClass {
 			System.out.println("Failed to add ability " + string + " to mysql server");
 			e.printStackTrace();
 		}
-		
-		/*ability_list = new_list;*/
 		
 		if (etc.getServer().getPlayer(name) != null) {
 			etc.getServer().getPlayer(name).sendMessage("Gained ability " + string);
@@ -107,7 +97,7 @@ public class SkillClass {
 			}
 		}
 
-		MineQuestListener.damageEntity(defend, getDamage(defend.getName(), quester.getLevel()));
+		MineQuestListener.damageEntity(defend, getDamage(defend, defend.getName(), quester.getLevel()));
 
 		expAdd(getExpMob(defend.getName()) + MineQuestListener.getAdjustment(), quester);
 		
@@ -117,10 +107,22 @@ public class SkillClass {
 	public void blockDestroy(Player player, Block block, Quester quester) {
 		int i;
 		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(player.getItemInHand())) {
-				ability_list[i].parseLeftClick(player, block, quester);
-				return;
+		if (block.getStatus() == 0) {
+			for (i = 0; i < ability_list.length; i++) {
+				if (ability_list[i].isBound(player.getItemInHand())) {
+					ability_list[i].parseLeftClick(player, block, quester);
+					return;
+				}
+			}
+		}
+
+		if (level > 5) {
+			if (isStoneWoodenTool(player.getItemInHand())) {
+				if (block.getStatus() == 3) {
+					if (isBlockGiveType(block.getType())) {
+						player.giveItemDrop(getItemGive(block.getType()));
+					}
+				}
 			}
 		}
 		
@@ -128,6 +130,53 @@ public class SkillClass {
 			expAdd(2, quester);
 		} else {
 			expAdd(1, quester);
+		}
+	}
+
+	private boolean isStoneWoodenTool(int itemInHand) {
+
+		switch (itemInHand) {
+		case 272:
+		case 268:
+		case 274:
+		case 270:
+		case 275:
+		case 271:
+		case 273:
+		case 269:
+		case 292:
+		case 290:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	private Item getItemGive(int type2) {
+		switch (type2) {
+		case 14: //gold
+			return new Item(266, 1);
+		case 56: //diamond
+			return new Item(264, 1);
+		case 73: //red stone
+			return new Item(331, 2);
+		case 74: //more red stone
+			return new Item(331, 2);
+		default:
+			return null;
+		}
+	}
+
+	private boolean isBlockGiveType(int i) {
+		switch (i) {
+		case 14: //gold
+		case 56: //diamond
+		case 73: //red stone
+		case 74: //more red stone
+			return true;
+		default:		
+			return false;
+
 		}
 	}
 
@@ -234,7 +283,11 @@ public class SkillClass {
 	}
 
 	public void display(Player player) {
-		player.sendMessage("You are a level " + level + " " + type + " with " + exp + "/" + (400*(level+1)) + " Exp to next level");
+		int num = 400;
+		if (!isCombatClass()) {
+			num *= 2;
+		}
+		player.sendMessage("You are a level " + level + " " + type + " with " + exp + "/" + (num*(level+1)) + " Exp to next level");
 		
 		return;
 	}
@@ -247,8 +300,12 @@ public class SkillClass {
 	}
 	
 	public void expAdd(int expNum, Quester quester) {
+		int num = 400;
+		if (!isCombatClass()) {
+			num *= 2;
+		}
 		exp += expNum;
-		if (exp >= 400 * (level + 1)) {
+		if (exp >= num * (level + 1)) {
 			levelUp(quester);
 		}
 	}
@@ -307,14 +364,21 @@ public class SkillClass {
 		return 0.05;
 	}
 	
-	private int getDamage(String name2, int plLevel) {
+	private int getDamage(LivingEntity defend, String name2, int plLevel) {
 		int damage = 2;
 		damage += (plLevel / 10);
 		damage += (level / 5);
 		
+		if (MineQuestListener.getSpecialList().contains(defend)) {
+			damage /= 2;
+		}
+		
 		if (generator.nextDouble() < getCritChance()) {
 			damage *= 2;
 			etc.getServer().getPlayer(name).sendMessage("Critical Hit!");
+		}
+		if (!isCombatClass()) {
+			damage /= 4;
 		}
 		
 		return damage;
@@ -459,8 +523,12 @@ public class SkillClass {
 	public void levelUp(Quester quester) {
 		int add_health;
 		int size;
+		int num = 400;
+		if (!isCombatClass()) {
+			num *= 2;
+		}
 		level++;
-		exp -= 400 * (level);
+		exp -= num * (level);
 		quester.getPlayer().sendMessage("Congratulations on becoming a level " + level + " " + type);
 		if (!isCombatClass()) return;
 		if (type.equals("Warrior")) {
@@ -566,7 +634,7 @@ public class SkillClass {
 		int i;
 		
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(player.getItemInHand())) {
+			if (ability_list[i].isBoundR(player.getItemInHand())) {
 				ability_list[i].parseRightClick(player, blockClicked, quester);
 				return true;
 			}
