@@ -8,13 +8,20 @@ import com.mysql.jdbc.Statement;
 
 public class mysql_interface {
 	private Statement stmt;
-	String url;
+	String url, user, pass;
 	java.sql.Connection con;
     private Logger log;
 	
 	
 	public void setup(String location, String port, String db, String user, String pass) {
 		url = "jdbc:mysql://" + location + ":" + port + "/" + db;
+		this.user = user;
+		this.pass = pass;
+		reconnect();
+        log = Logger.getLogger("Minecraft");
+	}
+	
+	public void reconnect() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
@@ -36,7 +43,6 @@ public class mysql_interface {
 			System.out.println("Failed to setup MySQL Statement");
 			e.printStackTrace();
 		}
-        log = Logger.getLogger("Minecraft");
 	}
 	
 	public ResultSet query(String the_query) throws SQLException {

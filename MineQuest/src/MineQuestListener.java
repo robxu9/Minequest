@@ -1,12 +1,31 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 
 
 public class MineQuestListener extends PluginListener {
-    public static int getAdjustment() {
+    static private List<LivingEntity> entity_list;
+    
+    static private Quester questers[];
+    
+    static private List<LivingEntity> special_list;
+	static private mysql_interface sql_server;
+	public static void damageEntity(LivingEntity entity, int i) {
+		int levelAdj = getAdjustment();
+		
+		if (levelAdj <= 0) {
+			levelAdj = 1;
+		}
+		
+		i /= levelAdj;
+		
+		entity.setHealth(entity.getHealth() - i);
+	}
+	public static int getAdjustment() {
 		int i;
 		int avgLevel = 0;
 		for (i = 0; i < questers.length; i++) {
@@ -16,11 +35,9 @@ public class MineQuestListener extends PluginListener {
 		
 		return (avgLevel / 10);
 	}
-    @SuppressWarnings("unused")
-	private Logger log;
-	static private Quester questers[];
-	static private mysql_interface sql_server;
-
+	public static Quester getQuester(String name) {
+		return lookupQuester(name);
+	}
 	static public void getQuesters() {
 		int num, i;
 		String names[];
@@ -46,8 +63,10 @@ public class MineQuestListener extends PluginListener {
 			e.printStackTrace();
 		}
 	}
-	
-	private PropertiesFile prop;
+
+	public static List<LivingEntity> getSpecialList() {
+    	return special_list;
+    }
 	
 	private static Quester lookupQuester(String name) {
 		int i;
@@ -60,12 +79,69 @@ public class MineQuestListener extends PluginListener {
 		return null;
 	}
 	
+	Random generator;
+	
+	@SuppressWarnings("unused")
+	private Logger log;
+	
+	
+	
+	private PropertiesFile prop;
+	
+	private void deadSpecial(LivingEntity livingEntity) {
+		// TODO: extra drops for special mobs
+		return;
+	}
+	
+	public String listSpellComps(String string) {
+		
+		if (string.equalsIgnoreCase("PowerStrike")) {
+			return "Wooden Sword";
+		} else if (string.equalsIgnoreCase("Dodge")) {
+			return "5 Feathers";
+		} else if (string.equalsIgnoreCase("Deathblow")) {
+			return "2 Steel";
+		} else if (string.equalsIgnoreCase("Sprint")) {
+			return "Feather";
+		} else if (string.equalsIgnoreCase("Fire Arrow")) {
+			return "Coal";
+		} else if (string.equalsIgnoreCase("Hail of Arrows")) {
+			return "10 Arrows";
+		} else if (string.equalsIgnoreCase("Repulsion")) {
+			return "Torch + Cactus";
+		} else if (string.equalsIgnoreCase("Fireball")) {
+			return "Coal";
+		} else if (string.equalsIgnoreCase("FireChain")) {
+			return "5 Coal";
+		} else if (string.equalsIgnoreCase("Wall of Fire")) {
+			return "7 Dirt + 3 Coal";
+		} else if (string.equalsIgnoreCase("Wall of Water")) {
+			return "7 Dirt + 2 Water";
+		} else if (string.equalsIgnoreCase("IceSphere")) {
+			return "5 Snow";
+		} else if (string.equalsIgnoreCase("Drain Life")) {
+			return "Lightstone";
+		} else if (string.equalsIgnoreCase("Fire Resistance")) {
+			return "Netherstone";
+		} else if (string.equalsIgnoreCase("Trap")) {
+			return "6 Dirt + Shovel";
+		} else if (string.equalsIgnoreCase("Heal")) {
+			return "Water";
+		} else if (string.equalsIgnoreCase("Heal Other")) {
+			return "Water";
+		} else if (string.equalsIgnoreCase("Heal Aura")) {
+			return "2 Bread";
+		} else if (string.equalsIgnoreCase("Damage Aura")) {
+			return "Flint and Steel";
+		}
+		
+		return "Unknown Ability";
+	}
+	
 	public void onArmSwing(Player player) {
 		lookupQuester(player.getName()).checkItemInHand(player);
 		lookupQuester(player.getName()).checkItemInHandAbil(player);
 	}
-	
-	
 	
 	public boolean onBlockDestroy(Player player, Block block) {
 		return lookupQuester(player.getName()).destroyBlock(player, block);
@@ -76,11 +152,11 @@ public class MineQuestListener extends PluginListener {
 			Block blockClicked, Item itemInHand) {
 		return lookupQuester(player.getName()).rightClick(player, blockClicked, itemInHand);
 	}
-	
+
 	public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
 		lookupQuester(player.getName()).rightClick(player, blockClicked, item);
 	}
-	
+
 	public boolean onCommand(Player player, String[] split) {
 		if (split[0].equals("/char")) {
 			Quester quester = lookupQuester(player.getName());
@@ -111,6 +187,10 @@ public class MineQuestListener extends PluginListener {
 			return true;
 		} else if (split[0].equals("/quest")) {
 			lookupQuester(player.getName()).enable();
+			return true;
+		} else if (split[0].equals("/zombie")) {
+			Mob mymob = new Mob("Zombie", new Location(player.getX() + 3, player.getY(), player.getZ()));
+			mymob.spawn();
 			return true;
 		} else if (split[0].equals("/abillist")) {
 			if (split.length < 2) {
@@ -195,57 +275,20 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 	
-	public String listSpellComps(String string) {
-		
-		if (string.equals("PowerStrike")) {
-			return "Wooden Sword";
-		} else if (string.equals("Dodge")) {
-			return "5 Feathers";
-		} else if (string.equals("Deathblow")) {
-			return "2 Steel";
-		} else if (string.equals("Sprint")) {
-			return "Feather";
-		} else if (string.equals("Fire Arrow")) {
-			return "Coal";
-		} else if (string.equals("Hail of Arrows")) {
-			return "10 Arrows";
-		} else if (string.equals("Repulsion")) {
-			return "Torch + Cactus";
-		} else if (string.equals("Fireball")) {
-			return "Coal";
-		} else if (string.equals("FireChain")) {
-			return "5 Coal";
-		} else if (string.equals("Wall of Fire")) {
-			return "7 Dirt + 3 Coal";
-		} else if (string.equals("IceSphere")) {
-			return "5 Snow";
-		} else if (string.equals("Drain Life")) {
-			return "Lightstone";
-		} else if (string.equals("Fire Resistance")) {
-			return "Netherstone";
-		} else if (string.equals("Trap")) {
-			return "6 Dirt + Shovel";
-		} else if (string.equals("Heal")) {
-			return "Water";
-		} else if (string.equals("Heal Other")) {
-			return "Water";
-		} else if (string.equals("Heal Aura")) {
-			return "2 Bread";
-		} else if (string.equals("Damage Aura")) {
-			return "Flint and Steel";
-		}
-		
-		return "Unknown Ability";
-	}
-
+	
+	
 	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
 			BaseEntity defender, int amount) {
 		int attack = 1;
 		int defend = 0;
 		
+
 		if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && defender.isPlayer()) {
 			Player player = defender.getPlayer();
 			lookupQuester(player.getName()).parseFire(type, amount);
+		} else if (type == PluginLoader.DamageType.CREEPER_EXPLOSION) {
+			Player player = defender.getPlayer();
+			lookupQuester(player.getName()).parseExplosion(attacker, player, amount);
 		}
 		if (type != PluginLoader.DamageType.ENTITY) {
 			return false;
@@ -270,17 +313,18 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 	
-	
-	
 	public void onDisconnect(Player player) {
 		lookupQuester(player.getName()).save();
+		player.setHealth(20);
 	}
-	
+
 	public boolean onEquipmentChange(Player player) {
 		lookupQuester(player.getName()).checkEquip(player);
 		return super.onEquipmentChange(player);
 	}
 
+
+	
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
 		if (lookupQuester(player.getName()).isEnabled()) {
 			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
@@ -289,8 +333,6 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 
-
-	
 	public void onLogin(Player player) {
 		Quester new_questers[];
 		int i;
@@ -309,6 +351,55 @@ public class MineQuestListener extends PluginListener {
 		}
 	}
 
+	public void onPlayerMove(Player player, Location from, Location to) {
+		List<LivingEntity> list = etc.getServer().getLivingEntityList();
+		List<LivingEntity> remove_list = new ArrayList<LivingEntity>();
+		int i;
+		
+		for (i = 0; i < list.size(); i++) {
+			if (!listContains(entity_list, list.get(i))) {
+				entity_list.add(list.get(i));
+				if (generator.nextDouble() < (getAdjustment() / 300.0)) {
+					special_list.add(list.get(i));
+				}
+			}
+		}
+		
+		for (i = 0; i < special_list.size(); i++) {
+			LivingEntity mob = special_list.get(i);
+			Block nblock = etc.getServer().getBlockAt((int)mob.getX(), Ability.getNearestY((int)mob.getX(), (int)mob.getY() - 5, (int)mob.getZ()) - 1, (int)mob.getZ());
+			if (etc.getServer().getBlockAt(nblock.getX(), nblock.getY() + 1, nblock.getZ()).getType() == 78) {
+				nblock = etc.getServer().getBlockAt(nblock.getX(), nblock.getY() + 1, nblock.getZ());
+				nblock.setType(0);
+				nblock.update();
+				nblock = etc.getServer().getBlockAt(nblock.getX(), nblock.getY() - 1, nblock.getZ());
+			}
+			if ((nblock.getType() != 9) && (nblock.getType() != 8) && (nblock.getType() != 10)) { // can't walk across liquid
+				nblock.setType(3);
+				nblock.update();
+			}
+			if (special_list.get(i).getHealth() < 0) {
+				remove_list.add(special_list.get(i));
+			}
+		}
+		for (i = 0; i < remove_list.size(); i++) {
+			deadSpecial(remove_list.get(i));
+			special_list.remove(remove_list.get(i));
+		}
+	}
+
+	private boolean listContains(List<LivingEntity> entityList,
+			LivingEntity livingEntity) {
+		int i;
+		
+		for (i = 0; i < entityList.size(); i++) {
+			if (entityList.get(i).getId() == livingEntity.getId()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	public void setup() {
 		String url, port, db, user, pass;
 		
@@ -324,21 +415,8 @@ public class MineQuestListener extends PluginListener {
 		sql_server.setup(url, port, db, user, pass);
 		
 		getQuesters();
-	}
-
-	public static void damageEntity(LivingEntity entity, int i) {
-		int levelAdj = getAdjustment();
-		
-		if (levelAdj <= 0) {
-			levelAdj = 1;
-		}
-		
-		i /= levelAdj;
-		
-		entity.setHealth(entity.getHealth() - i);
-	}
-
-	public static Quester getQuester(String name) {
-		return lookupQuester(name);
+		generator = new Random();
+		entity_list = new ArrayList<LivingEntity>();
+		special_list = new ArrayList<LivingEntity>();
 	}
 }
