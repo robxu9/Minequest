@@ -139,21 +139,25 @@ public class MineQuestListener extends PluginListener {
 	}
 	
 	public void onArmSwing(Player player) {
+		if (!lookupQuester(player.getName()).isEnabled()) return;
 		lookupQuester(player.getName()).checkItemInHand(player);
 		lookupQuester(player.getName()).checkItemInHandAbil(player);
 	}
 	
 	public boolean onBlockDestroy(Player player, Block block) {
+		if (!lookupQuester(player.getName()).isEnabled()) return false;
 		return lookupQuester(player.getName()).destroyBlock(player, block);
 	}
 	
 	@Override
 	public boolean onBlockPlace(Player player, Block blockPlaced,
 			Block blockClicked, Item itemInHand) {
+		if (!lookupQuester(player.getName()).isEnabled()) return false;
 		return lookupQuester(player.getName()).rightClick(player, blockClicked, itemInHand);
 	}
 
 	public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
+		if (!lookupQuester(player.getName()).isEnabled()) return;
 		lookupQuester(player.getName()).rightClick(player, blockClicked, item);
 	}
 
@@ -285,9 +289,11 @@ public class MineQuestListener extends PluginListener {
 
 		if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && defender.isPlayer()) {
 			Player player = defender.getPlayer();
+			if (!lookupQuester(player.getName()).isEnabled()) return false;
 			lookupQuester(player.getName()).parseFire(type, amount);
 		} else if (type == PluginLoader.DamageType.CREEPER_EXPLOSION) {
 			Player player = defender.getPlayer();
+			if (!lookupQuester(player.getName()).isEnabled()) return false;
 			lookupQuester(player.getName()).parseExplosion(attacker, player, amount);
 		}
 		if (type != PluginLoader.DamageType.ENTITY) {
@@ -301,11 +307,13 @@ public class MineQuestListener extends PluginListener {
 		
 		if (attack == 1) {
 			Player player = attacker.getPlayer();
+			if (!lookupQuester(player.getName()).isEnabled()) return false;
 			return lookupQuester(player.getName()).attack(player, defender, amount);
 		}
 
 		if (defend == 1) {
 			Player player = defender.getPlayer();
+			if (!lookupQuester(player.getName()).isEnabled()) return false;
 			lookupQuester(player.getName()).defend(player, attacker, amount);
 			return false;
 		}
@@ -319,6 +327,7 @@ public class MineQuestListener extends PluginListener {
 	}
 
 	public boolean onEquipmentChange(Player player) {
+		if (!lookupQuester(player.getName()).isEnabled()) return false;
 		lookupQuester(player.getName()).checkEquip(player);
 		return super.onEquipmentChange(player);
 	}
@@ -326,6 +335,7 @@ public class MineQuestListener extends PluginListener {
 
 	
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
+		if (!lookupQuester(player.getName()).isEnabled()) return false;
 		if (lookupQuester(player.getName()).isEnabled()) {
 			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
 			return false;
