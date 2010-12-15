@@ -439,13 +439,17 @@ public class Quester {
 		return etc.getServer().getPlayer(name);
 	}
 
-	public void healthChange(Player player, int oldValue, int newValue) {
+	public boolean healthChange(Player player, int oldValue, int newValue) {
+		boolean flag = false;
+		if (newValue <= 0) {
+			flag = true;
+		}
 		System.out.println(oldValue + " " + newValue);
-		if (!enabled) return;
+		if (!enabled) return false;
 		
 		if (oldValue - newValue >= 20) {
 			health = -1;
-			return;
+			return false;
 		}
 
 		if ((oldValue <= 0) && (newValue == 20)) {
@@ -466,6 +470,12 @@ public class Quester {
 		player.setHealth(newValue);
 
 		System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
+		if (flag) {
+			oldValue = newValue;
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public boolean isEnabled() {
@@ -609,7 +619,7 @@ public class Quester {
 	}
 
 	public void poison() {
-		poison_timer += 5;
+		poison_timer += 10;
 	}
 	
 	public boolean isPoisoned() {
@@ -628,6 +638,11 @@ public class Quester {
 		while ((distance > 5) && (poison_timer > 0)) {
 			distance -= 5;
 			poison_timer -= 1;
+			setHealth(getHealth() - 1);
 		}
+	}
+
+	public void curePoison() {
+		poison_timer = 0;
 	}
 }

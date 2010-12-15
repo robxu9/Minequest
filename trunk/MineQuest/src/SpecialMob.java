@@ -18,7 +18,9 @@ public class SpecialMob {
 		Block nblock = etc.getServer().getBlockAt((int)mob.getX(), Ability.getNearestY((int)mob.getX(), (int)mob.getY() - 5, (int)mob.getZ()) - 1, (int)mob.getZ());
 		if (etc.getServer().getBlockAt(nblock.getX(), nblock.getY() + 1, nblock.getZ()).getType() == 78) {
 			nblock = etc.getServer().getBlockAt(nblock.getX(), nblock.getY() + 1, nblock.getZ());
-			nblock.setType(0);
+			if (nblock.getType() != 52) {
+				nblock.setType(0);
+			}
 			nblock.update();
 			nblock = etc.getServer().getBlockAt(nblock.getX(), nblock.getY() - 1, nblock.getZ());
 		}
@@ -29,8 +31,16 @@ public class SpecialMob {
 	}
 
 	public void dropLoot() {
-		// TODO Auto-generated method stub
-		
+		if (mob.getName().contains("Zombie")) {
+			etc.getServer().dropItem(mob.getX(), mob.getY(), mob.getZ(), 39, 2);
+		} else if (mob.getName().contains("Spider")) {
+			etc.getServer().dropItem(mob.getX(), mob.getY(), mob.getZ(), 89, 6);
+		} else if (mob.getName().contains("Skeleton")) {
+			etc.getServer().dropItem(mob.getX(), mob.getY(), mob.getZ(), 331, 6);
+		} else if (mob.getName().contains("Creeper")) {
+			etc.getServer().dropItem(new Location(mob.getX(), mob.getY() + 1, mob.getZ()), 46);
+		}
+	
 	}
 
 	public boolean is(LivingEntity defend) {
@@ -78,6 +88,32 @@ public class SpecialMob {
 			if (generator.nextDouble() < .5) {
 				MineQuestListener.getQuester(player.getName()).poison();
 			}
+		} else if (mob.getName().contains("Spider")) {
+			if (generator.nextDouble() < .2) {
+				Ability trap = new Ability("Trap", null);
+				trap.useAbility(null, new Block(0, (int)player.getX(), (int)player.getY(), (int)player.getZ()), null, 0, (LivingEntity)player);
+			}
+		} else if (mob.getName().contains("Skeleton")) {
+			double num = generator.nextDouble();
+			Ability abil;
+			if (num < .2) {
+				abil = new Ability("Fireball", null);
+			} else if (num < .4) {
+				abil = new Ability("FireChain", null);
+			} else if (num < .6) {
+				abil = new Ability("IceSphere", null);
+			} else if (num < .8) {
+				abil = new Ability("Hail of Arrows", null);
+			} else {
+				abil = new Ability("PowerStrike", null);
+			}
+			abil.useAbility(null, new Block(0, (int)player.getX(), (int)player.getY(), (int)player.getZ()), null, 0, (LivingEntity)player);			
+		} else if (mob.getName().contains("Creeper")) {
+			Block nblock = new Block(46);
+			nblock.setX((int)mob.getX());
+			nblock.setY(Ability.getNearestY((int)mob.getX(), (int)mob.getY(), (int)mob.getZ()));
+			nblock.setZ((int)mob.getZ());
+			nblock.update();
 		}
 		amount *= 2;
 		

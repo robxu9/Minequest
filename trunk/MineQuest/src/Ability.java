@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 public class Ability {
 	static public int getNearestY(int x, int y, int z) {
 		int i = y;
@@ -83,7 +81,9 @@ public class Ability {
 
 	public int getCastTime() {
 		if (name.equals("Heal") || name.equals("Heal Other")) {
-			return 1200;
+			return 600;
+		} else if (name.equals("Cure Poison") || name.equals("Cure Poison Other") || name.equals("Trap") || name.equals("Trape")) {
+			return 300;
 		}
 		return 0;
 	}
@@ -119,10 +119,6 @@ public class Ability {
 	public List<Item> getManaCost(Player player, LivingEntity entity) {
 		List<Item> list = new ArrayList<Item>();
 		
-		//if (!name.equals("Fireball")) {
-			//list.add(new Item(331, 1));
-		//}
-		
 		if (name.equals("Dodge")) {
 			list.add(new Item(288, 5));
 		} else if (name.equals("Fireball")) {
@@ -151,7 +147,7 @@ public class Ability {
 			list.add(new Item(89, 1));
 		} else if (name.equals("Fire Resistance")) {
 			list.add(new Item(87, 1));
-		} else if (name.equals("Trap")) {
+		} else if (name.equals("Trap") || name.equals("Trape")) {
 			list.add(new Item(3, 6));
 			list.add(new Item(269, 1));
 		} else if (name.equals("Heal")) {
@@ -166,6 +162,10 @@ public class Ability {
 			list.add(new Item(297, 2));
 		} else if (name.equals("Damage Aura")) {
 			list.add(new Item(259, 1));
+		} else if (name.equals("Cure Poison")) {
+			list.add(new Item(39, 1));
+		} else if (name.equals("Cure Poison Other")) {
+			list.add(new Item(39, 1));
 		}
 		
 		return list;
@@ -357,9 +357,9 @@ public class Ability {
 		// TODO: add DrainLife
 		// TODO: add DamageAura
 		// TODO: add HealAura
-		if (quester.canCast(getManaCost(player, entity))) {
-			if (canCast()) {
-				if (player.getItemInHand() == ((l == 1)?bindl:bindr)) {
+		if ((quester == null) || quester.canCast(getManaCost(player, entity))) {
+			if (canCast() || (player == null)) {
+				if ((player == null) || player.getItemInHand() == ((l == 1)?bindl:bindr)) {
 					player.sendMessage("Casting " + name);
 					if (name.equals("Fireball")) {
 						double leftx, leftz;
@@ -453,8 +453,8 @@ public class Ability {
 							
 							this_entity = getRandomEntity(entity, 10);
 							for (i = 0; i < 3 + myclass.getCasterLevel(); i++) {
-								fireball.useAbility(player, new Block(1, (int)entity.getX(), (int)entity.getY(), (int)entity.getZ()), 
-										quester, 1, entity);
+								fireball.useAbility(null, new Block(1, (int)entity.getX(), (int)entity.getY(), (int)entity.getZ()), 
+										null, 1, entity);
 								this_entity = getRandomEntity(this_entity, 10);
 								if (myclass.getGenerator().nextDouble() < .1) {
 									break;
@@ -549,6 +549,13 @@ public class Ability {
 							x += x_change;
 							z += z_change;
 						}
+					} else if (name.equals("Cure Poison")) {
+						if (quester.isPoisoned()) {
+							quester.curePoison();
+						} else {
+							player.sendMessage("Quester must not be poisoned to cure poison");
+							return;
+						}
 					} else if (name.equals("Heal")) {
 						player.giveItem(new Item(325, 1));
 						player.getInventory().updateInventory();
@@ -566,12 +573,12 @@ public class Ability {
 						} else {
 							player.sendMessage("Must be called on an Entity");
 						}
-					} else if (name.equals("Trap")) {
+					} else if (name.equals("Trap") || name.equals("Trape")) {
 						int i, j, k;
 						int x, y, z;
 						if (entity == null) {
 							giveManaCost(player);
-							player.sendMessage("Trap must be used on a livint entity");
+							player.sendMessage("Trap must be used on a living entity");
 							return;
 						}
 						x = block.getX();
@@ -588,6 +595,25 @@ public class Ability {
 									nblock.update();
 								}
 							}
+						}
+					} else if (name.equals("Cure Poison Other")) {
+						if (entity.isPlayer()) {
+							Quester other = MineQuestListener.getQuester(entity.getName());
+							if (other != null) {
+								if (other.isPoisoned()) {
+									other.curePoison();
+								} else {
+									player.sendMessage("Quester must be poisoned to Cure Poison");
+									return;
+								}
+							} else {
+								giveManaCost(player);
+								player.sendMessage(entity.getName() + " is not a Quester");
+								return;
+							}
+						} else {
+							giveManaCost(player);
+							player.sendMessage(name + " must be cast on another player");
 						}
 					} else if (name.equals("Heal Other")) {
 						if (entity.isPlayer()) {
@@ -612,6 +638,7 @@ public class Ability {
 					} else if (name.equals("IceSphere")) {
 						int j,k;
 						if (entity == null) {
+							player.sendMessage("Cannot cast on null entity");
 							giveManaCost(player);
 							return;
 						}
@@ -629,14 +656,20 @@ public class Ability {
 					} else {
 						return;
 					}
-					myclass.expAdd(getExp(), quester);
+					if (myclass != null) {
+						myclass.expAdd(getExp(), quester);
+					}
 				}
 			} else {
-				giveManaCost(player);
-				player.sendMessage("You cast that too recently");
+				if (player != null) {
+					giveManaCost(player);
+					player.sendMessage("You cast that too recently");
+				}
 			}
 		} else {
-			player.sendMessage("You do not have the materials to cast that - try /spellcomp " + name);
+			if (player != null) {
+				player.sendMessage("You do not have the materials to cast that - try /spellcomp " + name);
+			}
 		}
 	}
 }
