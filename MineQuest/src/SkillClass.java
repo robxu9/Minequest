@@ -606,7 +606,7 @@ public class SkillClass {
 		} else if (type.equals("PeaceMage")) {
 			switch (level) {
 			case 2:
-				addAbility("Trap");
+				addAbility("Trape");
 				break;
 			case 3:
 				addAbility("Wall of Water");

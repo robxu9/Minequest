@@ -271,7 +271,9 @@ public class MineQuestListener extends PluginListener {
 					player.sendMessage(entity_list.get(i).getName() + " is a mob");
 				}
 			}
-			player.sendMessage("There are " + creeper + " Creepers " + zombie + " Zombies " + skeleton + " Skeletons and " + spider + " Spiders of " + entity_list.size());
+			player.sendMessage("There are " + creeper + " Creepers " + zombie 
+					+ " Zombies " + skeleton + " Skeletons and " + spider + " Spiders of " 
+					+ entity_list.size() + " with " + special_list.size() + " specials");
 			
 			return true;
 		}
@@ -330,14 +332,11 @@ public class MineQuestListener extends PluginListener {
 		lookupQuester(player.getName()).checkEquip(player);
 		return super.onEquipmentChange(player);
 	}
-
-
 	
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
 		if (!lookupQuester(player.getName()).isEnabled()) return false;
 		if (lookupQuester(player.getName()).isEnabled()) {
-			lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
-			return false;
+			return lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
 		}
 		return false;
 	}
@@ -370,7 +369,7 @@ public class MineQuestListener extends PluginListener {
 		for (i = 0; i < list.size(); i++) {
 			if (!listContains(entity_list, list.get(i))) {
 				entity_list.add(list.get(i));
-				if ((generator.nextDouble() < (getAdjustment() / 100.0)) && (list.get(i).isMob())) {
+				if ((generator.nextDouble() < (getAdjustment() / 100.0)) && isMob(list.get(i))) {
 					special_list.add(new SpecialMob(list.get(i)));
 				}
 			}
@@ -386,6 +385,19 @@ public class MineQuestListener extends PluginListener {
 		for (i = 0; i < remove_list.size(); i++) {
 			special_list.remove(remove_list.get(i));
 		}
+	}
+
+	private boolean isMob(LivingEntity livingEntity) {
+		if (livingEntity.getName().contains("Zombie")) {
+			return true;
+		} else if (livingEntity.getName().contains("Skeleton")) {
+			return true;
+		} else if (livingEntity.getName().contains("Spider")) {
+			return true;
+		} else if (livingEntity.getName().contains("Creeper")) {
+			return true;
+		}
+		return false;
 	}
 
 	private boolean listContains(List<LivingEntity> entityList,
