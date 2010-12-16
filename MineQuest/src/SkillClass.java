@@ -645,25 +645,14 @@ public class SkillClass {
 	}
 
 	public void save() {
-		try {
-			sql_server.update("UPDATE " + type + " SET exp='" + exp + "', level='" + level + 
+		sql_server.update("UPDATE " + type + " SET exp='" + exp + "', level='" + level + 
 								"' WHERE name='" + name + "'");
-		} catch (SQLException e) {
-			System.out.println("Save failed for class " + type + " of player " + name);
-			e.printStackTrace();
-		}
 	}
 
 	public void update() {
 		ResultSet results;
 		
-		try {
-			results = sql_server.query("SELECT * from " + type + " WHERE name='" + name + "'");
-		} catch (SQLException e) {
-			System.out.println("Query failed for class " + type + " for " + name);
-			e.printStackTrace();
-			return;
-		}
+		results = sql_server.query("SELECT * from " + type + " WHERE name='" + name + "'");
 		
 		try {
 			results.next();

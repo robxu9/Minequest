@@ -4,19 +4,19 @@ import java.util.List;
 import java.util.Random;
 
 public class Quester {
-	private int exp;
-	private int level;
-	private int health;
-	private int max_health;
-	private mysql_interface sql_server;
-	private boolean enabled;
-	private String name;
 	private SkillClass classes[];
-	private int mana;
-	private int max_mana;
-	private int poison_timer;
 	private double distance;
-	long last_time = etc.getServer().getTime();
+	private boolean enabled;
+	private int exp;
+	private int health;
+	private long last_time = etc.getServer().getTime();
+	private int level;
+	private boolean loginFlag;
+	private long loginTime;
+	private int max_health;
+	private String name;
+	private int poison_timer;
+	private mysql_interface sql_server;
 	
 	public Quester(String name, int x, mysql_interface sql) {
 		this.name = name;
@@ -48,8 +48,6 @@ public class Quester {
 		if (defend == null) {
 			player.sendMessage("Not Live Entity");
 		}
-		
-		if (!enabled) return false;
 		
 		if (checkItemInHand(player)) return false;
 
@@ -231,14 +229,9 @@ public class Quester {
 			update_string = update_string + ", " + class_names[i];
 		}
 		update_string = update_string + "', '10', '10')";
-		try {
-			sql_server.update(update_string);
-		} catch (SQLException e) {
-			System.out.println("Failed to add player to database");
-			e.printStackTrace();
-			return;
-		}
-		
+
+		sql_server.update(update_string);
+			
 		try {
 			results = sql_server.query("SELECT * FROM abilities");
 			results.last();
@@ -252,14 +245,14 @@ public class Quester {
 		for (i = 0; i < class_names.length; i++) {
 			update_string = "INSERT INTO " + class_names[i] + "(name, exp, level, abil_list_id) VALUES('"
 								+ name + "', '0', '0', '" + (num + i) + "')";
-			try {
-				sql_server.update(update_string);
-				sql_server.update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
-			} catch (SQLException e) {
-				System.out.println("Unable to insert");
-				e.printStackTrace();
-			}
+
+			sql_server.update(update_string);
+			sql_server.update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
 		}
+	}
+	
+	public void curePoison() {
+		poison_timer = 0;
 	}
 	
 	public void defend(Player player, BaseEntity attacker, int amount) {
@@ -352,7 +345,7 @@ public class Quester {
 			classes[i].disableAbility(string);
 		}
 	}
-	
+
 	public void enable() {
 		enabled = true;
 		etc.getServer().getPlayer(name).sendMessage("MineQuest is now enabled for your character");
@@ -386,19 +379,19 @@ public class Quester {
 		
 		return null;
 	}
-
+	
 	public int getExp() {
 		return exp;
 	}
-	
+
 	public int getHealth() {
 		return health;
 	}
-
+	
 	public int getLevel() {
 		return level;
 	}
-	
+
 	private LivingEntity getLiveEnt(BaseEntity defender) {
 		/*List<LivingEntity> entity_list = etc.getServer().getLivingEntityList();
 		int i;
@@ -438,27 +431,29 @@ public class Quester {
 	public Player getPlayer() {
 		return etc.getServer().getPlayer(name);
 	}
-
+	
 	public boolean healthChange(Player player, int oldValue, int newValue) {
 		boolean flag = false;
-		if (newValue <= 0) {
-			flag = true;
-		}
 		System.out.println(oldValue + " " + newValue);
 		if (!enabled) return false;
-		
-		if (oldValue - newValue >= 20) {
-			health = -1;
-			return false;
-		}
 
-		if ((oldValue <= 0) && (newValue == 20)) {
-			health = max_health;
-		} else if ((oldValue > 20) || (oldValue < -30)) {
-			oldValue = 20;
-			health -= (oldValue - newValue);
+		if (loginFlag && (loggedIn() < 50)) {
+			loginFlag = false;
 		} else {
-			health -= (oldValue - newValue);
+			loginFlag = false;
+			/*if (oldValue - newValue >= 20) {
+				health = -1;
+				return false;
+			}*/
+	
+			if ((oldValue <= 0) && (newValue == 20)) {
+				health = max_health;
+			} else if ((oldValue > 20) || (oldValue < -30)) {
+				oldValue = 20;
+				health -= (oldValue - newValue);
+			} else {
+				health -= (oldValue - newValue);
+			}
 		}
 		
 		newValue = 20 * health / max_health;
@@ -467,19 +462,37 @@ public class Quester {
 			newValue++;
 		}
 		
+		if (newValue <= 0) {
+			Inventory inven = player.getInventory();
+			int i;
+			Item item;
+			
+			player.setHealth(-1);
+			
+			for (i = 0; i < 36; i++) {
+				item = inven.getItemFromSlot(i);
+				etc.getServer().dropItem(player.getLocation(), item.getItemId(), item.getAmount());
+				inven.removeItem(i);
+			}
+			inven.updateInventory();
+
+			System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
+			
+			return false;
+		}
+		
 		player.setHealth(newValue);
 
 		System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
-		if (flag) {
-			oldValue = newValue;
-			return true;
-		} else {
-			return false;
-		}
+		return true;
 	}
-	
+
 	public boolean isEnabled() {
 		return enabled;
+	}
+
+	public boolean isPoisoned() {
+		return (poison_timer > 0);
 	}
 
 	private void levelUp() {
@@ -501,6 +514,32 @@ public class Quester {
 		}
 	}
 
+	private long loggedIn() {
+		return etc.getServer().getTime() - loginTime;
+	}
+
+	public void move(Location from, Location to) {
+		double move, x, y, z;
+		if (poison_timer > 0) {
+			x = from.x - to.x;
+			y = from.y - to.y;
+			z = from.z - to.z;
+			move = Math.sqrt(x*x + y*y + z*z);
+			distance += move;
+		}
+		while ((distance > 5) && (poison_timer > 0)) {
+			distance -= 5;
+			poison_timer -= 1;
+			setHealth(getHealth() - 1);
+		}
+	}
+
+	public void parseExplosion(BaseEntity attacker, Player player, int amount) {
+		if (MineQuestListener.getSpecialList().contains((LivingEntity)attacker)) {
+			amount *= 2;
+		}
+	}
+
 	public void parseFire(PluginLoader.DamageType type, int amount) {
 		int i;
 		
@@ -510,6 +549,10 @@ public class Quester {
 				return;
 			}
 		}
+	}
+
+	public void poison() {
+		poison_timer += 10;
 	}
 
 	public boolean rightClick(Player player, Block blockClicked, Item item) {
@@ -528,23 +571,19 @@ public class Quester {
 	}
 
 	public void save() {
-		try {
 			int i;
 			
-			sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
-					+ health + "', maxhealth='" + max_health + "', mana='" + mana + "', maxmana='" + max_mana
-					+ "' WHERE name='" + name + "'");
-			for (i = 0; i < classes.length; i++) {
-				classes[i].save();
-			}
-		} catch (SQLException e) {
-			etc.getServer().getPlayer(name).sendMessage("Unable to save properly, please try again");
-			sql_server.reconnect();
-			System.out.println("Unable to save " + name + " to database");
+		if (sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
+				+ health + "', maxhealth='" + max_health + "', mana='" + 0 + "', maxmana='" + 0
+				+ "' WHERE name='" + name + "'") != 0) {
+			etc.getServer().getPlayer(name).sendMessage("May not have saved properly, please try again");
+		}
+		for (i = 0; i < classes.length; i++) {
+			classes[i].save();
 		}
 		enabled = false;
 	}
-
+	
 	public void setHealth(int i) {
 
 		/*int newValue;
@@ -594,8 +633,6 @@ public class Quester {
 			level = results.getInt("level");
 			health = results.getInt("health");
 			max_health = results.getInt("maxhealth");
-			mana = results.getInt("mana");
-			max_mana = results.getInt("maxmana");
 			enabled = true;
 			
 		} catch (SQLException e) {
@@ -609,40 +646,7 @@ public class Quester {
 			classes[i] = new SkillClass(split[i], name, sql_server);
 		}
 		enabled = true;
-		mana = 10000;
-	}
-
-	public void parseExplosion(BaseEntity attacker, Player player, int amount) {
-		if (MineQuestListener.getSpecialList().contains((LivingEntity)attacker)) {
-			amount *= 2;
-		}
-	}
-
-	public void poison() {
-		poison_timer += 10;
-	}
-	
-	public boolean isPoisoned() {
-		return (poison_timer > 0);
-	}
-
-	public void move(Location from, Location to) {
-		double move, x, y, z;
-		if (poison_timer > 0) {
-			x = from.x - to.x;
-			y = from.y - to.y;
-			z = from.z - to.z;
-			move = Math.sqrt(x*x + y*y + z*z);
-			distance += move;
-		}
-		while ((distance > 5) && (poison_timer > 0)) {
-			distance -= 5;
-			poison_timer -= 1;
-			setHealth(getHealth() - 1);
-		}
-	}
-
-	public void curePoison() {
-		poison_timer = 0;
+		loginFlag = true;
+		loginTime = etc.getServer().getTime();
 	}
 }

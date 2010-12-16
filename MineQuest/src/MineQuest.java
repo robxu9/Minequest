@@ -35,7 +35,7 @@ public class MineQuest extends Plugin {
                 PluginLoader.Hook.DAMAGE,
                 listener,
                 this,
-                PluginListener.Priority.MEDIUM);
+                PluginListener.Priority.HIGH);
         etc.getLoader().addListener(
                 PluginLoader.Hook.EQUIPMENT_CHANGE,
                 listener,
