@@ -38,10 +38,6 @@ public class MineQuestListener extends PluginListener {
 		return (avgLevel / 10);
 	}
 	
-	public static Quester getQuester(String name) {
-		return lookupQuester(name);
-	}
-	
 	static public void getQuesters() {
 		int num, i;
 		String names[];
@@ -68,11 +64,35 @@ public class MineQuestListener extends PluginListener {
 		}
 	}
 
+	public static SpecialMob getSpecial(LivingEntity defend) {
+		int i;
+		
+		for (i = 0; i < special_list.size(); i++) {
+			if (special_list.get(i).is(defend)) {
+				return special_list.get(i);
+			}
+		}
+		
+		return null;
+	}
+	
 	public static List<SpecialMob> getSpecialList() {
     	return special_list;
     }
 	
-	private static Quester lookupQuester(String name) {
+	public static boolean isSpecial(LivingEntity defend) {
+		int i;
+		
+		for (i = 0; i < special_list.size(); i++) {
+			if (special_list.get(i).is(defend)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public static Quester getQuester(String name) {
 		int i;
 		for (i = 0; i < questers.length; i++) {
 			if (questers[i].getName().equals(name)) {
@@ -83,15 +103,41 @@ public class MineQuestListener extends PluginListener {
 		return null;
 	}
 	
+	
+	
 	Random generator;
 	
 	@SuppressWarnings("unused")
 	private Logger log;
 	
-	
-	
 	private PropertiesFile prop;
 	
+	private boolean isMob(LivingEntity livingEntity) {
+		if (livingEntity.getName().contains("Zombie")) {
+			return true;
+		} else if (livingEntity.getName().contains("Skeleton")) {
+			return true;
+		} else if (livingEntity.getName().contains("Spider")) {
+			return true;
+		} else if (livingEntity.getName().contains("Creeper")) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean listContains(List<LivingEntity> entityList,
+			LivingEntity livingEntity) {
+		int i;
+		
+		for (i = 0; i < entityList.size(); i++) {
+			if (entityList.get(i).getId() == livingEntity.getId()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	public String listSpellComps(String string) {
 		
 		if (string.equalsIgnoreCase("PowerStrike")) {
@@ -136,33 +182,35 @@ public class MineQuestListener extends PluginListener {
 		
 		return "Unknown Ability";
 	}
-	
+
 	public void onArmSwing(Player player) {
-		if (!lookupQuester(player.getName()).isEnabled()) return;
-		lookupQuester(player.getName()).checkItemInHand(player);
-		lookupQuester(player.getName()).checkItemInHandAbil(player);
+		if (!getQuester(player.getName()).isEnabled()) return;
+		getQuester(player.getName()).checkItemInHand(player);
+		getQuester(player.getName()).checkItemInHandAbil(player);
 	}
 	
+	
+	
 	public boolean onBlockDestroy(Player player, Block block) {
-		if (!lookupQuester(player.getName()).isEnabled()) return false;
-		return lookupQuester(player.getName()).destroyBlock(player, block);
+		if (!getQuester(player.getName()).isEnabled()) return false;
+		return getQuester(player.getName()).destroyBlock(player, block);
 	}
 	
 	@Override
 	public boolean onBlockPlace(Player player, Block blockPlaced,
 			Block blockClicked, Item itemInHand) {
-		if (!lookupQuester(player.getName()).isEnabled()) return false;
-		return lookupQuester(player.getName()).rightClick(player, blockClicked, itemInHand);
+		if (!getQuester(player.getName()).isEnabled()) return false;
+		return getQuester(player.getName()).rightClick(player, blockClicked, itemInHand);
 	}
 
 	public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
-		if (!lookupQuester(player.getName()).isEnabled()) return;
-		lookupQuester(player.getName()).rightClick(player, blockClicked, item);
+		if (!getQuester(player.getName()).isEnabled()) return;
+		getQuester(player.getName()).rightClick(player, blockClicked, item);
 	}
-
+	
 	public boolean onCommand(Player player, String[] split) {
 		if (split[0].equals("/char")) {
-			Quester quester = lookupQuester(player.getName());
+			Quester quester = getQuester(player.getName());
 			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 			
 			return true;
@@ -183,13 +231,13 @@ public class MineQuestListener extends PluginListener {
 			player.sendMessage("    /spellcomp <ability name> - list the components required for an ability");
 			return true;
 		} else if (split[0].equals("/save")) {
-			lookupQuester(player.getName()).save();
+			getQuester(player.getName()).save();
 			return true;
 		} else if (split[0].equals("/load")) {
-			lookupQuester(player.getName()).update();
+			getQuester(player.getName()).update();
 			return true;
 		} else if (split[0].equals("/quest")) {
-			lookupQuester(player.getName()).enable();
+			getQuester(player.getName()).enable();
 			return true;
 		} else if (split[0].equals("/zombie")) {
 			Mob mymob = new Mob("Zombie", new Location(player.getX() + 3, player.getY(), player.getZ()));
@@ -197,30 +245,30 @@ public class MineQuestListener extends PluginListener {
 			return true;
 		} else if (split[0].equals("/abillist")) {
 			if (split.length < 2) {
-				lookupQuester(player.getName()).listAbil(player);
+				getQuester(player.getName()).listAbil(player);
 			} else {
-				lookupQuester(player.getName()).getClass(split[1]);
+				getQuester(player.getName()).getClass(split[1]);
 			}
 			return true;
 		} else if (split[0].equals("/unbind")) {
-			lookupQuester(player.getName()).unBind(player.getItemInHand());
+			getQuester(player.getName()).unBind(player.getItemInHand());
 			return true;
 		} else if (split[0].equals("/enableabil")) {
 			if (split.length < 2) return false;
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
-			lookupQuester(player.getName()).enableabil(abil);
+			getQuester(player.getName()).enableabil(abil);
 			return true;
 		} else if (split[0].equals("/disableabil")) {
 			if (split.length < 2) return false;
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
-			lookupQuester(player.getName()).disableabil(abil);
+			getQuester(player.getName()).disableabil(abil);
 			return true;
 		} else if (split[0].equals("/noquest")) {
-			lookupQuester(player.getName()).disable();
+			getQuester(player.getName()).disable();
 			return true;
 		} else if (split[0].equals("/bind")) {
 			if (split.length < 3) {
@@ -230,17 +278,17 @@ public class MineQuestListener extends PluginListener {
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length - 1; i++) abil = abil + " " + split[i];
-			lookupQuester(player.getName()).bind(player, abil, split[split.length - 1]);
+			getQuester(player.getName()).bind(player, abil, split[split.length - 1]);
 			return true;
 		} else if (split[0].equals("/class")) {
 			if (split.length < 2) {
 				player.sendMessage("Usage: /class <class_name>");
 				return true;
 			}
-			lookupQuester(player.getName()).getClass(split[1]).display(player);
+			getQuester(player.getName()).getClass(split[1]).display(player);
 			return true;
 		} else if (split[0].equals("/health")) {
-			player.sendMessage("Your health is " + lookupQuester(player.getName()).getHealth() + "/" + lookupQuester(player.getName()).getMaxHealth());
+			player.sendMessage("Your health is " + getQuester(player.getName()).getHealth() + "/" + getQuester(player.getName()).getMaxHealth());
 			return true;
 		} else if (split[0].equals("/spellcomp")) {
 			if (split.length < 2) {
@@ -279,74 +327,75 @@ public class MineQuestListener extends PluginListener {
 		}
 		return false;
 	}
-	
-	
-	
+
 	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
 			BaseEntity defender, int amount) {
 		int attack = 1;
 		int defend = 0;
 		
+		
 
-		if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && defender.isPlayer()) {
+		if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && (defender != null) && defender.isPlayer()) {
 			Player player = defender.getPlayer();
-			if (!lookupQuester(player.getName()).isEnabled()) return false;
-			lookupQuester(player.getName()).parseFire(type, amount);
-		} else if (type == PluginLoader.DamageType.CREEPER_EXPLOSION) {
+			if (!getQuester(player.getName()).isEnabled()) return false;
+			getQuester(player.getName()).parseFire(type, amount);
+		} else if ((type == PluginLoader.DamageType.CREEPER_EXPLOSION) && (defender != null)) {
 			Player player = defender.getPlayer();
-			if (!lookupQuester(player.getName()).isEnabled()) return false;
-			lookupQuester(player.getName()).parseExplosion(attacker, player, amount);
-		}
-		if (type != PluginLoader.DamageType.ENTITY) {
-			return false;
-		}
-		
-		if ((attacker.getPlayer() == null) && (defender.getPlayer() != null)) {
-			attack = 0;
-			defend = 1;
-		}
-		
-		if (attack == 1) {
-			Player player = attacker.getPlayer();
-			if (!lookupQuester(player.getName()).isEnabled()) return false;
-			return lookupQuester(player.getName()).attack(player, defender, amount);
-		}
+			if (!getQuester(player.getName()).isEnabled()) return false;
+			getQuester(player.getName()).parseExplosion(attacker, player, amount);
+		} else if (type == PluginLoader.DamageType.ENTITY) {
+			if ((attacker.getPlayer() == null) && (defender.getPlayer() != null)) {
+				attack = 0;
+				defend = 1;
+			}
+			
+			if (attack == 1) {
+				Player player = attacker.getPlayer();
+				if (!getQuester(player.getName()).isEnabled()) return false;
+				getQuester(player.getName()).attack(player, defender, amount);
+				return false;
+			}
 
-		if (defend == 1) {
-			Player player = defender.getPlayer();
-			if (!lookupQuester(player.getName()).isEnabled()) return false;
-			lookupQuester(player.getName()).defend(player, attacker, amount);
-			return false;
+			if (defend == 1) {
+				Player player = defender.getPlayer();
+				if (!getQuester(player.getName()).isEnabled()) return false;
+				getQuester(player.getName()).defend(player, attacker, amount);
+			}
 		}
 		
-		return false;
+		if ((defender != null) && defender.isPlayer()) {
+			Player player = defender.getPlayer();
+			return getQuester(player.getName()).healthChange(player, amount, 0);
+		}
+			
+		return true;
 	}
-	
+
 	public void onDisconnect(Player player) {
-		lookupQuester(player.getName()).save();
-		player.setHealth(20);
+		getQuester(player.getName()).save();
 	}
 
 	public boolean onEquipmentChange(Player player) {
-		if (!lookupQuester(player.getName()).isEnabled()) return false;
-		lookupQuester(player.getName()).checkEquip(player);
+		if (!getQuester(player.getName()).isEnabled()) return false;
+		getQuester(player.getName()).checkEquip(player);
 		return super.onEquipmentChange(player);
 	}
-	
+
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
-		if (!lookupQuester(player.getName()).isEnabled()) return false;
-		if (lookupQuester(player.getName()).isEnabled()) {
-			return lookupQuester(player.getName()).healthChange(player, oldValue, newValue);
+		if (!getQuester(player.getName()).isEnabled()) return false;
+		if (getQuester(player.getName()).isEnabled()) {
+			if (newValue == 20) {
+				return getQuester(player.getName()).healthChange(player, oldValue, newValue);
+			}
 		}
 		return false;
 	}
-
 	public void onLogin(Player player) {
 		Quester new_questers[];
 		int i;
 		
 		
-		if (lookupQuester(player.getName()) == null) {
+		if (getQuester(player.getName()) == null) {
 			
 			new_questers = new Quester[questers.length + 1];
 			for (i = 0; i < questers.length; i++) {
@@ -355,16 +404,19 @@ public class MineQuestListener extends PluginListener {
 			new_questers[questers.length] = new Quester(player.getName(), 0, sql_server);
 			questers = new_questers;
 		} else {
-			lookupQuester(player.getName()).update();
+			getQuester(player.getName()).update();
 		}
 	}
-
+	
 	public void onPlayerMove(Player player, Location from, Location to) {
 		List<LivingEntity> list = etc.getServer().getLivingEntityList();
 		List<LivingEntity> remove_list = new ArrayList<LivingEntity>();
 		int i;
+		Quester quester = getQuester(player.getName());
 		
-		getQuester(player.getName()).move(from, to);
+		if (quester != null) {
+			quester.move(from, to);
+		}
 		
 		for (i = 0; i < list.size(); i++) {
 			if (!listContains(entity_list, list.get(i))) {
@@ -386,32 +438,7 @@ public class MineQuestListener extends PluginListener {
 			special_list.remove(remove_list.get(i));
 		}
 	}
-
-	private boolean isMob(LivingEntity livingEntity) {
-		if (livingEntity.getName().contains("Zombie")) {
-			return true;
-		} else if (livingEntity.getName().contains("Skeleton")) {
-			return true;
-		} else if (livingEntity.getName().contains("Spider")) {
-			return true;
-		} else if (livingEntity.getName().contains("Creeper")) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean listContains(List<LivingEntity> entityList,
-			LivingEntity livingEntity) {
-		int i;
-		
-		for (i = 0; i < entityList.size(); i++) {
-			if (entityList.get(i).getId() == livingEntity.getId()) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
+	
 	public void setup() {
 		String url, port, db, user, pass;
 		
@@ -424,35 +451,11 @@ public class MineQuestListener extends PluginListener {
 		user = prop.getString("user", "root");
 		pass = prop.getString("pass", "root");
 		sql_server = new mysql_interface();
-		sql_server.setup(url, port, db, user, pass);
+		sql_server.setup(url, port, db, user, pass, prop.getInt("silent", 0));
 		
 		getQuesters();
 		generator = new Random();
 		entity_list = new ArrayList<LivingEntity>();
 		special_list = new ArrayList<SpecialMob>();
-	}
-	
-	public static boolean isSpecial(LivingEntity defend) {
-		int i;
-		
-		for (i = 0; i < special_list.size(); i++) {
-			if (special_list.get(i).is(defend)) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	public static SpecialMob getSpecial(LivingEntity defend) {
-		int i;
-		
-		for (i = 0; i < special_list.size(); i++) {
-			if (special_list.get(i).is(defend)) {
-				return special_list.get(i);
-			}
-		}
-		
-		return null;
 	}
 }
