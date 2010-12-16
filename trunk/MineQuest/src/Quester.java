@@ -1,3 +1,21 @@
+/*
+ * MineQuest - Hey0 Plugin for adding RPG characteristics to minecraft
+ * Copyright (C) 2010  Jason Monk
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -469,22 +487,37 @@ public class Quester {
 			
 			player.setHealth(-1);
 			
-			for (i = 0; i < 36; i++) {
+			/*for (i = 0; i < 36; i++) {
 				item = inven.getItemFromSlot(i);
 				etc.getServer().dropItem(player.getLocation(), item.getItemId(), item.getAmount());
 				inven.removeItem(i);
 			}
 			inven.updateInventory();
+			
+			inven = player.getCraftingTable();
+			for (i = 0; i < 4; i++) {
+				item = inven.getItemFromSlot(i);
+				etc.getServer().dropItem(player.getLocation(), item.getItemId(), item.getAmount());
+				inven.removeItem(i);
+			}
+			inven.updateInventory();
+			
+			inven = player.getEquipment();
+			for (i = 0; i < 4; i++) {
+				item = inven.getItemFromSlot(i);
+				etc.getServer().dropItem(player.getLocation(), item.getItemId(), item.getAmount());
+				inven.removeItem(i);
+			}
+			inven.updateInventory();*/
 
 			System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
-			
-			return false;
+			return true;
 		}
 		
 		player.setHealth(newValue);
 
 		System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
-		return true;
+		return false;
 	}
 
 	public boolean isEnabled() {
@@ -575,7 +608,7 @@ public class Quester {
 			
 		if (sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
 				+ health + "', maxhealth='" + max_health + "', mana='" + 0 + "', maxmana='" + 0
-				+ "' WHERE name='" + name + "'") != 0) {
+				+ "' WHERE name='" + name + "'") == -1) {
 			etc.getServer().getPlayer(name).sendMessage("May not have saved properly, please try again");
 		}
 		for (i = 0; i < classes.length; i++) {
@@ -648,5 +681,18 @@ public class Quester {
 		enabled = true;
 		loginFlag = true;
 		loginTime = etc.getServer().getTime();
+	}
+
+	public void updateHealth(Player player) {
+		int newValue;
+		
+		newValue = 20 * health / max_health;
+		
+		if ((newValue == 0) && (health > 0)) {
+			newValue++;
+		}
+
+		
+		player.setHealth(newValue);
 	}
 }

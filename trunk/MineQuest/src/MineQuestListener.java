@@ -1,3 +1,21 @@
+/*
+ * MineQuest - Hey0 Plugin for adding RPG characteristics to minecraft
+ * Copyright (C) 2010  Jason Monk
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -332,6 +350,7 @@ public class MineQuestListener extends PluginListener {
 			BaseEntity defender, int amount) {
 		int attack = 1;
 		int defend = 0;
+		boolean flag = false;
 		
 		
 
@@ -353,22 +372,33 @@ public class MineQuestListener extends PluginListener {
 				Player player = attacker.getPlayer();
 				if (!getQuester(player.getName()).isEnabled()) return false;
 				getQuester(player.getName()).attack(player, defender, amount);
-				return false;
+				return true;
 			}
 
 			if (defend == 1) {
 				Player player = defender.getPlayer();
 				if (!getQuester(player.getName()).isEnabled()) return false;
+				if ((player.getHealth() - 1) <= 0) {
+					flag = true;
+				}
+				System.out.println("Amount is " + amount);
 				getQuester(player.getName()).defend(player, attacker, amount);
+				System.out.println("Amount is " + amount);
 			}
 		}
 		
 		if ((defender != null) && defender.isPlayer()) {
 			Player player = defender.getPlayer();
-			return getQuester(player.getName()).healthChange(player, amount, 0);
+			
+			System.out.println("Player Health " + player.getName());
+			if (getQuester(player.getName()).healthChange(player, amount, 0)) {
+				amount = 50;
+			} else {
+				amount = 0;
+			}
 		}
 			
-		return true;
+		return flag;
 	}
 
 	public void onDisconnect(Player player) {
@@ -384,9 +414,10 @@ public class MineQuestListener extends PluginListener {
 	public boolean onHealthChange(Player player, int oldValue, int newValue) {
 		if (!getQuester(player.getName()).isEnabled()) return false;
 		if (getQuester(player.getName()).isEnabled()) {
-			if (newValue == 20) {
+			if (newValue > oldValue) {
 				return getQuester(player.getName()).healthChange(player, oldValue, newValue);
 			}
+			getQuester(player.getName()).updateHealth(player);
 		}
 		return false;
 	}
