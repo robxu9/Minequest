@@ -346,59 +346,44 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 
-	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
-			BaseEntity defender, int amount) {
-		int attack = 1;
-		int defend = 0;
-		boolean flag = false;
-		
-		
-
-		if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && (defender != null) && defender.isPlayer()) {
-			Player player = defender.getPlayer();
-			if (!getQuester(player.getName()).isEnabled()) return false;
-			getQuester(player.getName()).parseFire(type, amount);
-		} else if ((type == PluginLoader.DamageType.CREEPER_EXPLOSION) && (defender != null)) {
-			Player player = defender.getPlayer();
-			if (!getQuester(player.getName()).isEnabled()) return false;
-			getQuester(player.getName()).parseExplosion(attacker, player, amount);
-		} else if (type == PluginLoader.DamageType.ENTITY) {
-			if ((attacker.getPlayer() == null) && (defender.getPlayer() != null)) {
-				attack = 0;
-				defend = 1;
-			}
-			
-			if (attack == 1) {
-				Player player = attacker.getPlayer();
-				if (!getQuester(player.getName()).isEnabled()) return false;
-				getQuester(player.getName()).attack(player, defender, amount);
-				return true;
-			}
-
-			if (defend == 1) {
-				Player player = defender.getPlayer();
-				if (!getQuester(player.getName()).isEnabled()) return false;
-				if ((player.getHealth() - 1) <= 0) {
-					flag = true;
-				}
-				System.out.println("Amount is " + amount);
-				getQuester(player.getName()).defend(player, attacker, amount);
-				System.out.println("Amount is " + amount);
-			}
-		}
-		
-		if ((defender != null) && defender.isPlayer()) {
-			Player player = defender.getPlayer();
-			
-			System.out.println("Player Health " + player.getName());
-			if (getQuester(player.getName()).healthChange(player, amount, 0)) {
-				amount = 50;
-			} else {
-				amount = 0;
-			}
-		}
-			
-		return flag;
+    public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker,
+            BaseEntity defender, int amount) {
+	    int attack = 1;
+	    int defend = 0;
+	    
+	
+	    if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && defender.isPlayer()) {
+	            Player player = defender.getPlayer();
+	            if (!getQuester(player.getName()).isEnabled()) return false;
+	            getQuester(player.getName()).parseFire(type, amount);
+	    } else if (type == PluginLoader.DamageType.CREEPER_EXPLOSION) {
+	            Player player = defender.getPlayer();
+	            if (!getQuester(player.getName()).isEnabled()) return false;
+	            getQuester(player.getName()).parseExplosion(attacker, player, amount);
+	    }
+	    if (type != PluginLoader.DamageType.ENTITY) {
+	            return false;
+	    }
+	    
+	    if ((attacker.getPlayer() == null) && (defender.getPlayer() != null)) {
+	            attack = 0;
+	            defend = 1;
+	    }
+	    
+	    if (attack == 1) {
+	            Player player = attacker.getPlayer();
+	            if (!getQuester(player.getName()).isEnabled()) return false;
+	            return getQuester(player.getName()).attack(player, defender, amount);
+	    }
+	
+	    if (defend == 1) {
+	            Player player = defender.getPlayer();
+	            if (!getQuester(player.getName()).isEnabled()) return false;
+	            getQuester(player.getName()).defend(player, attacker, amount);
+	            return false;
+	    }
+	    
+	    return false;
 	}
 
 	public void onDisconnect(Player player) {
@@ -411,16 +396,14 @@ public class MineQuestListener extends PluginListener {
 		return super.onEquipmentChange(player);
 	}
 
-	public boolean onHealthChange(Player player, int oldValue, int newValue) {
-		if (!getQuester(player.getName()).isEnabled()) return false;
-		if (getQuester(player.getName()).isEnabled()) {
-			if (newValue > oldValue) {
-				return getQuester(player.getName()).healthChange(player, oldValue, newValue);
-			}
-			getQuester(player.getName()).updateHealth(player);
-		}
-		return false;
-	}
+    public boolean onHealthChange(Player player, int oldValue, int newValue) {
+        if (!getQuester(player.getName()).isEnabled()) return false;
+        if (getQuester(player.getName()).isEnabled()) {
+                return getQuester(player.getName()).healthChange(player, oldValue, newValue);
+        }
+        return false;
+    }
+    
 	public void onLogin(Player player) {
 		Quester new_questers[];
 		int i;
