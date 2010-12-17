@@ -450,75 +450,45 @@ public class Quester {
 		return etc.getServer().getPlayer(name);
 	}
 	
-	public boolean healthChange(Player player, int oldValue, int newValue) {
-		boolean flag = false;
-		System.out.println(oldValue + " " + newValue);
-		if (!enabled) return false;
+    public boolean healthChange(Player player, int oldValue, int newValue) {
+        boolean flag = false;
+        if (newValue <= 0) {
+                flag = true;
+        }
+        System.out.println(oldValue + " " + newValue);
+        if (!enabled) return false;
+        
+        if (oldValue - newValue >= 20) {
+                health = -1;
+                return false;
+        }
 
-		if (loginFlag && (loggedIn() < 50)) {
-			loginFlag = false;
-		} else {
-			loginFlag = false;
-			/*if (oldValue - newValue >= 20) {
-				health = -1;
-				return false;
-			}*/
-	
-			if ((oldValue <= 0) && (newValue == 20)) {
-				health = max_health;
-			} else if ((oldValue > 20) || (oldValue < -30)) {
-				oldValue = 20;
-				health -= (oldValue - newValue);
-			} else {
-				health -= (oldValue - newValue);
-			}
-		}
-		
-		newValue = 20 * health / max_health;
-		
-		if ((newValue == 0) && (health > 0)) {
-			newValue++;
-		}
-		
-		if (newValue <= 0) {
-			Inventory inven = player.getInventory();
-			int i;
-			Item item;
-			
-			player.setHealth(-1);
-			
-			/*for (i = 0; i < 36; i++) {
-				item = inven.getItemFromSlot(i);
-				etc.getServer().dropItem(player.getLocation(), item.getItemId(), item.getAmount());
-				inven.removeItem(i);
-			}
-			inven.updateInventory();
-			
-			inven = player.getCraftingTable();
-			for (i = 0; i < 4; i++) {
-				item = inven.getItemFromSlot(i);
-				etc.getServer().dropItem(player.getLocation(), item.getItemId(), item.getAmount());
-				inven.removeItem(i);
-			}
-			inven.updateInventory();
-			
-			inven = player.getEquipment();
-			for (i = 0; i < 4; i++) {
-				item = inven.getItemFromSlot(i);
-				etc.getServer().dropItem(player.getLocation(), item.getItemId(), item.getAmount());
-				inven.removeItem(i);
-			}
-			inven.updateInventory();*/
+        if ((oldValue <= 0) && (newValue == 20)) {
+                health = max_health;
+        } else if ((oldValue > 20) || (oldValue < -30)) {
+                oldValue = 20;
+                health -= (oldValue - newValue);
+        } else {
+                health -= (oldValue - newValue);
+        }
+        
+        newValue = 20 * health / max_health;
+        
+        if ((newValue == 0) && (health > 0)) {
+                newValue++;
+        }
+        
+        player.setHealth(newValue);
 
-			System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
-			return true;
-		}
-		
-		player.setHealth(newValue);
+        System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
+        if (flag) {
+                oldValue = newValue;
+                return true;
+        } else {
+                return false;
+        }
+    }
 
-		System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
-		return false;
-	}
 
 	public boolean isEnabled() {
 		return enabled;

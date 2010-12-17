@@ -233,7 +233,7 @@ public class SkillClass {
 		int item_ids[];
 		int i;
 		
-		if (level > 20) {
+		if (level >= 20) {
 			return;
 		}
 		
