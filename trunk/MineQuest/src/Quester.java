@@ -474,6 +474,9 @@ public class Quester {
         if ((newValue == 0) && (health > 0)) {
                 newValue++;
         }
+        if (health > max_health) {
+        	health = max_health;
+        }
         
         player.setHealth(newValue);
 
