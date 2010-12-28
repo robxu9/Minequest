@@ -54,11 +54,12 @@ public class MineQuest extends Plugin {
                 listener,
                 this,
                 PluginListener.Priority.HIGH);
+        /*
         etc.getLoader().addListener(
                 PluginLoader.Hook.EQUIPMENT_CHANGE,
                 listener,
                 this,
-                PluginListener.Priority.MEDIUM);
+                PluginListener.Priority.MEDIUM);*/
         etc.getLoader().addListener(
                 PluginLoader.Hook.ARM_SWING,
                 listener,

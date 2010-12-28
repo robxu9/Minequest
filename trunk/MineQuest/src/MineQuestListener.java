@@ -427,11 +427,13 @@ public class MineQuestListener extends PluginListener {
 		List<LivingEntity> remove_list = new ArrayList<LivingEntity>();
 		int i;
 		Quester quester = getQuester(player.getName());
+		if (!getQuester(player.getName()).isEnabled()) return;
+		getQuester(player.getName()).checkEquip(player);
 		
 		if (quester != null) {
 			quester.move(from, to);
 		}
-		
+		/*
 		for (i = 0; i < list.size(); i++) {
 			if (!listContains(entity_list, list.get(i))) {
 				entity_list.add(list.get(i));
@@ -450,7 +452,7 @@ public class MineQuestListener extends PluginListener {
 		}
 		for (i = 0; i < remove_list.size(); i++) {
 			special_list.remove(remove_list.get(i));
-		}
+		}*/
 	}
 	
 	public void setup() {

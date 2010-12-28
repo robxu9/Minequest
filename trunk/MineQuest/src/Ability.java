@@ -207,7 +207,6 @@ public class Ability {
 		for (i = 0; i < cost.size(); i++) {
 			player.giveItem(cost.get(i));
 		}
-		player.getInventory().updateInventory();
 	}
 
 	public boolean isBound(int id) {
@@ -530,7 +529,6 @@ public class Ability {
 						
 						player.giveItem(new Item(325, 1));
 						player.giveItem(new Item(325, 1));
-						player.getInventory().updateInventory();
 						
 						while (rot < 0) rot += 360;
 						
@@ -576,7 +574,6 @@ public class Ability {
 						}
 					} else if (name.equals("Heal")) {
 						player.giveItem(new Item(325, 1));
-						player.getInventory().updateInventory();
 						if (quester.getHealth() < quester.getMaxHealth()) {
 							quester.setHealth(player.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 						} else {
@@ -638,7 +635,6 @@ public class Ability {
 							Quester other = MineQuestListener.getQuester(entity.getName());
 							if (other != null) {
 								player.giveItem(new Item(325, 1));
-								player.getInventory().updateInventory();
 								if (other.getHealth() < other.getMaxHealth()) {
 									other.setHealth(other.getPlayer().getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 								} else {
