@@ -236,7 +236,7 @@ public class SkillClass {
 		if (level >= 20) {
 			return;
 		}
-		
+		/*
 		item_ids = getClassArmorIds();
 		if (item_ids == null) {
 			return;
@@ -249,11 +249,9 @@ public class SkillClass {
 			if (equip.hasItem(item_ids[i], 1, 10000)) {
 				equip.removeItem(new Item(item_ids[i], 1));
 				player.giveItemDrop(item_ids[i], 1);
-				equip.updateInventory();
-				inven.updateInventory();
 				player.sendMessage("You are not high enough level to use that armor");
 			}
-		}
+		}*/
 		
 		return;
 	}
@@ -520,9 +518,11 @@ public class SkillClass {
 	}
 
 	private boolean isWearing(Player player, int i) {
+		/*
 		Inventory equip = player.getEquipment();
 		
-		return equip.hasItem(i, 1, 10000);
+		return equip.hasItem(i, 1, 10000);*/
+		return false;
 	}
 
 	public boolean leftClick(Player player, Block block, int itemInHand,

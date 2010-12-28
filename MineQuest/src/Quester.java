@@ -169,18 +169,16 @@ public class Quester {
 				while (i-- > 0) {
 					inven.addItem(list.get(i));
 				}
-				inven.updateInventory();
 				return false;
 			}
 		}
-		inven.updateInventory();
 		return true;
 	}
 	
 	public void checkEquip(Player player) {
 		if (!enabled) return;
 		
-		Inventory equip = player.getEquipment();
+		Inventory equip = player.getInventory();//getEquipment();
 		Inventory inven = player.getInventory();
 		
 		int i;
@@ -200,7 +198,6 @@ public class Quester {
 				if (!classes[i].canUse(player.getItemInHand())) {
 					int id = player.getItemInHand();
 					player.getInventory().removeItem(new Item(id, 1));
-					player.getInventory().updateInventory();
 					player.giveItemDrop(new Item(id, 1));
 					player.sendMessage("You are not high enough level to use that weapon");
 					return true;
