@@ -22,7 +22,7 @@ public class MineQuest extends Plugin {
     static final MineQuestListener listener = new MineQuestListener();
     private Logger log;
     private String name = "MineQuest";
-    private String version = "0.10";
+    private String version = "0.11d";
 
     public void enable() {
     }

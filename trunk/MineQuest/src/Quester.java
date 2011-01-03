@@ -35,6 +35,7 @@ public class Quester {
 	private String name;
 	private int poison_timer;
 	private mysql_interface sql_server;
+	private Item give_item;
 	
 	public Quester(String name, int x, mysql_interface sql) {
 		this.name = name;
@@ -43,6 +44,7 @@ public class Quester {
 		update();
 		distance = 0;
 		enabled = false;
+		give_item = null;
 	}
 	
 	public Quester(String name, mysql_interface sql) {
@@ -50,6 +52,7 @@ public class Quester {
 		this.name = name;
 		update();
 		enabled = false;
+		give_item = null;
 	}
 	
 	public void addHealth(int addition) {
@@ -275,6 +278,7 @@ public class Quester {
 		if (levelAdj == 0) {
 			levelAdj = 1;
 		}
+		
 		amount *= levelAdj * 3;
 		if (MineQuestListener.isSpecial((LivingEntity)attacker)) {
 			amount = MineQuestListener.getSpecial((LivingEntity)attacker).attack(this, player, amount);
@@ -448,16 +452,21 @@ public class Quester {
 	}
 	
     public boolean healthChange(Player player, int oldValue, int newValue) {
-        boolean flag = false;
-        if (newValue <= 0) {
-                flag = true;
-        }
+//        boolean flag = false;
+//        if (newValue <= 0) {
+//                flag = true;
+//        }
         System.out.println(oldValue + " " + newValue);
         if (!enabled) return false;
         
+        if (loginFlag) {
+        	loginFlag = false;
+        	return false;
+        }
+        
         if (oldValue - newValue >= 20) {
-                health = -1;
-                return false;
+//                health = -1;
+//                return false;
         }
 
         if ((oldValue <= 0) && (newValue == 20)) {
@@ -472,7 +481,7 @@ public class Quester {
         newValue = 20 * health / max_health;
         
         if ((newValue == 0) && (health > 0)) {
-                newValue++;
+        	newValue++;
         }
         if (health > max_health) {
         	health = max_health;
@@ -481,12 +490,8 @@ public class Quester {
         player.setHealth(newValue);
 
         System.out.println("Health is " + health + "/" + max_health + " for " + name + " ");
-        if (flag) {
-                oldValue = newValue;
-                return true;
-        } else {
-                return false;
-        }
+
+        return false;
     }
 
 
@@ -523,6 +528,12 @@ public class Quester {
 
 	public void move(Location from, Location to) {
 		double move, x, y, z;
+		
+		if (give_item != null) {
+			etc.getServer().getPlayer(name).giveItem(give_item);
+			give_item = null;
+		}
+		
 		if (poison_timer > 0) {
 			x = from.x - to.x;
 			y = from.y - to.y;

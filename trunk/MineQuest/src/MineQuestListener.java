@@ -130,6 +130,7 @@ public class MineQuestListener extends PluginListener {
 	
 	private PropertiesFile prop;
 	
+	@SuppressWarnings("unused")
 	private boolean isMob(LivingEntity livingEntity) {
 		if (livingEntity.getName().contains("Zombie")) {
 			return true;
@@ -143,6 +144,7 @@ public class MineQuestListener extends PluginListener {
 		return false;
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean listContains(List<LivingEntity> entityList,
 			LivingEntity livingEntity) {
 		int i;
@@ -353,16 +355,16 @@ public class MineQuestListener extends PluginListener {
 	    
 	
 	    if (((type == PluginLoader.DamageType.FIRE) || (type == PluginLoader.DamageType.FIRE_TICK)) && defender.isPlayer()) {
-	            Player player = defender.getPlayer();
-	            if (!getQuester(player.getName()).isEnabled()) return false;
-	            getQuester(player.getName()).parseFire(type, amount);
+            Player player = defender.getPlayer();
+            if (!getQuester(player.getName()).isEnabled()) return false;
+            getQuester(player.getName()).parseFire(type, amount);
 	    } else if (type == PluginLoader.DamageType.CREEPER_EXPLOSION) {
-	            Player player = defender.getPlayer();
-	            if (!getQuester(player.getName()).isEnabled()) return false;
-	            getQuester(player.getName()).parseExplosion(attacker, player, amount);
+			Player player = defender.getPlayer();
+			if (!getQuester(player.getName()).isEnabled()) return false;
+			getQuester(player.getName()).parseExplosion(attacker, player, amount);
 	    }
 	    if (type != PluginLoader.DamageType.ENTITY) {
-	            return false;
+	        return false;
 	    }
 	    
 	    if ((attacker.getPlayer() == null) && (defender.getPlayer() != null)) {
@@ -380,7 +382,6 @@ public class MineQuestListener extends PluginListener {
 	            Player player = defender.getPlayer();
 	            if (!getQuester(player.getName()).isEnabled()) return false;
 	            getQuester(player.getName()).defend(player, attacker, amount);
-	            return false;
 	    }
 	    
 	    return false;
@@ -397,11 +398,7 @@ public class MineQuestListener extends PluginListener {
 	}
 
     public boolean onHealthChange(Player player, int oldValue, int newValue) {
-        if (!getQuester(player.getName()).isEnabled()) return false;
-        if (getQuester(player.getName()).isEnabled()) {
-                return getQuester(player.getName()).healthChange(player, oldValue, newValue);
-        }
-        return false;
+        return getQuester(player.getName()).healthChange(player, oldValue, newValue);
     }
     
 	public void onLogin(Player player) {
