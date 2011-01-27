@@ -1,6 +1,8 @@
 
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class StoreBlock {
 	private int price;
@@ -84,13 +86,11 @@ public class StoreBlock {
 		lefts = quantity % 64;
 		try {
 			while (multis-- > 0) {
-				//TODO Item implementation
-				//player.giveItem(new Item(id, 64));
+				player.getInventory().addItem(new ItemStack(id, 64));
 			}
 			if (lefts != 0) {
-				System.out.println("Giviing " + lefts + " of " + id);
-				//TODO Item implementation
-				//player.giveItem(new Item(id, lefts));
+				//System.out.println("Giviing " + lefts + " of " + id);
+				player.getInventory().addItem(new ItemStack(id, lefts));
 			}
 		} catch (Exception e) {
 			System.out.println("Strange problem " + e);
@@ -151,34 +151,35 @@ public class StoreBlock {
 	}
 	
 	private boolean playerRemove(Player player, int quantity) {
-		// TODO: write this function - bukkit needs inventory first
-		/* old way!!
-		Inventory inventory = player.getInventory();
-		int multis = quantity / 64;
-		int lefts = quantity % 64;
+		// TODO: test this function - bukkit has inventory now
+		/* old way!!*/
+		PlayerInventory inventory = player.getInventory();
+		int mod = 1;
+		int multis = quantity / mod;
+		int lefts = quantity % mod;
 
 		
 		while (multis-- > 0) {
-			if (inventory.hasItem(id, 64, 10000)) {
-				inventory.removeItem(new Item(id, 64));
+			if (inventory.contains(id)) {
+				inventory.removeItem(new ItemStack(id, mod));
 			} else {
 				multis++;
-				while (multis++ < (quantity / 64)) {
-					player.giveItem(new Item(id, 64));
+				while (multis++ < (quantity / mod)) {
+					inventory.addItem(new ItemStack(id, mod));
 				}
 				return false;
 			}
 		}
 		if (lefts > 0) {
-			if (inventory.hasItem(id, lefts, 10000)) {
-				inventory.removeItem(new Item(id, lefts));
+			if (inventory.contains(id)) {
+				inventory.removeItem(new ItemStack(id, lefts));
 			} else {
-				for (multis = 64; multis < quantity; multis += 64) {
-					player.giveItem(new Item(id, 64));
+				for (multis = 64; multis < quantity; multis += mod) {
+					inventory.addItem(new ItemStack(id, mod));
 				}
 				return false;
 			}
-		}*/
+		}
 		
 		return true;
 	}

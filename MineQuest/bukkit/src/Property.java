@@ -13,6 +13,7 @@ public class Property {
 	private int height, y;
 	private Quester owner;
 	private List<Quester> editors;
+	private long price;
 	
 	public Property(Quester owner, Location start, Location end, boolean height) {
 		if (start.getX() < end.getX()) {
@@ -83,6 +84,10 @@ public class Property {
 		return owner;
 	}
 	
+	public void setOwner(Quester quester) {
+		owner = quester;
+	}
+	
 	public boolean canEdit(Quester quester) {
 		int i;
 		
@@ -132,23 +137,23 @@ public class Property {
 		return super.equals(obj);
 	}
 
-	private int getY() {
+	int getY() {
 		return y;
 	}
 
-	private int getMaxZ() {
+	int getMaxZ() {
 		return max_z;
 	}
 
-	private int getZ() {
+	int getZ() {
 		return z;
 	}
 
-	private int getMaxX() {
+	int getMaxX() {
 		return max_x;
 	}
 
-	private int getX() {
+	int getX() {
 		return x;
 	}
 
@@ -162,5 +167,9 @@ public class Property {
 
 	public int getCenterZ() {
 		return (z + max_z) / 2;
+	}
+
+	public void setPrice(long price) {
+		this.price = price;
 	}
 }
