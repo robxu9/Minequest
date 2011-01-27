@@ -615,7 +615,7 @@ public class Quester {
 	}
 	
 	public void setHealth(int i) {
-		/*int newValue;
+		int newValue;
 		
 		
 
@@ -628,9 +628,12 @@ public class Quester {
 		
 		if ((newValue == 0) && (health > 0)) {
 			newValue++;
-		}*/
+		}
+		if (newValue < 0) {
+			newValue = 0;
+		}
 		
-		player.setHealth(i);
+		player.setHealth(newValue);
 		
 	}
 

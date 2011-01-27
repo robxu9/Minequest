@@ -27,6 +27,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 public class Ability {
 	static public int getNearestY(int x, int y, int z) {
@@ -451,6 +452,9 @@ public class Ability {
 		// TODO: add DrainLife
 		// TODO: add DamageAura
 		// TODO: add HealAura
+		// TODO: fix Repulsion 
+		// TODO: fix FireChain
+		
 		if ((quester == null) || quester.canCast(getManaCost(player, entity))) {
 			if (canCast() || (player == null)) {
 				if ((player == null) || player.getItemInHand().getTypeId() == ((l == 1)?bindl:bindr)) {
@@ -490,54 +494,58 @@ public class Ability {
 						if (entity == null) {
 							player.sendMessage("Null Entity");
 						}
-//					} else if (name.equals("PowerStrike")) {
-//						if (entity != null) {
-//							MineQuestListener.damageEntity(entity, 5);
-//						} else {
-//							giveManaCost(player);
-//							player.sendMessage("PowerStrike must be bound to an attack");
-//							return;
-//						}
-//					} else if (name.equals("Sprint")) {
-//						double rot = player.getRotation() % 360 - 90;
-//						while (rot < 0) rot += 360;
-//						
-//						if ((rot  < 45) && (rot > 315)) {
-//							player.teleportTo(player.getX() - 1, player.getY(), player.getZ(), player.getRotation(), player.getPitch());
-//						} else if ((rot > 45) && (rot < 135)) {
-//							player.teleportTo(player.getX(), player.getY(), player.getZ() - 1, player.getRotation(), player.getPitch());
-//						} else if ((rot > 135) && (rot < 225)) {
-//							player.teleportTo(player.getX() + 1, player.getY(), player.getZ(), player.getRotation(), player.getPitch());
-//						} else {
-//							player.teleportTo(player.getX(), player.getY(), player.getZ() + 1, player.getRotation(), player.getPitch());
-//						}
-//					} else if (name.equals("Hail of Arrows")) {
-//						if (entity != null) {
-//							List<LivingEntity> entities = getEntities(entity, 10);
-//							int i;
-//							
-//							for (i = 0; i < entities.size(); i++) {
-//								if (myclass.getGenerator().nextDouble() < .5) {
-//									MineQuestListener.damageEntity(entities.get(i), 4);
-//								}
-//							}
-//						} else {
-//							giveManaCost(player);
-//							player.sendMessage("Hail of Arrows must be bound to an attack - Recommended that it is ranged");
-//							return;
-//						}
-//					} else if (name.equals("Fire Arrow")) {
-//						Block nblock = new Block(51);
-//						if ((entity != null) && (player.getItemStackInHand() == 261)) {
-//							nblock.setX((int)entity.getX());
-//							nblock.setY((int)entity.getY());
-//							nblock.setZ((int)entity.getZ());
-//							nblock.update();
-//						} else {
-//							giveManaCost(player);
-//							player.sendMessage("Fire Arrow must be bound to a bow attack - Recommended that it is ranged");
-//							return;
-//						}
+					} else if (name.equals("PowerStrike")) {
+						if (entity != null) {
+							entity.setHealth(entity.getHealth() - 10);
+						} else {
+							giveManaCost(player);
+							player.sendMessage("PowerStrike must be bound to an attack");
+							return;
+						}
+					} else if (name.equals("Sprint")) {
+						Location loc = player.getLocation();
+						double rot = loc.getYaw() % 360 - 90;
+						while (rot < 0) rot += 360;
+						
+						if ((rot  < 45) || (rot > 315)) {
+							loc.setX(loc.getX() - 1);
+						} else if ((rot > 45) && (rot < 135)) {
+							loc.setZ(loc.getZ() - 1);
+						} else if ((rot > 135) && (rot < 225)) {
+							loc.setX(loc.getX() + 1);
+						} else {
+							loc.setZ(loc.getZ() + 1);
+						}
+						player.teleportTo(loc);
+					} else if (name.equals("Hail of Arrows")) {
+						if (entity != null) {
+							Location loc1 = player.getLocation();
+							Location loc2 = entity.getLocation();
+							Vector vel = new Vector(loc1.getX() - loc2.getX(), loc1.getY() - loc2.getY(), loc1.getZ() - loc2.getZ());
+							player.getWorld().spawnArrow(player.getLocation(), vel, (float).8, (float)16.0);
+							player.getWorld().spawnArrow(player.getLocation(), vel, (float).8, (float)20.0);
+							player.getWorld().spawnArrow(player.getLocation(), vel, (float).8, (float)24.0);
+							player.getWorld().spawnArrow(player.getLocation(), vel, (float).8, (float)28.0);
+							player.getWorld().spawnArrow(player.getLocation(), vel, (float).8, (float)30.0);
+							player.getWorld().spawnArrow(player.getLocation(), vel, (float).8, (float)36.0);
+						} else {
+							giveManaCost(player);
+							player.sendMessage("Hail of Arrows must be bound to an attack - Recommended that it is ranged");
+							return;
+						}
+					} else if (name.equals("Fire Arrow")) {
+						if ((entity != null) && (player.getInventory().getItemInHand().getTypeId() == 261)) {
+							Location loc = entity.getLocation();
+							Block block = player.getWorld().getBlockAt((int)loc.getX(), 
+									getNearestY((int)location.getX(), (int)location.getY(), (int)location.getZ()), 
+									(int)loc.getZ());
+							block.setTypeId(51);
+							
+						} else {
+							giveManaCost(player);
+							player.sendMessage("Fire Arrow must be bound to a bow attack - Recommended that it is ranged");
+							return;
+						}
 //					} else if (name.equals("Repulsion")) {
 //						purgeEntities(player, 10, 0);
 //					} else if (name.equals("FireChain")) {
@@ -563,191 +571,186 @@ public class Ability {
 //							player.sendMessage("FireChain must be bound to an attack");
 //							return;
 //						}		
-//					} else if (name.equals("Wall of Fire")) {
-//						double rot = player.getRotation() % 360 - 90;
-//						int x_change, z_change;
-//						int x, z;
-//						int i;
-//						while (rot < 0) rot += 360;
-//						
-//						
-//						if ((rot  < 45) && (rot > 315)) {
-//							x_change = 0;
-//							z_change = 1;
-//							x = (int)player.getX() - 3;
-//							z = (int)player.getZ() - 3;
-//						} else if ((rot > 45) && (rot < 135)) {
-//							x_change = 1;
-//							z_change = 0;
-//							x = (int)player.getX() - 3;
-//							z = (int)player.getZ() - 4;
-//						} else if ((rot > 135) && (rot < 225)) {
-//							x_change = 0;
-//							z_change = 1;
-//							x = (int)player.getX() + 3;
-//							z = (int)player.getZ() - 3;
-//						} else {
-//							x_change = 1;
-//							z_change = 0;
-//							x = (int)player.getX() - 3;
-//							z = (int)player.getZ() + 3;
-//						}
-//						
-//						for (i = 0; i < 7; i++) {
-//							Block nblock = new Block(51);
-//							nblock.setX(x);
-//							nblock.setY(getNearestY(x, (int)player.getY(), z));
-//							nblock.setZ(z);
-//							nblock.update();
-//							x += x_change;
-//							z += z_change;
-//						}
-//					} else if (name.equals("Wall of Water")) {
-//						double rot = player.getRotation() % 360 - 90;
-//						int x_change, z_change;
-//						int x, z;
-//						int i;
-//						
-//						player.giveItemStack(new ItemStack(325, 1));
-//						player.giveItemStack(new ItemStack(325, 1));
-//						
-//						while (rot < 0) rot += 360;
-//						
-//						
-//						if ((rot  < 45) && (rot > 315)) {
-//							x_change = 0;
-//							z_change = 1;
-//							x = (int)player.getX() - 3;
-//							z = (int)player.getZ() - 3;
-//						} else if ((rot > 45) && (rot < 135)) {
-//							x_change = 1;
-//							z_change = 0;
-//							x = (int)player.getX() - 3;
-//							z = (int)player.getZ() - 4;
-//						} else if ((rot > 135) && (rot < 225)) {
-//							x_change = 0;
-//							z_change = 1;
-//							x = (int)player.getX() + 3;
-//							z = (int)player.getZ() - 3;
-//						} else {
-//							x_change = 1;
-//							z_change = 0;
-//							x = (int)player.getX() - 3;
-//							z = (int)player.getZ() + 3;
-//						}
-//						
-//						for (i = 0; i < 7; i++) {
-//							Block nblock = new Block(8);
-//							nblock.setX(x);
-//							nblock.setY(getNearestY(x, (int)player.getY(), z));
-//							nblock.setZ(z);
-//							nblock.update();
-//							etc.getServer().updateBlockPhysics(nblock);
-//							x += x_change;
-//							z += z_change;
-//						}
-//					} else if (name.equals("Cure Poison")) {
-//						if (quester.isPoisoned()) {
-//							quester.curePoison();
-//						} else {
-//							player.sendMessage("Quester must not be poisoned to cure poison");
-//							return;
-//						}
-//					} else if (name.equals("Heal")) {
-//						player.giveItemStack(new ItemStack(325, 1));
-//						if (quester.getHealth() < quester.getMaxHealth()) {
-//							quester.setHealth(player.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
-//						} else {
-//							player.sendMessage("Quester must not be at full health to heal");
-//							return;
-//						}
-//					} else if (name.equals("Drain Life")) {
-//						int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
-//						if (entity != null) {
-//							entity.setHealth(entity.getHealth() - drain);
-//							quester.setHealth(player.getHealth() + drain);
-//						} else {
-//							player.sendMessage("Must be called on an Entity");
-//						}
-//					} else if (name.equals("Trap") || name.equals("Trape")) {
-//						int i, j, k;
-//						int x, y, z;
-//						if (entity == null) {
-//							giveManaCost(player);
-//							player.sendMessage("Trap must be used on a living entity");
-//							return;
-//						}
-//						x = block.getX();
-//						y = block.getY();
-//						z = block.getZ();
-//						Server server = etc.getServer();
-//						
-//						for (i = 1; i < 3; i++) {
-//							for (j = -1; j < 2; j++) {
-//								for (k = -1; k < 2; k++) {
-//									Block nblock = server.getBlockAt(x + j, y - i, z + k);
-//									
-//									nblock.setType(0);
-//									nblock.update();
-//								}
-//							}
-//						}
-//					} else if (name.equals("Cure Poison Other")) {
-//						if (entity.isPlayer()) {
-//							Quester other = MineQuestListener.getQuester(entity.getName());
-//							if (other != null) {
-//								if (other.isPoisoned()) {
-//									other.curePoison();
-//								} else {
-//									player.sendMessage("Quester must be poisoned to Cure Poison");
-//									return;
-//								}
-//							} else {
-//								giveManaCost(player);
-//								player.sendMessage(entity.getName() + " is not a Quester");
-//								return;
-//							}
-//						} else {
-//							giveManaCost(player);
-//							player.sendMessage(name + " must be cast on another player");
-//						}
-//					} else if (name.equals("Heal Other")) {
-//						if (entity.isPlayer()) {
-//							Quester other = MineQuestListener.getQuester(entity.getName());
-//							if (other != null) {
-//								player.giveItemStack(new ItemStack(325, 1));
-//								if (other.getHealth() < other.getMaxHealth()) {
-//									other.setHealth(other.getPlayer().getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
-//								} else {
-//									player.sendMessage("Quester must not be at full health to heal");
-//									return;
-//								}
-//							} else {
-//								giveManaCost(player);
-//								player.sendMessage(entity.getName() + " is not a Quester");
-//								return;
-//							}
-//						} else {
-//							player.sendMessage(name + " must be cast on another player");
-//						}
-//					} else if (name.equals("IceSphere")) {
-//						int j,k;
-//						if (entity == null) {
-//							player.sendMessage("Cannot cast on null entity");
-//							giveManaCost(player);
-//							return;
-//						}
-//						
-//						for (j = -1; j < 2; j++) {
-//							for (k = -1; k < 2; k++) {
-//								Block nblock = new Block(78, block.getX() + j, 
-//										getNearestY(block.getX() + j, block.getY() + ((entity == null)?1:0), block.getZ() + k), 
-//										block.getZ() + k);
-//								nblock.update();
-//							}
-//						}
-//						
-//						entity.setHealth(entity.getHealth() - 3 - (myclass.getCasterLevel() / 2));
+					} else if (name.equals("Wall of Fire")) {
+						double rot = player.getLocation().getYaw() % 360 - 90;
+						int x_change, z_change;
+						int x, z;
+						int i;
+						while (rot < 0) rot += 360;
+						
+						
+						if ((rot  < 45) && (rot > 315)) {
+							x_change = 0;
+							z_change = 1;
+							x = (int)player.getLocation().getX() - 3;
+							z = (int)player.getLocation().getZ() - 3;
+						} else if ((rot > 45) && (rot < 135)) {
+							x_change = 1;
+							z_change = 0;
+							x = (int)player.getLocation().getX() - 3;
+							z = (int)player.getLocation().getZ() - 4;
+						} else if ((rot > 135) && (rot < 225)) {
+							x_change = 0;
+							z_change = 1;
+							x = (int)player.getLocation().getX() + 3;
+							z = (int)player.getLocation().getZ() - 3;
+						} else {
+							x_change = 1;
+							z_change = 0;
+							x = (int)player.getLocation().getX() - 3;
+							z = (int)player.getLocation().getZ() + 3;
+						}
+						
+						World world = player.getWorld();
+						for (i = 0; i < 7; i++) {
+							Block nblock = world.getBlockAt(x, getNearestY(x, (int)player.getLocation().getY(), z), z);
+							nblock.setTypeId(51);
+							x += x_change;
+							z += z_change;
+						}
+					} else if (name.equals("Wall of Water")) {
+						double rot = player.getLocation().getYaw() % 360 - 90;
+						int x_change, z_change;
+						int x, z;
+						int i;
+						
+						player.getInventory().addItem(new ItemStack(325, 1));
+						player.getInventory().addItem(new ItemStack(325, 1));
+						
+						while (rot < 0) rot += 360;
+						
+						
+						if ((rot  < 45) && (rot > 315)) {
+							x_change = 0;
+							z_change = 1;
+							x = (int)player.getLocation().getX() - 3;
+							z = (int)player.getLocation().getZ() - 3;
+						} else if ((rot > 45) && (rot < 135)) {
+							x_change = 1;
+							z_change = 0;
+							x = (int)player.getLocation().getX() - 3;
+							z = (int)player.getLocation().getZ() - 4;
+						} else if ((rot > 135) && (rot < 225)) {
+							x_change = 0;
+							z_change = 1;
+							x = (int)player.getLocation().getX() + 3;
+							z = (int)player.getLocation().getZ() - 3;
+						} else {
+							x_change = 1;
+							z_change = 0;
+							x = (int)player.getLocation().getX() - 3;
+							z = (int)player.getLocation().getZ() + 3;
+						}
+
+						World world = player.getWorld();
+						for (i = 0; i < 7; i++) {
+							Block nblock = world.getBlockAt(x, getNearestY(x, (int)player.getLocation().getY(), z), z);
+							nblock.setTypeId(8);
+							x += x_change;
+							z += z_change;
+						}
+					} else if (name.equals("Cure Poison")) {
+						if (quester.isPoisoned()) {
+							quester.curePoison();
+						} else {
+							player.sendMessage("Quester must not be poisoned to cure poison");
+							return;
+						}
+					} else if (name.equals("Heal")) {
+						player.getInventory().addItem(new ItemStack(325, 1));
+						if (quester.getHealth() < quester.getMaxHealth()) {
+							quester.setHealth(player.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
+						} else {
+							player.sendMessage("Quester must not be at full health to heal");
+							return;
+						}
+					} else if (name.equals("Drain Life")) {
+						int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
+						if (entity != null) {
+							entity.setHealth(entity.getHealth() - drain);
+							quester.setHealth(player.getHealth() + drain);
+						} else {
+							player.sendMessage("Must be called on an Entity");
+						}
+					} else if (name.equals("Trap") || name.equals("Trape")) {
+						int i, j, k;
+						int x, y, z;
+						if (entity == null) {
+							giveManaCost(player);
+							player.sendMessage("Trap must be used on a living entity");
+							return;
+						}
+						World world = entity.getWorld();
+						x = (int)entity.getLocation().getX();
+						y = (int)entity.getLocation().getY();
+						z = (int)entity.getLocation().getZ();
+						
+						for (i = 1; i < 3; i++) {
+							for (j = -1; j < 2; j++) {
+								for (k = -1; k < 2; k++) {
+									Block nblock = world.getBlockAt(x + j, y - i, z + k);
+									
+									nblock.setTypeId(0);
+								}
+							}
+						}
+					} else if (name.equals("Cure Poison Other")) {
+						if (entity instanceof Player) {
+							Quester other = MineQuest.getQuester((Player)entity);
+							if (other != null) {
+								if (other.isPoisoned()) {
+									other.curePoison();
+								} else {
+									player.sendMessage("Quester must be poisoned to Cure Poison");
+									return;
+								}
+							} else {
+								giveManaCost(player);
+								player.sendMessage("entity is not a Quester");
+								return;
+							}
+						} else {
+							giveManaCost(player);
+							player.sendMessage(name + " must be cast on another player");
+						}
+					} else if (name.equals("Heal Other")) {
+						if (entity instanceof Player) {
+							Quester other = MineQuest.getQuester((Player)entity);
+							if (other != null) {
+								player.getInventory().addItem(new ItemStack(325, 1));
+								if (other.getHealth() < other.getMaxHealth()) {
+									other.setHealth(other.getPlayer().getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
+								} else {
+									player.sendMessage("Quester must not be at full health to heal");
+									return;
+								}
+							} else {
+								giveManaCost(player);
+								player.sendMessage("entity is not a Quester");
+								return;
+							}
+						} else {
+							player.sendMessage(name + " must be cast on another player");
+						}
+					} else if (name.equals("IceSphere")) {
+						int j,k;
+						if (entity == null) {
+							player.sendMessage("Cannot cast on null entity");
+							giveManaCost(player);
+							return;
+						}
+						
+						World world = entity.getWorld();
+						for (j = -1; j < 2; j++) {
+							for (k = -1; k < 2; k++) {
+								Block nblock = world.getBlockAt((int)location.getX() + j, 
+										getNearestY((int)location.getX() + j, (int)location.getY() + ((entity == null)?1:0), (int)location.getZ() + k), 
+										(int)location.getZ() + k);
+								nblock.setTypeId(78);
+							}
+						}
+						
+						entity.setHealth(entity.getHealth() - 3 - (myclass.getCasterLevel() / 2));
 					} else {
 						return;
 					}

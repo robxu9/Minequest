@@ -23,6 +23,8 @@ public class MineQuest extends JavaPlugin {
 	static private mysql_interface sql_server;
 	static private Logger log;
 	private static Server server;
+	private static Location start;
+	private static String namer;
 	private MineQuestBlockListener bl;
 	private MineQuestEntityListener el;
 	private MineQuestPlayerListener pl;
@@ -103,6 +105,7 @@ public class MineQuest extends JavaPlugin {
         
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
+        start = null;
 	}
 	
 	static public double distance(Location loc1, Location loc2) {
@@ -248,5 +251,110 @@ public class MineQuest extends JavaPlugin {
 
 	public static Server getSServer() {
 		return server;
+	}
+
+	public static String listSpellComps(String string) {
+		
+		if (string.equalsIgnoreCase("PowerStrike")) {
+			return "Wooden Sword";
+		} else if (string.equalsIgnoreCase("Dodge")) {
+			return "5 Feathers";
+		} else if (string.equalsIgnoreCase("Deathblow")) {
+			return "2 Steel";
+		} else if (string.equalsIgnoreCase("Sprint")) {
+			return "Feather";
+		} else if (string.equalsIgnoreCase("Fire Arrow")) {
+			return "Coal";
+		} else if (string.equalsIgnoreCase("Hail of Arrows")) {
+			return "10 Arrows";
+		} else if (string.equalsIgnoreCase("Repulsion")) {
+			return "Torch + Cactus";
+		} else if (string.equalsIgnoreCase("Fireball")) {
+			return "Coal";
+		} else if (string.equalsIgnoreCase("FireChain")) {
+			return "5 Coal";
+		} else if (string.equalsIgnoreCase("Wall of Fire")) {
+			return "7 Dirt + 3 Coal";
+		} else if (string.equalsIgnoreCase("Wall of Water")) {
+			return "7 Dirt + 2 Water";
+		} else if (string.equalsIgnoreCase("IceSphere")) {
+			return "5 Snow";
+		} else if (string.equalsIgnoreCase("Drain Life")) {
+			return "Lightstone";
+		} else if (string.equalsIgnoreCase("Fire Resistance")) {
+			return "Netherstone";
+		} else if (string.equalsIgnoreCase("Trap")) {
+			return "6 Dirt + Shovel";
+		} else if (string.equalsIgnoreCase("Heal")) {
+			return "Water";
+		} else if (string.equalsIgnoreCase("Heal Other")) {
+			return "Water";
+		} else if (string.equalsIgnoreCase("Heal Aura")) {
+			return "2 Bread";
+		} else if (string.equalsIgnoreCase("Damage Aura")) {
+			return "Flint and Steel";
+		}
+		
+		return "Unknown Ability";
+	}
+	
+	public static boolean isMayor(Quester quester) {
+		if (quester.equals("jmonk")) {
+			return true;
+		}
+		
+		for (Town t : towns) {
+			if (t.getTownProperty().getOwner().equals(quester)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public static void createTown(Player player) {
+		if (!isMayor(getQuester(player))) {
+			player.sendMessage("Only mayors are allowed to create towns");
+		} else {
+			start = player.getLocation();
+			namer = player.getName();
+		}
+	}
+
+	public static void finishTown(Player player, String name) {
+		if (!isMayor(getQuester(player))) {
+			player.sendMessage("Only mayors are allowed to create towns");
+		} else {
+			if (namer.equals(player.getName())) {
+				Location end = player.getLocation();
+				int x, z, max_x, max_z;
+				int spawn_x, spawn_y, spawn_z;
+				if (end.getX() > start.getX()) {
+					x = (int)start.getX();
+					max_x = (int)end.getX();
+				} else {
+					x = (int)end.getX();
+					max_x = (int)start.getX();
+				}
+				if (end.getZ() > start.getZ()) {
+					z = (int)start.getZ();
+					max_z = (int)end.getZ();
+				} else {
+					z = (int)end.getZ();
+					max_z = (int)start.getZ();
+				}
+				spawn_x = (x + max_x) / 2;
+				spawn_y = (int)(start.getY() + end.getY()) / 2;
+				spawn_z = (z + max_z) / 2;
+				sql_server.update("INSERT INTO towns (name, x, z, max_x, max_z, spawn_x, spawn_y, spawn_z, owner, height, y) VALUES('"
+						+ name + "', '" + x + "', '" + z + "', '" + max_x + "', '" + max_z + "', '" + spawn_x + "', '"
+						+ spawn_y + "', '" + spawn_z + "', '" + player.getName() + "', '0', '0')");
+				sql_server.update("CREATE TABLE IF NOT EXISTS " + name + 
+						"(height INT, x INT, y INT, z INT, max_x INT, max_z INT, price INT, name VARCHAR(30), store_prop BOOLEAN)");
+				towns.add(new Town(name, sql_server));
+			} else {
+				player.sendMessage(namer + " is in the process of creating a town - use /createtown to start a new creation");
+			}
+		}
 	}
 }

@@ -169,7 +169,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
-			//player.sendMessage(listSpellComps(abil));
+			player.sendMessage(MineQuest.listSpellComps(abil));
 			event.setCancelled(true);
 		} else if (split[0].equals("/store")) {
     		int page;
@@ -337,10 +337,52 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
 			event.setCancelled(true);
 			return;
-        } else if (split[0].equals("/saveall")) {
-			player.sendMessage("Saving All Chunks...");
-			//useConsoleCommand("save-all");
-			player.sendMessage("Save Complete");
+        } else if (split[0].equals("/createtown")) {
+        	MineQuest.createTown(player);
+			event.setCancelled(true);
+        } else if (split[0].equals("/finishtown")) {
+        	if (split.length <= 1) {
+        		player.sendMessage("Usage: /finishtown <name>");
+        	} else {
+        		MineQuest.finishTown(player, split[1]);
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/setowner")) {
+        	if (MineQuest.getTown(player) != null) {
+        		MineQuest.getTown(player).setOwner(split[1]);
+        	} else {
+        		player.sendMessage("You are not in a town");
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/creatproperty")) {
+        	if (MineQuest.getTown(player) != null) {
+        		MineQuest.getTown(player).createProperty(player);
+        	} else {
+        		player.sendMessage("You are not in a town");
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/finishproperty")) {
+        	if (split.length <= 1) {
+        		player.sendMessage("Usage: /finishproperty <name> [set-height]");
+        	} else {
+	        	if (MineQuest.getTown(player) != null) {
+	        		MineQuest.getTown(player).finishProperty(player, split[1], split.length > 1);
+	        	} else {
+	        		player.sendMessage("You are not in a town");
+	        	}
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/setprice")) {
+        	if (split.length <= 1) {
+        		player.sendMessage("Usage: /setprice <price>");
+        	} else {
+	        	if (MineQuest.getTown(player) != null) {
+	        		MineQuest.getTown(player).setPrice(player, Long.parseLong(split[1]));
+	        	} else {
+	        		player.sendMessage("You are not in a town");
+	        	}
+        	}
+			event.setCancelled(true);
         }
 		
 		
