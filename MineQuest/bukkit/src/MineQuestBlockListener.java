@@ -6,7 +6,7 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockDamage(org.bukkit.event.block.BlockDamageEvent event) {
-		Town town = MineQuest.getTown(event.getPlayer());
+		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 	
 		quester.checkItemInHand();
@@ -16,7 +16,7 @@ public class MineQuestBlockListener extends BlockListener {
 		quester.destroyBlock(event.getBlock());
 		
 		if (town != null) {
-			Property prop = town.getProperty(event.getPlayer());
+			Property prop = town.getProperty(event.getBlock().getLocation());
 			
 			if (prop != null) {
 				if (prop.canEdit(quester)) {
@@ -57,7 +57,7 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockPlace(org.bukkit.event.block.BlockPlaceEvent event) {
-		Town town = MineQuest.getTown(event.getPlayer());
+		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		quester.checkItemInHand();
@@ -66,7 +66,7 @@ public class MineQuestBlockListener extends BlockListener {
 		}
 		
 		if (town != null) {
-			Property prop = town.getProperty(event.getPlayer());
+			Property prop = town.getProperty(event.getBlock().getLocation());
 			
 			if (prop != null) {
 				if (prop.canEdit(MineQuest.getQuester(event.getPlayer()))) {

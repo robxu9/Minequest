@@ -19,9 +19,8 @@ public class MineQuestPlayerListener extends PlayerListener {
 	public void onPlayerJoin(PlayerEvent event) {
 		if (MineQuest.getQuester(event.getPlayer()) == null) {
 			MineQuest.addQuester(new Quester(event.getPlayer(), 0, MineQuest.getSQLServer()));
-		} else {
-			MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		}
+		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		super.onPlayerJoin(event);
 	}
 	
@@ -354,7 +353,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("You are not in a town");
         	}
 			event.setCancelled(true);
-        } else if (split[0].equals("/creatproperty")) {
+        } else if (split[0].equals("/createproperty")) {
         	if (MineQuest.getTown(player) != null) {
         		MineQuest.getTown(player).createProperty(player);
         	} else {
@@ -362,11 +361,29 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/finishproperty")) {
-        	if (split.length <= 1) {
-        		player.sendMessage("Usage: /finishproperty <name> [set-height]");
+        	if (split.length <= 0) {
+        		player.sendMessage("Usage: /finishproperty [set-height]");
         	} else {
 	        	if (MineQuest.getTown(player) != null) {
-	        		MineQuest.getTown(player).finishProperty(player, split[1], split.length > 1);
+	        		MineQuest.getTown(player).finishProperty(player, split.length > 1);
+	        	} else {
+	        		player.sendMessage("You are not in a town");
+	        	}
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/createstore")) {
+        	if (MineQuest.getTown(player) != null) {
+        		MineQuest.getTown(player).createStore(player);
+        	} else {
+        		player.sendMessage("You are not in a town");
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/finishstore")) {
+        	if (split.length <= 0) {
+        		player.sendMessage("Usage: /finishstore <unique name>");
+        	} else {
+	        	if (MineQuest.getTown(player) != null) {
+	        		MineQuest.getTown(player).finishStore(player, split[1]);
 	        	} else {
 	        		player.sendMessage("You are not in a town");
 	        	}
@@ -382,6 +399,13 @@ public class MineQuestPlayerListener extends PlayerListener {
 	        		player.sendMessage("You are not in a town");
 	        	}
         	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/town")) {
+			if (MineQuest.getTown(player) != null) {
+				player.sendMessage("You are in " + MineQuest.getTown(player).getName());
+			} else {
+				player.sendMessage("You are not in a town");
+			}
 			event.setCancelled(true);
         }
 		

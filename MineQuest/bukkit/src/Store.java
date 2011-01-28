@@ -10,64 +10,60 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Store {
-	private String name;
 	private List<StoreBlock> blocks;
-	private int num_page;
-	private mysql_interface sql_server;
-	private double radius;
-	private Logger log;
-	private Location start;
 	private Location end;
+	private String name;
+	private int num_page;
+	private double radius;
+	private mysql_interface sql_server;
+	private Location start;
 	
 	public Store(String store_name, Location start, Location end, mysql_interface mysql) {
     	sql_server = mysql;
-        log = Logger.getLogger("Minecraft");
 		name = store_name;
 		
 		this.start = start;
 		this.end = end;
 	}
 	
-	public void queryData() {
-		ResultSet results;
-		
-		blocks = new ArrayList<StoreBlock>();
-		results = sql_server.query("SELECT * FROM " + name + " ORDER BY type");
+	public Store(String name, mysql_interface sql_server, String town) {
+
+		ResultSet results = sql_server.query("SELECT * FROM " + town + " WHERE name='" + name + "'");
 		try {
-			while (results.next()) {
-				try {
-					blocks.add(new StoreBlock(sql_server, this, results.getString("type"), results.getInt("quantity"), results.getInt("price"), results.getInt("item_id")));
-				} catch (SQLException e) {
-					log.info("[MineQuest] Unable to query data for block");
-					e.printStackTrace();
-					return;
-				}
-			}
+			results.next();
+			int height = results.getInt("height");
+			Location start = new Location(null, (double)results.getInt("x"), (double)results.getInt("y"), (double)results.getInt("z"));
+			Location end = new Location(null, (double)results.getInt("max_x"), (double)results.getInt("y") + height, (double)results.getInt("max_z"));
+			String store = results.getString("name");
+	    	this.sql_server = sql_server;
+			this.name = name;
+			
+			this.start = start;
+			this.end = end;
 		} catch (SQLException e) {
-			log.info("[MineQuest] Unable to query data for store");
+			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return;
 		}
-		
-		num_page = blocks.size() / 6;
-		if ((blocks.size() % 6) > 0) {
-			num_page++;
+	}
+
+	public void buy(Quester quester, int item_id, int quantity) {
+		if (buy(quester, getBlock(item_id), quantity)) {
+			quester.getPlayer().sendMessage(item_id + " is not a valid block id for this store - Contact Admin to have it added");
 		}
 	}
 	
-	public boolean inStore(Location loc) {
-		if (MineQuest.greaterLoc(loc, start) && MineQuest.greaterLoc(end, loc)) {
+	public boolean buy(Quester quester, StoreBlock block, int quantity) {
+		if (block != null) {
+			block.buy(quester, quantity);
+			return false;
+		} else {
 			return true;
 		}
-		return false;
-		//return MineQuest.distance(loc, location) < radius;
 	}
 	
-	public boolean inStore(Player player) {
-		return inStore(player.getLocation());
-	}
-	
-	public void cost(Quester quester, String name, int quantity, boolean buy) {
-		if (cost(quester, getBlock(name), quantity, buy)) {
+	public void buy(Quester quester, String name, int quantity) {
+		if (buy(quester, getBlock(name), quantity)) {
 			quester.getPlayer().sendMessage(name + " is not a valid block type for this store - Contact Admin to have it added");
 		}
 	}
@@ -87,46 +83,50 @@ public class Store {
 		return true;
 	}
 	
-	public void sell(Quester quester, String name, int quantity) {
-		if (sell(quester, getBlock(name), quantity)) {
+	public void cost(Quester quester, String name, int quantity, boolean buy) {
+		if (cost(quester, getBlock(name), quantity, buy)) {
 			quester.getPlayer().sendMessage(name + " is not a valid block type for this store - Contact Admin to have it added");
 		}
 	}
 	
-	public void sell(Quester quester, int item_id, int quantity) {
-		if (sell(quester, getBlock(item_id), quantity)) {
-			quester.getPlayer().sendMessage(item_id + " is not a valid block id for this store - Contact Admin to have it added");
+	public void displayPage(Quester quester, int page) {
+		Player player = quester.getPlayer();
+		int i;
+		
+		if (page > num_page) {
+			player.sendMessage("This store only has " + num_page + " pages");
+			return;
 		}
-	}
-	
-	public boolean sell(Quester quester, StoreBlock block, int quantity) {
-		if (block != null) {
-			block.sell(quester, quantity);
-			return false;
+		if (page <= 0) {
+			page = 1;
 		}
 		
-		return true;
-	}
-	
-	public void buy(Quester quester, String name, int quantity) {
-		if (buy(quester, getBlock(name), quantity)) {
-			quester.getPlayer().sendMessage(name + " is not a valid block type for this store - Contact Admin to have it added");
-		}
-	}
-	
-	public void buy(Quester quester, int item_id, int quantity) {
-		if (buy(quester, getBlock(item_id), quantity)) {
-			quester.getPlayer().sendMessage(item_id + " is not a valid block id for this store - Contact Admin to have it added");
-		}
-	}
-	
-	public boolean buy(Quester quester, StoreBlock block, int quantity) {
-		if (block != null) {
-			block.buy(quester, quantity);
-			return false;
+		String cubes_string;
+		if (quester.getCubes() > 1000000) {
+			cubes_string = (((int)((double)quester.getCubes()) / 1000.0)/1000) + "M";
+		} else if (quester.getCubes() > 1000) {
+			cubes_string = ((double)quester.getCubes() / 1000.0) + "K";
 		} else {
-			return true;
+			cubes_string = quester.getCubes() + "";
 		}
+		player.sendMessage(name + ": page " + (page) + " of " + num_page + " - You have " + cubes_string + "C");
+		player.sendMessage("     Type - Price - Quantity");
+		
+    	for (i = 6 * (page - 1); (i < (6 * (page))) && (i < blocks.size()); i++) {
+    		blocks.get(i).display(player, i);
+    	}
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof String) {
+			return name.equals(obj);
+		}
+		if (obj instanceof Store) {
+			return name.equals(((Store)obj).getName());
+		}
+		
+		return super.equals(obj);
 	}
 	
 	private StoreBlock getBlock(int item_id) {
@@ -157,44 +157,63 @@ public class Store {
 		return name;
 	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof String) {
-			return name.equals(obj);
+	public boolean inStore(Location loc) {
+		if (MineQuest.greaterLoc(loc, start) && MineQuest.greaterLoc(end, loc)) {
+			return true;
 		}
-		if (obj instanceof Store) {
-			return name.equals(((Store)obj).getName());
-		}
-		
-		return super.equals(obj);
+		return false;
+		//return MineQuest.distance(loc, location) < radius;
 	}
 	
-	public void displayPage(Quester quester, int page) {
-		Player player = quester.getPlayer();
-		int i;
+	public boolean inStore(Player player) {
+		return inStore(player.getLocation());
+	}
+	
+	public void queryData() {
+		ResultSet results;
 		
-		if (page > num_page) {
-			player.sendMessage("This store only has " + num_page + " pages");
-			return;
-		}
-		if (page <= 0) {
-			page = 1;
+		blocks = new ArrayList<StoreBlock>();
+		results = sql_server.query("SELECT * FROM " + name + " ORDER BY type");
+		try {
+			while (results.next()) {
+				try {
+					blocks.add(new StoreBlock(sql_server, this, results.getString("type"), results.getInt("quantity"), results.getDouble("price"), results.getInt("item_id")));
+				} catch (SQLException e) {
+					MineQuest.log("[MineQuest] Unable to query data for block");
+					e.printStackTrace();
+					return;
+				}
+			}
+		} catch (SQLException e) {
+			MineQuest.log("[MineQuest] Unable to query data for store");
+			e.printStackTrace();
 		}
 		
-		String cubes_string;
-		if (quester.getCubes() > 1000000) {
-			cubes_string = (((int)((double)quester.getCubes()) / 1000.0)/1000) + "M";
-		} else if (quester.getCubes() > 1000) {
-			cubes_string = ((double)quester.getCubes() / 1000.0) + "K";
-		} else {
-			cubes_string = quester.getCubes() + "";
+		num_page = blocks.size() / 6;
+		if ((blocks.size() % 6) > 0) {
+			num_page++;
 		}
-		player.sendMessage(name + ": page " + (page) + " of " + num_page + " - You have " + cubes_string + "C");
-		player.sendMessage("     Type - Price - Quantity");
+	}
+	
+	public void sell(Quester quester, int item_id, int quantity) {
+		if (sell(quester, getBlock(item_id), quantity)) {
+			quester.getPlayer().sendMessage(item_id + " is not a valid block id for this store - Contact Admin to have it added");
+		}
+	}
+	
+	public boolean sell(Quester quester, StoreBlock block, int quantity) {
+		if (block != null) {
+			block.sell(quester, quantity);
+			return false;
+		}
 		
-    	for (i = 6 * (page - 1); (i < (6 * (page))) && (i < blocks.size()); i++) {
-    		blocks.get(i).display(player, i);
-    	}
+		return true;
+	}
+	
+	public void sell(Quester quester, String name, int quantity) {
+		if (sell(quester, getBlock(name), quantity)) {
+			quester.getPlayer().sendMessage(name + " is not a valid block type for this store - Contact Admin to have it added");
+		}
 	}
 
 }

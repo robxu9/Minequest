@@ -18,33 +18,32 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class Quester {
+	private ChestSet chests;
 	private SkillClass classes[];
 	private double cubes;
 	private double distance;
 	private boolean enabled;
 	private int exp;
 	private int health;
-	private Town last;
+	private String last;
 	private int level;
-	private boolean loginFlag;
 	private int max_health;
 	private String name;
 	private Player player;
 	private int poison_timer;
 	private int rep;
 	private mysql_interface sql_server;
-	private ChestSet chests;
+	
+	public Quester(Player player, int x, mysql_interface sql) {
+		this(player.getName(), 0, sql);
+		this.player = player;
+	}
 	
 	public Quester(Player player, mysql_interface sql) {
 		sql_server = sql;
 		this.name = player.getName();
 		update();
 		enabled = false;
-		this.player = player;
-	}
-	
-	public Quester(Player player, int x, mysql_interface sql) {
-		this(player.getName(), 0, sql);
 		this.player = player;
 	}
 	
@@ -164,6 +163,50 @@ public class Quester {
 		return 4;
 	}
 	
+	public void callAbilityL(Block block) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityL(this, block);
+				return;
+			}
+		}
+	}
+	
+	public void callAbilityL(Entity entity) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityL(this, entity);
+				return;
+			}
+		}
+	}
+
+	public void callAbilityR(Block block) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityR(this, block);
+				return;
+			}
+		}
+	}
+
+	public void callAbilityR(Entity entity) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityR(this, entity);
+				return;
+			}
+		}
+	}
+	
 	public boolean canCast(List<ItemStack> list) {
 		int i;
 		PlayerInventory inven = player.getInventory();
@@ -193,16 +236,21 @@ public class Quester {
 		}
 		
 	}
-
+	
 	public boolean checkItemInHand() {
 		int i;
-		Inventory inven = player.getInventory();
+		PlayerInventory inven = player.getInventory();
 		ItemStack item = player.getItemInHand();
 		
 		for (i = 0; i < classes.length; i++) {
 			if (!classes[i].canUse(item)) {
-				inven.addItem(item);
-				item.setTypeId(0);
+				if (inven.firstEmpty() != -1) {
+					inven.addItem(item);
+				} else {
+					player.getWorld().dropItem(player.getLocation(), item);
+				}
+				
+				inven.setItemInHand(null);
 				player.sendMessage("You are not high enough level to use that weapon");
 				return true;
 			}
@@ -210,7 +258,7 @@ public class Quester {
 
 		return false;
 	}
-
+	
 	public boolean checkItemInHandAbil() {
 		int i;
 		
@@ -226,7 +274,7 @@ public class Quester {
 		
 		return false;
 	}
-	
+
 	public void create() {
 		int i, num;
 		ResultSet results;
@@ -273,12 +321,16 @@ public class Quester {
 	public void curePoison() {
 		poison_timer = 0;
 	}
-	
+
+	public void defend(EntityDamageEvent event) {
+		healthChange(event.getDamage(), event);
+	}
+
 	public void defendBlock(Block damager, int damage) {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
 	public void defendCombust(Type type) {
 		// TODO Auto-generated method stub
 		
@@ -292,6 +344,7 @@ public class Quester {
 		} else {
 			amount *= levelAdj * 3;
 		}
+		amount /= 2;
 		
 //		if (MineQuest.isSpecial((LivingEntity)attacker)) {
 //			amount = MineQuest.getSpecial((LivingEntity)attacker).attack(this, player, amount);
@@ -366,7 +419,7 @@ public class Quester {
 		
 		return;
 	}
-
+	
 	public void disableabil(String string) {
 		int i;
 		
@@ -380,14 +433,15 @@ public class Quester {
 	public void dropRep(int i) {
 		rep -= i;
 	}
-
-	public void enable() {
+	
+    public void enable() {
 		enabled = true;
 		player.sendMessage("MineQuest is now enabled for your character");
 		
 		return;
 	}
-	
+
+
 	public void enableabil(String string) {
 		int i;
 		
@@ -408,7 +462,7 @@ public class Quester {
 		}
 		return super.equals(obj);
 	}
-	
+
 	private void expGain(int i) {
 		exp += i;
 		if (exp > 400 * (level + 1)) {
@@ -420,8 +474,8 @@ public class Quester {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-    public SkillClass getClass(String string) {
+
+	public SkillClass getClass(String string) {
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
@@ -433,29 +487,8 @@ public class Quester {
 		return null;
 	}
 
-
 	public double getCubes() {
 		return cubes;
-	}
-
-	public int getExp() {
-		return exp;
-	}
-
-	public int getHealth() {
-		return health;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public int getMaxHealth() {
-		return max_health;
-	}
-
-	private String getName() {
-		return name;
 	}
 
 //	public void parseFire(int amount) {
@@ -469,8 +502,8 @@ public class Quester {
 //		}
 //	}
 
-	public Player getPlayer() {
-		return player;
+	public int getExp() {
+		return exp;
 	}
 
 //	public boolean rightClick(Player player, Block blockClicked, Item item) {
@@ -488,10 +521,30 @@ public class Quester {
 //		return false;
 //	}
 
-	public Town getTown() {
-		return last;
+	public int getHealth() {
+		return health;
 	}
 	
+	public int getLevel() {
+		return level;
+	}
+
+	public int getMaxHealth() {
+		return max_health;
+	}
+
+	private String getName() {
+		return name;
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	public Town getTown() {
+		return MineQuest.getTown(last);
+	}
+
 	public boolean healthChange(int change, EntityDamageEvent event) {
 //        boolean flag = false;
 //        if (newValue <= 0) {
@@ -499,11 +552,6 @@ public class Quester {
 //        }
 		int newHealth;
         if (!enabled) return false;
-        
-        if (loginFlag) {
-        	loginFlag = false;
-        	return false;
-        }
         
 //        if (oldValue - newValue >= 20) {
 //                health = -1;
@@ -562,10 +610,18 @@ public class Quester {
 	}
 
 	public void move(Location from, Location to) {
-		last = MineQuest.getNearestTown(to);
+		Town last_town = MineQuest.getNearestTown(to);
+		if (last_town != null) {
+			last = last_town.getName();
+		} else {
+			last = null;
+		}
+		
+		checkEquip(player);
+		
 		updateHealth(player);
 		if (last != null) {
-			sql_server.update("UPDATE questers SET last_town='" + last.getName() + "'");
+			sql_server.update("UPDATE questers SET last_town='" + last + "'");
 		}
 		
 		if (poison_timer > 0) {
@@ -578,7 +634,7 @@ public class Quester {
 			setHealth(getHealth() - 1);
 		}
 	}
-
+	
 	public void parseExplosion(LivingEntity attacker, Player player, int amount) {
 		/*if (MineQuestListener.getSpecialList().contains((LivingEntity)attacker)) {
 			amount *= 2;
@@ -593,7 +649,8 @@ public class Quester {
 			int i;
 			
 		if (sql_server.update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
-				+ health + "', max_health='" + max_health + "' WHERE name='" + name + "'") == -1) {
+				+ health + "', max_health='" + max_health + "', enabled='" + (enabled?1:0) 
+				+ "' WHERE name='" + name + "'") == -1) {
 			player.sendMessage("May not have saved properly, please try again");
 		}
 		for (i = 0; i < classes.length; i++) {
@@ -613,7 +670,7 @@ public class Quester {
 	public void setCubes(double d) {
 		cubes = d;
 	}
-	
+
 	public void setHealth(int i) {
 		int newValue;
 		
@@ -638,8 +695,14 @@ public class Quester {
 	}
 
 	public void setTown(Town town) {
-		last = town;
+		last = town.getName();
 		sql_server.update("UPDATE players SET town='" + town.getName() + "' WHERE name='" + name + "'");
+	}
+
+	public void teleport() {
+		if (health <= 0) {
+			health = max_health;
+		}
 	}
 
 	public void unBind(ItemStack itemInHand) {
@@ -670,11 +733,11 @@ public class Quester {
 			level = results.getInt("level");
 			health = results.getInt("health");
 			max_health = results.getInt("max_health");
-			enabled = results.getBoolean("enabled");
+			enabled = results.getInt("enabled") > 0;
 			
 			cubes = results.getDouble("cubes");
 			chests = new ChestSet();
-			last = MineQuest.getTown(results.getString("last_town"));
+			last = results.getString("last_town");
 		} catch (SQLException e) {
 			System.out.println("Issue getting parameters");
 			e.printStackTrace();
@@ -685,7 +748,11 @@ public class Quester {
 		for (i = 0; i < split.length; i++) {
 			classes[i] = new SkillClass(this, split[i], name, sql_server);
 		}
-		loginFlag = true;
+	}
+
+	public void update(Player player2) {
+		this.player = player2;
+		update();
 	}
 
 	public void updateHealth(Player player) {
@@ -702,64 +769,5 @@ public class Quester {
 		}
 		
 		player.setHealth(newValue);
-	}
-
-	public void update(Player player2) {
-		this.player = player2;
-		update();
-	}
-
-	public void defend(EntityDamageEvent event) {
-		healthChange(event.getDamage(), event);
-	}
-
-	public void teleport() {
-		if (health <= 0) {
-			health = max_health;
-		}
-	}
-
-	public void callAbilityL(Entity entity) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityL(this, entity);
-				return;
-			}
-		}
-	}
-
-	public void callAbilityR(Entity entity) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityR(this, entity);
-				return;
-			}
-		}
-	}
-
-	public void callAbilityL(Block block) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityL(this, block);
-				return;
-			}
-		}
-	}
-
-	public void callAbilityR(Block block) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityR(this, block);
-				return;
-			}
-		}
 	}
 }
