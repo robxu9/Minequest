@@ -140,6 +140,26 @@ public class SkillClass {
 		}
 	}
 
+	public void callAbilityL(Quester quester, Block block) {
+		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), 1, null);
+	}
+
+	public void callAbilityL(Quester quester, Entity entity) {
+		if (entity instanceof LivingEntity) {
+			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), 1, (LivingEntity)entity);
+		}
+	}
+
+	public void callAbilityR(Quester quester, Block block) {
+		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), 0, null);
+	}
+
+	public void callAbilityR(Quester quester, Entity entity) {
+		if (entity instanceof LivingEntity) {
+			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), 0, (LivingEntity)entity);
+		}
+	}
+
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
 		
@@ -172,7 +192,7 @@ public class SkillClass {
 		
 		return true;
 	}
-
+	
 	public void checkEquip(Player player, PlayerInventory equip) {
 		int item_ids[];
 		int i;
@@ -191,30 +211,46 @@ public class SkillClass {
 		
 		for (i = 0; i < item_ids.length; i++) {
 			if (equip.getBoots().getTypeId() == item_ids[i]) {
-				equip.getItem(equip.first(0)).setTypeId(item_ids[i]);
-				equip.getBoots().setTypeId(0);
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
+				}
+				equip.setBoots(null);
 				player.sendMessage("You are not high enough level to use those boots");
 			}
 			if (equip.getChestplate().getTypeId() == item_ids[i]) {
-				equip.getItem(equip.first(0)).setTypeId(item_ids[i]);
-				equip.getBoots().setTypeId(0);
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
+				}
+				equip.setChestplate(null);
 				player.sendMessage("You are not high enough level to use that chestplate");
 			}
 			if (equip.getHelmet().getTypeId() == item_ids[i]) {
-				equip.getItem(equip.first(0)).setTypeId(item_ids[i]);
-				equip.getBoots().setTypeId(0);
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
+				}
+				equip.setHelmet(null);
 				player.sendMessage("You are not high enough level to use that helmet");
 			}
 			if (equip.getLeggings().getTypeId() == item_ids[i]) {
-				equip.getItem(equip.first(0)).setTypeId(item_ids[i]);
-				equip.getBoots().setTypeId(0);
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
+				}
+				equip.setLeggings(null);
 				player.sendMessage("You are not high enough level to use those leggings");
 			}
 		}
 		
 		return;
 	}
-
+	
 	public int defend(Quester quester, LivingEntity entity, int amount) {
 		int i;
 		int armor[] = getClassArmorIds();
@@ -267,7 +303,7 @@ public class SkillClass {
 		
 		return;
 	}
-	
+
 	public void enableAbility(String abil_name, Quester quester) {
 		Ability abil = getAbility(abil_name);
 		if (abil != null) {
@@ -286,6 +322,18 @@ public class SkillClass {
 		}
 	}
 
+	public Ability getAbility(ItemStack itemInHand) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBound(itemInHand)) {
+				return ability_list[i];
+			}
+		}
+		
+		return null;
+	}
+	
 	public Ability getAbility(String name) {
 		int i;
 		
@@ -297,11 +345,11 @@ public class SkillClass {
 		
 		return null;
 	}
-
+	
 	public int getCasterLevel() {
 		return (level + 1) / 2;
 	}
-
+	
 	public int[] getClassArmorIds() {
 		int[] item_ids;
 		
@@ -335,7 +383,7 @@ public class SkillClass {
 		
 		return item_ids;
 	}
-	
+
 	private double getCritChance() {
 		if ((getAbility("Deathblow") != null) && (getAbility("Deathblow").isEnabled())) {
 			return 0.1;
@@ -343,7 +391,7 @@ public class SkillClass {
 		
 		return 0.05;
 	}
-
+	
 	private int getDamage(Quester quester, LivingEntity defend, int plLevel) {
 		int damage = 2;
 		damage += (plLevel / 10);
@@ -396,7 +444,7 @@ public class SkillClass {
 	public Random getGenerator() {
 		return generator;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private ItemStack getItemGive(int type2) {
 		switch (type2) {
@@ -416,19 +464,17 @@ public class SkillClass {
 	public int getLevel() {
 		return level;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getType() {
 		return type;
 	}
-	
+
 	public boolean isAbilityItem(ItemStack itemStack) {
 		int i;
-		
-		System.out.println(type + " is checking abilities");
 		
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i].isBound(itemStack)) {
@@ -498,7 +544,7 @@ public class SkillClass {
 		}
 		return false;
 	}
-
+	
 	private boolean isClassItem(Material type2) {
 		return isClassItem(new ItemStack(type2.getId()));
 	}
@@ -555,7 +601,7 @@ public class SkillClass {
 		
 		return false;
 	}
-	
+
 	public boolean leftClick(Quester quester, Block block, int itemInHand) {
 		int i;
 		
@@ -738,38 +784,6 @@ public class SkillClass {
 				}
 			}
 		}
-	}
-
-	public void callAbilityL(Quester quester, Entity entity) {
-		if (entity instanceof LivingEntity) {
-			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), 1, (LivingEntity)entity);
-		}
-	}
-
-	public void callAbilityR(Quester quester, Entity entity) {
-		if (entity instanceof LivingEntity) {
-			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), 0, (LivingEntity)entity);
-		}
-	}
-
-	public void callAbilityL(Quester quester, Block block) {
-		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), 1, null);
-	}
-
-	public void callAbilityR(Quester quester, Block block) {
-		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), 0, null);
-	}
-
-	public Ability getAbility(ItemStack itemInHand) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(itemInHand)) {
-				return ability_list[i];
-			}
-		}
-		
-		return null;
 	}	
 	
 

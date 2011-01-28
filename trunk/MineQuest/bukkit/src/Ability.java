@@ -73,7 +73,9 @@ public class Ability {
 			enabled = false;
 		}
 		cast_time = getCastTime();
-		time = MineQuest.getSServer().getTime();
+		bindl = -1;
+		bindr = -1;
+		//time = MineQuest.getSServer().getTime();
 	}
 	
 	public void bindl(Player player, ItemStack item) {

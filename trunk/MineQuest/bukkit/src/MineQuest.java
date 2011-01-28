@@ -46,8 +46,24 @@ public class MineQuest extends JavaPlugin {
 		user = minequest.getString("user", "root");
 		pass = minequest.getString("pass", "jasonamm");
 		sql_server = new mysql_interface(url, port, db, user, pass, minequest.getInt("silent", 0));
+
+		ResultSet results = sql_server.query("SELECT * FROM questers");
 		
-		ResultSet results = sql_server.query("SELECT * FROM towns");
+		try {
+			while (results.next()) {
+				names.add(results.getString("name"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for (String name : names) {
+			questers.add(new Quester(name, sql_server));
+		}
+		
+		names.clear();
+		results = sql_server.query("SELECT * FROM towns");
 		
 		server = getServer();
 		
@@ -62,22 +78,6 @@ public class MineQuest extends JavaPlugin {
 		
 		for (String name : names) {
 			towns.add(new Town(name, sql_server));
-		}
-
-		names.clear();
-		results = sql_server.query("SELECT * FROM questers");
-		
-		try {
-			while (results.next()) {
-				names.add(results.getString("name"));
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		for (String name : names) {
-			questers.add(new Quester(name, sql_server));
 		}
 		
 		bl = new MineQuestBlockListener();

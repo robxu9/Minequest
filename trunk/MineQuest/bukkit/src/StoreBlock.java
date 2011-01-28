@@ -5,17 +5,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class StoreBlock {
-	private int price;
-	private int new_price;
+	private double price;
+	private double new_price;
 	private String type;
 	private int quantity;
 	private Store my_store;
 	private int id;
 	private mysql_interface sql_server;
 	
-	public StoreBlock(mysql_interface mysql, Store store, String stype, int squantity, int sprice, int sid) {
+	public StoreBlock(mysql_interface mysql, Store store, String stype, int squantity, double d, int sid) {
 		type = stype;
-		price = sprice;
+		price = d;
 		quantity = squantity;
 		id = sid;
 		my_store = store;
@@ -64,16 +64,16 @@ public class StoreBlock {
 		int lefts;
 		Player player = quester.getPlayer();
 		
-		if (quantity > block_quantity) {
-			player.sendMessage("There are only " + block_quantity + " " + type + " blocks available in the store");
+		if (quantity < block_quantity) {
+			player.sendMessage("There are only " + quantity + " " + type + " blocks available in the store");
 			return;
 		}
-		if (quantity < 0) {
+		if (block_quantity < 0) {
 			player.sendMessage("You entered an invalid quantity");
 			return;
 		}
 		
-		cubes = blocksToCubes(quantity, true);
+		cubes = blocksToCubes(block_quantity, true);
 		
 		if (cubes > quester.getCubes()) {
 			player.sendMessage("Insufficient Funds");
@@ -82,8 +82,8 @@ public class StoreBlock {
 		
 		price = new_price;
 		
-		multis = quantity / 64;
-		lefts = quantity % 64;
+		multis = block_quantity / 64;
+		lefts = block_quantity % 64;
 		try {
 			while (multis-- > 0) {
 				player.getInventory().addItem(new ItemStack(id, 64));
@@ -96,7 +96,7 @@ public class StoreBlock {
 			System.out.println("Strange problem " + e);
 		}
 		
-		block_quantity -= quantity;
+		quantity -= block_quantity;
 		
 		quester.setCubes(quester.getCubes() - cubes);
 		quester.update();
@@ -112,7 +112,7 @@ public class StoreBlock {
     		cubes_string = cubes + "C";
     	}
 
-		player.sendMessage("You bought " + quantity + " " + type + " for " + cubes_string);
+		player.sendMessage("You bought " + block_quantity + " " + type + " for " + cubes_string);
 		
 		return;
 	}
@@ -123,14 +123,14 @@ public class StoreBlock {
 		
 		cubes = blocksToCubes(quantity, false);
 		
-		if (!playerRemove(player, quantity)) {
+		if (!playerRemove(player, block_quantity)) {
 			player.sendMessage("Insufficient Materials");
 			return;
 		}
 		
 		price = new_price;
 		
-		block_quantity += quantity;
+		quantity += block_quantity;
 
 		quester.setCubes(quester.getCubes() + cubes);
 		quester.update();
@@ -145,7 +145,7 @@ public class StoreBlock {
     		cubes_string = cubes + "C";
     	}
 		
-		player.sendMessage("You sold " + quantity + " " + type + " for " + cubes_string);
+		player.sendMessage("You sold " + block_quantity + " " + type + " for " + cubes_string);
 		
 		return;
 	}
@@ -156,7 +156,7 @@ public class StoreBlock {
 		PlayerInventory inventory = player.getInventory();
 		int mod = 1;
 		int multis = quantity / mod;
-		int lefts = quantity % mod;
+		int lefts = 0;//quantity % mod;
 
 		
 		while (multis-- > 0) {
@@ -185,7 +185,7 @@ public class StoreBlock {
 	}
 	
 	private void update() {
-		sql_server.update("UPDATE " + my_store + " SET price='" + price + "', quantity='" + quantity + "' WHERE type='" + type + "'");
+		sql_server.update("UPDATE " + my_store.getName() + " SET price='" + price + "', quantity='" + quantity + "' WHERE type='" + type + "'");
 	}
 	
 	private int blocksToCubes(int blocks, boolean buy) {
@@ -247,4 +247,13 @@ public class StoreBlock {
 		display(quester.getPlayer(), i);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof StoreBlock) {
+			return id == ((StoreBlock)obj).getId();
+		} else if (obj instanceof String) {
+			return type.equals(obj);
+		}
+		return super.equals(obj);
+	}
 }

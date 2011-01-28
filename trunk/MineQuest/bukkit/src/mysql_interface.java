@@ -11,7 +11,6 @@ public class mysql_interface {
 	private Statement stmt;
 	String url;
 	java.sql.Connection con;
-    private Logger log;
     String user, pass;
     boolean silent;
 	
@@ -33,14 +32,13 @@ public class mysql_interface {
 			return;
 		}
 		this.silent = false;
-        log = Logger.getLogger("Minecraft");
 	}
 	
 	public void reconnect() {
 		try {
 			con = (Connection) DriverManager.getConnection(url, user, pass);// + "?autoReconnect=true&user=" + user + "&password=" + pass);
 		} catch (SQLException e) {
-			log.info("[MineQuest] Unable to Connect to MySQL Databse");
+			MineQuest.log("[ERROR] Unable to Connect to MySQL Databse");
 			e.printStackTrace();
 			return;
 		}
@@ -48,19 +46,19 @@ public class mysql_interface {
 		 try {
 			stmt = (Statement) con.createStatement();
 		} catch (SQLException e) {
-			log.info("[MineQuest] Failed to setup MySQL Statement");
+			MineQuest.log("[ERROR] Failed to setup MySQL Statement");
 			e.printStackTrace();
 		}
 	}
 	
 	public ResultSet query(String the_query) {
 		if (!silent) {
-			log.info("[MineQuest] (MySQL) " + the_query);
+			MineQuest.log("[MineQuest] (MySQL) " + the_query);
 		}
 		try {
 			return stmt.executeQuery(the_query);
 		} catch (SQLException e) {
-			log.info("[MineQuest] Failed to query database");
+			MineQuest.log("[ERROR] Failed to query database");
 			e.printStackTrace();
 			reconnect();
 			try {
@@ -73,12 +71,12 @@ public class mysql_interface {
 	
 	public int update(String sql) {
 		if (!silent) {
-			log.info("[MineQuest] (MySQL) " + sql);
+			MineQuest.log("(MySQL) " + sql);
 		}
 		try {
 			return stmt.executeUpdate(sql);
 		} catch (SQLException e) {
-			log.info("[MineQuest] Failed to update database");
+			MineQuest.log("[ERROR] Failed to update database");
 			e.printStackTrace();
 			reconnect();
 			try {
