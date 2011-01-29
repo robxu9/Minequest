@@ -89,18 +89,9 @@ public class SkillClass {
 	}
 
 	public boolean attack(Quester quester, LivingEntity defend, EntityDamageByEntityEvent event) {
-		int i;
-		
-		System.out.println("Call to " + name + ".attack()");
-		
-		if (defend == null) {
-			quester.sendMessage("Not Live Entity");
-			return false;
-		}
-
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(quester.getPlayer().getItemInHand())) {
-				if (ability_list[i].parseAttack(quester, defend)) {
+		for (Ability abil : ability_list) {
+			if (abil.isBound(quester.getPlayer().getItemInHand())) {
+				if (abil.parseAttack(quester, defend)) {
 					return true;
 				}
 			}
@@ -114,11 +105,9 @@ public class SkillClass {
 	}
 
 	public void blockDestroy(Block block, Quester quester) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(quester.getPlayer().getItemInHand())) {
-				ability_list[i].parseLeftClick(quester, block);
+		for (Ability abil : ability_list) {
+			if (abil.isBound(quester.getPlayer().getItemInHand())) {
+				abil.parseLeftClick(quester, block);
 				return;
 			}
 		}
@@ -299,7 +288,7 @@ public class SkillClass {
 		if (!isCombatClass()) {
 			num *= 2;
 		}
-		player.sendMessage("You are a level " + level + " " + type + " with " + exp + "/" + (num*(level+1)) + " Exp to next level");
+		player.sendMessage(" " + type + ": " + level + " - " + exp + "/" + (num*(level+1)));
 		
 		return;
 	}
@@ -478,6 +467,30 @@ public class SkillClass {
 		
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i].isBound(itemStack)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public boolean isAbilityItemL(ItemStack itemStack) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBoundL(itemStack)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public boolean isAbilityItemR(ItemStack itemStack) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].isBoundR(itemStack)) {
 				return true;
 			}
 		}
