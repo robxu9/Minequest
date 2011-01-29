@@ -2,6 +2,7 @@
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -10,13 +11,11 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Type;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -37,6 +36,8 @@ public class Quester {
 	private int poison_timer;
 	private int rep;
 	private mysql_interface sql_server;
+	private long damage_timer;
+	
 	
 	public Quester(Player player, int x, mysql_interface sql) {
 		this(player.getName(), 0, sql);
@@ -47,7 +48,6 @@ public class Quester {
 		sql_server = sql;
 		this.name = player.getName();
 		update();
-		enabled = false;
 		this.player = player;
 	}
 	
@@ -57,14 +57,12 @@ public class Quester {
 		create();
 		update();
 		distance = 0;
-		enabled = false;
 	}
 
 	public Quester(String name, mysql_interface sql) {
 		sql_server = sql;
 		this.name = name;
 		update();
-		enabled = false;
 	}
 
 	public void addHealth(int addition) {
@@ -73,25 +71,23 @@ public class Quester {
 	}
 
 	public void attackEntity(Entity entity, EntityDamageByEntityEvent event) {
-		int i;
-		
 		if (checkItemInHand()) return;
 
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())) {
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())) {
 				System.out.println("Found Ability Item");
 				if (entity instanceof LivingEntity) {
-					if (classes[i].attack(this, (LivingEntity)entity, event)) {
-						return;
-					}
+					skill.attack(this, (LivingEntity)entity, event);
+					expGain(5);
+					return;
 				}
 			}
 		}
 		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isClassItem(player.getItemInHand())) {
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(player.getItemInHand())) {
 				if (entity instanceof LivingEntity) {
-					classes[i].attack(this, (LivingEntity)entity, event);
+					skill.attack(this, (LivingEntity)entity, event);
 					expGain(5);
 					return;
 				}
@@ -212,6 +208,7 @@ public class Quester {
 	}
 	
 	public boolean canCast(List<ItemStack> list) {
+		//for testing
 //		int i;
 //		PlayerInventory inven = player.getInventory();
 //		
@@ -279,6 +276,38 @@ public class Quester {
 		return false;
 	}
 
+	public boolean checkItemInHandAbilL() {
+		int i;
+		
+		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
+			return false;
+		}
+
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItemL(player.getItemInHand())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public boolean checkItemInHandAbilR() {
+		int i;
+		
+		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
+			return false;
+		}
+
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItemR(player.getItemInHand())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	public void create() {
 		int i, num;
 		ResultSet results;
@@ -335,19 +364,17 @@ public class Quester {
 	}
 
 	public void defendCombust(EntityCombustEvent event) {
-		//healthChange(event.getDamage(), event);
 	}
 
 	public void defendEntity(Entity entity, EntityDamageByEntityEvent event) {
-		int amount = event.getDamage();
+		int amount = classes[0].getGenerator().nextInt(10);
 		int levelAdj = MineQuest.getAdjustment();
 		if (levelAdj == 0) {
 			levelAdj = 1;
 		} else {
 			amount *= levelAdj * 3;
 		}
-		amount /= 3;
-		amount += 1;
+		amount /= 4;
 		
 //		if (MineQuest.isSpecial((LivingEntity)attacker)) {
 //			amount = MineQuest.getSpecial((LivingEntity)attacker).attack(this, player, amount);
@@ -377,19 +404,19 @@ public class Quester {
 	
 	public boolean destroyBlock(Block block) {
 		if (!enabled) return false;
-		
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())) {
-				classes[i].blockDestroy(block, this);
+
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())) {
+				System.out.println("Found Ability Item");
+				skill.blockDestroy(block, this);
+				expGain(5);
 				return false;
 			}
 		}
 		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isClassItem(player.getItemInHand())) {
-				classes[i].blockDestroy(block, this);
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(player.getItemInHand())) {
+				skill.blockDestroy(block, this);
 				expGain(1);
 				return false;
 			}
@@ -548,12 +575,18 @@ public class Quester {
 	}
 
 	public boolean healthChange(int change, EntityDamageEvent event) {
+		Calendar now = Calendar.getInstance();
 //        boolean flag = false;
 //        if (newValue <= 0) {
 //                flag = true;
 //        }
 		int newHealth;
         if (!enabled) return false;
+        if ((now.getTimeInMillis() - damage_timer) < 500) { 
+        	event.setCancelled(true);
+        	return false;
+        }
+    	damage_timer = now.getTimeInMillis();
         
 //        if (oldValue - newValue >= 20) {
 //                health = -1;
@@ -674,8 +707,6 @@ public class Quester {
 
 	public void setHealth(int i) {
 		int newValue;
-		
-		
 
 		if (i > max_health) {
 			i = max_health;
@@ -751,6 +782,7 @@ public class Quester {
 		for (i = 0; i < split.length; i++) {
 			classes[i] = new SkillClass(this, split[i], name, sql_server);
 		}
+		damage_timer = 0;
 	}
 
 	public void update(Player player2) {
@@ -781,5 +813,9 @@ public class Quester {
 
 	public void setPlayer(Player player) {
 		this.player = player;
+	}
+
+	public SkillClass[] getClasses() {
+		return classes;
 	}
 }

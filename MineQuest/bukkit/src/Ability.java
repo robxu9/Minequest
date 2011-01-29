@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.bukkit.Location;
@@ -65,6 +66,7 @@ public class Ability {
 	private long time;
 	
 	public Ability(String name, SkillClass myclass) {
+		Calendar now = Calendar.getInstance();
 		this.name = name;
 		enabled = true;
 		this.myclass = myclass;
@@ -75,7 +77,7 @@ public class Ability {
 		cast_time = getCastTime();
 		bindl = -1;
 		bindr = -1;
-		//time = MineQuest.getSServer().getTime();
+		time = now.getTimeInMillis();
 	}
 	
 	public void bindl(Player player, ItemStack item) {
@@ -89,8 +91,9 @@ public class Ability {
 	}
 	
 	private boolean canCast() {
-		if ((MineQuest.getSServer().getTime() - time) > getCastTime()) {
-			time = MineQuest.getSServer().getTime();
+		Calendar now = Calendar.getInstance();
+		if ((now.getTimeInMillis() - time) > getCastTime()) {
+			time = now.getTimeInMillis();
 			return true;
 		}
 		return false;
@@ -115,9 +118,9 @@ public class Ability {
 
 	public int getCastTime() {
 		if (name.equals("Heal") || name.equals("Heal Other")) {
-			return 600;
+			return 20000;
 		} else if (name.equals("Cure Poison") || name.equals("Cure Poison Other") || name.equals("Trap") || name.equals("Trape")) {
-			return 300;
+			return 5000;
 		}
 		return 0;
 	}
@@ -659,7 +662,7 @@ public class Ability {
 					} else if (name.equals("Heal")) {
 						player.getInventory().addItem(new ItemStack(325, 1));
 						if (quester.getHealth() < quester.getMaxHealth()) {
-							quester.setHealth(player.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
+							quester.setHealth(quester.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 						} else {
 							player.sendMessage("Quester must not be at full health to heal");
 							return;
@@ -719,7 +722,7 @@ public class Ability {
 							if (other != null) {
 								player.getInventory().addItem(new ItemStack(325, 1));
 								if (other.getHealth() < other.getMaxHealth()) {
-									other.setHealth(other.getPlayer().getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
+									other.setHealth(other.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 								} else {
 									player.sendMessage("Quester must not be at full health to heal");
 									return;
@@ -744,7 +747,7 @@ public class Ability {
 						for (j = -1; j < 2; j++) {
 							for (k = -1; k < 2; k++) {
 								Block nblock = world.getBlockAt((int)location.getX() + j, 
-										getNearestY((int)location.getX() + j, (int)location.getY() + ((entity == null)?1:0), (int)location.getZ() + k), 
+										getNearestY((int)location.getX() + j, (int)location.getY(), (int)location.getZ() + k), 
 										(int)location.getZ() + k);
 								nblock.setTypeId(78);
 							}

@@ -6,11 +6,14 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockDamage(org.bukkit.event.block.BlockDamageEvent event) {
+		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
+			return;
+		}
 		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 	
 		quester.checkItemInHand();
-		if (quester.checkItemInHandAbil()) {
+		if (quester.checkItemInHandAbilL()) {
 			quester.callAbilityL(event.getBlock());
 		}
 		quester.destroyBlock(event.getBlock());
@@ -45,10 +48,13 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockRightClick(org.bukkit.event.block.BlockRightClickEvent event) {
+		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
+			return;
+		}
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		quester.checkItemInHand();
-		if (quester.checkItemInHandAbil()) {
+		if (quester.checkItemInHandAbilR()) {
 			quester.callAbilityR(event.getBlock());
 		}
 		
@@ -57,11 +63,14 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockPlace(org.bukkit.event.block.BlockPlaceEvent event) {
+		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
+			return;
+		}
 		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		quester.checkItemInHand();
-		if (quester.checkItemInHandAbil()) {
+		if (quester.checkItemInHandAbilR()) {
 			quester.callAbilityR(event.getBlock());
 		}
 		

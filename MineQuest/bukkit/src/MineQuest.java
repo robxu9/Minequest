@@ -166,7 +166,7 @@ public class MineQuest extends JavaPlugin {
 		log("[WARNING] Cannot find quester " + name);
 		return null;
 	}
-	
+	 
 	static public Quester getQuester(Player player) {
 		return getQuester(player.getName());
 	}

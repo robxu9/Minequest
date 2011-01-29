@@ -12,12 +12,18 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
+		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
+			return;
+		}
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).move(event.getFrom(), event.getTo());
 		super.onPlayerMove(event);
 	}
 
 	public void onPlayerJoin(PlayerEvent event) {
+		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
+			return;
+		}
 		if (MineQuest.getQuester(event.getPlayer()) == null) {
 			MineQuest.addQuester(new Quester(event.getPlayer(), 0, MineQuest.getSQLServer()));
 		}
@@ -29,11 +35,17 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerTeleport(PlayerMoveEvent event) {
+		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
+			return;
+		}
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).teleport(event);
 	}
 	
 	public void onPlayerQuit(PlayerEvent event) {
+		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
+			return;
+		}
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		if (MineQuest.getQuester(event.getPlayer()) != null) {
 			MineQuest.getQuester(event.getPlayer()).save();
@@ -88,6 +100,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 			Quester quester = MineQuest.getQuester(player);
 			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 
+			for (SkillClass skill : quester.getClasses()) {
+				skill.display(player);
+			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/minequest")) {
 			player.sendMessage("Minequest Commands:");
@@ -122,7 +137,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			if (split.length < 2) {
 				MineQuest.getQuester(player).listAbil(MineQuest.getQuester(player));
 			} else {
-				MineQuest.getQuester(player).getClass(split[1]);
+				MineQuest.getQuester(player).getClass(split[1]).listAbil(MineQuest.getQuester(player));
 			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/unbind")) {
