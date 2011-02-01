@@ -232,8 +232,8 @@ public class Quester {
 		
 		int i;
 		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].checkEquip(player, inven);
+		for (SkillClass skill : classes) {
+			skill.checkEquip(player, inven);
 		}
 		
 	}
