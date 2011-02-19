@@ -1,0 +1,1114 @@
+package org.monk.MineQuest.Quester;
+
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Random;
+
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.World.Town;
+
+/**
+ * This is a wrapper around bukkit's player class.
+ * It manages the health for the player as well as
+ * any other Player specific MineQuest data.
+ * 
+ * @author jmonk
+ */
+public class Quester {
+	private ChestSet chests;
+	private SkillClass classes[];
+	private double cubes;
+	private double distance;
+	private boolean enabled;
+	private int exp;
+	private int health;
+	private String last;
+	private boolean respawn_flag;
+	private int level;
+	private int max_health;
+	private String name;
+	private Player player;
+	private int poison_timer;
+	private int rep;
+	private long damage_timer;
+	
+	/**
+	 * Load player from MySQL Database.
+	 * @param player
+	 */
+	public Quester(Player player) {
+		this(player.getName());
+		this.player = player;
+	}
+	
+	/**
+	 * Create a new Player in the MySQL Database.
+	 * 
+	 * @param player
+	 * @param x
+	 */
+	public Quester(Player player, int x) {
+		this(player.getName(), 0);
+		this.player = player;
+	}
+	
+	/**
+	 * Load player from MySQL Database.
+	 * @param name
+	 */
+	public Quester(String name) {
+		this.name = name;
+		update();
+	}
+
+	/**
+	 * Create a new Player in the MySQL Database
+	 * 
+	 * @param name
+	 * @param x
+	 */
+	public Quester(String name, int x) {
+		this.name = name;
+		create();
+		update();
+		distance = 0;
+	}
+
+	/**
+	 * Adds to both health and maximum health of quester.
+	 * Should be used on level up of character of 
+	 * SkillClasses.
+	 * 
+	 * @param addition
+	 */
+	public void addHealth(int addition) {
+		health += addition;
+		max_health += addition;
+	}
+
+	/**
+	 * Called whenever a Quester attacks any other entity.
+	 * 
+	 * @param entity
+	 * @param event
+	 */
+	public void attackEntity(Entity entity, EntityDamageByEntityEvent event) {
+		if (checkItemInHand()) return;
+
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())) {
+				if (entity instanceof LivingEntity) {
+					skill.attack(this, (LivingEntity)entity, event);
+					expGain(5);
+					return;
+				}
+			}
+		}
+		
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(player.getItemInHand())) {
+				if (entity instanceof LivingEntity) {
+					skill.attack(this, (LivingEntity)entity, event);
+					expGain(5);
+					return;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Binds an Ability to left of right click of the item
+	 * in the players hand.
+	 * 
+	 * @param player Player
+	 * @param name Name of Ability
+	 * @param lr 1 for left, 0 for right
+	 */
+	public void bind(Player player, String name, String lr) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
+		}
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getAbility(name) != null) {
+				if (lr.equals("l")) {
+					classes[i].getAbility(name).bindl(player, player.getItemInHand());
+				} else {
+					classes[i].getAbility(name).bindr(player, player.getItemInHand());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Determines which resource class a given block belongs to.
+	 * 
+	 * @param block
+	 * @return
+	 */
+	public int blockToClass(Block block) {
+		int miner[] = {
+			1,
+			4,
+			14,
+			15,
+			16,
+			41,42,43,44,45,
+			56, 57,
+			73, 74, 48, 49
+		};
+		int lumber[] = {
+			5,17,18,47,50,53,
+			58,63,64,65,68
+		};
+		int digger[] = {
+			2,3,6,12,13,60,78,
+			82
+		};
+		int farmer[] = {
+			37, 38, 39, 40,
+			81, 83, 281, 282,
+			295, 296, 297, 332
+		};
+		
+		int i;
+		
+		for (i = 0; i < miner.length; i++) {
+			if (block.getType().getId() == miner[i]) {
+				return 0;
+			}
+		}
+		for (i = 0; i < lumber.length; i++) {
+			if (block.getType().getId() == lumber[i]) {
+				return 1;
+			}
+		}
+		for (i = 0; i < digger.length; i++) {
+			if (block.getType().getId() == digger[i]) {
+				return 2;
+			}
+		}
+		for (i = 0; i < farmer.length; i++) {
+			if (block.getType().getId() == farmer[i]) {
+				return 3;
+			}
+		}
+		return 4;
+	}
+	
+	/**
+	 * Casts a left click bound ability on the given block.
+	 * 
+	 * @param block
+	 */
+	public void callAbilityL(Block block) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityL(this, block);
+				return;
+			}
+		}
+	}
+	
+	/**
+	 * Casts a left click bound ability on the given entity
+	 * 
+	 * @param entity
+	 */
+	public void callAbilityL(Entity entity) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityL(this, entity);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Casts a right click bound ability on a given block.
+	 * 
+	 * @param block
+	 */
+	public void callAbilityR(Block block) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityR(this, block);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Casts a right click bound ability on a given entity.
+	 * @param entity
+	 */
+	public void callAbilityR(Entity entity) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbilityR(this, entity);
+				return;
+			}
+		}
+	}
+	
+	/**
+	 * Checks if a Quester has the required spell components.
+	 * to cast an ability. If the Quester has the components
+	 * they are removed from the inventory.
+	 * 
+	 * @param list List of Components
+	 * @return true if cost paid
+	 */
+	public boolean canCast(List<ItemStack> list) {
+//		removed for testing
+//		int i;
+//		PlayerInventory inven = player.getInventory();
+//		
+//		for (i = 0; i < list.size(); i++) {
+//			if (inven.contains(list.get(i).getType())) {
+//				inven.removeItem(list.get(i));
+//			} else {
+//				while (i-- > 0) {
+//					inven.addItem(list.get(i));
+//				}
+//				return false;
+//			}
+//		}
+		return true;
+	}
+	
+	/**
+	 * Checks if a Quester can use all of the equipment
+	 * that they are wearing. It checks with each class
+	 * individually, and they all handle their own removal.
+	 * 
+	 * @param player
+	 */
+	public void checkEquip(Player player) {
+		if (!enabled) return;
+		
+		PlayerInventory inven = player.getInventory();
+		
+		int i;
+		
+		for (SkillClass skill : classes) {
+			skill.checkEquip(player, inven);
+		}
+	}
+	
+	/**
+	 * Checks if a Quester is allowed to use the item
+	 * in hand. The item is checked with each class
+	 * but the removal is handled here.
+	 * 
+	 * @return
+	 */
+	public boolean checkItemInHand() {
+		int i;
+		PlayerInventory inven = player.getInventory();
+		ItemStack item = player.getItemInHand();
+		
+		for (i = 0; i < classes.length; i++) {
+			if (!classes[i].canUse(item)) {
+				if (inven.firstEmpty() != -1) {
+					inven.addItem(item);
+				} else {
+					player.getWorld().dropItem(player.getLocation(), item);
+				}
+				
+				inven.setItemInHand(null);
+				player.sendMessage("You are not high enough level to use that weapon");
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Checks if the item in the Questers hand is bound
+	 * to any abilities. 
+	 * @return true if bound to an ability
+	 */
+	public boolean checkItemInHandAbil() {
+		int i;
+		
+		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
+			return false;
+		}
+
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Checks if the item in the Questers hand is left bound
+	 * to any abilities. 
+	 * @return true if left bound to an ability
+	 */
+	public boolean checkItemInHandAbilL() {
+		int i;
+		
+		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
+			return false;
+		}
+
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItemL(player.getItemInHand())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Checks if the item in the Questers hand is right bound
+	 * to any abilities. 
+	 * @return true if right bound to an ability
+	 */
+	public boolean checkItemInHandAbilR() {
+		int i;
+		
+		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
+			return false;
+		}
+
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItemR(player.getItemInHand())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Creates database entry for this quester with starting
+	 * classes and health.
+	 */
+	public void create() {
+		int i, num;
+		ResultSet results;
+		String class_names[] = {
+				"Warrior",
+				"Archer",
+				"WarMage",
+				"PeaceMage",
+				"Miner",
+				"Lumberjack",
+				"Digger",
+				"Farmer"
+		};
+		
+		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health) VALUES('"
+			+ name + "', '" + name + "', '500000', '0', '0', 'Bitville', '";
+		update_string = update_string + class_names[0];
+		for (i = 1; i < class_names.length; i++) {
+			update_string = update_string + ", " + class_names[i];
+		}
+		update_string = update_string + "', '10', '10')";
+
+		MineQuest.getSQLServer().update(update_string);
+
+		num = 0;
+		try {
+			results = MineQuest.getSQLServer().query("SELECT * FROM abilities");
+			while (results.next()) {
+				num++;
+			}
+		} catch (SQLException e) {
+			System.out.println("Unable to get max ability id");
+		}
+		
+		for (i = 0; i < class_names.length; i++) {
+			update_string = "INSERT INTO classes (name, class, exp, level, abil_list_id) VALUES('"
+								+ name + "', '" + class_names[i] + "', '0', '0', '" + (num + i) + "')";
+
+			MineQuest.getSQLServer().update(update_string);
+			MineQuest.getSQLServer().update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
+		}
+	}
+	
+	/**
+	 * Cures all poison for the Quester.
+	 */
+	public void curePoison() {
+		poison_timer = 0;
+	}
+
+	/**
+	 * Called any time there is a generic damage event on 
+	 * the Quester.
+	 * 
+	 * @param event
+	 */
+	public void defend(EntityDamageEvent event) {
+		healthChange(event.getDamage(), event);
+	}
+
+	/**
+	 * Called any time there is a damaged by block event
+	 * on the Quester.
+	 * @param event
+	 */
+	public void defendBlock(EntityDamageByBlockEvent event) {
+		healthChange(event.getDamage(), event);
+	}
+
+	/**
+	 * Called any time the Quester is defending against an
+	 * attack from another entity.
+	 * 
+	 * @param entity Attacker
+	 * @param event
+	 */
+	public void defendEntity(Entity entity, EntityDamageByEntityEvent event) {
+		int amount = classes[0].getGenerator().nextInt(10);
+		int levelAdj = MineQuest.getAdjustment();
+		if (levelAdj == 0) {
+			levelAdj = 1;
+		} else {
+			amount *= levelAdj * 3;
+		}
+		amount /= 4;
+		
+//		if (MineQuest.isSpecial((LivingEntity)attacker)) {
+//			amount = MineQuest.getSpecial((LivingEntity)attacker).attack(this, player, amount);
+//		}
+		
+		MineQuest.log("[INFO] Damage to " + name + " is " + amount);
+		if (!enabled) return;
+		
+		int i, sum = 0;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (entity instanceof LivingEntity) {
+				sum += classes[i].defend(this, (LivingEntity)entity, amount);
+			}
+		}
+		
+		amount -= sum;
+
+		if (amount < 0) {
+			amount = 0;
+		}
+		
+		healthChange(amount, event);
+		
+		return;
+	}
+	
+	/**
+	 * Called anytime a Player is destroying a block. Checks to
+	 * see if it is bound to any abilities then attributes experience
+	 * to given class if required.
+	 * 
+	 * @param block being destroyed
+	 * @return false
+	 */
+	public boolean destroyBlock(Block block) {
+		if (!enabled) return false;
+
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())) {
+				skill.blockDestroy(block, this);
+				expGain(5);
+				return false;
+			}
+		}
+		
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(player.getItemInHand())) {
+				skill.blockDestroy(block, this);
+				expGain(1);
+				return false;
+			}
+		}
+		
+		switch (blockToClass(block)) {
+		case 0: // Miner
+			getClass("Miner").blockDestroy(block, this);
+			return false;
+		case 1: // Lumberjack
+			getClass("Lumberjack").blockDestroy(block, this);
+			return false;
+		case 2: // Digger
+			getClass("Digger").blockDestroy(block, this);
+			return false;
+		case 3: // Farmer
+			getClass("Farmer").blockDestroy(block, this);
+			return false;
+		default:
+			break;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * MineQuest will soon be enabled for all characters all
+	 * the time.
+	 * 
+	 * @deprecated
+	 */
+	public void disable() {
+		enabled = false;
+		player.sendMessage("MineQuest is now disabled for your character");
+		
+		return;
+	}
+	
+	/**
+	 * Disable an ability with the given name.
+	 * 
+	 * @param string Name of Ability
+	 */
+	public void disableabil(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getAbility(string) != null) {
+				classes[i].getAbility(string).disable();
+			}
+		}
+	}
+
+	/**
+	 * Drops a Questers reputation by i.
+	 * 
+	 * @param i
+	 */
+	public void dropRep(int i) {
+		rep -= i;
+	}
+	
+	/**
+	 * Enables MineQuest for this quester.
+	 * 
+	 * @deprecated
+	 */
+    public void enable() {
+		enabled = true;
+		player.sendMessage("MineQuest is now enabled for your character");
+		
+		return;
+	}
+
+    /**
+	 * Enable an ability with the given name.
+	 * 
+	 * @param string Name of Ability
+	 */
+	public void enableabil(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getAbility(string) != null) {
+				classes[i].getAbility(string).enable(this);
+			}
+		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Quester) {
+			return name.equals(((Quester)obj).getName());
+		}
+		if (obj instanceof String) {
+			return name.equals(obj);
+		}
+		return super.equals(obj);
+	}
+
+	/**
+	 * Adds i experience to Quester and checks for level
+	 * up.
+	 * 
+	 * @param i Experience to Add
+	 */
+	private void expGain(int i) {
+		exp += i;
+		if (exp > 400 * (level + 1)) {
+			levelUp();
+		}
+	}
+
+	/**
+	 * Gets the ChestSet for given player
+	 * 
+	 * @param player
+	 * @return ChestSet
+	 */
+	public ChestSet getChestSet(Player player) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * Gets the SkillClass with given name for this
+	 * Quester. Returns NULL if no class exists with
+	 * given name.
+	 * 
+	 * @param string Name of SkillClass
+	 * @return SkillClass
+	 */
+	public SkillClass getClass(String string) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getType().equalsIgnoreCase(string)) {
+				return classes[i];
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Gets a list of SkillClasses that this Quester has.
+	 * @return
+	 */
+	public SkillClass[] getClasses() {
+		return classes;
+	}
+
+	/**
+	 * Returns amount of cubes the Quester has.
+	 * 
+	 * @return
+	 */
+	public double getCubes() {
+		return cubes;
+	}
+
+	/**
+	 * Returns amount of experience for Quester.
+	 * @return
+	 */
+	public int getExp() {
+		return exp;
+	}
+	
+	/**
+	 * Returns health of Quester.
+	 * @return
+	 */
+	public int getHealth() {
+		return health;
+	}
+
+	/**
+	 * Returns level of Quester.
+	 * 
+	 * @return
+	 */
+	public int getLevel() {
+		return level;
+	}
+
+	/**
+	 * Returns maximum health of Quester.
+	 * 
+	 * @return
+	 */
+	public int getMaxHealth() {
+		return max_health;
+	}
+
+	/**
+	 * Returns name of Quester.
+	 * @return
+	 */
+	private String getName() {
+		return name;
+	}
+
+	/**
+	 * Returns player that the Quester wraps.
+	 * 
+	 * @return
+	 */
+	public Player getPlayer() {
+		return player;
+	}
+
+	/**
+	 * Returns last town player was near.
+	 * 
+	 * @return
+	 */
+	public Town getTown() {
+		return MineQuest.getTown(last);
+	}
+
+	/**
+	 * Called any time a Quester is taking damage of any time
+	 * it adjusts the Quester's health accordingly and sets
+	 * the damage of the event as required.
+	 * 
+	 * @param change Amount of Damage Done
+	 * @param event Event causing Damage
+	 * @return false
+	 */
+	public boolean healthChange(int change, EntityDamageEvent event) {
+		Calendar now = Calendar.getInstance();
+//		boolean flag = false;
+//		if (newValue <= 0) {
+//			flag = true;
+//		}
+		int newHealth;
+        if (!enabled) return false;
+        if ((now.getTimeInMillis() - damage_timer) < 500) { 
+        	event.setCancelled(true);
+        	return false;
+        }
+    	damage_timer = now.getTimeInMillis();
+        
+//        if (oldValue - newValue >= 20) {
+//                health = -1;
+//                return false;
+//        }
+
+    	MineQuest.log(change + " damage to " + name);
+        health -= change;
+        
+        newHealth = 20 * health / max_health;
+        
+        if ((newHealth == 0) && (health > 0)) {
+        	newHealth++;
+        }
+        
+        if (health > max_health) {
+        	health = max_health;
+        }
+        
+        if (player.getHealth() >= newHealth) {
+        	event.setDamage(player.getHealth() - newHealth);
+        } else {
+            player.setHealth(newHealth);
+            event.setDamage(0);
+            event.setCancelled(true);
+        }
+
+        MineQuest.log("[INFO] " + name + " - " + health + "/" + max_health);
+
+        return false;
+    }
+
+	/**
+	 * Returns true if MineQuest is enabled for this
+	 * Quester.
+	 * 
+	 * @deprecated
+	 * @return
+	 */
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	/**
+	 * Returns true if Quester is poisoned currently.
+	 * 
+	 * @return
+	 */
+	public boolean isPoisoned() {
+		return (poison_timer > 0);
+	}
+
+	/**
+	 * Called whenever a Quester's character goes up
+	 * a level. Handles experience changes and health
+	 * additions.
+	 */
+	private void levelUp() {
+		Random generator = new Random();
+		int add_health = generator.nextInt(3) + 1;
+		level++;
+		exp -= (400 * level);
+		max_health += add_health;
+		health += add_health;
+		
+		getPlayer().sendMessage("Congratulations on reaching character level " + level);
+	}
+
+	/**
+	 * Display list of abilities that Quester has.
+	 */
+	public void listAbil() {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].listAbil(this);
+		}
+	}
+
+	/**
+	 * Called every time a player moves. It makes sure that players
+	 * respawn in the proper town. Handles any poison damage required
+	 * and updates the health to fix any inconsistencies that may have
+	 * arisen.
+	 * 
+	 * @param from Quester's old Location
+	 * @param to Quester's new Location
+	 */
+	public void move(Location from, Location to) {
+		if (respawn_flag) {
+			player.teleportTo(MineQuest.getTown(last).getSpawn());
+			respawn_flag = false;
+		}
+		checkEquip(player);
+		
+		updateHealth(player);
+		
+		Town last_town = MineQuest.getNearestTown(to);
+		if (last_town != null) {
+			last = last_town.getName();
+		} else {
+			last = null;
+		}
+		if (last != null) {
+			MineQuest.getSQLServer().update("UPDATE questers SET last_town='" + last + "'");
+		}
+		
+		if (poison_timer > 0) {
+			distance += MineQuest.distance(from, to);
+		}
+		
+		while ((distance > 5) && (poison_timer > 0)) {
+			distance -= 5;
+			poison_timer -= 1;
+			setHealth(getHealth() - 1);
+		}
+	}
+
+	/**
+	 * Called each time the player is poisoned.
+	 * Updates the poison counter appropriately.
+	 */
+	public void poison() {
+		poison_timer += 10;
+	}
+
+	/**
+	 * Saves any changes in the Quester to the MySQL
+	 * Database.
+	 */
+	public void save() {
+			int i;
+			
+		if (MineQuest.getSQLServer().update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
+				+ health + "', max_health='" + max_health + "', enabled='" + (enabled?1:0) 
+				+ "' WHERE name='" + name + "'") == -1) {
+			player.sendMessage("May not have saved properly, please try again");
+		}
+		for (i = 0; i < classes.length; i++) {
+			classes[i].save();
+		}
+		enabled = false;
+	}
+
+	/**
+	 * Sends a message to the Quester's Player.
+	 * 
+	 * @param string Message
+	 */
+	public void sendMessage(String string) {
+		if (player != null) {
+			player.sendMessage(string);
+		} else {
+			MineQuest.log("[WARNING] Quester " + name + " doesn't have player, not logged in?");
+		}
+	}
+
+	/**
+	 * Sets the Cubes of the Quester.
+	 * 
+	 * @param d New Cubes
+	 */
+	public void setCubes(double d) {
+		cubes = d;
+	}
+
+	/**
+	 * Sets the Health of the Quester.
+	 * 
+	 * @param i New Health
+	 */
+	public void setHealth(int i) {
+		int newValue;
+
+		if (i > max_health) {
+			i = max_health;
+		}
+		health = i;
+		
+		newValue = 20 * health / max_health;
+		
+		if ((newValue == 0) && (health > 0)) {
+			newValue++;
+		}
+		if (newValue < 0) {
+			newValue = 0;
+		}
+		
+		player.setHealth(newValue);
+		
+	}
+
+	/**
+	 * Sets the reference to the Player.
+	 * 
+	 * @param player New Reference
+	 */
+	public void setPlayer(Player player) {
+		this.player = player;
+	}
+
+	/**
+	 * Sets the last town that the Quester was near.
+	 * 
+	 * @param town Last Town
+	 */
+	public void setTown(Town town) {
+		last = town.getName();
+		MineQuest.getSQLServer().update("UPDATE players SET town='" + town.getName() + "' WHERE name='" + name + "'");
+	}
+
+	/**
+	 * Called whenever a Quester is teleported to check for
+	 * respawning.
+	 * 
+	 * @param event Teleport Event
+	 */
+	public void teleport(PlayerMoveEvent event) {
+		if ((health <= 0) && (player.getHealth() == 20)) {
+			health = max_health;
+			Town town = MineQuest.getNearestTown(event.getFrom());
+			event.setTo(town.getSpawn());
+		}
+	}
+
+	/**
+	 * Unbinds the Item that the Quester is holding
+	 * from all abilities.
+	 * 
+	 * @param itemInHand
+	 */
+	public void unBind(ItemStack itemInHand) {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].unBind(itemInHand, true);
+			classes[i].unBind(itemInHand, false);
+		}
+	}
+
+	/**
+	 * Loads all of the Quester's status from the MySQL
+	 * database.
+	 */
+	public void update() {
+		ResultSet results;
+		String split[];
+		int i;
+		
+		try {
+			results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + name + "'");
+			results.next();
+		} catch (SQLException e) {
+			System.out.println("Issue querying name");
+			e.printStackTrace();
+			return;
+		}
+		try {
+			split = results.getString("classes").split(", ");
+			exp = results.getInt("exp");
+			level = results.getInt("level");
+			health = results.getInt("health");
+			max_health = results.getInt("max_health");
+			enabled = results.getInt("enabled") > 0;
+			
+			cubes = results.getDouble("cubes");
+			chests = new ChestSet();
+			last = results.getString("last_town");
+		} catch (SQLException e) {
+			System.out.println("Issue getting parameters");
+			e.printStackTrace();
+			return;
+		}
+		
+		classes = new SkillClass[split.length];
+		for (i = 0; i < split.length; i++) {
+			classes[i] = new SkillClass(this, split[i], name);
+		}
+		damage_timer = 0;
+	}
+
+	/**
+	 * Sets the reference to the Player and updates
+	 * the Quester's status information from the db.
+	 * @param player
+	 */
+	public void update(Player player) {
+		this.player = player;
+		update();
+	}
+
+	/**
+	 * Updates the Players health to show a percentage of
+	 * the Questers health.
+	 * 
+	 * @param player
+	 */
+	public void updateHealth(Player player) {
+		int newValue;
+		
+		newValue = 20 * health / max_health;
+		
+		if ((newValue == 0) && (health > 0)) {
+			newValue++;
+		}
+
+		if (newValue < 0) {
+			newValue = 0;
+		}
+		
+		if ((player.getHealth() == 20) && (health <= 0)) {
+			health = max_health;
+			respawn_flag = true;
+		} else {
+			player.setHealth(newValue);
+		}
+	}
+}
