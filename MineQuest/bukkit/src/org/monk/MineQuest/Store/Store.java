@@ -11,14 +11,29 @@ import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 
+/**
+ * Store holds all of the information associated with rectangular
+ * area in MineQuest where items can be bought and sold based
+ * on what items the store supports.
+ * 
+ * @author jmonk
+ *
+ */
 public class Store {
 	private List<StoreBlock> blocks;
 	private Location end;
 	private String name;
 	private int num_page;
-	private double radius;
 	private Location start;
 	
+	/**
+	 * Creates a blank store not associated with the MySQL Database.
+	 * 
+	 * @deprecated
+	 * @param store_name Name of Store
+	 * @param start First Corner of Store
+	 * @param end Last Corner of Store
+	 */
 	public Store(String store_name, Location start, Location end) {
 		name = store_name;
 		
@@ -26,6 +41,12 @@ public class Store {
 		this.end = end;
 	}
 	
+	/**
+	 * Loads a Store from the MineQuest Database.
+	 * 
+	 * @param name Name of Store
+	 * @param town Name of Town
+	 */
 	public Store(String name, String town) {
 		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + town + " WHERE name='" + name + "'");
 		try {
@@ -33,7 +54,6 @@ public class Store {
 			int height = results.getInt("height");
 			Location start = new Location(null, (double)results.getInt("x"), (double)results.getInt("y"), (double)results.getInt("z"));
 			Location end = new Location(null, (double)results.getInt("max_x"), (double)results.getInt("y") + height, (double)results.getInt("max_z"));
-			String store = results.getString("name");
 			this.name = name;
 			
 			this.start = start;
@@ -45,12 +65,28 @@ public class Store {
 		}
 	}
 
+	/**
+	 * Buy some quantity of a block.
+	 * 
+	 * @param quester Buyer
+	 * @param item_id Type if Block
+	 * @param quantity Amount being baught
+	 */
 	public void buy(Quester quester, int item_id, int quantity) {
 		if (buy(quester, getBlock(item_id), quantity)) {
 			quester.getPlayer().sendMessage(item_id + " is not a valid block id for this store - Contact Admin to have it added");
 		}
 	}
 	
+
+	/**
+	 * Buy some quantity of a block.
+	 * 
+	 * @param quester Buyer
+	 * @param block Type if Block
+	 * @param quantity Amount being baught
+	 * @return True if block is not valid
+	 */
 	public boolean buy(Quester quester, StoreBlock block, int quantity) {
 		if (block != null) {
 			block.buy(quester, quantity);
@@ -60,12 +96,26 @@ public class Store {
 		}
 	}
 	
+	/**
+	 * Buy some quantity of a block.
+	 * 
+	 * @param quester Buyer
+	 * @param name Type if Block
+	 * @param quantity Amount being baught
+	 */
 	public void buy(Quester quester, String name, int quantity) {
 		if (buy(quester, getBlock(name), quantity)) {
 			quester.getPlayer().sendMessage(name + " is not a valid block type for this store - Contact Admin to have it added");
 		}
 	}
 	
+	/**
+	 * 
+	 * @param quester
+	 * @param item_id
+	 * @param quantity
+	 * @param buy
+	 */
 	public void cost(Quester quester, int item_id, int quantity, boolean buy) {
 		if (cost(quester, getBlock(item_id), quantity, buy)) {
 			quester.getPlayer().sendMessage(name + " is not a valid block type for this store - Contact Admin to have it added");

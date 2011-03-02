@@ -113,7 +113,7 @@ public class Quester {
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
 				if (entity instanceof LivingEntity) {
-					skill.attack(this, (LivingEntity)entity, event);
+					skill.attack((LivingEntity)entity, event);
 					expGain(5);
 					return;
 				}
@@ -123,7 +123,7 @@ public class Quester {
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
 				if (entity instanceof LivingEntity) {
-					skill.attack(this, (LivingEntity)entity, event);
+					skill.attack((LivingEntity)entity, event);
 					expGain(5);
 					return;
 				}
@@ -223,7 +223,7 @@ public class Quester {
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityL(this, block);
+				classes[i].callAbilityL(block);
 				return;
 			}
 		}
@@ -239,7 +239,7 @@ public class Quester {
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityL(this, entity);
+				classes[i].callAbilityL(entity);
 				return;
 			}
 		}
@@ -255,7 +255,7 @@ public class Quester {
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityR(this, block);
+				classes[i].callAbilityR(block);
 				return;
 			}
 		}
@@ -270,7 +270,7 @@ public class Quester {
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityR(this, entity);
+				classes[i].callAbilityR(entity);
 				return;
 			}
 		}
@@ -317,7 +317,7 @@ public class Quester {
 		int i;
 		
 		for (SkillClass skill : classes) {
-			skill.checkEquip(player, inven);
+			skill.checkEquip(inven);
 		}
 	}
 	
@@ -514,7 +514,7 @@ public class Quester {
 		
 		for (i = 0; i < classes.length; i++) {
 			if (entity instanceof LivingEntity) {
-				sum += classes[i].defend(this, (LivingEntity)entity, amount);
+				sum += classes[i].defend((LivingEntity)entity, amount);
 			}
 		}
 		
@@ -542,7 +542,7 @@ public class Quester {
 
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
-				skill.blockDestroy(block, this);
+				skill.blockDestroy(block);
 				expGain(5);
 				return false;
 			}
@@ -550,7 +550,7 @@ public class Quester {
 		
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
-				skill.blockDestroy(block, this);
+				skill.blockDestroy(block);
 				expGain(1);
 				return false;
 			}
@@ -558,16 +558,16 @@ public class Quester {
 		
 		switch (blockToClass(block)) {
 		case 0: // Miner
-			getClass("Miner").blockDestroy(block, this);
+			getClass("Miner").blockDestroy(block);
 			return false;
 		case 1: // Lumberjack
-			getClass("Lumberjack").blockDestroy(block, this);
+			getClass("Lumberjack").blockDestroy(block);
 			return false;
 		case 2: // Digger
-			getClass("Digger").blockDestroy(block, this);
+			getClass("Digger").blockDestroy(block);
 			return false;
 		case 3: // Farmer
-			getClass("Farmer").blockDestroy(block, this);
+			getClass("Farmer").blockDestroy(block);
 			return false;
 		default:
 			break;
@@ -869,7 +869,7 @@ public class Quester {
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
-			classes[i].listAbil(this);
+			classes[i].listAbil();
 		}
 	}
 
@@ -1070,7 +1070,7 @@ public class Quester {
 		
 		classes = new SkillClass[split.length];
 		for (i = 0; i < split.length; i++) {
-			classes[i] = new SkillClass(this, split[i], name);
+			classes[i] = new SkillClass(this, split[i]);
 		}
 		damage_timer = 0;
 	}
