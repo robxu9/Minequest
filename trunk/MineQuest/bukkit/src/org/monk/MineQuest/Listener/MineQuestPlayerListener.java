@@ -107,7 +107,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 
 			for (SkillClass skill : quester.getClasses()) {
-				skill.display(player);
+				skill.display();
 			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/minequest")) {
@@ -143,7 +143,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			if (split.length < 2) {
 				MineQuest.getQuester(player).listAbil();
 			} else {
-				MineQuest.getQuester(player).getClass(split[1]).listAbil(MineQuest.getQuester(player));
+				MineQuest.getQuester(player).getClass(split[1]).listAbil();
 			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/unbind")) {
@@ -181,7 +181,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 				player.sendMessage("Usage: /class <class_name>");
 				event.setCancelled(true);
 			}
-			MineQuest.getQuester(player).getClass(split[1]).display(player);
+			MineQuest.getQuester(player).getClass(split[1]).display();
 			event.setCancelled(true);
 		} else if (split[0].equals("/health")) {
 			player.sendMessage("Your health is " + MineQuest.getQuester(player).getHealth() + "/" + MineQuest.getQuester(player).getMaxHealth());

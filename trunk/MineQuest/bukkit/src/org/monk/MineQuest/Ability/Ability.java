@@ -579,7 +579,7 @@ public class Ability {
 					player.sendMessage("Casting " + name);
 					castAbility(quester, location, entity);
 					if (myclass != null) {
-						myclass.expAdd(getExp(), quester);
+						myclass.expAdd(getExp());
 					}
 				}
 			} else {
