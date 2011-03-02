@@ -48,6 +48,7 @@ public class MineQuest extends JavaPlugin {
 //	private MineQuestWorldListener wl;
 	
 
+	
 	/**
 	 * Creates an instance of MineQuest. There should never be more than
 	 * one instance of MineQuest required. This method will load all of the
@@ -57,10 +58,9 @@ public class MineQuest extends JavaPlugin {
 	 * This loads all adjustable parameters from minequest.properties, including
 	 * database location and login parameters.
 	 */
-    public MineQuest(PluginLoader pluginLoader, Server instance,
-			PluginDescriptionFile desc, File folder, File plugin,
-			ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, folder, plugin, cLoader);
+    public MineQuest() {
+    	super();
+		//super(pluginLoader, instance, desc, folder, plugin, cLoader);
 		List<String> names = new ArrayList<String>();
 		String url, port, db, user, pass;
 		PropertiesFile minequest = new PropertiesFile("minequest.properties");
@@ -115,13 +115,10 @@ public class MineQuest extends JavaPlugin {
         
         pm.registerEvent(Event.Type.PLAYER_JOIN, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_QUIT, pl, Priority.Normal, this);
-        pm.registerEvent(Event.Type.PLAYER_COMMAND, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_TELEPORT, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGEDBY_BLOCK, el, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGEDBY_ENTITY, el, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGEDBY_PROJECTILE, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGED, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGED, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACED, bl, Priority.Normal, this);
