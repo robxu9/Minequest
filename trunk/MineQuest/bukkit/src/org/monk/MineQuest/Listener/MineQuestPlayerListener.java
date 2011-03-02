@@ -61,7 +61,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	}
 	
 	@Override
-	public void onPlayerCommand(PlayerChatEvent event) {
+	public void onPlayerCommandPreprocess(PlayerChatEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		String split[] = event.getMessage().split(" ");
 		Player player = event.getPlayer();
@@ -443,6 +443,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 		
 		
 		
-		super.onPlayerCommand(event);
+		super.onPlayerCommandPreprocess(event);
 	}
 }
