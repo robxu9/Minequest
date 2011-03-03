@@ -30,12 +30,12 @@ Event:24:EntitySpawnerCompleteEvent:10:11
 Event:25:EntitySpawnerCompleteEvent:10:12
 Event:26:MessageEvent:1000:all:God job! You got them all!
 Event:27:ExperienceAdd:1000:all:1000:1000
-Task:0,1,2
-Task:3,4,5,6,7,8
-Task:9,10,11,12,13,14,15,16,28
-Task:17,18,19,20,21
-Task:22
-Task:23
-Task:24
-Task:25,26,27
+Task:1:0,1,2:2
+Task:2:3,4,5,6,7,8:3
+Task:3:9,10,11,12,13,14,15,16,28:4
+Task:4:17,18,19,20,21:5
+Task:5:22:6
+Task:6:23:7
+Task:7:24:8
+Task:8:25,26,27:-1
 }}}
