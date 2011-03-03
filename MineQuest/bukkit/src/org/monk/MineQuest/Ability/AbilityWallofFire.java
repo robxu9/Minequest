@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.BlockCDEvent;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass;
 
@@ -73,7 +76,7 @@ public class AbilityWallofFire extends Ability {
 		World world = player.getWorld();
 		for (i = 0; i < 7; i++) {
 			Block nblock = world.getBlockAt(x, getNearestY(x, (int)player.getLocation().getY(), z), z);
-			nblock.setTypeId(51);
+			MineQuest.getEventParser().addEvent(new BlockCDEvent(0, 60000, nblock, Material.WATER));
 			x += x_change;
 			z += z_change;
 		}

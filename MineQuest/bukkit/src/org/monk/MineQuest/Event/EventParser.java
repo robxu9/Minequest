@@ -7,10 +7,10 @@ import java.util.List;
 import org.monk.MineQuest.MineQuest;
 
 public class EventParser implements java.lang.Runnable {
-	private long start_time;
-	private Calendar now;
-	private List<Event> events;
-	private boolean enabled;
+	static private long start_time;
+	static private Calendar now;
+	static private List<Event> events;
+	static private boolean enabled;
 	
 	public EventParser() {
 		events = new ArrayList<Event>();
