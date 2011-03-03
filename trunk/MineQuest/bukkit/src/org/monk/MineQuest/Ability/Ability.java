@@ -35,7 +35,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.Combat.Archer;
+import org.monk.MineQuest.Quester.SkillClass.Combat.PeaceMage;
+import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
+import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
 
 /**
  * This is the base class for all abilities in MineQuest.
@@ -53,51 +57,58 @@ public class Ability {
 	 * @return new Ability created
 	 */
 	static public Ability newAbility(String name, SkillClass myclass) {
-		if (name.equals("Dodge")) {
-			return new AbilityDodge(name, myclass);
-	    } else if (name.equals("Fireball")) {
-			return new AbilityFireball(name, myclass);
-	    } else if (name.equals("Deathblow")) {
-			return new AbilityDeathblow(name, myclass);
-	    } else if (name.equals("Sprint")) {
-			return new AbilitySprint(name, myclass);
-	    } else if (name.equals("PowerStrike")) {
-			return new AbilityPowerstrike(name, myclass);
-	    } else if (name.equals("Hail of Arrows")) {
-			return new AbilityHailofArrows(name, myclass);
-	    } else if (name.equals("Fire Arrow")) {
-			return new AbilityFireArrow(name, myclass);
-	    } else if (name.equals("Repulsion")) {
-			return new AbilityRepulsion(name, myclass);
-	    } else if (name.equals("FireChain")) {
-			return new AbilityFireChain(name, myclass);
-	    } else if (name.equals("Wall of Fire")) {
-			return new AbilityWallofFire(name, myclass);
-	    } else if (name.equals("IceSphere")) {
-			return new AbilityIceSphere(name, myclass);
-	    } else if (name.equals("Drain Life")) {
-			return new AbilityDrainLife(name, myclass);
-	    } else if (name.equals("Fire Resistance")) {
-			return new AbilityFireResistance(name, myclass);
-	    } else if (name.equals("Trap") || name.equals("Trape")) {
-			return new AbilityTrap(name, myclass);
-	    } else if (name.equals("Heal")) {
-			return new AbilityHeal(name, myclass);
-	    } else if (name.equals("Heal Other")) {
-			return new AbilityHealOther(name, myclass);
-	    } else if (name.equals("Wall of Water")) {
-			return new AbilityWallofWater(name, myclass);
-	    } else if (name.equals("Heal Aura")) {
-			return new AbilityHealAura(name, myclass);
-	    } else if (name.equals("Damage Aura")) {
-			return new AbilityDamageAura(name, myclass);
-	    } else if (name.equals("Cure Poison")) {
-			return new AbilityCurePoison(name, myclass);
-	    } else if (name.equals("Cure Poison Other")) {
-			return new AbilityCurePoisonOther(name, myclass);
-	    }
+		for (Ability ability : newAbilities(name, myclass)) {
+			if (name.equalsIgnoreCase(ability.getName())) {
+				return ability;
+			}
+		}
+		MineQuest.log("Warning: Could not find ability " + name);
 		
 		return new Ability(name, myclass);
+	}
+	
+	static public List<Ability> newAbilities(String name, SkillClass myclass) {
+		List<Ability> abilities = new ArrayList<Ability>();
+		
+		if (myclass instanceof Warrior) {
+			abilities.add(new AbilityPowerstrike(name, myclass));
+			abilities.add(new AbilityDodge(name, myclass));
+			abilities.add(new AbilityDeathblow(name, myclass));
+			abilities.add(new AbilitySprint(name, myclass));
+		} else if (myclass instanceof Archer) {
+			abilities.add(new AbilityDodge(name, myclass));
+			abilities.add(new AbilitySprint(name, myclass));
+			abilities.add(new AbilityFireArrow(name, myclass));
+			abilities.add(new AbilityRepulsion(name, myclass));
+			abilities.add(new AbilityHailofArrows(name, myclass));
+		} else if (myclass instanceof WarMage) {
+			abilities.add(new AbilityFireball(name, myclass));
+			abilities.add(new AbilityWallofFire(name, myclass));
+			abilities.add(new AbilityFireChain(name, myclass));
+			abilities.add(new AbilityFireResistance(name, myclass));
+			abilities.add(new AbilityDrainLife(name, myclass));
+			abilities.add(new AbilityIceSphere(name, myclass));
+			abilities.add(new AbilityTrap(name, myclass));
+		} else if (myclass instanceof PeaceMage) {
+			abilities.add(new AbilityHeal(name, myclass));
+			abilities.add(new AbilityHealOther(name, myclass));
+			abilities.add(new AbilityHealAura(name, myclass));
+			abilities.add(new AbilityDamageAura(name, myclass));
+			abilities.add(new AbilityCurePoison(name, myclass));
+			abilities.add(new AbilityCurePoisonOther(name, myclass));
+			abilities.add(new AbilityTrape(name, myclass));
+			abilities.add(new AbilityWallofWater(name, myclass));
+		} else {
+			MineQuest.log("Unknown Class " + myclass.getType());
+		}
+		
+		return abilities;
+	}
+	
+	
+	
+	public int getReqLevel() {
+		return 0;
 	}
 	
 	/**
@@ -609,7 +620,6 @@ public class Ability {
 	 */
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		// TODO Auto-generated method stub
 		
 	}
 }

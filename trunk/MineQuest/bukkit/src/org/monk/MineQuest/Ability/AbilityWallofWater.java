@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.BlockCDEvent;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityWallofWater extends Ability {
 
@@ -37,6 +37,16 @@ public class AbilityWallofWater extends Ability {
 		list.add(new ItemStack(3, 1));
 		
 		return list;
+	}
+	
+	@Override
+	public int getReqLevel() {
+		return 3;
+	}
+	
+	@Override
+	public String getName() {
+		return "Wall of Water";
 	}
 	
 	@Override
@@ -79,8 +89,7 @@ public class AbilityWallofWater extends Ability {
 		World world = player.getWorld();
 		for (i = 0; i < 7; i++) {
 			Block nblock = world.getBlockAt(x, getNearestY(x, (int)player.getLocation().getY(), z), z);
-			//nblock.setTypeId(8);
-			MineQuest.getEventParser().addEvent(new BlockCDEvent(0, 60000, nblock, Material.LAVA));
+			MineQuest.getEventParser().addEvent(new BlockCDEvent(0, 60000, nblock, Material.WATER));
 			x += x_change;
 			z += z_change;
 		}

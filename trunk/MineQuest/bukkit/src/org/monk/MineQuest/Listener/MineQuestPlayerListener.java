@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.Store;
 import org.monk.MineQuest.World.Town;
 
@@ -118,9 +118,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 			event.setCancelled(true);
 		} else if (split[0].equals("/load")) {
 			MineQuest.getQuester(player).update();
-			event.setCancelled(true);
-		} else if (split[0].equals("/quest")) {
-			MineQuest.getQuester(player).enable();
 			event.setCancelled(true);
 		} else if (split[0].equals("/zombie")) {
 			//Mob mymob = new Mob("Zombie", new Location(player.getX() + 3, player.getY(), player.getZ()));

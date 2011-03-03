@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityCurePoison extends Ability {
 
@@ -27,8 +27,18 @@ public class AbilityCurePoison extends Ability {
 	}
 	
 	@Override
+	public int getReqLevel() {
+		return 5;
+	}
+	
+	@Override
 	public int getCastTime() {
 		return 5000;
+	}
+	
+	@Override
+	public String getName() {
+		return "Cure Poison";
 	}
 	
 	@Override

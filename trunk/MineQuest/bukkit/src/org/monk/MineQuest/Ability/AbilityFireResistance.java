@@ -6,13 +6,23 @@ import java.util.List;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityFireResistance extends Ability {
 
 	public AbilityFireResistance(String name, SkillClass myclass) {
 		super(name, myclass);
 		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	public String getName() {
+		return "Fire Resistance";
+	}
+	
+	@Override
+	public int getReqLevel() {
+		return 10;
 	}
 	
 	@Override

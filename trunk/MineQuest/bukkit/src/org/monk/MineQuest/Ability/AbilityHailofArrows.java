@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityHailofArrows extends Ability {
 
@@ -34,6 +34,16 @@ public class AbilityHailofArrows extends Ability {
 		list.add(new ItemStack(262, 1));
 		
 		return list;
+	}
+	
+	@Override
+	public int getReqLevel() {
+		return 5;
+	}
+	
+	@Override
+	public String getName() {
+		return "Hail of Arrows";
 	}
 	
 	@Override

@@ -12,11 +12,13 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.CheckMobEvent;
-import org.monk.MineQuest.Event.EventParser;
+import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
@@ -33,17 +35,18 @@ import org.monk.MineQuest.World.Town;
  *
  */
 public class MineQuest extends JavaPlugin {
-	private static EventParser eventParser;
+	private static EventQueue eventQueue;
+	private static Logger log;
+	private static String namer;
+	private static List<Quester> questers = new ArrayList<Quester>();
+	private static Server server;
+	private static MysqlInterface sql_server;
+	private static Location start;
+	private static List<Town> towns = new ArrayList<Town>();
 //	private MineQuestServerListener sl;
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
-	static private Logger log;
-	private static String namer;
-	static private List<Quester> questers = new ArrayList<Quester>();
-	private static Server server;
-	static private MysqlInterface sql_server;
-	private static Location start;
-	static private List<Town> towns = new ArrayList<Town>();
+	
 	/**
 	 * Adds a Quester to the MineQuest Server.
 	 * Does not modify mysql database.
@@ -159,8 +162,8 @@ public class MineQuest extends JavaPlugin {
      * 
      * @return EventParser
      */
-    static public EventParser getEventParser() {
-    	return eventParser;
+    static public EventQueue getEventParser() {
+    	return eventQueue;
     }
 	
 	/**
@@ -346,49 +349,36 @@ public class MineQuest extends JavaPlugin {
 	 * @return String of Components
 	 */
 	public static String listSpellComps(String string) {
-		if (string.equalsIgnoreCase("PowerStrike")) {
-			return "Wooden Sword";
-		} else if (string.equalsIgnoreCase("Dodge")) {
-			return "5 Feathers";
-		} else if (string.equalsIgnoreCase("Deathblow")) {
-			return "2 Steel";
-		} else if (string.equalsIgnoreCase("Sprint")) {
-			return "Feather";
-		} else if (string.equalsIgnoreCase("Fire Arrow")) {
-			return "Coal";
-		} else if (string.equalsIgnoreCase("Hail of Arrows")) {
-			return "10 Arrows";
-		} else if (string.equalsIgnoreCase("Repulsion")) {
-			return "Torch + Cactus";
-		} else if (string.equalsIgnoreCase("Fireball")) {
-			return "Coal";
-		} else if (string.equalsIgnoreCase("FireChain")) {
-			return "5 Coal";
-		} else if (string.equalsIgnoreCase("Wall of Fire")) {
-			return "7 Dirt + 3 Coal";
-		} else if (string.equalsIgnoreCase("Wall of Water")) {
-			return "7 Dirt + 2 Water";
-		} else if (string.equalsIgnoreCase("IceSphere")) {
-			return "5 Snow";
-		} else if (string.equalsIgnoreCase("Drain Life")) {
-			return "Lightstone";
-		} else if (string.equalsIgnoreCase("Fire Resistance")) {
-			return "Netherstone";
-		} else if (string.equalsIgnoreCase("Trap")) {
-			return "6 Dirt + Shovel";
-		} else if (string.equalsIgnoreCase("Heal")) {
-			return "Water";
-		} else if (string.equalsIgnoreCase("Heal Other")) {
-			return "Water";
-		} else if (string.equalsIgnoreCase("Heal Aura")) {
-			return "2 Bread";
-		} else if (string.equalsIgnoreCase("Damage Aura")) {
-			return "Flint and Steel";
+		Ability ability = Ability.newAbility(string, null);
+		String ret = new String();
+		
+		for (ItemStack item : reduce(ability.getManaCost())) {
+			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
 		}
 		
-		return "Unknown Ability";
+		return ret;
 	}
 
+	private static List<ItemStack> reduce(List<ItemStack> manaCost) {
+		List<ItemStack> ret = new ArrayList<ItemStack>();
+		boolean flag;
+		
+		for (ItemStack itm : manaCost) {
+			flag = false;
+			for (ItemStack item : ret) {
+				if (item.getTypeId() == itm.getTypeId()) {
+					flag = true;
+					item.setAmount(item.getAmount() + itm.getAmount());
+					break;
+				}
+			}
+			if (!flag) {
+				ret.add(itm);
+			}
+		}
+		
+		return ret;
+	}
 	/**
 	 * Prints to screen the message preceded by [MineQuest].
 	 * 
@@ -448,6 +438,12 @@ public class MineQuest extends JavaPlugin {
 	public MineQuest() {
 	}
 
+	@Override
+	public void onDisable() {
+	}
+	@Override
+	public void onEnable() {
+	}
 	/**
 	 * Sets up an instance of MineQuest. There should never be more than
 	 * one instance of MineQuest required. If enabled this method will load all of the
@@ -462,12 +458,9 @@ public class MineQuest extends JavaPlugin {
     	super.setEnabled(enabled);
     	if (enabled) {
 	        
-	        eventParser = new EventParser();
-	        eventParser.enable();
+	        eventQueue = new EventQueue(this);
 	        
-	        if (getServer().getScheduler().scheduleSyncRepeatingTask(this, eventParser, 1, 1) == -1) {
-	        	MineQuest.log("There was a problem setting up EventParser!");
-	        }
+	        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
 	        
 			List<String> names = new ArrayList<String>();
 			String url, port, db, user, pass;
@@ -537,14 +530,8 @@ public class MineQuest extends JavaPlugin {
 	        start = null;
 			
 			for (Town town : towns) {
-				eventParser.addEvent(new CheckMobEvent(town));
+				eventQueue.addEvent(new CheckMobEvent(town));
 			}
     	}
     }
-	@Override
-	public void onDisable() {
-	}
-	@Override
-	public void onEnable() {
-	}
 }

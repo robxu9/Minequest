@@ -3,10 +3,13 @@ package org.monk.MineQuest.Ability;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.AuraEvent;
+import org.monk.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityDamageAura extends Ability {
 
@@ -23,5 +26,22 @@ public class AbilityDamageAura extends Ability {
 		
 		return list;
 	}
-
+	
+	@Override
+	public int getReqLevel() {
+		return 7;
+	}
+	
+	@Override
+	public String getName() {
+		return "Damage Aura";
+	}
+	
+	@Override
+	public void castAbility(Quester quester, Location location,
+			LivingEntity entity) {
+		super.castAbility(quester, location, entity);
+		
+		MineQuest.getEventParser().addEvent(new AuraEvent(this, quester, 10000, 300000, -1, false));
+	}
 }

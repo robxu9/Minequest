@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityFireChain extends Ability {
 
@@ -28,6 +28,16 @@ public class AbilityFireChain extends Ability {
 		list.add(new ItemStack(263, 1));
 		
 		return list;
+	}
+	
+	@Override
+	public int getReqLevel() {
+		return 10;
+	}
+	
+	@Override
+	public String getName() {
+		return "Fire Chain";
 	}
 	
 	@Override

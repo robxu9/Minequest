@@ -13,13 +13,12 @@ import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.BlockCDEvent;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityWallofFire extends Ability {
 
 	public AbilityWallofFire(String name, SkillClass myclass) {
 		super(name, myclass);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
@@ -38,6 +37,16 @@ public class AbilityWallofFire extends Ability {
 		list.add(new ItemStack(3, 1));
 		
 		return list;
+	}
+	
+	@Override
+	public int getReqLevel() {
+		return 5;
+	}
+	
+	@Override
+	public String getName() {
+		return "Wall of Fire";
 	}
 	
 	@Override
@@ -76,7 +85,7 @@ public class AbilityWallofFire extends Ability {
 		World world = player.getWorld();
 		for (i = 0; i < 7; i++) {
 			Block nblock = world.getBlockAt(x, getNearestY(x, (int)player.getLocation().getY(), z), z);
-			MineQuest.getEventParser().addEvent(new BlockCDEvent(0, 60000, nblock, Material.WATER));
+			MineQuest.getEventParser().addEvent(new BlockCDEvent(0, 60000, nblock, Material.FIRE));
 			x += x_change;
 			z += z_change;
 		}
