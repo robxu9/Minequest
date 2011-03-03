@@ -29,7 +29,6 @@ public class Store {
 	/**
 	 * Creates a blank store not associated with the MySQL Database.
 	 * 
-	 * @deprecated
 	 * @param store_name Name of Store
 	 * @param start First Corner of Store
 	 * @param end Last Corner of Store
@@ -72,9 +71,9 @@ public class Store {
 	 * @param item_id Type if Block
 	 * @param quantity Amount being baught
 	 */
-	public void buy(Quester quester, int item_id, int quantity) {
-		if (buy(quester, getBlock(item_id), quantity)) {
-			quester.getPlayer().sendMessage(item_id + " is not a valid block id for this store - Contact Admin to have it added");
+	public void buy(Quester quester, int index, int quantity) {
+		if (buy(quester, blocks.get(index), quantity)) {
+			quester.getPlayer().sendMessage(index + " is not a valid index for this store - Contact Admin to have it added");
 		}
 	}
 	
@@ -116,9 +115,9 @@ public class Store {
 	 * @param quantity
 	 * @param buy
 	 */
-	public void cost(Quester quester, int item_id, int quantity, boolean buy) {
-		if (cost(quester, getBlock(item_id), quantity, buy)) {
-			quester.getPlayer().sendMessage(name + " is not a valid block type for this store - Contact Admin to have it added");
+	public void cost(Quester quester, int index, int quantity, boolean buy) {
+		if (cost(quester, getBlock(index), quantity, buy)) {
+			quester.getPlayer().sendMessage(index + " is not a valid index for this store - Contact Admin to have it added");
 		}
 	}
 	

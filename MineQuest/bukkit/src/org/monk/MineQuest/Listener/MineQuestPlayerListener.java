@@ -18,18 +18,12 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
-		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
-			return;
-		}
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).move(event.getFrom(), event.getTo());
 		super.onPlayerMove(event);
 	}
 
 	public void onPlayerJoin(PlayerEvent event) {
-		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
-			return;
-		}
 		if (MineQuest.getQuester(event.getPlayer()) == null) {
 			MineQuest.addQuester(new Quester(event.getPlayer(), 0));
 		}
@@ -37,26 +31,19 @@ public class MineQuestPlayerListener extends PlayerListener {
 		super.onPlayerJoin(event);
 	}
 	
-	
-	
 	@Override
 	public void onPlayerTeleport(PlayerMoveEvent event) {
-		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
-			return;
-		}
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).teleport(event);
+		super.onPlayerTeleport(event);
 	}
 	
 	public void onPlayerQuit(PlayerEvent event) {
-		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
-			return;
-		}
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		if (MineQuest.getQuester(event.getPlayer()) != null) {
 			MineQuest.getQuester(event.getPlayer()).save();
+			MineQuest.getQuester(event.getPlayer()).setPlayer(null);
 		}
-//		MineQuest.remQuester(MineQuest.getQuester(event.getPlayer()));
 		super.onPlayerQuit(event);
 	}
 	
@@ -162,9 +149,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
 			MineQuest.getQuester(player).disableabil(abil);
-			event.setCancelled(true);
-		} else if (split[0].equals("/noquest")) {
-			MineQuest.getQuester(player).disable();
 			event.setCancelled(true);
 		} else if (split[0].equals("/bind")) {
 			if (split.length < 3) {
@@ -439,6 +423,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 				player.sendMessage("You are not in a town");
 			}
 			event.setCancelled(true);
+        } else if (split[0].equals("/give_spare")) {
+        	MineQuest.getQuester(event.getPlayer()).giveSpareInventory();
+        	event.setCancelled(true);
         }
 		
 		

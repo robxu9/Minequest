@@ -33,30 +33,30 @@ public class AbilityFireChain extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-//		if (entity != null) {
-//			Ability fireball = new Ability("Fireball", myclass);
-//			LivingEntity this_entity;
-//			int i;
-//
-//			fireball.enable(quester);
-//			fireball.bindl(player,
-//					new ItemStack(player.getItemStackInHand(), 1));
-//
-//			this_entity = getRandomEntity(entity, 10);
-//			for (i = 0; i < 3 + myclass.getCasterLevel(); i++) {
-//				fireball.useAbility(null, new Block(1, (int) entity.getX(),
-//						(int) entity.getY(), (int) entity.getZ()), null, 1,
-//						entity);
-//				this_entity = getRandomEntity(this_entity, 10);
-//				if (myclass.getGenerator().nextDouble() < .1) {
-//					break;
-//				}
-//			}
-//		} else {
-//			giveManaCost(player);
-//			player.sendMessage("FireChain must be bound to an attack");
-//			return;
-//		}	
+		Player player = quester.getPlayer();
+		if (entity != null) {
+			Ability fireball = new Ability("Fireball", myclass);
+			LivingEntity this_entity;
+			int i;
+
+			fireball.enable(quester);
+			fireball.bindl(player, player.getItemInHand());
+
+			this_entity = getRandomEntity(entity, 10);
+			for (i = 0; i < 3 + myclass.getCasterLevel(); i++) {
+				fireball.useAbility(quester, new Location(player.getWorld(), (int) entity.getLocation().getX(),
+						(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()), 1,
+						entity);
+				this_entity = getRandomEntity(this_entity, 10);
+				if (myclass.getGenerator().nextDouble() < .1) {
+					break;
+				}
+			}
+		} else {
+			giveManaCost(player);
+			player.sendMessage("FireChain must be bound to an attack");
+			return;
+		}	
 	}
 
 }

@@ -30,7 +30,7 @@ public class AbilityRepulsion extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-//		purgeEntities(player, 10, 0);
+		purgeEntities(quester.getPlayer(), 10, 0);
 	}
 
 }

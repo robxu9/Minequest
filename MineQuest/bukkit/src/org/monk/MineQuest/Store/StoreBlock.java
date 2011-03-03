@@ -196,15 +196,13 @@ public class StoreBlock {
         
         while (change-- > 0) {
             if (buy) {
-                cost += (new_price * 64);
-                new_price *= 1.005;
+                cost += (new_price);
+                new_price *= 1.0005;
             } else {
-                cost += (new_price * 64);
-                new_price /= 1.005;
+                cost += (new_price);
+                new_price /= 1.0005;
             }
         }
-        change = (blocks % 64);
-        cost += (new_price * change);
 
         if (!buy) {
              cost *= .92;
@@ -225,9 +223,9 @@ public class StoreBlock {
             blocks++;
             if ((blocks % 64) == 0) {
                 if (buy) {
-                	new_price *= 1.005;
+                	new_price *= 1.0005;
                 } else {
-                	new_price /= 1.005;
+                	new_price /= 1.0005;
                 }
             }
         }
