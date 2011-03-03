@@ -26,10 +26,13 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftCreeper;
+import org.bukkit.craftbukkit.entity.CraftSkeleton;
+import org.bukkit.craftbukkit.entity.CraftSpider;
+import org.bukkit.craftbukkit.entity.CraftZombie;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass;
@@ -253,14 +256,15 @@ public class Ability {
 	 */
 	public List<LivingEntity> getEntities(LivingEntity player, int radius) {
 		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
-		List<LivingEntity> serverList;
+		List<LivingEntity> serverList = player.getWorld().getLivingEntities();
 		int i;
 		
-//		for (i = 0; i < serverList.size(); i++) {
-//			if ((isWithin(player, serverList.get(i), radius)) && (serverList.get(i).getId() != player.getId())) {
-//				entities.add(serverList.get(i));
-//			}
-//		}
+		for (i = 0; i < serverList.size(); i++) {
+			if ((MineQuest.distance(player.getLocation(), serverList.get(i).getLocation()) < radius) 
+				&& (serverList.get(i).getEntityId() != player.getEntityId())) {
+				entities.add(serverList.get(i));
+			}
+		}
 		
 		return entities;
 	}
@@ -304,7 +308,7 @@ public class Ability {
 	 * @param radius
 	 * @return
 	 */
-	private LivingEntity getRandomEntity(LivingEntity entity, int radius) {
+	protected LivingEntity getRandomEntity(LivingEntity entity, int radius) {
 		List<LivingEntity> entities = getEntities(entity, radius);
 		int i = myclass.getGenerator().nextInt(entities.size());
 		
@@ -386,18 +390,17 @@ public class Ability {
 	 * @return
 	 */
 	private boolean isType(LivingEntity livingEntity, int type) {
-		/*if (type == 1) {
-			return livingEntity.getName().equals("Zombie");
+		if (type == 1) {
+			return livingEntity instanceof CraftZombie;
 		} else if (type == 2) {
-			return livingEntity.getName().equals("Skeleton");
+			return livingEntity instanceof CraftSkeleton;
 		} else if (type == 3) {
-			return livingEntity.getName().equals("Creeper");
+			return livingEntity instanceof CraftCreeper;
 		} else if (type == 4) {
-			return livingEntity.getName().equals("Spider");
+			return livingEntity instanceof CraftSpider;
 		} else {
 			return true;
-		}*/
-		return false;
+		}
 	}
 
 	/**
@@ -512,7 +515,7 @@ public class Ability {
 	 * @param distance
 	 * @param type
 	 */
-	private void purgeEntities(LivingEntity player, int distance, int type) {
+	protected void purgeEntities(LivingEntity player, int distance, int type) {
 		List<LivingEntity> entities = getEntities(player, distance);
 		
 		int i;
@@ -520,7 +523,7 @@ public class Ability {
 		for (i = 0; i < entities.size(); i++) {
 			if (isType(entities.get(i), type)) {
 				moveOut(player, entities.get(i), distance);
-//				MineQuestListener.damageEntity(entities.get(i), 1);
+				entities.get(i).setHealth(entities.get(i).getHealth() - 1);
 			}
 		}
 		

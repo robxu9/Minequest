@@ -174,4 +174,25 @@ public class Property {
 	public void setPrice(long price) {
 		this.price = price;
 	}
+
+	public Location getEdge(Location location) {
+		Location ret = new Location(location.getWorld(), location.getX(),
+				location.getY(), location.getZ());
+		
+		if (Math.abs(ret.getX() - getCenterX()) > Math.abs(ret.getZ() - getCenterZ())) {
+			if (ret.getX() > getCenterX()) {
+				ret.setX(getMaxX());
+			} else {
+				ret.setX(getX());
+			}
+		} else {
+			if (ret.getZ() > getCenterZ()) {
+				ret.setZ(getMaxZ());
+			} else {
+				ret.setZ(getZ());
+			}
+		}
+		
+		return ret;
+	}
 }

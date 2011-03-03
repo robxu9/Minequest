@@ -14,15 +14,14 @@ import org.monk.MineQuest.Quester.Quester;
 
 public class MineQuestEntityListener extends EntityListener {
 	
-	
 	@Override
 	public void onEntityDamage(EntityDamageEvent event) {
 		if (event.getCause() == DamageCause.ENTITY_ATTACK) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
             if (evente.getDamager() instanceof Player) {
-                    MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
+                MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
             } else if (event.getEntity() instanceof Player) {
-                    MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+                MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
             }
 		}
 		if (event.getEntity() instanceof Player) {

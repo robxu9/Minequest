@@ -3,19 +3,24 @@ package org.monk.MineQuest.Quester;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -46,6 +51,10 @@ public class Quester {
 	private int poison_timer;
 	private int rep;
 	private long damage_timer;
+	List<Integer> ids = new ArrayList<Integer>();
+	List<Long> times = new ArrayList<Long>();
+	private ItemStack[] spare_inven;
+	private ItemStack[] spare_inven_2;
 	
 	/**
 	 * Load player from MySQL Database.
@@ -74,6 +83,8 @@ public class Quester {
 	public Quester(String name) {
 		this.name = name;
 		update();
+		spare_inven = null;
+		spare_inven_2 = null;
 	}
 
 	/**
@@ -87,6 +98,8 @@ public class Quester {
 		create();
 		update();
 		distance = 0;
+		spare_inven = null;
+		spare_inven_2 = null;
 	}
 
 	/**
@@ -285,20 +298,19 @@ public class Quester {
 	 * @return true if cost paid
 	 */
 	public boolean canCast(List<ItemStack> list) {
-//		removed for testing
-//		int i;
-//		PlayerInventory inven = player.getInventory();
-//		
-//		for (i = 0; i < list.size(); i++) {
-//			if (inven.contains(list.get(i).getType())) {
-//				inven.removeItem(list.get(i));
-//			} else {
-//				while (i-- > 0) {
-//					inven.addItem(list.get(i));
-//				}
-//				return false;
-//			}
-//		}
+		int i;
+		PlayerInventory inven = player.getInventory();
+		
+		for (i = 0; i < list.size(); i++) {
+			if (inven.contains(list.get(i).getType())) {
+				inven.removeItem(list.get(i));
+			} else {
+				while (i-- > 0) {
+					inven.addItem(list.get(i));
+				}
+				return false;
+			}
+		}
 		return true;
 	}
 	
@@ -575,19 +587,6 @@ public class Quester {
 		
 		return false;
 	}
-
-	/**
-	 * MineQuest will soon be enabled for all characters all
-	 * the time.
-	 * 
-	 * @deprecated
-	 */
-	public void disable() {
-		enabled = false;
-		player.sendMessage("MineQuest is now disabled for your character");
-		
-		return;
-	}
 	
 	/**
 	 * Disable an ability with the given name.
@@ -750,7 +749,7 @@ public class Quester {
 	 * Returns name of Quester.
 	 * @return
 	 */
-	private String getName() {
+	public String getName() {
 		return name;
 	}
 
@@ -771,6 +770,33 @@ public class Quester {
 	public Town getTown() {
 		return MineQuest.getTown(last);
 	}
+	
+	public void giveSpareInventory() {
+		if (spare_inven != null) {
+			Location loc = player.getLocation();
+			World world = player.getWorld();
+			
+			Block block = world.getBlockAt((int)loc.getX() + 1,
+					(int)loc.getY(), (int)loc.getZ());
+			
+			block.setType(Material.CHEST);
+			
+			Chest chest = new CraftChest(block);
+			
+			chest.getInventory().setContents(spare_inven);
+			
+			block = world.getBlockAt((int)loc.getX() + 2,
+					(int)loc.getY(), (int)loc.getZ());
+			
+			block.setType(Material.CHEST);
+			
+			chest = new CraftChest(block);
+			
+			chest.getInventory().setContents(spare_inven_2);
+			
+			spare_inven = null;
+		}
+	}
 
 	/**
 	 * Called any time a Quester is taking damage of any time
@@ -782,23 +808,20 @@ public class Quester {
 	 * @return false
 	 */
 	public boolean healthChange(int change, EntityDamageEvent event) {
-		Calendar now = Calendar.getInstance();
-//		boolean flag = false;
-//		if (newValue <= 0) {
-//			flag = true;
-//		}
 		int newHealth;
-        if (!enabled) return false;
-        if ((now.getTimeInMillis() - damage_timer) < 500) { 
+		
+        if ((event instanceof EntityDamageByEntityEvent) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
         	event.setCancelled(true);
         	return false;
         }
-    	damage_timer = now.getTimeInMillis();
-        
-//        if (oldValue - newValue >= 20) {
-//                health = -1;
-//                return false;
-//        }
+        if (((event.getCause() == DamageCause.FIRE) || 
+        		(event.getCause() == DamageCause.FIRE_TICK) || 
+        		(event.getCause() == DamageCause.SUFFOCATION) || 
+        		(event.getCause() == DamageCause.DROWNING) || 
+        		(event.getCause() == DamageCause.LAVA)) && checkDamage(42024)) {
+        	event.setCancelled(true);
+        	return false;
+        }
 
     	MineQuest.log(change + " damage to " + name);
         health -= change;
@@ -813,18 +836,72 @@ public class Quester {
         	health = max_health;
         }
         
+        if (health <= 0) {
+        	MineQuest.log("Clearing Inventory!!");
+        	
+        	spare_inven = new ItemStack[27];
+        	int i;
+        	for (i = 0; i < 27; i++) {
+        		spare_inven[i] = player.getInventory().getItem(i);
+        	}
+        	spare_inven_2 = new ItemStack[27];
+        	for (i = 0; i < (player.getInventory().getSize() - 27); i++) {
+        		spare_inven_2[i] = player.getInventory().getItem(i + 27);
+        	}
+        	while ((i - (player.getInventory().getSize() - 27)) < player.getInventory().getArmorContents().length) {
+        		spare_inven_2[i] = player.getInventory().getArmorContents()[i - (player.getInventory().getSize() - 27)];
+        		i++;
+        	}
+        	
+        	player.getInventory().clear();
+        	
+        }
+        
         if (player.getHealth() >= newHealth) {
         	event.setDamage(player.getHealth() - newHealth);
         } else {
-            player.setHealth(newHealth);
-            event.setDamage(0);
-            event.setCancelled(true);
+        	if (health < 20) {
+        		player.setHealth(health + 1);
+        		event.setDamage(1);
+        	} else {
+        		event.setDamage(0);
+                event.setCancelled(true);
+        	}
         }
 
         MineQuest.log("[INFO] " + name + " - " + health + "/" + max_health);
 
         return false;
     }
+
+	/**
+	 * This function will check if the damager in the event passed
+	 * has damaged the quester too recently to damage again.
+	 * This implements individual cool down for every entity.
+	 * 
+	 * @param event Event that holds the attacker
+	 * @return True if damage should be cancelled
+	 */
+	private boolean checkDamage(int id) {
+		Calendar now = Calendar.getInstance();
+		int i;
+		
+		for (i = 0; i < ids.size(); i++) {
+			if (ids.get(i) == id) {
+				if ((now.getTimeInMillis() - times.get(i)) > 500) {
+					times.set(i, now.getTimeInMillis());
+					return false;
+				} else {
+					return true;
+				}
+			}
+		}
+		
+		ids.add(id);
+		times.add(now.getTimeInMillis());
+		
+		return false;
+	}
 
 	/**
 	 * Returns true if MineQuest is enabled for this
@@ -883,13 +960,16 @@ public class Quester {
 	 * @param to Quester's new Location
 	 */
 	public void move(Location from, Location to) {
-		if (respawn_flag) {
+		if ((respawn_flag) || ((health <= 0) && (player.getHealth() == 20))) {
+			health = max_health;
+//			updateHealth(player);
 			player.teleportTo(MineQuest.getTown(last).getSpawn());
 			respawn_flag = false;
+			return;
 		}
 		checkEquip(player);
 		
-		updateHealth(player);
+//		updateHealth(player);
 		
 		Town last_town = MineQuest.getNearestTown(to);
 		if (last_town != null) {
@@ -973,17 +1053,7 @@ public class Quester {
 		}
 		health = i;
 		
-		newValue = 20 * health / max_health;
-		
-		if ((newValue == 0) && (health > 0)) {
-			newValue++;
-		}
-		if (newValue < 0) {
-			newValue = 0;
-		}
-		
-		player.setHealth(newValue);
-		
+		updateHealth(player);
 	}
 
 	/**
@@ -993,6 +1063,10 @@ public class Quester {
 	 */
 	public void setPlayer(Player player) {
 		this.player = player;
+	}
+	
+	public void setRespawn(boolean enabled) {
+		respawn_flag = enabled;
 	}
 
 	/**
@@ -1012,11 +1086,10 @@ public class Quester {
 	 * @param event Teleport Event
 	 */
 	public void teleport(PlayerMoveEvent event) {
-		if ((health <= 0) && (player.getHealth() == 20)) {
-			health = max_health;
-			Town town = MineQuest.getNearestTown(event.getFrom());
-			event.setTo(town.getSpawn());
-		}
+//		if ((health <= 0) && (player.getHealth() == 20)) {
+//			event.setTo(MineQuest.getTown(last).getSpawn());
+//			setRespawn(true);
+//		}
 	}
 
 	/**
@@ -1083,6 +1156,7 @@ public class Quester {
 	public void update(Player player) {
 		this.player = player;
 		update();
+		updateHealth(player);
 	}
 
 	/**
@@ -1104,11 +1178,6 @@ public class Quester {
 			newValue = 0;
 		}
 		
-		if ((player.getHealth() == 20) && (health <= 0)) {
-			health = max_health;
-			respawn_flag = true;
-		} else {
-			player.setHealth(newValue);
-		}
+		player.setHealth(newValue);
 	}
 }

@@ -1068,7 +1068,7 @@ public class SkillClass {
 	public void update() {
 		ResultSet results;
 		
-		results = MineQuest.getSQLServer().query("SELECT * FROM classes WHERE name='" + quester.getPlayer().getName() + "' AND class='" + type + "'");
+		results = MineQuest.getSQLServer().query("SELECT * FROM classes WHERE name='" + quester.getName() + "' AND class='" + type + "'");
 		
 		try {
 			results.next();

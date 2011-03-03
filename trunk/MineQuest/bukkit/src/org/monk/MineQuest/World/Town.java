@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
@@ -22,23 +25,23 @@ public class Town {
 	private List<Store> stores;
 	private Property town;
 	
-	public Town(String name) {
+	public Town(String name, World world) {
 		ResultSet results = MineQuest.getSQLServer().query("SELECT * from towns WHERE name='" + name + "'");
 		this.name = name;
 		
 		try {
 			if (results.next()) {
 				int height = results.getInt("height");
-				Location start = new Location(null, (double)results.getInt("x"), 
+				Location start = new Location(world, (double)results.getInt("x"), 
 						(double)results.getInt("y"), (double)results.getInt("z"));
-				Location end = new Location(null, (double)results.getInt("max_x"), 
+				Location end = new Location(world, (double)results.getInt("max_x"), 
 						(double)results.getInt("y") + height, (double)results.getInt("max_z"));
 				Quester owner = MineQuest.getQuester(results.getString("owner"));
 				
 				town = new Property(owner, start, end, height > 0);
 				center_x = town.getCenterX();
 				center_z = town.getCenterZ();
-				spawn = new Location(MineQuest.getSServer().getWorlds().get(0), 
+				spawn = new Location(world, 
 						(double)results.getInt("spawn_x"), 
 						(double)results.getInt("spawn_y"), 
 						(double)results.getInt("spawn_z"));
@@ -54,8 +57,8 @@ public class Town {
 		try {
 			while (results.next()) {
 				int height = results.getInt("height");
-				Location start = new Location(null, (double)results.getInt("x"), (double)results.getInt("y"), (double)results.getInt("z"));
-				Location end = new Location(null, (double)results.getInt("max_x"), (double)results.getInt("y") + height, (double)results.getInt("max_z"));
+				Location start = new Location(world, (double)results.getInt("x"), (double)results.getInt("y"), (double)results.getInt("z"));
+				Location end = new Location(world, (double)results.getInt("max_x"), (double)results.getInt("y") + height, (double)results.getInt("max_z"));
 				if (results.getBoolean("store_prop")) {
 					String store = results.getString("name");
 					
@@ -84,9 +87,21 @@ public class Town {
 	}
 	
 	public void checkMobs() {
-		//TODO: write checkMobs();
+		List<LivingEntity> livingEntities = MineQuest.getSServer().getWorld("world").getLivingEntities();
+		
+		for (LivingEntity livingEntity : livingEntities) {
+			if (livingEntity instanceof Monster) {
+				checkMob((Monster)livingEntity);
+			}
+		}
 	}
 	
+	private void checkMob(Monster livingEntity) {
+		if (inTown(livingEntity.getLocation())) {
+			livingEntity.teleportTo(town.getEdge(livingEntity.getLocation()));
+		}
+	}
+
 	public void createProperty(Player player) {
 		if (town.canEdit(MineQuest.getQuester(player))) {
 			person = player.getName();
