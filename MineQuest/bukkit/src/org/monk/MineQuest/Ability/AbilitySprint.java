@@ -8,7 +8,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
 
 public class AbilitySprint extends Ability {
 
@@ -24,6 +25,20 @@ public class AbilitySprint extends Ability {
 		list.add(new ItemStack(288, 1));
 
 		return list;
+	}
+	
+	@Override
+	public String getName() {
+		return "Sprint";
+	}
+	
+	@Override
+	public int getReqLevel() {
+		if (myclass instanceof Warrior) {
+			return 5;
+		} else {
+			return 3;
+		}
 	}
 	
 	@Override

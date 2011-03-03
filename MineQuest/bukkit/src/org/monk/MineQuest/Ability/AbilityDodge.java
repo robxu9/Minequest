@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityDodge extends Ability {
 
@@ -28,6 +28,16 @@ public class AbilityDodge extends Ability {
 		list.add(new ItemStack(288, 1));
 		
 		return list;
+	}
+	
+	@Override
+	public int getReqLevel() {
+		return 1;
+	}
+	
+	@Override
+	public String getName() {
+		return "Dodge";
 	}
 
 	@Override

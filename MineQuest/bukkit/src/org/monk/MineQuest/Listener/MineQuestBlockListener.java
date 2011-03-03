@@ -21,7 +21,7 @@ public class MineQuestBlockListener extends BlockListener {
 		if (quester.checkItemInHandAbilL()) {
 			quester.callAbilityL(event.getBlock());
 		}
-		quester.destroyBlock(event.getBlock());
+		quester.destroyBlock(event);
 		
 		if (town != null) {
 			Property prop = town.getProperty(event.getBlock().getLocation());

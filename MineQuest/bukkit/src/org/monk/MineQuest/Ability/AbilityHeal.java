@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityHeal extends Ability {
 
@@ -29,6 +29,11 @@ public class AbilityHeal extends Ability {
 	@Override
 	public int getCastTime() {
 		return 20000;
+	}
+	
+	@Override
+	public String getName() {
+		return "Heal";
 	}
 	
 	@Override

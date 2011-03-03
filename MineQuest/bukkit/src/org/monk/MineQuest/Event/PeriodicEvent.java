@@ -23,7 +23,7 @@ public class PeriodicEvent implements Event {
 
 	@Override
 	public void activate(EventParser eventParser) {
-		eventParser.addEvent(this);
+		eventParser.setComplete(false);
 	}
 
 	@Override

@@ -1,61 +1,58 @@
 package org.monk.MineQuest.Event;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-
-import org.monk.MineQuest.MineQuest;
 
 public class EventParser implements java.lang.Runnable {
-	static private long start_time;
-	static private Calendar now;
-	static private List<Event> events;
-	static private boolean enabled;
+	protected Event event;
+	protected int id;
+	protected boolean complete;
+	private Calendar now;
+	private boolean done;
+
+	public EventParser(Event event) {
+		this.event = event;
+		complete = false;
+		event.reset(getTime());
+		done = false;
+	}
 	
-	public EventParser() {
-		events = new ArrayList<Event>();
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public void setComplete(boolean complete) {
+		this.complete = complete;
+	}
+	
+	public boolean getComplete() {
+		return complete;
+	}
+
+	public void run() {
 		now = Calendar.getInstance();
+		if (!complete && event.isPassed(now.getTimeInMillis())) {
+			complete = true;
+			event.activate(this);
+			if (!complete) {
+				event.reset(getTime());
+			}
+		}
 	}
-	
-	public void enable() {
-		enabled = true;
+
+	public int getId() {
+		return id;
 	}
-	
-	public void disable() {
-		enabled = false;
-	}
-	
-	public void addEvent(Event event) {
-		now = Calendar.getInstance();
-		event.reset(now.getTimeInMillis());
-		events.add(event);
-	}
-	
-	public void delEvent(Event event) {
-		now = Calendar.getInstance();
-		events.remove(event);
-	}
-	
-	public List<Event> getQueue() {
-		now = Calendar.getInstance();
-		return events;
-	}
-	
+
 	public long getTime() {
 		now = Calendar.getInstance();
 		return now.getTimeInMillis();
 	}
 
-	public void run() {
-		now = Calendar.getInstance();
-		if (enabled) {
-			for (Event event : events) {
-				if (event.isPassed(now.getTimeInMillis())) {
-					events.remove(event);
-					event.activate(this);
-				}
-			}
-		}
+	public boolean isDone() {
+		return done;
 	}
-	
+
+	public void setDone(boolean b) {
+		done = b;
+	}
 }

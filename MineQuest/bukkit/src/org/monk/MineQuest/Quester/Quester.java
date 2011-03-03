@@ -17,6 +17,7 @@ import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -25,6 +26,9 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Quester.SkillClass.CombatClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
 import org.monk.MineQuest.World.Town;
 
 /**
@@ -126,8 +130,10 @@ public class Quester {
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
 				if (entity instanceof LivingEntity) {
-					skill.attack((LivingEntity)entity, event);
-					expGain(5);
+					if (skill instanceof CombatClass) {
+						((CombatClass)skill).attack((LivingEntity)entity, event);
+						expGain(5);
+					}
 					return;
 				}
 			}
@@ -136,8 +142,10 @@ public class Quester {
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
 				if (entity instanceof LivingEntity) {
-					skill.attack((LivingEntity)entity, event);
-					expGain(5);
+					if (skill instanceof CombatClass) {
+						((CombatClass)skill).attack((LivingEntity)entity, event);
+						expGain(5);
+					}
 					return;
 				}
 			}
@@ -524,9 +532,13 @@ public class Quester {
 		
 		int i, sum = 0;
 		
-		for (i = 0; i < classes.length; i++) {
+		for (SkillClass sclass : classes) {
 			if (entity instanceof LivingEntity) {
-				sum += classes[i].defend((LivingEntity)entity, amount);
+				if (sclass instanceof CombatClass) {
+					sum += ((CombatClass)sclass).defend((LivingEntity)entity, amount);
+				} else if (sclass instanceof Miner) {
+					sum += ((Miner)sclass).defend((LivingEntity)entity, amount);
+				}
 			}
 		}
 		
@@ -546,15 +558,15 @@ public class Quester {
 	 * see if it is bound to any abilities then attributes experience
 	 * to given class if required.
 	 * 
-	 * @param block being destroyed
+	 * @param event being destroyed
 	 * @return false
 	 */
-	public boolean destroyBlock(Block block) {
+	public boolean destroyBlock(BlockDamageEvent event) {
 		if (!enabled) return false;
 
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
-				skill.blockDestroy(block);
+				skill.blockDestroy(event);
 				expGain(5);
 				return false;
 			}
@@ -562,24 +574,24 @@ public class Quester {
 		
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
-				skill.blockDestroy(block);
+				skill.blockDestroy(event);
 				expGain(1);
 				return false;
 			}
 		}
 		
-		switch (blockToClass(block)) {
+		switch (blockToClass(event.getBlock())) {
 		case 0: // Miner
-			getClass("Miner").blockDestroy(block);
+			getClass("Miner").blockDestroy(event);
 			return false;
 		case 1: // Lumberjack
-			getClass("Lumberjack").blockDestroy(block);
+			getClass("Lumberjack").blockDestroy(event);
 			return false;
 		case 2: // Digger
-			getClass("Digger").blockDestroy(block);
+			getClass("Digger").blockDestroy(event);
 			return false;
 		case 3: // Farmer
-			getClass("Farmer").blockDestroy(block);
+			getClass("Farmer").blockDestroy(event);
 			return false;
 		default:
 			break;
@@ -610,18 +622,6 @@ public class Quester {
 	 */
 	public void dropRep(int i) {
 		rep -= i;
-	}
-	
-	/**
-	 * Enables MineQuest for this quester.
-	 * 
-	 * @deprecated
-	 */
-    public void enable() {
-		enabled = true;
-		player.sendMessage("MineQuest is now enabled for your character");
-		
-		return;
 	}
 
     /**
@@ -1143,7 +1143,7 @@ public class Quester {
 		
 		classes = new SkillClass[split.length];
 		for (i = 0; i < split.length; i++) {
-			classes[i] = new SkillClass(this, split[i]);
+			classes[i] = SkillClass.newClass(this, split[i]);
 		}
 		damage_timer = 0;
 	}

@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityPowerstrike extends Ability{
 
@@ -24,6 +24,16 @@ public class AbilityPowerstrike extends Ability{
 		list.add(new ItemStack(268, 1));
 		
 		return list;
+	}
+	
+	@Override
+	public int getReqLevel() {
+		return 3;
+	}
+	
+	@Override
+	public String getName() {
+		return "PowerStrike";
 	}
 	
 	@Override
