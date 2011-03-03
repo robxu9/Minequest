@@ -1,0 +1,39 @@
+This is the format for the save files that will hold quest event details.
+
+Event:0:AreaEvent:500:all:-116:68:-179:2
+Event:1:MessageEvent:10:all:There has been suspicious activity on the Ship to the East
+Event:2:MessageEvent:20:all:Go investigate it!
+Event:3:BlockEvent:1000:-117:67:-181:5
+Event:4:BlockEvent:1000:-118:67:-181:5
+Event:5:BlockEvent:1000:-110:67:-181:5
+Event:6:QuestEvent:1000
+Event:7:MessageEvent:2000:all:Its a Trap! Kill the Monsters!
+Event:8:MessageEvent:120000:all:These monsters just keep respawning, get those on the Shoreline!
+Event:9:EntitySpawnerEvent:5:-97:71:-178:Skeleton:f
+Event:10:EntitySpawnerEvent:5:-97:71:-185:Zombie:f
+Event:11:EntitySpawnerEvent:5:-99:71:-178:Spider:f
+Event:12:EntitySpawnerEvent:5:-99:71:-185:Zombie:f
+Event:13:EntitySpawnerNoMove:5:-87:67:-142:Skeleton:t
+Event:14:EntitySpawnerNoMove:5:-87:67:-143:Zombie:t
+Event:15:EntitySpawnerNoMove:5:-88:67:-142:Spider:t
+Event:16:EntitySpawnerNoMove:5:-88:67:-143:Zombie:t
+Event:28:AreaEvent:500:all:-87:67:-143:20
+Event:17:EntitySpawnerCompleteNMEvent:10:13
+Event:18:EntitySpawnerCompleteNMEvent:10:14
+Event:19:EntitySpawnerCompleteNMEvent:10:15
+Event:20:EntitySpawnerCompleteNMEvent:10:16
+Event:21:MessageEvent:10:all:They noticed you! Kill them quickly!
+Event:22:EntitySpawnerCompleteEvent:10:9
+Event:23:EntitySpawnerCompleteEvent:10:10
+Event:24:EntitySpawnerCompleteEvent:10:11
+Event:25:EntitySpawnerCompleteEvent:10:12
+Event:26:MessageEvent:1000:all:God job! You got them all!
+Event:27:ExperienceAdd:1000:all:1000:1000
+Task:0,1,2
+Task:3,4,5,6,7,8
+Task:9,10,11,12,13,14,15,16,28
+Task:17,18,19,20,21
+Task:22
+Task:23
+Task:24
+Task:25,26,27
