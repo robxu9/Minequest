@@ -3,7 +3,6 @@ package org.monk.MineQuest.Event;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.monk.MineQuest.MineQuest;
 
 public class BlockEvent extends NormalEvent {
 	protected Material newType;
@@ -22,7 +21,6 @@ public class BlockEvent extends NormalEvent {
 	
 	@Override
 	public void activate(EventParser eventParser) {
-		MineQuest.log("Setting Type to " + newType);
 		block.setType(newType);
 	}
 

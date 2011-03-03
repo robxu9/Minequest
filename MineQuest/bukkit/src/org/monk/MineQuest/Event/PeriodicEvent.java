@@ -1,6 +1,5 @@
 package org.monk.MineQuest.Event;
 
-import org.monk.MineQuest.MineQuest;
 
 public class PeriodicEvent extends NormalEvent {
 	protected long delay;

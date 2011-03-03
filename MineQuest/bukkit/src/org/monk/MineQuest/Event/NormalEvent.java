@@ -3,6 +3,7 @@ package org.monk.MineQuest.Event;
 public class NormalEvent implements Event {
 	protected long delay;
 	protected long reset_time;
+	protected int id;
 	
 	public NormalEvent(long delay) {
 		this.delay = delay;
@@ -27,5 +28,15 @@ public class NormalEvent implements Event {
 	@Override
 	public String getName() {
 		return "Generic Event";
+	}
+
+	@Override
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	@Override
+	public int getId() {
+		return id;
 	}
 }

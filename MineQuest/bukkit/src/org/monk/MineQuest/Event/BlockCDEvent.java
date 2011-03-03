@@ -2,7 +2,6 @@ package org.monk.MineQuest.Event;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.monk.MineQuest.MineQuest;
 
 public class BlockCDEvent extends BlockEvent {
 	private long second_delay;

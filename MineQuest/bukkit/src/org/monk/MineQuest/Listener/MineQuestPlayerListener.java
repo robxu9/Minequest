@@ -51,8 +51,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		// TODO Auto-generated method stub
-		super.onPlayerRespawn(event);
+		MineQuest.getQuester(event.getPlayer()).respawn(event);
 	}
 	
 	@Override
@@ -439,6 +438,16 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
         	MineQuest.addQuest(new Quest(questers));
            	event.setCancelled(true);
+        } else if (split[0].equals("/class_exp")) {
+        	MineQuest.getQuester(player).sendMessage("You have " + MineQuest.getQuester(player).getClassExp() + " unassigned experience");
+        	event.setCancelled(true);
+        } else if (split[0].equals("/assign_exp")) {
+        	if (split.length < 3) {
+        		player.sendMessage("Usage: /assign_exp class_name amount");
+        	} else {
+        		MineQuest.getQuester(player).spendClassExp(split[1], Integer.parseInt(split[2]));
+        	}
+        	event.setCancelled(true);
         }
 		
 		

@@ -1,6 +1,5 @@
 package org.monk.MineQuest.Quester.SkillClass;
 
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;

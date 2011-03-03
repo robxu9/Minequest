@@ -1,7 +1,7 @@
 package org.monk.MineQuest.Event;
 
 public class EntitySpawnerCompleteEvent extends NormalEvent {
-	private EntitySpawnerEvent event;
+	protected EntitySpawnerEvent event;
 
 	public EntitySpawnerCompleteEvent(long delay, EntitySpawnerEvent event) {
 		super(delay);

@@ -33,4 +33,10 @@ public interface Event {
 	 * @return Name of event
 	 */
 	public String getName();
+	
+	/**
+	 * Used for local organization. Does not have to be unique.
+	 */
+	void setId(int id);
+	public int getId();
 }
