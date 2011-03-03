@@ -71,18 +71,20 @@ public class Ability {
 	static public List<Ability> newAbilities(String name, SkillClass myclass) {
 		List<Ability> abilities = new ArrayList<Ability>();
 		
-		if (myclass instanceof Warrior) {
+		if ((myclass == null) || (myclass instanceof Warrior)) {
 			abilities.add(new AbilityPowerstrike(name, myclass));
 			abilities.add(new AbilityDodge(name, myclass));
 			abilities.add(new AbilityDeathblow(name, myclass));
 			abilities.add(new AbilitySprint(name, myclass));
-		} else if (myclass instanceof Archer) {
+		} 
+		if ((myclass == null) || (myclass instanceof Archer)) {
 			abilities.add(new AbilityDodge(name, myclass));
 			abilities.add(new AbilitySprint(name, myclass));
 			abilities.add(new AbilityFireArrow(name, myclass));
 			abilities.add(new AbilityRepulsion(name, myclass));
 			abilities.add(new AbilityHailofArrows(name, myclass));
-		} else if (myclass instanceof WarMage) {
+		} 
+		if ((myclass == null) || (myclass instanceof WarMage)) {
 			abilities.add(new AbilityFireball(name, myclass));
 			abilities.add(new AbilityWallofFire(name, myclass));
 			abilities.add(new AbilityFireChain(name, myclass));
@@ -90,7 +92,8 @@ public class Ability {
 			abilities.add(new AbilityDrainLife(name, myclass));
 			abilities.add(new AbilityIceSphere(name, myclass));
 			abilities.add(new AbilityTrap(name, myclass));
-		} else if (myclass instanceof PeaceMage) {
+		}
+		if ((myclass == null) || (myclass instanceof PeaceMage)) {
 			abilities.add(new AbilityHeal(name, myclass));
 			abilities.add(new AbilityHealOther(name, myclass));
 			abilities.add(new AbilityHealAura(name, myclass));
@@ -99,8 +102,6 @@ public class Ability {
 			abilities.add(new AbilityCurePoisonOther(name, myclass));
 			abilities.add(new AbilityTrape(name, myclass));
 			abilities.add(new AbilityWallofWater(name, myclass));
-		} else {
-			MineQuest.log("Unknown Class " + myclass.getType());
 		}
 		
 		return abilities;
@@ -225,7 +226,7 @@ public class Ability {
 	 * @param quester Quester enabling the ability
 	 */
 	public void enable(Quester quester) {
-		if (quester.canCast(null)) {
+		if (quester.canCast(getManaCost())) {
 			enabled = true;
 			quester.sendMessage(name + " enabled");
 		} else {

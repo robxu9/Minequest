@@ -4,7 +4,6 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
 
 public class QuestEvent extends PeriodicEvent {
-
 	private Quest quest;
 
 	public QuestEvent(Quest quest, long delay) {
@@ -19,8 +18,11 @@ public class QuestEvent extends PeriodicEvent {
 	}
 	
 	public void eventComplete() {
-		for (Event event : quest.getNextEvents()) {
-			MineQuest.getEventParser().addEvent(event);
+		Event[] events = quest.getNextEvents();
+		if (events != null) {
+			for (Event event : events) {
+				MineQuest.getEventParser().addEvent(event);
+			}
 		}
 	}
 	

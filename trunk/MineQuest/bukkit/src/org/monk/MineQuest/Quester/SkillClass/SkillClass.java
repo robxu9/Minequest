@@ -224,6 +224,16 @@ public class SkillClass {
 		if (level >= 20) {
 			return;
 		}
+		if (this instanceof WarMage) {
+			if (quester.getClass("PeaceMage").getLevel() >= 20) {
+				return;
+			}
+		}
+		if (this instanceof PeaceMage) {
+			if (quester.getClass("WarMage").getLevel() >= 20) {
+				return;
+			}
+		}
 		
 		item_ids = getClassArmorIds();
 		if (item_ids == null) {

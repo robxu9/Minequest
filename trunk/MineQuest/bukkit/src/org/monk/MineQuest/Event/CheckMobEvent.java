@@ -1,6 +1,5 @@
 package org.monk.MineQuest.Event;
 
-import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.World.Town;
 
 public class CheckMobEvent extends PeriodicEvent {

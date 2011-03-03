@@ -17,6 +17,7 @@ public class MineQuestBlockListener extends BlockListener {
 		if (quester.inQuest()) {
 			event.setCancelled(true);
 			quester.sendMessage("A Mystical Force is keeping you from Modifying the world!");
+			quester.sendMessage(event.getBlock().getX() + " " + event.getBlock().getY() + " " + event.getBlock().getZ());
 		}
 	
 		quester.checkItemInHand();
@@ -55,9 +56,6 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockRightClick(org.bukkit.event.block.BlockRightClickEvent event) {
-		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
-			return;
-		}
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		quester.checkItemInHand();

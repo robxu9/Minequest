@@ -537,6 +537,7 @@ public class MineQuest extends JavaPlugin {
 	        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, pl, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.PLAYER_TELEPORT, pl, Priority.Normal, this);
+	        pm.registerEvent(Event.Type.PLAYER_RESPAWN, pl, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.ENTITY_DAMAGED, el, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
@@ -572,7 +573,6 @@ public class MineQuest extends JavaPlugin {
 		if (getMob(entity) != null) return;
 		
 		if (generator.nextDouble() < (getAdjustment() / 100.0)) {
-			getSServer().broadcastMessage("Super Mob Spawn!");
 			newMob = new SpecialMob(entity);
 		} else {
 			newMob = new MQMob(entity);

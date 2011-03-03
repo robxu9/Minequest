@@ -30,7 +30,10 @@ public class SpecialMobHandler extends PeriodicEvent {
 		Block block = mob.getMonster().getWorld().getBlockAt((int)loc.getX(), 
 				Ability.getNearestY((int)loc.getX(), (int)loc.getY(), (int)loc.getZ()) - 1, (int)loc.getZ());
 		
-		block.setType(Material.DIRT);
+		if (block.getType() != Material.DIRT){
+			MineQuest.getEventParser().addEvent(new BlockEvent(30000, block, block.getType()));
+			MineQuest.getEventParser().addEvent(new BlockEvent(10, block, Material.DIRT));
+		}
 
 		super.activate(eventParser);
 		

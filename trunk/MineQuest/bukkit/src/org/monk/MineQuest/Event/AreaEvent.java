@@ -26,8 +26,6 @@ public class AreaEvent extends QuestEvent {
 	public void activate(EventParser eventParser) {
 		eventParser.setComplete(false);
 		
-		MineQuest.log("Checking Area");
-		
 		int i;
 		for (i = 0; i < entities.length; i++) {
 			if (MineQuest.distance(entities[i].getLocation(), loc) < radius) {

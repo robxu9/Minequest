@@ -1,7 +1,6 @@
 package org.monk.MineQuest.Quester.SkillClass.Combat;
 
 import org.bukkit.craftbukkit.entity.CraftCreeper;
-import org.bukkit.craftbukkit.entity.CraftSpider;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;

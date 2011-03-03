@@ -23,6 +23,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
@@ -48,7 +49,6 @@ public class Quester {
 	private int exp;
 	private int health;
 	private String last;
-	private boolean respawn_flag;
 	private int level;
 	private int max_health;
 	private String name;
@@ -56,6 +56,7 @@ public class Quester {
 	private int poison_timer;
 	private int rep;
 	private long damage_timer;
+	private int class_exp;
 	List<Integer> ids = new ArrayList<Integer>();
 	List<Long> times = new ArrayList<Long>();
 	private ItemStack[] spare_inven;
@@ -668,7 +669,7 @@ public class Quester {
 	 * 
 	 * @param i Experience to Add
 	 */
-	private void expGain(int i) {
+	public void expGain(int i) {
 		exp += i;
 		if (exp > 400 * (level + 1)) {
 			levelUp();
@@ -861,6 +862,7 @@ public class Quester {
         		spare_inven_2[i] = player.getInventory().getItem(i + 27);
         	}
         	while ((i - (player.getInventory().getSize() - 27)) < player.getInventory().getArmorContents().length) {
+        		MineQuest.log("Armor! " + i + " " + (i - (player.getInventory().getSize() - 27)));
         		spare_inven_2[i] = player.getInventory().getArmorContents()[i - (player.getInventory().getSize() - 27)];
         		i++;
         	}
@@ -972,13 +974,6 @@ public class Quester {
 	 * @param to Quester's new Location
 	 */
 	public void move(Location from, Location to) {
-		if ((respawn_flag) || ((health <= 0) && (player.getHealth() == 20))) {
-			health = max_health;
-//			updateHealth(player);
-			player.teleportTo(MineQuest.getTown(last).getSpawn());
-			respawn_flag = false;
-			return;
-		}
 		checkEquip(player);
 		
 		updateHealth(player);
@@ -1076,10 +1071,6 @@ public class Quester {
 	public void setPlayer(Player player) {
 		this.player = player;
 	}
-	
-	public void setRespawn(boolean enabled) {
-		respawn_flag = enabled;
-	}
 
 	/**
 	 * Sets the last town that the Quester was near.
@@ -1158,6 +1149,8 @@ public class Quester {
 			classes[i] = SkillClass.newClass(this, split[i]);
 		}
 		damage_timer = 0;
+		
+		class_exp = 0;
 	}
 
 	/**
@@ -1203,5 +1196,35 @@ public class Quester {
 	
 	public boolean inQuest() {
 		return quest != null;
+	}
+
+	public void expClassGain(int class_exp) {
+		this.class_exp = class_exp;
+	}
+	
+	public int getClassExp() {
+		return class_exp;
+	}
+	
+	public void spendClassExp(String type, int amount) {
+		if (amount > class_exp) {
+			sendMessage("You only have " + class_exp + " available");
+			return;
+		}
+		if (getClass(type) == null) {
+			sendMessage(type + " is not a valid class for you");
+			return;
+		}
+		
+		class_exp -= amount;
+		
+		getClass(type).expAdd(amount);
+		sendMessage(amount + " experience spent on " + type);
+	}
+
+	public void respawn(PlayerRespawnEvent event) {
+		health = max_health;
+		event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+		return;
 	}
 }
