@@ -5,10 +5,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -22,6 +25,7 @@ import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
+import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.World.Town;
 
@@ -43,6 +47,8 @@ public class MineQuest extends JavaPlugin {
 	private static MysqlInterface sql_server;
 	private static Location start;
 	private static List<Town> towns = new ArrayList<Town>();
+	private static MQMob mobs[];
+	private static List<Quest> quests;
 //	private MineQuestServerListener sl;
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
@@ -153,8 +159,17 @@ public class MineQuest extends JavaPlugin {
 	 * @return Adjustment Factor to be used
 	 */
 	public static int getAdjustment() {
-		// TODO Auto-generated method stub
-		return 0;
+        int avgLevel = 0;
+        int size = 0;
+        for (Quester quester : questers) {
+            if (quester.getPlayer() == null) {
+	            avgLevel += quester.getLevel();
+	            size++;
+            }
+        }
+        avgLevel /= size;
+        
+        return (avgLevel / 10);
 	}
 	
     /**
@@ -456,11 +471,16 @@ public class MineQuest extends JavaPlugin {
     protected void setEnabled(boolean enabled) {
     	// TODO Auto-generated method stub
     	super.setEnabled(enabled);
-    	if (enabled) {
+    	if (enabled) {			
+			server = getServer();
 	        
+			mobs = new MQMob[1];
+    		
 	        eventQueue = new EventQueue(this);
 	        
-	        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
+	        quests = new ArrayList<Quest>();
+	        
+//	        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
 	        
 			List<String> names = new ArrayList<String>();
 			String url, port, db, user, pass;
@@ -489,8 +509,6 @@ public class MineQuest extends JavaPlugin {
 			
 			names.clear();
 			results = sql_server.query("SELECT * FROM towns");
-			
-			server = getServer();
 			
 			try {
 				while (results.next()) {
@@ -521,6 +539,7 @@ public class MineQuest extends JavaPlugin {
 	        pm.registerEvent(Event.Type.PLAYER_TELEPORT, pl, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.ENTITY_DAMAGED, el, Priority.Normal, this);
+	        pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.BLOCK_DAMAGED, bl, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.BLOCK_PLACED, bl, Priority.Normal, this);
 	        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED, bl, Priority.Normal, this);
@@ -534,4 +553,83 @@ public class MineQuest extends JavaPlugin {
 			}
     	}
     }
+    
+    public static void checkMobs() {
+    	int i;
+    	
+    	for (i = 0; i < mobs.length; i++) {
+    		if ((mobs[i] != null) && (mobs[i].getHealth() <= 0)) {
+    			mobs[i].dropLoot();
+    			mobs[i] = null;
+    		}
+    	}
+    }
+
+	public static void addMob(Monster entity) {
+		Random generator = new Random();
+		MQMob newMob;
+		
+		if (getMob(entity) != null) return;
+		
+		if (generator.nextDouble() < (getAdjustment() / 100.0)) {
+			getSServer().broadcastMessage("Super Mob Spawn!");
+			newMob = new SpecialMob(entity);
+		} else {
+			newMob = new MQMob(entity);
+		}
+		
+		addMQMob(newMob);
+	}
+	
+	public static void addMQMob(MQMob newMob) {
+		int i;
+		for (i = 0; i < mobs.length; i++) {
+			if (mobs[i] == null) {
+				mobs[i] = newMob;
+				return;
+			}
+		}
+		
+		MQMob newList[] = new MQMob[mobs.length*2];
+		i = 0;
+		for (MQMob mob : mobs) {
+			newList[i++] = mob;
+		}
+		newList[i++] = newMob;
+		while (i < newList.length){
+			newList[i++] = null;
+		}
+	}
+	
+	public static MQMob getMob(LivingEntity entity) {
+		for (MQMob mob : mobs) {
+			if (mob != null) {
+				if (mob.getId() == entity.getEntityId()) {
+					return mob;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	public static Quest getQuest(int index) {
+		return quests.get(index);
+	}
+	
+	public static void addQuest(Quest quest) {
+		quests.add(quest);
+	}
+	
+	public static List<Quester> getActiveQuesters() {
+		List<Quester> ret = new ArrayList<Quester>();
+		
+		for (Quester quester : questers) {
+			if (quester.getPlayer() != null) {
+				ret.add(quester);
+			}
+		}
+		
+		return ret;
+	}
 }

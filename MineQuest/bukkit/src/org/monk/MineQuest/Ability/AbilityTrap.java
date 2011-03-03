@@ -52,7 +52,10 @@ public class AbilityTrap extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		Player player = quester.getPlayer();
+		Player player = null;
+		if (quester != null) {
+			player = quester.getPlayer();
+		}
 		int i, j, k;
 		int x, y, z;
 		if (entity == null) {

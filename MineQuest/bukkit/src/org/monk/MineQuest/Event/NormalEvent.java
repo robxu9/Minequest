@@ -6,6 +6,7 @@ public class NormalEvent implements Event {
 	
 	public NormalEvent(long delay) {
 		this.delay = delay;
+		reset_time = 0;
 	}
 
 	@Override

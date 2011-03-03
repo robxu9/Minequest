@@ -8,7 +8,9 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.Store;
@@ -45,6 +47,12 @@ public class MineQuestPlayerListener extends PlayerListener {
 			MineQuest.getQuester(event.getPlayer()).setPlayer(null);
 		}
 		super.onPlayerQuit(event);
+	}
+	
+	@Override
+	public void onPlayerRespawn(PlayerRespawnEvent event) {
+		// TODO Auto-generated method stub
+		super.onPlayerRespawn(event);
 	}
 	
 	@Override
@@ -423,6 +431,14 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/give_spare")) {
         	MineQuest.getQuester(event.getPlayer()).giveSpareInventory();
         	event.setCancelled(true);
+        } else if (split[0].equals("/startquest")) {
+        	Quester questers[] = new Quester[MineQuest.getActiveQuesters().size()];
+        	int i = 0;
+        	for (Quester quester : MineQuest.getActiveQuesters()) {
+        		questers[i++] = quester;
+        	}
+        	MineQuest.addQuest(new Quest(questers));
+           	event.setCancelled(true);
         }
 		
 		

@@ -1,18 +1,28 @@
 package org.monk.MineQuest.Listener;
 
 
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityListener;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Quester.Quester;
 
 public class MineQuestEntityListener extends EntityListener {
+	
+	@Override
+	public void onCreatureSpawn(CreatureSpawnEvent event) {
+		Entity entity = event.getEntity();
+		
+		if (entity instanceof Monster) {
+			MineQuest.addMob((Monster)entity);
+			MineQuest.checkMobs();
+		}
+	}
 	
 	@Override
 	public void onEntityDamage(EntityDamageEvent event) {

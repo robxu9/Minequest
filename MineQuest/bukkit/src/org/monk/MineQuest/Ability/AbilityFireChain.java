@@ -43,19 +43,19 @@ public class AbilityFireChain extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		Player player = quester.getPlayer();
+		Player player = null;
+		if (quester != null) {
+			player = quester.getPlayer();
+		}
 		if (entity != null) {
-			Ability fireball = new Ability("Fireball", myclass);
+			Ability fireball = Ability.newAbility("Fireball", myclass);
 			LivingEntity this_entity;
 			int i;
 
-			fireball.enable(quester);
-			fireball.bindl(player, player.getItemInHand());
-
 			this_entity = getRandomEntity(entity, 10);
 			for (i = 0; i < 3 + myclass.getCasterLevel(); i++) {
-				fireball.useAbility(quester, new Location(player.getWorld(), (int) entity.getLocation().getX(),
-						(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()), 1,
+				fireball.castAbility(quester, new Location(player.getWorld(), (int) entity.getLocation().getX(),
+						(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 						entity);
 				this_entity = getRandomEntity(this_entity, 10);
 				if (myclass.getGenerator().nextDouble() < .1) {

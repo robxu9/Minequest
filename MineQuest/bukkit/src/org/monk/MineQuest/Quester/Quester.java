@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
@@ -59,6 +60,7 @@ public class Quester {
 	List<Long> times = new ArrayList<Long>();
 	private ItemStack[] spare_inven;
 	private ItemStack[] spare_inven_2;
+	private Quest quest;
 	
 	/**
 	 * Load player from MySQL Database.
@@ -138,15 +140,19 @@ public class Quester {
 				}
 			}
 		}
-		
-		for (SkillClass skill : classes) {
-			if (skill.isClassItem(player.getItemInHand())) {
-				if (entity instanceof LivingEntity) {
+
+		if (entity instanceof LivingEntity) {
+			for (SkillClass skill : classes) {
+				if (skill.isClassItem(player.getItemInHand())) {
 					if (skill instanceof CombatClass) {
 						((CombatClass)skill).attack((LivingEntity)entity, event);
 						expGain(5);
+						return;
+					} else {
+						((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
+						expGain(3);
+						return;
 					}
-					return;
 				}
 			}
 		}
@@ -522,6 +528,12 @@ public class Quester {
 			amount *= levelAdj * 3;
 		}
 		amount /= 4;
+		
+		if (entity instanceof LivingEntity) {
+			if (MineQuest.getMob((LivingEntity)entity) != null) {
+				amount = MineQuest.getMob((LivingEntity)entity).attack(amount, player);
+			}
+		}
 		
 //		if (MineQuest.isSpecial((LivingEntity)attacker)) {
 //			amount = MineQuest.getSpecial((LivingEntity)attacker).attack(this, player, amount);
@@ -969,7 +981,7 @@ public class Quester {
 		}
 		checkEquip(player);
 		
-//		updateHealth(player);
+		updateHealth(player);
 		
 		Town last_town = MineQuest.getNearestTown(to);
 		if (last_town != null) {
@@ -1179,5 +1191,17 @@ public class Quester {
 		}
 		
 		player.setHealth(newValue);
+	}
+	
+	public void setQuest(Quest quest) {
+		this.quest = quest;
+	}
+	
+	public void clearQuest() {
+		this.quest = null;
+	}
+	
+	public boolean inQuest() {
+		return quest != null;
 	}
 }
