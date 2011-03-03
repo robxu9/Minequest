@@ -2,18 +2,18 @@ package org.monk.MineQuest.Event;
 
 import java.util.Calendar;
 
+import org.monk.MineQuest.MineQuest;
+
 public class EventParser implements java.lang.Runnable {
 	protected Event event;
 	protected int id;
 	protected boolean complete;
 	private Calendar now;
-	private boolean done;
 
 	public EventParser(Event event) {
 		this.event = event;
 		complete = false;
 		event.reset(getTime());
-		done = false;
 	}
 	
 	public void setId(int id) {
@@ -36,6 +36,8 @@ public class EventParser implements java.lang.Runnable {
 			if (!complete) {
 				event.reset(getTime());
 			}
+		} else if (complete) {
+			MineQuest.getSServer().getScheduler().cancelTask(id);
 		}
 	}
 
@@ -46,13 +48,5 @@ public class EventParser implements java.lang.Runnable {
 	public long getTime() {
 		now = Calendar.getInstance();
 		return now.getTimeInMillis();
-	}
-
-	public boolean isDone() {
-		return done;
-	}
-
-	public void setDone(boolean b) {
-		done = b;
 	}
 }

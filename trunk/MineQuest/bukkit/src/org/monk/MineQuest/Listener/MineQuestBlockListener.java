@@ -11,11 +11,13 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockDamage(org.bukkit.event.block.BlockDamageEvent event) {
-		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
-			return;
-		}
 		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
+		
+		if (quester.inQuest()) {
+			event.setCancelled(true);
+			quester.sendMessage("A Mystical Force is keeping you from Modifying the world!");
+		}
 	
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbilL()) {
@@ -68,11 +70,13 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockPlace(org.bukkit.event.block.BlockPlaceEvent event) {
-		if (!MineQuest.getQuester(event.getPlayer()).isEnabled()) {
-			return;
-		}
 		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
+		
+		if (quester.inQuest()) {
+			event.setCancelled(true);
+			quester.sendMessage("A Mystical Force is keeping you from Modifying the world!");
+		}
 		
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbilR()) {

@@ -2,23 +2,12 @@ package org.monk.MineQuest.Event;
 
 import org.monk.MineQuest.MineQuest;
 
-public class PeriodicEvent implements Event {
+public class PeriodicEvent extends NormalEvent {
 	protected long delay;
 	protected long reset_time;
 	
 	public PeriodicEvent(long delay) {
-		this.delay = delay;
-		reset_time = 0;
-	}
-
-	@Override
-	public boolean isPassed(long time) {
-		return (time - reset_time) > delay;
-	}
-
-	@Override
-	public void reset(long time) {
-		reset_time = time;
+		super(delay);
 	}
 
 	@Override

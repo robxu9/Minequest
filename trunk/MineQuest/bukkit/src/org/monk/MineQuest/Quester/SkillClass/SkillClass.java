@@ -79,6 +79,10 @@ public class SkillClass {
 		update();
 	}
 	
+	public SkillClass() {
+		//Shell
+	}
+	
 	/**
 	 * Reload the ability list from the MySQL database.
 	 * Used on initial creation of class and upon modification
@@ -355,47 +359,6 @@ public class SkillClass {
 	 */
 	public int[] getClassArmorIds() {
 		return null;
-	}
-
-	/**
-	 * Gets the Critical Hit chance for this specific
-	 * class.
-	 * 
-	 * @return Critical Hit Chance
-	 */
-	private double getCritChance() {
-		if ((getAbility("Deathblow") != null) && (getAbility("Deathblow").isEnabled())) {
-			return 0.1;
-		}
-		
-		return 0.05;
-	}
-	
-	/**
-	 * Gets the amount of damage that this class would do
-	 * to a specific entity.
-	 * 
-	 * @param defend Defending Entity
-	 * @return Damage to be dealt
-	 */
-	protected int getDamage(LivingEntity defend) {
-		int damage = 2;
-		damage += (quester.getLevel() / 10);
-		damage += (level / 5);
-		
-		if (generator.nextDouble() < getCritChance()) {
-			damage *= 2;
-			quester.sendMessage("Critical Hit!");
-		}
-		if (this instanceof ResourceClass) {
-			damage /= 4;
-		}
-		
-//		if (MineQuestListener.isSpecial(defend)) {
-//			return MineQuestListener.getSpecial(defend).defend(player, damage);
-//		}
-		
-		return damage;
 	}
 	
 	/**

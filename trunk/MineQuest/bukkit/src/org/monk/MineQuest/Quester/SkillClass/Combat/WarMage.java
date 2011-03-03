@@ -12,6 +12,11 @@ public class WarMage extends CombatClass {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public WarMage() {
+		type = "WarMage";
+		level = 10;
+	}
+	
 	@Override
 	public int[] getClassArmorIds() {
 		int item_ids[] = new int[4];

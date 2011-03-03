@@ -52,8 +52,21 @@ public class AbilityWallofFire extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		Player player = quester.getPlayer();
-		double rot = player.getLocation().getYaw() % 360 - 90;
+		Player player = null;
+		if (quester != null) {
+			player = quester.getPlayer();
+		}
+		double rot = 0;
+		if (player != null) {
+			rot = player.getLocation().getYaw() % 360 - 90;
+		} else {
+			rot = entity.getLocation().getYaw() % 360 - 90;
+		}
+		if (player != null) {
+			location = player.getLocation();
+		} else {
+			location = entity.getLocation();
+		}
 		int x_change, z_change;
 		int x, z;
 		int i;
@@ -63,26 +76,26 @@ public class AbilityWallofFire extends Ability {
 		if ((rot  < 45) || (rot > 315)) {
 			x_change = 0;
 			z_change = 1;
-			x = (int)player.getLocation().getX() - 2;
-			z = (int)player.getLocation().getZ() - 3;
+			x = (int)location.getX() - 2;
+			z = (int)location.getZ() - 3;
 		} else if ((rot > 45) && (rot < 135)) {
 			x_change = 1;
 			z_change = 0;
-			x = (int)player.getLocation().getX() - 3;
-			z = (int)player.getLocation().getZ() - 2;
+			x = (int)location.getX() - 3;
+			z = (int)location.getZ() - 2;
 		} else if ((rot > 135) && (rot < 225)) {
 			x_change = 0;
 			z_change = 1;
-			x = (int)player.getLocation().getX() + 3;
-			z = (int)player.getLocation().getZ() - 3;
+			x = (int)location.getX() + 3;
+			z = (int)location.getZ() - 3;
 		} else {
 			x_change = 1;
 			z_change = 0;
-			x = (int)player.getLocation().getX() - 3;
-			z = (int)player.getLocation().getZ() + 3;
+			x = (int)location.getX() - 3;
+			z = (int)location.getZ() + 3;
 		}
 		
-		World world = player.getWorld();
+		World world = location.getWorld();
 		for (i = 0; i < 7; i++) {
 			Block nblock = world.getBlockAt(x, getNearestY(x, (int)player.getLocation().getY(), z), z);
 			MineQuest.getEventParser().addEvent(new BlockCDEvent(0, 60000, nblock, Material.FIRE));

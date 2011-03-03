@@ -10,7 +10,10 @@ public class CombatClass extends SkillClass {
 
 	public CombatClass(Quester quester, String type) {
 		super(quester, type);
-		// TODO Auto-generated constructor stub
+	}
+	
+	public CombatClass() {
+		// Shell
 	}
 
 	/**
@@ -36,6 +39,45 @@ public class CombatClass extends SkillClass {
 		expAdd(getExpMob(defend) + MineQuest.getAdjustment());
 		
 		return true;
+	}
+	
+	/**
+	 * Gets the amount of damage that this class would do
+	 * to a specific entity.
+	 * 
+	 * @param defend Defending Entity
+	 * @return Damage to be dealt
+	 */
+	protected int getDamage(LivingEntity defend) {
+		int damage = 2;
+		damage += (quester.getLevel() / 10);
+		damage += (level / 5);
+		
+		if (generator.nextDouble() < getCritChance()) {
+			damage *= 2;
+			quester.sendMessage("Critical Hit!");
+		}
+		if (!isClassItem(quester.getPlayer().getItemInHand())) {
+			damage /= 2;
+		}
+		
+		damage = MineQuest.getMob(defend).defend(damage, quester.getPlayer());
+		
+		return damage;
+	}
+
+	/**
+	 * Gets the Critical Hit chance for this specific
+	 * class.
+	 * 
+	 * @return Critical Hit Chance
+	 */
+	private double getCritChance() {
+		if ((getAbility("Deathblow") != null) && (getAbility("Deathblow").isEnabled())) {
+			return 0.1;
+		}
+		
+		return 0.05;
 	}
 	
 	/**

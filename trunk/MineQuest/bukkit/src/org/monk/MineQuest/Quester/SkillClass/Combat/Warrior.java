@@ -39,6 +39,9 @@ public class Warrior extends CombatClass {
 	
 	@Override
 	protected int getExpMob(LivingEntity defend) {
+		if (!isClassItem(quester.getPlayer().getItemInHand())) {
+			return 3;
+		}
 		if (defend instanceof CraftCreeper) {
 			return 10;
 		} else {

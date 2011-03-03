@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -135,12 +136,12 @@ public class Ability {
 		if (world.getBlockAt(x, y, z).getTypeId() != 0) {
 			do {
 				i++;
-			} while (((world.getBlockAt(x, i, z).getTypeId() != 78) && (world.getBlockAt(x, i, z).getTypeId() != 0)) && (i < 1000));
+			} while (((world.getBlockAt(x, i, z).getType() != Material.SNOW) && (world.getBlockAt(x, i, z).getType() != Material.AIR)) && (i < 1000));
 			if (i == 1000) i = 0;
 		} else {
 			do {
 				i--;
-			} while (((world.getBlockAt(x, i, z).getTypeId() == 78) || (world.getBlockAt(x, i, z).getTypeId() == 0)) && (i > -100));
+			} while (((world.getBlockAt(x, i, z).getType() == Material.SNOW) || (world.getBlockAt(x, i, z).getType() == Material.AIR)) && (i > -100));
 			if (i == -100) i = 0;
 			i++;
 		}

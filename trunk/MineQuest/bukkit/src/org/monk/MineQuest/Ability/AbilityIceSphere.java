@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
@@ -45,7 +46,10 @@ public class AbilityIceSphere extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		Player player = quester.getPlayer();
+		Player player = null;
+		if (quester != null) {
+			player = quester.getPlayer();
+		}
 		int j,k;
 		if (entity == null) {
 			player.sendMessage("Cannot cast on null entity");
@@ -63,7 +67,12 @@ public class AbilityIceSphere extends Ability {
 			}
 		}
 		
-		entity.setHealth(entity.getHealth() - 3 - (myclass.getCasterLevel() / 2));
+		if (entity instanceof Player) {
+			Quester quest = MineQuest.getQuester((Player)entity);
+			quest.setHealth(quest.getHealth() - 3 - (myclass.getCasterLevel() / 2));
+		} else {
+			entity.setHealth(entity.getHealth() - 3 - (myclass.getCasterLevel() / 2));
+		}
 	}
 
 }

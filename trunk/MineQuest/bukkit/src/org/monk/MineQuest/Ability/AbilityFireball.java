@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -35,7 +36,17 @@ public class AbilityFireball extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		Player player = quester.getPlayer();
+		Player player = null;
+		World world;
+		if (quester != null) {
+			player = quester.getPlayer();
+		}
+		
+		if (player != null) {
+			world = player.getWorld();
+		} else {
+			world = entity.getWorld();
+		}
 		
 		double leftx, leftz;
 		int x, z;
@@ -49,22 +60,22 @@ public class AbilityFireball extends Ability {
 		x = (leftx < .5)?-1:1;
 		z = (leftz < .5)?-1:1;
 		
-		Block nblock = player.getWorld().getBlockAt((int)location.getX(), 
+		Block nblock = world.getBlockAt((int)location.getX(), 
 				getNearestY((int)location.getX(), (int)location.getY(), (int)location.getZ()), 
 				(int)location.getZ());
 		nblock.setTypeId(51);
 		
-		nblock = player.getWorld().getBlockAt((int)location.getX() + x, 
+		nblock = world.getBlockAt((int)location.getX() + x, 
 				getNearestY((int)location.getX() + x, (int)location.getY(), (int)location.getZ()), 
 				(int)location.getZ());
 		nblock.setTypeId(51);
 		
-		nblock = player.getWorld().getBlockAt((int)location.getX() + x, 
+		nblock = world.getBlockAt((int)location.getX() + x, 
 				getNearestY((int)location.getX() + x, (int)location.getY(), (int)location.getZ() + z), 
 				(int)location.getZ() + z);
 		nblock.setTypeId(51);
 		
-		nblock = player.getWorld().getBlockAt((int)location.getX(), 
+		nblock = world.getBlockAt((int)location.getX(), 
 				getNearestY((int)location.getX(), (int)location.getY(), (int)location.getZ() + z), 
 				(int)location.getZ() + z);
 		nblock.setTypeId(51);

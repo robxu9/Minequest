@@ -39,6 +39,7 @@ public class AbilityDrainLife extends Ability{
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
+		if (quester == null) return;
 		Player player = quester.getPlayer();
 		int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
 		if (entity != null) {
