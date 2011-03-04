@@ -8,10 +8,12 @@ public class EntitySpawnerCompleteNMEvent extends EntitySpawnerCompleteEvent {
 	private Quest quest;
 	private boolean first;
 	private LivingEntity entity;
+	private int index;
 
-	public EntitySpawnerCompleteNMEvent(Quest quest, long delay, EntitySpawnerEvent event) {
+	public EntitySpawnerCompleteNMEvent(Quest quest, long delay, int index, EntitySpawnerEvent event) {
 		super(delay, event);
 		this.quest = quest;
+		this.index = index;
 		first = true;
 	}
 	
@@ -32,7 +34,7 @@ public class EntitySpawnerCompleteNMEvent extends EntitySpawnerCompleteEvent {
 	}
 	
 	public void eventComplete() {
-		Event[] events = quest.getNextEvents();
+		Event[] events = quest.getNextEvents(index);
 		if (events != null) {
 			for (Event event : events) {
 				MineQuest.getEventParser().addEvent(event);

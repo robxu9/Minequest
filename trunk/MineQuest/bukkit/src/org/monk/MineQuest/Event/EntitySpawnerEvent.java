@@ -17,9 +17,9 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 	protected boolean complete;
 	protected boolean superm;
 
-	public EntitySpawnerEvent(long delay, World world, Location location, CreatureType creatureType, boolean superm) {
+	public EntitySpawnerEvent(long delay, Location location, CreatureType creatureType, boolean superm) {
 		super(delay);
-		this.world = world;
+		this.world = location.getWorld();
 		this.location = location;
 		this.creatureType = creatureType;
 		this.superm = superm;

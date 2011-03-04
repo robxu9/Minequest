@@ -621,15 +621,21 @@ public class MineQuest extends JavaPlugin {
 		quests.add(quest);
 	}
 	
-	public static List<Quester> getActiveQuesters() {
-		List<Quester> ret = new ArrayList<Quester>();
+	public static Quester[] getActiveQuesters() {
+		List<Quester> active = new ArrayList<Quester>();
 		
 		for (Quester quester : questers) {
 			if (quester.getPlayer() != null) {
-				ret.add(quester);
+				active.add(quester);
 			}
 		}
 		
-		return ret;
+		Quester[] questers = new Quester[active.size()];
+		int i;
+		for (i = 0; i < active.size(); i++) {
+			questers[i] = active.get(i);
+		}
+		
+		return questers;
 	}
 }

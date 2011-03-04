@@ -6,9 +6,9 @@ import org.bukkit.entity.CreatureType;
 
 public class EntitySpawnerNoMove extends EntitySpawnerEvent {
 
-	public EntitySpawnerNoMove(long delay, World world, Location location,
+	public EntitySpawnerNoMove(long delay, Location location,
 			CreatureType creatureType, boolean superm) {
-		super(delay, world, location, creatureType, superm);
+		super(delay, location, creatureType, superm);
 	}
 	
 	@Override

@@ -431,12 +431,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         	MineQuest.getQuester(event.getPlayer()).giveSpareInventory();
         	event.setCancelled(true);
         } else if (split[0].equals("/startquest")) {
-        	Quester questers[] = new Quester[MineQuest.getActiveQuesters().size()];
-        	int i = 0;
-        	for (Quester quester : MineQuest.getActiveQuesters()) {
-        		questers[i++] = quester;
+        	if (split.length < 2) {
+        		MineQuest.addQuest(new Quest(split[1]));
+        	} else {
+        		player.sendMessage("Usage: /startquest filename");
         	}
-        	MineQuest.addQuest(new Quest(questers));
            	event.setCancelled(true);
         } else if (split[0].equals("/class_exp")) {
         	MineQuest.getQuester(player).sendMessage("You have " + MineQuest.getQuester(player).getClassExp() + " unassigned experience");

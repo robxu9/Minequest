@@ -1,10 +1,15 @@
 package org.monk.MineQuest.Quest;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.World.Environment;
+import org.bukkit.block.Block;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
@@ -23,102 +28,184 @@ import org.monk.MineQuest.Quester.Quester;
 public class Quest {
 	private Quester questers[];
 	private List<QuestTask> tasks;
+	private List<Event> events;
 	
-	public Quest(Quester questers[]) {
-		this.questers = questers;
+	public Quest(String filename) {
+		this.questers = MineQuest.getActiveQuesters();
 		tasks = new ArrayList<QuestTask>();
+		events = new ArrayList<Event>();
+
+		try {
+			BufferedReader bis = new BufferedReader(new FileReader(filename));
+			
+			String line;
+			while ((line = bis.readLine()) != null) {
+				String split[] = line.split(":");
+				if (split[0].equals("Event")) {
+					createEvent(split);
+				} else if (split[0].equals("Task")) {
+					createTask(split);
+				} else if (split[0].equals("World")) {
+					if (MineQuest.getSServer().getWorld(split[1]) != null) {
+						MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+					}
+					
+					World world = MineQuest.getSServer().getWorld(split[1]);
+					
+					teleport(questers, world);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void teleport(Quester[] questers, World world) {
+		for (Quester quester : questers) {
+			Location location = quester.getPlayer().getLocation();
+			location.setWorld(world);
+			quester.getPlayer().teleportTo(location);
+		}
+	}
+
+	public void createTask(String line[]) {
+		int id = Integer.parseInt(line[1]);
+		Event[] events = new Event[line[2].split(",").length];
+		int i = 0;
 		
-		tasks.add(new QuestTask(null));
+		for (String event : line[2].split(",")) {
+			events[i++] = getEvent(Integer.parseInt(event));
+		}
 		
-		Event[] events = new Event[3];
+		tasks.add(new QuestTask(events, id));
+	}
+	
+	public void createEvent(String line[]) {
+		int id = Integer.parseInt(line[1]);
+		String type = line[2];
 		LivingEntity entities[] = new LivingEntity[questers.length];
 		int i = 0;
 		for (Quester quester : questers) {
 			entities[i++] = quester.getPlayer();
 			quester.setQuest(this);
 		}
-		events[0] = new AreaEvent(this, 500, entities, new Location(entities[0].getWorld(), -116, 68, -179), 2);
-		events[1] = new MessageEvent(10, questers, "There has been suspicious activity on the Ship to the East");
-		events[2] = new MessageEvent(20, questers, "Go investigate it!");
 		
-		tasks.add(new QuestTask(events));
-		events = new Event[6];
-		
-		Location location = new Location(entities[0].getWorld(), -117, 67, -181);
-		events[0] = new BlockEvent(1000, entities[0].getWorld().getBlockAt(location), Material.WOOD);
-		location = new Location(entities[0].getWorld(), -118, 67, -181);
-		events[1] = new BlockEvent(1000, entities[0].getWorld().getBlockAt(location), Material.WOOD);
-		location = new Location(entities[0].getWorld(), -119, 67, -181);
-		events[2] = new BlockEvent(1000, entities[0].getWorld().getBlockAt(location), Material.WOOD);
-		events[3] = new QuestEvent(this, 1000);
-		events[4] = new MessageEvent(2000, questers, "Its a Trap! Kill the Monsters!");
-		events[5] = new MessageEvent(120000, questers, "These monsters just keep respawning, get those on the Shoreline!");
-		
-		tasks.add(new QuestTask(events));
-		
-		events = new Event[9];
-		//Normals on Ship
-		location = new Location(entities[0].getWorld(), -97, 71, -178);
-		events[0] = new EntitySpawnerEvent(5, entities[0].getWorld(), location, CreatureType.SKELETON, false);
-		location = new Location(entities[0].getWorld(), -97, 71, -185);
-		events[1] = new EntitySpawnerEvent(5, entities[0].getWorld(), location, CreatureType.ZOMBIE, false);
-		location = new Location(entities[0].getWorld(), -99, 71, -178);
-		events[2] = new EntitySpawnerEvent(5, entities[0].getWorld(), location, CreatureType.SPIDER, false);
-		location = new Location(entities[0].getWorld(), -99, 71, -185);
-		events[3] = new EntitySpawnerEvent(5, entities[0].getWorld(), location, CreatureType.ZOMBIE, false);
-		
-		//Supers on Land
-		location = new Location(entities[0].getWorld(), -87, 67, -142);
-		events[4] = new EntitySpawnerNoMove(5, entities[0].getWorld(), location, CreatureType.SKELETON, true);
-		location = new Location(entities[0].getWorld(), -87, 67, -143);
-		events[5] = new EntitySpawnerNoMove(5, entities[0].getWorld(), location, CreatureType.ZOMBIE, true);
-		location = new Location(entities[0].getWorld(), -88, 67, -142);
-		events[6] = new EntitySpawnerNoMove(5, entities[0].getWorld(), location, CreatureType.SPIDER, true);
-		location = new Location(entities[0].getWorld(), -88, 67, -143);
-		events[7] = new EntitySpawnerNoMove(5, entities[0].getWorld(), location, CreatureType.ZOMBIE, true);
-		
-		events[8] = new AreaEvent(this, 500, entities, new Location(entities[0].getWorld(), -87, 67, -143), 20);
-		
-		Event[] end_move = new Event[5];
-		end_move[0] = new EntitySpawnerCompleteNMEvent(this, 10, (EntitySpawnerNoMove)events[4]);
-		end_move[1] = new EntitySpawnerCompleteNMEvent(this, 10, (EntitySpawnerNoMove)events[5]);
-		end_move[2] = new EntitySpawnerCompleteNMEvent(this, 10, (EntitySpawnerNoMove)events[6]);
-		end_move[3] = new EntitySpawnerCompleteNMEvent(this, 10, (EntitySpawnerNoMove)events[7]);
-		end_move[4] = new MessageEvent(120000, questers, "They noticed you! Kill them quickly!");
-		
-		Event[] end_spawn = new Event[1];
-		end_spawn[0] = new EntitySpawnerCompleteEvent(10, (EntitySpawnerEvent)events[0]);
-		
-		tasks.add(new QuestTask(events));
-		tasks.add(new QuestTask(end_move));
-		tasks.add(new QuestTask(end_spawn));
-		end_spawn = new Event[1];
-		end_spawn[0] = new EntitySpawnerCompleteEvent(10, (EntitySpawnerEvent)events[1]);
-		tasks.add(new QuestTask(end_spawn));
-		end_spawn = new Event[1];
-		end_spawn[0] = new EntitySpawnerCompleteEvent(10, (EntitySpawnerEvent)events[2]);
-		tasks.add(new QuestTask(end_spawn));
-		end_spawn = new Event[3];
-		end_spawn[0] = new EntitySpawnerCompleteEvent(10, (EntitySpawnerEvent)events[3]);
-		end_spawn[1] = new MessageEvent(1000, questers, "Good job! You got them all!");
-		end_spawn[2] = new ExperienceAdd(1000, questers, 1000, 1000);
-		tasks.add(new QuestTask(end_spawn));
-		
-		MineQuest.getEventParser().addEvent(new QuestEvent(this, 0));
+		if (type.equals("AreaEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			int index = Integer.parseInt(line[4]);
+			
+			if (!line[5].equals("all")) {
+				entities = new LivingEntity[line[5].split(",").length];
+				int in = 0;
+				for (String name : line[5].split(",")) {
+					for (Quester quester : questers) {
+						if (quester.getName().equals(name)) {
+							entities[in++] = quester.getPlayer();
+						}
+					}
+				}
+			}
+			Location loc = new Location(entities[0].getWorld(), Integer.parseInt(line[6]), Integer.parseInt(line[7]), Integer.parseInt(line[8]));
+			int radius = Integer.parseInt(line[9]);
+			events.add(new AreaEvent(this, delay, index, entities, loc, radius));
+		} else if (type.equals("MessageEvent")) {
+			int delay = Integer.parseInt(line[3]);
+
+			if (!line[4].equals("all")) {
+				entities = new LivingEntity[line[4].split(",").length];
+				int in = 0;
+				for (String name : line[4].split(",")) {
+					for (Quester quester : questers) {
+						if (quester.getName().equals(name)) {
+							entities[in++] = quester.getPlayer();
+						}
+					}
+				}
+			}
+			events.add(new MessageEvent(delay, questers, line[5]));
+		} else if (type.equals("BlockEvent")) {
+			int delay = Integer.parseInt(line[3]);
+
+			Block block = entities[0].getWorld().getBlockAt(Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6]));
+			
+			int mat = Integer.parseInt(line[7]);
+			
+			events.add(new BlockEvent(delay, block, Material.getMaterial(mat)));
+		} else if (type.equals("QuestEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			int index = Integer.parseInt(line[4]);
+			
+			events.add(new QuestEvent(this, delay, index));
+		} else if (type.equals("EntitySpawnerEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			String creature = line[7];
+			Location location = new Location(entities[0].getWorld(), Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6]));
+			boolean superm;
+			if (line[8].equals("f")) {
+				superm = false;
+			} else {
+				superm = true;
+			}
+			events.add(new EntitySpawnerEvent(delay, location, CreatureType.fromName(creature), superm));
+		} else if (type.equals("EntitySpawnerNoMove")) {
+			int delay = Integer.parseInt(line[3]);
+			String creature = line[7];
+			Location location = new Location(entities[0].getWorld(), Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6]));
+			boolean superm;
+			if (line[8].equals("f")) {
+				superm = false;
+			} else {
+				superm = true;
+			}
+			events.add(new EntitySpawnerNoMove(delay, location, CreatureType.fromName(creature), superm));			
+		} else if (type.equals("EntitySpawnerCompleteNMEvent")) {
+			long delay = Integer.parseInt(line[3]);
+			int index = Integer.parseInt(line[4]);
+			int event = Integer.parseInt(line[5]);
+
+			events.add(new EntitySpawnerCompleteNMEvent(this, delay, index, (EntitySpawnerEvent)getEvent(event)));
+		} else if (type.equals("EntitySpawnerCompleteEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			int event = Integer.parseInt(line[4]);
+
+			events.add(new EntitySpawnerCompleteEvent(delay, (EntitySpawnerEvent)getEvent(event)));
+		} else if (type.equals("ExperienceAdd")) {
+			long delay = Integer.parseInt(line[3]);
+			int exp = Integer.parseInt(line[5]);
+			int class_exp = Integer.parseInt(line[6]);
+			if (!line[4].equals("all")) {
+				MineQuest.log("Warning: Options other than all are not supported for ExperienceAdd");
+			}
+			
+			events.add(new ExperienceAdd(delay, questers, exp, class_exp));
+		}
+		events.get(events.size() - 1).setId(id);
 	}
 	
-	public Event[] getNextEvents() {
-		tasks.remove(0);
-		if (tasks.size() == 1) {
+	private Event getEvent(int id) {
+		for (Event event : events) {
+			if (event.getId() == id) {
+				return event;
+			}
+		}
+		
+		return null;
+	}
+
+	public Event[] getNextEvents(int index) {
+		if (index == -1) {
 			for (Quester quester : questers) {
 				quester.clearQuest();
 			}
+			return null;
 		}
-		if (tasks.get(0).getEvents() != null) {
-			MineQuest.log("Getting the Next " + tasks.get(0).getEvents().length + " Events");
-		} else {
-			MineQuest.log("Getting Next Null Event Set");
+		
+		for (QuestTask task : tasks) {
+			if (task.getId() == index) {
+				return task.getEvents();
+			}
 		}
-		return tasks.get(0).getEvents();
+		
+		return null;
 	}
 }
