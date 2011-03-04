@@ -20,6 +20,7 @@ import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.AreaEvent;
+import org.monk.MineQuest.Event.BlockCDEvent;
 import org.monk.MineQuest.Event.BlockEvent;
 import org.monk.MineQuest.Event.EntitySpawnerCompleteEvent;
 import org.monk.MineQuest.Event.EntitySpawnerCompleteNMEvent;
@@ -262,6 +263,24 @@ public class Quest {
 			World world = MineQuest.getSServer().getWorld(line[4]);
 			
 			events.add(new LockWorldTime(delay, world, time, time_2));
+		} else if (type.equals("BlockCDEvent")) {
+			long delay = Integer.parseInt(line[3]);
+			long second_delay = Integer.parseInt(line[4]);
+			Location location = new Location(entities[0].getWorld(),
+					Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
+			Block block = entities[0].getWorld().getBlockAt(location);
+			int idd = Integer.parseInt(line[8]);
+			
+			events.add(new BlockCDEvent(delay, second_delay, block, Material.getMaterial(idd)));
+		} else if (type.equals("BlockDCEvent")) {
+			long delay = Integer.parseInt(line[3]);
+			long second_delay = Integer.parseInt(line[4]);
+			Location location = new Location(entities[0].getWorld(),
+					Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
+			Block block = entities[0].getWorld().getBlockAt(location);
+			int idd = Integer.parseInt(line[8]);
+			
+			events.add(new BlockCDEvent(delay, second_delay, block, Material.getMaterial(idd)));
 		}
 		events.get(events.size() - 1).setId(id);
 	}

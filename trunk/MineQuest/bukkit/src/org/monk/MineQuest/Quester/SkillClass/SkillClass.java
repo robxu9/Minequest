@@ -682,6 +682,18 @@ public class SkillClass {
 				}
 			}
 		}
+	}
+
+	public void binderAdd(Ability abil) {
+		Ability[] new_list = new Ability[ability_list.length + 1];
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			new_list[i] = ability_list[i];
+		}
+		new_list[i] = abil;
+		
+		ability_list = new_list;
 	}	
 	
 

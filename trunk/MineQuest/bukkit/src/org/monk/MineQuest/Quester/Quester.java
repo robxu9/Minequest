@@ -27,6 +27,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Ability.AbilityBinder;
 import org.monk.MineQuest.Event.EntityTeleportEvent;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
@@ -160,6 +162,43 @@ public class Quester {
 		}
 	}
 	
+	/**
+	 * Binds an Ability to left of right click of the item
+	 * in the players hand.
+	 * 
+	 * @param player Player
+	 * @param name Name of Ability
+	 * @param lr 1 for left, 0 for right
+	 */
+	public void bind_binder(Player player, String name, String ability, String item, String lr, String lr_2) {
+		int i;
+		Ability abil = new AbilityBinder(name, null, getAbility(ability), Integer.parseInt(item), lr_2.equals("l")?1:0);
+		classes[0].binderAdd(abil);
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
+		}
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].getAbility(name) != null) {
+				if (lr.equals("l")) {
+					classes[i].getAbility(name).bindl(player, player.getItemInHand());
+				} else {
+					classes[i].getAbility(name).bindr(player, player.getItemInHand());
+				}
+			}
+		}
+	}
+	
+	public Ability getAbility(String ability) {
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(ability) != null) {
+				return skill.getAbility(ability);
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Binds an Ability to left of right click of the item
 	 * in the players hand.
@@ -850,27 +889,27 @@ public class Quester {
         	health = max_health;
         }
         
-        if (health <= 0) {
-        	MineQuest.log("Clearing Inventory!!");
-        	
-        	spare_inven = new ItemStack[27];
-        	int i;
-        	for (i = 0; i < 27; i++) {
-        		spare_inven[i] = player.getInventory().getItem(i);
-        	}
-        	spare_inven_2 = new ItemStack[27];
-        	for (i = 0; i < (player.getInventory().getSize() - 27); i++) {
-        		spare_inven_2[i] = player.getInventory().getItem(i + 27);
-        	}
-        	while ((i - (player.getInventory().getSize() - 27)) < player.getInventory().getArmorContents().length) {
-        		MineQuest.log("Armor! " + i + " " + (i - (player.getInventory().getSize() - 27)));
-        		spare_inven_2[i] = player.getInventory().getArmorContents()[i - (player.getInventory().getSize() - 27)];
-        		i++;
-        	}
-        	
-        	player.getInventory().clear();
-        	
-        }
+//        if (health <= 0) {
+//        	MineQuest.log("Clearing Inventory!!");
+//        	
+//        	spare_inven = new ItemStack[27];
+//        	int i;
+//        	for (i = 0; i < 27; i++) {
+//        		spare_inven[i] = player.getInventory().getItem(i);
+//        	}
+//        	spare_inven_2 = new ItemStack[27];
+//        	for (i = 0; i < (player.getInventory().getSize() - 27); i++) {
+//        		spare_inven_2[i] = player.getInventory().getItem(i + 27);
+//        	}
+//        	while ((i - (player.getInventory().getSize() - 27)) < player.getInventory().getArmorContents().length) {
+//        		MineQuest.log("Armor! " + i + " " + (i - (player.getInventory().getSize() - 27)));
+//        		spare_inven_2[i] = player.getInventory().getArmorContents()[i - (player.getInventory().getSize() - 27)];
+//        		i++;
+//        	}
+//        	
+//        	player.getInventory().clear();
+//        	
+//        }
         
         if (player.getHealth() >= newHealth) {
         	event.setDamage(player.getHealth() - newHealth);
