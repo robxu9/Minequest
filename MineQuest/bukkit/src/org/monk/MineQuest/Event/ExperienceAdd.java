@@ -19,7 +19,9 @@ public class ExperienceAdd extends NormalEvent {
 		super.activate(eventParser);
 		
 		for (Quester quester : questers) {
+			quester.sendMessage("You gained " + exp + " exp from a quest");
 			quester.expGain(exp);
+			quester.sendMessage("You gained " + class_exp + " unassigned exp from a quest");
 			quester.expClassGain(class_exp);
 		}
 	}

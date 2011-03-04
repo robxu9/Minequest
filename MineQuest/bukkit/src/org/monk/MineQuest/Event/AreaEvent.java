@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
+import org.monk.MineQuest.Quest.QuestTask;
 
 public class AreaEvent extends QuestEvent {
 	private LivingEntity[] entities;
@@ -11,8 +12,8 @@ public class AreaEvent extends QuestEvent {
 	private int radius;
 	private Location loc;
 
-	public AreaEvent(Quest quest, long delay, LivingEntity entities[], Location loc, int radius) {
-		super(quest, delay);
+	public AreaEvent(Quest quest, long delay, int index, LivingEntity entities[], Location loc, int radius) {
+		super(quest, delay, index);
 		this.entities = entities;
 		this.radius = radius;
 		this.loc = loc;
