@@ -2,6 +2,7 @@ This is the format for the save files that will hold quest event details.
 
 {{{
 LoadWorld:pirate_ship_instance:pirate_ship
+Event:44:LockWorldTime:1:pirate_ship_instance:12000:18000
 Event:0:AreaEvent:500:1:all:-116:68:-179:2
 Event:1:MessageEvent:10:all:There has been suspicious activity on the Ship to the East
 Event:2:MessageEvent:20:all:Go investigate it!
@@ -31,7 +32,7 @@ Event:24:EntitySpawnerCompleteEvent:10:11
 Event:25:EntitySpawnerCompleteEvent:10:12
 Event:26:MessageEvent:1000:all:God job! You got them all!
 Event:27:ExperienceAdd:1000:all:1000:1000
-Task:0:0,1,2,29,30,31
+Task:0:0,1,2,29,30,31,44
 Task:1:3,4,5,6,7,8
 Task:2:9,10,11,12,13,14,15,16,28
 Task:3:17,21
