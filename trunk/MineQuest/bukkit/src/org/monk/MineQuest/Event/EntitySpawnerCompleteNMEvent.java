@@ -4,29 +4,45 @@ import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
 
-public class EntitySpawnerCompleteNMEvent extends EntitySpawnerCompleteEvent {
+public class EntitySpawnerCompleteNMEvent extends PeriodicEvent {
 	private Quest quest;
 	private boolean first;
-	private LivingEntity entity;
+	private LivingEntity entities[];
 	private int index;
+	private EntitySpawnerEvent[] events;
 
-	public EntitySpawnerCompleteNMEvent(Quest quest, long delay, int index, EntitySpawnerEvent event) {
-		super(delay, event);
+	public EntitySpawnerCompleteNMEvent(Quest quest, long delay, int index, EntitySpawnerEvent[] events) {
+		super(delay);
 		this.quest = quest;
 		this.index = index;
 		first = true;
+		this.events = events;
+		this.entities = new LivingEntity[events.length];
 	}
 	
 	@Override
 	public void activate(EventParser eventParser) {
-		eventParser.setComplete(false);
+		super.activate(eventParser);
 		if (first) {
-			entity = event.getEntity();
-			super.activate(eventParser);
+			int i = 0;
+			for (EntitySpawnerEvent e : events) {
+				entities[i++] = e.getEntity();
+				e.setComplete(true);
+			}
 		
 			first = false;
 		} else {
-			if (entity.getHealth() <= 0) {
+			boolean flag = true;
+			int i;
+			for (i = 0; i < entities.length; i++) {
+				if ((entities[i] != null) && (entities[i].getHealth() > 0)) {
+					flag = false;
+				} else if (entities[i] != null) {
+					entities[i] = null;
+				}
+			}
+			
+			if (flag) {
 				eventComplete();
 				eventParser.setComplete(true);
 			}

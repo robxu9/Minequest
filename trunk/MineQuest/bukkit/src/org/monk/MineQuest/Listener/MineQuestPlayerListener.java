@@ -3,6 +3,9 @@ package org.monk.MineQuest.Listener;
 
 import java.util.List;
 
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerEvent;
@@ -432,9 +435,9 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/startquest")) {
         	if (split.length < 2) {
-        		MineQuest.addQuest(new Quest(split[1]));
-        	} else {
         		player.sendMessage("Usage: /startquest filename");
+        	} else {
+        		MineQuest.addQuest(new Quest(split[1]));
         	}
            	event.setCancelled(true);
         } else if (split[0].equals("/class_exp")) {
@@ -446,6 +449,25 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		MineQuest.getQuester(player).spendClassExp(split[1], Integer.parseInt(split[2]));
         	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/goto")) {
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /goto world_name type");
+        	} else {
+        		World world = MineQuest.getSServer().getWorld(split[1]);
+        		if (world == null) {
+        			if ((split.length < 3) || !split[2].equals("Nether")) {
+        				world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+        			} else {
+        				world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+        			}
+        		}
+        		player.teleportTo(world.getSpawnLocation());
+        		event.setCancelled(true);
+        	}
+        } else if (split[0].equals("/setworldtime")) {
+        	World world = MineQuest.getSServer().getWorld(split[1]);
+        	world.setTime(Long.parseLong(split[2]));
         	event.setCancelled(true);
         }
 		

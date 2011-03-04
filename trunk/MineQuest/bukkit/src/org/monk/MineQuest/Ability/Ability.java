@@ -124,15 +124,9 @@ public class Ability {
 	 * @param z Z Location
 	 * @return Nearest empty height above ground to Location
 	 */
-	static public int getNearestY(int x, int y, int z) {
+	static public int getNearestY(World world, int x, int y, int z) {
 		int i = y;
 		Server server = MineQuest.getSServer();
-		
-		if (server.getWorlds().size() > 1) {
-			MineQuest.log("[CONFUSED] Multiple worlds found...");
-		}
-		
-		World world = server.getWorlds().get(0);
 		
 		if (world.getBlockAt(x, y, z).getTypeId() != 0) {
 			do {
@@ -453,7 +447,7 @@ public class Ability {
 		y = MineQuest.getSServer().getWorlds().get(0).getHighestBlockYAt((int)x, (int)z) + 1;
 
 		other.teleportTo(new Location(other.getWorld(), x + player.getLocation().getX(), 
-				(double)getNearestY((int)(x + player.getLocation().getX()), 
+				(double)getNearestY(player.getWorld(), (int)(x + player.getLocation().getX()), 
 				(int)other.getLocation().getY(), (int)(z + player.getLocation().getZ())), 
 				z + player.getLocation().getZ()));
 		

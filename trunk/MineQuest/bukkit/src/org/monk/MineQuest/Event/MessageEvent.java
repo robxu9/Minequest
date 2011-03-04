@@ -16,10 +16,14 @@ public class MessageEvent extends NormalEvent {
 	@Override
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
-		MineQuest.log("Sending Message: " + message);
 		for (Quester quester : questers) {
 			quester.sendMessage(message);
 		}
+	}
+	
+	@Override
+	public String getName() {
+		return "Message Event";
 	}
 
 }

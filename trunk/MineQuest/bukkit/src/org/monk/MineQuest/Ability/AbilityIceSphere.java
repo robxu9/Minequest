@@ -61,7 +61,7 @@ public class AbilityIceSphere extends Ability {
 		for (j = -1; j < 2; j++) {
 			for (k = -1; k < 2; k++) {
 				Block nblock = world.getBlockAt((int)location.getX() + j, 
-						getNearestY((int)location.getX() + j, (int)location.getY(), (int)location.getZ() + k), 
+						getNearestY(location.getWorld(), (int)location.getX() + j, (int)location.getY(), (int)location.getZ() + k), 
 						(int)location.getZ() + k);
 				nblock.setTypeId(78);
 			}

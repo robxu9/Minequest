@@ -27,6 +27,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.EntityTeleportEvent;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
@@ -1192,6 +1193,9 @@ public class Quester {
 	
 	public void clearQuest() {
 		this.quest = null;
+		Location location = player.getLocation();
+		location.setWorld(MineQuest.getSServer().getWorld("world"));
+		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, location));
 	}
 	
 	public boolean inQuest() {

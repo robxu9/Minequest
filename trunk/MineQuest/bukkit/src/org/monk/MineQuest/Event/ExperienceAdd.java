@@ -1,17 +1,20 @@
 package org.monk.MineQuest.Event;
 
+import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;
 
 public class ExperienceAdd extends NormalEvent {
 	private Quester[] questers;
 	private int exp;
 	private int class_exp;
+	private Quest quest;
 
-	public ExperienceAdd(long delay, Quester questers[], int exp, int class_exp) {
+	public ExperienceAdd(Quest quest, long delay, Quester questers[], int exp, int class_exp) {
 		super(delay);
 		this.questers = questers;
 		this.exp = exp;
 		this.class_exp = class_exp;
+		this.quest = quest;
 	}
 	
 	@Override
@@ -24,6 +27,8 @@ public class ExperienceAdd extends NormalEvent {
 			quester.sendMessage("You gained " + class_exp + " unassigned exp from a quest");
 			quester.expClassGain(class_exp);
 		}
+		
+		quest.getNextEvents(-1);
 	}
 
 }
