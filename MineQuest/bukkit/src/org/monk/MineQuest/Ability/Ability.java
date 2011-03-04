@@ -151,6 +151,7 @@ public class Ability {
 	protected SkillClass myclass;
 	protected String name;
 	protected long time;
+	protected long last_msg;
 	
 	/**
 	 * Creates an Ability
@@ -168,6 +169,16 @@ public class Ability {
 		bindl = -1;
 		bindr = -1;
 		time = now.getTimeInMillis();
+		last_msg = 0;
+	}
+	
+	public void notify(Quester quester, String message) {
+		Calendar now = Calendar.getInstance();
+		
+		if ((now.getTimeInMillis() - last_msg) > 2000) {
+			last_msg = now.getTimeInMillis();
+			quester.sendMessage(message);
+		}		
 	}
 	
 	/**
@@ -574,7 +585,7 @@ public class Ability {
 		Player player = quester.getPlayer();
 		
 		if (!enabled) {
-			player.sendMessage(name + " is not enabled");
+			notify(quester, name + " is not enabled");
 			return;
 		}
 		// TODO: add DrainLife
@@ -586,7 +597,7 @@ public class Ability {
 		if ((quester == null) || quester.canCast(getManaCost())) {
 			if (canCast() || (player == null)) {
 				if ((player == null) || player.getItemInHand().getTypeId() == ((l == 1)?bindl:bindr)) {
-					player.sendMessage("Casting " + name);
+					notify(quester, "Casting " + name);
 					castAbility(quester, location, entity);
 					if (myclass != null) {
 						myclass.expAdd(getExp());
@@ -595,12 +606,12 @@ public class Ability {
 			} else {
 				if (player != null) {
 					giveManaCost(player);
-					player.sendMessage("You cast that too recently");
+					notify(quester, "You cast that too recently");
 				}
 			}
 		} else {
 			if (player != null) {
-				player.sendMessage("You do not have the materials to cast that - try /spellcomp " + name);
+				notify(quester, "You do not have the materials to cast that - try /spellcomp " + name);
 			}
 		}
 	}
