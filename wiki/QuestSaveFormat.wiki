@@ -1,6 +1,7 @@
 This is the format for the save files that will hold quest event details.
 
-{{{LoadWorld:pirate_ship_instance:pirate_ship
+{{{
+LoadWorld:pirate_ship_instance:pirate_ship
 Event:0:AreaEvent:500:1:all:-116:68:-179:2
 Event:1:MessageEvent:10:all:There has been suspicious activity on the Ship to the East
 Event:2:MessageEvent:20:all:Go investigate it!
