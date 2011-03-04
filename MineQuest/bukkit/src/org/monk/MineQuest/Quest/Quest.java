@@ -1,7 +1,13 @@
 package org.monk.MineQuest.Quest;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +27,7 @@ import org.monk.MineQuest.Event.EntitySpawnerEvent;
 import org.monk.MineQuest.Event.EntitySpawnerNoMove;
 import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.ExperienceAdd;
+import org.monk.MineQuest.Event.LockWorldTime;
 import org.monk.MineQuest.Event.MessageEvent;
 import org.monk.MineQuest.Event.QuestEvent;
 import org.monk.MineQuest.Quester.Quester;
@@ -36,7 +43,7 @@ public class Quest {
 		events = new ArrayList<Event>();
 
 		try {
-			BufferedReader bis = new BufferedReader(new FileReader(filename));
+			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
 			
 			String line;
 			while ((line = bis.readLine()) != null) {
@@ -46,21 +53,87 @@ public class Quest {
 				} else if (split[0].equals("Task")) {
 					createTask(split);
 				} else if (split[0].equals("World")) {
-					if (MineQuest.getSServer().getWorld(split[1]) != null) {
-						MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+					World world = null;
+					if (MineQuest.getSServer().getWorld(split[1]) == null) {
+						world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
 					}
 					
-					World world = MineQuest.getSServer().getWorld(split[1]);
+					teleport(questers, world);
+				} else if (split[0].equals("LoadWorld")) {
+					deleteDir(new File(split[1]));
+					copyDirectory(new File(split[2]), new File(split[1]));
+					World world = null;
+					if (MineQuest.getSServer().getWorld(split[1]) == null) {
+						world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+					}
 					
 					teleport(questers, world);
 				}
 			}
+			
+			for (QuestTask task : tasks) {
+				MineQuest.log("Task: " + task.getId());
+				for (Event event : task.getEvents()) {
+					MineQuest.log(event.getName());
+				}
+			}
+			
+			MineQuest.getEventParser().addEvent(new QuestEvent(this, 100, 0));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
+	public static boolean deleteDir(File dir) {
+	    if (dir.isDirectory()) {
+	        String[] children = dir.list();
+	        for (int i=0; i<children.length; i++) {
+	            boolean success = deleteDir(new File(dir, children[i]));
+	            if (!success) {
+	                return false;
+	            }
+	        }
+	    }
+
+	    // The directory is now empty so delete it
+	    return dir.delete();
+	}
+	
+	// If targetLocation does not exist, it will be created.
+    public void copyDirectory(File sourceLocation , File targetLocation)
+    throws IOException {
+        
+        if (sourceLocation.isDirectory()) {
+            if (!targetLocation.exists()) {
+                targetLocation.mkdir();
+            }
+            
+            String[] children = sourceLocation.list();
+            for (int i=0; i<children.length; i++) {
+                copyDirectory(new File(sourceLocation, children[i]),
+                        new File(targetLocation, children[i]));
+            }
+        } else {
+            
+            InputStream in = new FileInputStream(sourceLocation);
+            OutputStream out = new FileOutputStream(targetLocation);
+            
+            // Copy the bits from instream to outstream
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+        }
+    }
+	
 	private void teleport(Quester[] questers, World world) {
+		if (world == null) {
+			MineQuest.log("Null World!!");
+			return;
+		}
 		for (Quester quester : questers) {
 			Location location = quester.getPlayer().getLocation();
 			location.setWorld(world);
@@ -161,9 +234,13 @@ public class Quest {
 		} else if (type.equals("EntitySpawnerCompleteNMEvent")) {
 			long delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
-			int event = Integer.parseInt(line[5]);
+			i = 0;
+			EntitySpawnerEvent[] eventss = new EntitySpawnerEvent[line[5].split(",").length];
+			for (String s : line[5].split(",")) {
+				eventss[i++] = (EntitySpawnerEvent)getEvent(Integer.parseInt(s));
+			}
 
-			events.add(new EntitySpawnerCompleteNMEvent(this, delay, index, (EntitySpawnerEvent)getEvent(event)));
+			events.add(new EntitySpawnerCompleteNMEvent(this, delay, index, eventss));
 		} else if (type.equals("EntitySpawnerCompleteEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int event = Integer.parseInt(line[4]);
@@ -177,7 +254,14 @@ public class Quest {
 				MineQuest.log("Warning: Options other than all are not supported for ExperienceAdd");
 			}
 			
-			events.add(new ExperienceAdd(delay, questers, exp, class_exp));
+			events.add(new ExperienceAdd(this, delay, questers, exp, class_exp));
+		} else if (type.equals("LockWorldTime")) {
+			long delay = Integer.parseInt(line[3]);
+			long time = Integer.parseInt(line[5]);
+			long time_2 = Integer.parseInt(line[6]);
+			World world = MineQuest.getSServer().getWorld(line[4]);
+			
+			events.add(new LockWorldTime(delay, world, time, time_2));
 		}
 		events.get(events.size() - 1).setId(id);
 	}

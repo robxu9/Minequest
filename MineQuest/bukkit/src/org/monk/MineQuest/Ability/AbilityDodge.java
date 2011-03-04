@@ -59,7 +59,7 @@ public class AbilityDodge extends Ability {
 				player.sendMessage("Dodging1");
 				player.teleportTo(new Location(player.getWorld(), 
 						(int)player.getLocation().getX() - 1, 
-						getNearestY((int)player.getLocation().getX(), 
+						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
 								(int)player.getLocation().getY(), 
 								(int)player.getLocation().getZ()),
 						player.getLocation().getZ(), player.getLocation().getYaw(), 
@@ -68,7 +68,7 @@ public class AbilityDodge extends Ability {
 				player.sendMessage("Dodging2");
 				player.teleportTo(new Location(player.getWorld(), 
 						player.getLocation().getX(), 
-						getNearestY((int)player.getLocation().getX(), 
+						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
 								(int)player.getLocation().getY(), 
 								(int)player.getLocation().getZ()),
 						player.getLocation().getZ() - 1, player.getLocation().getYaw(), 
@@ -77,7 +77,7 @@ public class AbilityDodge extends Ability {
 				player.sendMessage("Dodging3");
 				player.teleportTo(new Location(player.getWorld(), 
 						(int)player.getLocation().getX() + 1, 
-						getNearestY((int)player.getLocation().getX(), 
+						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
 								(int)player.getLocation().getY(), 
 								(int)player.getLocation().getZ()), 
 						player.getLocation().getZ(), player.getLocation().getYaw(), 
@@ -86,7 +86,7 @@ public class AbilityDodge extends Ability {
 				player.sendMessage("Dodging4");
 				player.teleportTo(new Location(player.getWorld(), 
 						player.getLocation().getX(), 
-						getNearestY((int)player.getLocation().getX(), 
+						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
 								(int)player.getLocation().getY(), 
 								(int)player.getLocation().getZ()),
 						player.getLocation().getZ() + 1, player.getLocation().getYaw(), 

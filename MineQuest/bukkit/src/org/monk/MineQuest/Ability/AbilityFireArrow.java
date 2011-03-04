@@ -45,7 +45,7 @@ public class AbilityFireArrow extends Ability {
 		if ((entity != null) && (player.getInventory().getItemInHand().getTypeId() == 261)) {
 			Location loc = entity.getLocation();
 			Block block = player.getWorld().getBlockAt((int)loc.getX(), 
-					getNearestY((int)location.getX(), (int)location.getY(), (int)location.getZ()), 
+					getNearestY(location.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ()), 
 					(int)loc.getZ());
 			block.setTypeId(51);
 			

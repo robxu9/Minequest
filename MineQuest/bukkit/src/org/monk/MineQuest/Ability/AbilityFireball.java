@@ -61,22 +61,22 @@ public class AbilityFireball extends Ability {
 		z = (leftz < .5)?-1:1;
 		
 		Block nblock = world.getBlockAt((int)location.getX(), 
-				getNearestY((int)location.getX(), (int)location.getY(), (int)location.getZ()), 
+				getNearestY(location.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ()), 
 				(int)location.getZ());
 		nblock.setTypeId(51);
 		
 		nblock = world.getBlockAt((int)location.getX() + x, 
-				getNearestY((int)location.getX() + x, (int)location.getY(), (int)location.getZ()), 
+				getNearestY(location.getWorld(), (int)location.getX() + x, (int)location.getY(), (int)location.getZ()), 
 				(int)location.getZ());
 		nblock.setTypeId(51);
 		
 		nblock = world.getBlockAt((int)location.getX() + x, 
-				getNearestY((int)location.getX() + x, (int)location.getY(), (int)location.getZ() + z), 
+				getNearestY(location.getWorld(), (int)location.getX() + x, (int)location.getY(), (int)location.getZ() + z), 
 				(int)location.getZ() + z);
 		nblock.setTypeId(51);
 		
 		nblock = world.getBlockAt((int)location.getX(), 
-				getNearestY((int)location.getX(), (int)location.getY(), (int)location.getZ() + z), 
+				getNearestY(location.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ() + z), 
 				(int)location.getZ() + z);
 		nblock.setTypeId(51);
 		

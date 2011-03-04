@@ -69,7 +69,7 @@ public class SpecialMob extends MQMob {
 			abilities.get(index).castAbility(null, player.getLocation(), player);
 		} else if (entity instanceof Creeper) {
 			Location location = new Location(entity.getWorld(), (int) entity.getLocation().getX(), 
-					Ability.getNearestY((int) entity.getLocation().getX(), (int) entity.getLocation().getY(),
+					Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(), (int) entity.getLocation().getY(),
 					(int) entity.getLocation().getZ()), (int) entity.getLocation().getZ());
 			Block nblock = entity.getWorld().getBlockAt(location);
 			nblock.setType(Material.TNT);
@@ -91,28 +91,28 @@ public class SpecialMob extends MQMob {
 					((Player)player).sendMessage("Zombie Dodged");
 					entity.teleportTo(new Location(entity.getWorld(),
 							entity.getLocation().getX() - 1,
-							Ability.getNearestY((int) entity.getLocation().getX(),
+							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 									entity.getLocation().getZ()));
 				} else if ((rot > 45) && (rot < 135)) {
 					((Player)player).sendMessage("Zombie Dodged");
 					entity.teleportTo(new Location(entity.getWorld(),
 							entity.getLocation().getX(),
-							Ability.getNearestY((int) entity.getLocation().getX(),
+							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 									entity.getLocation().getZ() - 1));
 				} else if ((rot > 135) && (rot < 225)) {
 					((Player)player).sendMessage("Zombie Dodged");
 					entity.teleportTo(new Location(entity.getWorld(),
 							entity.getLocation().getX() + 1,
-							Ability.getNearestY((int) entity.getLocation().getX(),
+							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 									entity.getLocation().getZ()));
 				} else {
 					((Player)player).sendMessage("Zombie Dodged");
 					entity.teleportTo(new Location(entity.getWorld(),
 							entity.getLocation().getX(),
-							Ability.getNearestY((int) entity.getLocation().getX(),
+							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 									entity.getLocation().getZ() + 1));
 				}

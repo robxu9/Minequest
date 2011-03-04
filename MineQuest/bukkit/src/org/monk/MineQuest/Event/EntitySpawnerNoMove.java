@@ -13,7 +13,11 @@ public class EntitySpawnerNoMove extends EntitySpawnerEvent {
 	
 	@Override
 	public void activate(EventParser eventParser) {
-		super.activate(eventParser);
+		if (!complete) {
+			super.activate(eventParser);
+		} else {
+			eventParser.setComplete(true);
+		}
 		
 		entity.teleportTo(location);
 	}
