@@ -38,7 +38,7 @@ public class Town {
 						(double)results.getInt("y") + height, (double)results.getInt("max_z"));
 				Quester owner = MineQuest.getQuester(results.getString("owner"));
 				
-				town = new Property(owner, start, end, height > 0);
+				town = new Property(owner, start, end, height > 0, 0);
 				center_x = town.getCenterX();
 				center_z = town.getCenterZ();
 				spawn = new Location(world, 
@@ -66,7 +66,7 @@ public class Town {
 				} else {
 					Quester owner = MineQuest.getQuester(results.getString("name"));
 					
-					properties.add(new Property(owner, start, end, height > 0));
+					properties.add(new Property(owner, start, end, height > 0, results.getLong("price")));
 				}
 			}
 		} catch (SQLException e) {
@@ -159,9 +159,12 @@ public class Town {
 			if (!b) {
 				height = 0;
 			}
+
+			Location start = new Location(player.getWorld(), (double)x, (double)y, (double)z);
+			Location ends = new Location(player.getWorld(), max_x, (double)y + height, max_z);
+			properties.add(new Property(null, start, ends, height > 0, 10000000));
 			MineQuest.getSQLServer().update("INSERT INTO " + name + 
-					" (name, x, y, z, max_x, max_z, height, store_prop, price) VALUES('"
-					+ player.getName() + "', '" + x + "', '" + y + "', '" + z
+					" (name, x, y, z, max_x, max_z, height, store_prop, price) VALUES('null', '" + x + "', '" + y + "', '" + z
 					+ "', '" + max_x + "', '" + max_z + "', '" + height
 					+ "', '0', '10000000')");
 		} else {
@@ -291,5 +294,14 @@ public class Town {
 
 	public Location getSpawn() {
 		return spawn;
+	}
+
+	public void buy(Quester quester, Property prop) {
+		quester.setCubes(quester.getCubes() - prop.getPrice());
+		
+		prop.setOwner(quester);
+		
+		MineQuest.getSQLServer().update("UPDATE " + name + " SET name='" + quester.getName() 
+				+ "' WHERE x='" + prop.getX() + "' AND z='" + prop.getZ() + "' AND y='" + prop.getY() + "'");
 	}
 }

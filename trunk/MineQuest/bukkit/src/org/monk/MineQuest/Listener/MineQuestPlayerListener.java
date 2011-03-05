@@ -13,14 +13,18 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.Store;
+import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
 public class MineQuestPlayerListener extends PlayerListener {
 	
+	private NoMobs event;
+
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
@@ -437,7 +441,10 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 2) {
         		player.sendMessage("Usage: /startquest filename");
         	} else {
-        		MineQuest.addQuest(new Quest(split[1]));
+        		if (MineQuest.getQuester(player).getParty() == null) {
+        			MineQuest.getQuester(player).createParty();
+        		}
+    			MineQuest.addQuest(new Quest(split[1], MineQuest.getQuester(player).getParty()));
         	}
            	event.setCancelled(true);
         } else if (split[0].equals("/class_exp")) {
@@ -468,6 +475,66 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/setworldtime")) {
         	World world = MineQuest.getSServer().getWorld(split[1]);
         	world.setTime(Long.parseLong(split[2]));
+        	event.setCancelled(true);
+        } else if (split[0].equals("/price")) {
+        	if ((MineQuest.getTown(player) != null) && (MineQuest.getTown(player).getProperty(player) != null)) {
+        		Property prop = MineQuest.getTown(player).getProperty(player);
+        		if (prop.getOwner() == null) {
+        			player.sendMessage("The price of this property is " + prop.getPrice() + " cubes");
+        		} else {
+        			player.sendMessage("This property is not for sale");
+        		}
+        	} else {
+        		player.sendMessage("You are not on a property");
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/buyprop")) {
+        	Town town = MineQuest.getTown(player);
+        	Property prop = town.getProperty(player);
+        	Quester quester = MineQuest.getQuester(player);
+        	if (prop.getOwner() == null) {
+        		if (quester.getCubes() > prop.getPrice()) {
+        			town.buy(quester, prop);
+        		} else {
+        			player.sendMessage("You cannot afford this property");
+        		}
+        	} else {
+        		player.sendMessage("This Property is not for sale");
+        	}
+        } else if (split[0].equals("/debug")) {
+        	MineQuest.getQuester(player).debug();
+        	event.setCancelled(true);
+        } else if (split[0].equals("/nomobs")) {
+        	this.event = new NoMobs(100, MineQuest.getSServer().getWorld(split[1]));
+        	MineQuest.getEventParser().addEvent(this.event);
+        	event.setCancelled(true);
+        } else if (split[0].equals("/mobs")) {
+        	this.event.setComplete(true);
+        	event.setCancelled(true);
+        } else if (split[0].equals("/createparty")) {
+        	MineQuest.getQuester(player).createParty();
+        	player.sendMessage("Party Created");
+        	event.setCancelled(true);
+        } else if (split[0].equals("/joinparty")) {
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /joinparty player_name");
+        	} else {
+        		if (MineQuest.getQuester(split[1]) == null) {
+        			player.sendMessage(split[1] + " is not a valid quester");
+        		} else if (MineQuest.getQuester(split[1]).getParty() == null) {
+        			player.sendMessage(split[1] + " is not in a party");
+        		} else {
+        			MineQuest.getQuester(split[1]).getParty().addQuester(MineQuest.getQuester(player));
+        		}
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/quit_quest")) {
+        	MineQuest.getQuester(player).getQuest().removeQuester(MineQuest.getQuester(player));
+        	event.setCancelled(true);
+        } else if (split[0].equals("/listparty")) {
+        	for (Quester quester : MineQuest.getQuester(player).getParty().getQuesters()) {
+        		player.sendMessage(quester.getName());
+        	}
         	event.setCancelled(true);
         }
 		

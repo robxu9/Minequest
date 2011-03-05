@@ -43,7 +43,7 @@ public class StoreBlock {
 			quantity = 0;
 		}
 		
-		cubes = blocksToCubes(quantity, b);
+		cubes = blocksToCubes(block_quantity, b);
 		
     	String cubes_string;
 		if (cubes > 1000000) {
@@ -54,7 +54,7 @@ public class StoreBlock {
     		cubes_string = cubes + "C";
     	}
 		
-		quester.getPlayer().sendMessage("You could " + buy + quantity + " " + type + " for " + cubes_string);
+		quester.getPlayer().sendMessage("You could " + buy + block_quantity + " " + type + " for " + cubes_string);
 		
 		return;
 	}
@@ -122,7 +122,7 @@ public class StoreBlock {
 		int cubes;
 		Player player = quester.getPlayer();
 		
-		cubes = blocksToCubes(quantity, false);
+		cubes = blocksToCubes(block_quantity, false);
 		
 		if (!playerRemove(player, block_quantity)) {
 			player.sendMessage("Insufficient Materials");
@@ -190,7 +190,7 @@ public class StoreBlock {
 	}
 	
 	private int blocksToCubes(int blocks, boolean buy) {
-        int change = blocks / 64;
+        int change = blocks;
         double cost = 0;
         new_price = price;
         

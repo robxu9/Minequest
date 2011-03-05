@@ -30,6 +30,7 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityBinder;
 import org.monk.MineQuest.Event.EntityTeleportEvent;
+import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
@@ -65,6 +66,9 @@ public class Quester {
 	private ItemStack[] spare_inven;
 	private ItemStack[] spare_inven_2;
 	private Quest quest;
+	private boolean debug;
+	private Party party;
+	private Location before_quest;
 	
 	/**
 	 * Load player from MySQL Database.
@@ -569,6 +573,7 @@ public class Quester {
 			amount *= levelAdj * 3;
 		}
 		amount /= 4;
+		MineQuest.log("Defend " + name + "!");
 		
 		if (entity instanceof LivingEntity) {
 			if (MineQuest.getMob((LivingEntity)entity) != null) {
@@ -863,7 +868,8 @@ public class Quester {
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		int newHealth;
 		
-        if ((event instanceof EntityDamageByEntityEvent) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
+        if ((event instanceof EntityDamageByEntityEvent) && ((((EntityDamageByEntityEvent)event).getDamager() != null) 
+        		&& checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId()))) {
         	event.setCancelled(true);
         	return false;
         }
@@ -1226,15 +1232,18 @@ public class Quester {
 		player.setHealth(newValue);
 	}
 	
-	public void setQuest(Quest quest) {
+	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
+		
+		before_quest = player.getLocation();
+		
+		player.teleportTo(world.getSpawnLocation());
 	}
 	
 	public void clearQuest() {
 		this.quest = null;
-		Location location = player.getLocation();
-		location.setWorld(MineQuest.getSServer().getWorld("world"));
-		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, location));
+		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, before_quest.getWorld().getSpawnLocation()));
+		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(11000, player, before_quest));
 	}
 	
 	public boolean inQuest() {
@@ -1267,7 +1276,36 @@ public class Quester {
 
 	public void respawn(PlayerRespawnEvent event) {
 		health = max_health;
-		event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+		if (quest != null) {
+			event.setRespawnLocation(quest.getSpawn());
+		} else {
+			event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+		}
 		return;
+	}
+
+	public void debug() {
+		debug = !debug;
+	}
+	
+	public boolean isDebug() {
+		return debug;
+	}
+
+	public Party getParty() {
+		return party;
+	}
+
+	public void createParty() {
+		party = new Party();
+		party.addQuester(this);
+	}
+
+	public void setParty(Party party) {
+		this.party = party;
+	}
+
+	public Quest getQuest() {
+		return quest;
 	}
 }
