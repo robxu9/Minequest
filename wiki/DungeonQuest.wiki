@@ -1,0 +1,36 @@
+{{{
+LoadWorld:test:dungeon:Nether
+
+#enter the cave
+Event:0:AreaEvent:500:1:all:38:67:57:2
+#clear the entrance
+Event:1:BlockEvent:500:33:67:57:0
+Event:2:BlockEvent:1000:33:67:56:0
+Event:3:BlockEvent:1500:33:68:57:0
+Event:4:BlockEvent:2000:33:68:56:0
+#block the entrance
+Event:5:BlockEvent:500:33:67:57:4
+Event:6:BlockEvent:1000:33:67:56:4
+Event:7:BlockEvent:1500:33:68:57:4
+Event:8:BlockEvent:2000:33:68:56:4
+#spawn three zombies and wait for death
+Event:9:EntitySpawnerNoMove:5:43:67:59:Zombie:f
+Event:10:EntitySpawnerNoMove:5:44:67:57:Zombie:f
+Event:11:EntitySpawnerNoMove:5:44:67:54:Zombie:f
+Event:12:EntitySpawnerCompleteNMEvent:10:2:9,10,11
+
+#complete quest
+Event:13:ExperienceAdd:60000:all:1000:1000
+#wait to enter arrow trap
+Event:14:SingleAreaEvent:500:2:all:47:67:62:2
+#fire arrows
+Event:16:ArrowEvent:250:47:68:62:-1:0:0
+Event:17:ArrowEvent:500:47:68:62:-1:0:0
+Event:18:ArrowEvent:750:47:68:62:-1:0:0
+Event:19:ArrowEvent:1000:47:68:62:-1:0:0
+
+Task:0:0,1,2,3,4
+Task:1:5,6,7,8,9,10,11,12,14
+Task:2:16,17,18,19
+Task:3:13
+}}}
