@@ -7,6 +7,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Property {
@@ -17,7 +18,7 @@ public class Property {
 	private List<Quester> editors;
 	private long price;
 	
-	public Property(Quester owner, Location start, Location end, boolean height) {
+	public Property(Quester owner, Location start, Location end, boolean height, long price) {
 		if (start.getX() < end.getX()) {
 			x = (int)start.getX();
 			max_x = (int)end.getX();
@@ -36,6 +37,8 @@ public class Property {
 			y = (int)start.getY();
 			this.height = (int)(start.getY() - end.getY());
 		}
+		
+		this.price = price;
 		
 		this.owner = owner;
 		
@@ -194,5 +197,9 @@ public class Property {
 		}
 		
 		return ret;
+	}
+
+	public long getPrice() {
+		return price;
 	}
 }

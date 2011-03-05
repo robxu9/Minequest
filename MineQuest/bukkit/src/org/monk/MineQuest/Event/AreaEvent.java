@@ -7,10 +7,10 @@ import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quest.QuestTask;
 
 public class AreaEvent extends QuestEvent {
-	private LivingEntity[] entities;
-	private boolean[] flags;
-	private int radius;
-	private Location loc;
+	protected LivingEntity[] entities;
+	protected boolean[] flags;
+	protected int radius;
+	protected Location loc;
 
 	public AreaEvent(Quest quest, long delay, int index, LivingEntity entities[], Location loc, int radius) {
 		super(quest, delay, index);
@@ -45,7 +45,6 @@ public class AreaEvent extends QuestEvent {
 		eventParser.setComplete(flag);
 		
 		if (flag) {
-			MineQuest.log("AreaEvent Complete");
 			eventComplete();
 		}
 	}
