@@ -1,15 +1,15 @@
 package org.monk.MineQuest.Event;
 
 import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
+import org.monk.MineQuest.Quester.Quester;
 
 public class SingleAreaEvent extends AreaEvent {
 
 	public SingleAreaEvent(Quest quest, long delay, int index,
-			LivingEntity[] entities, Location loc, int radius) {
-		super(quest, delay, index, entities, loc, radius);
+			Quester[] questers, Location loc, int radius) {
+		super(quest, delay, index, questers, loc, radius);
 	}
 	
 	@Override
@@ -18,8 +18,8 @@ public class SingleAreaEvent extends AreaEvent {
 		
 		int i;
 		boolean flag = false;
-		for (i = 0; i < entities.length; i++) {
-			if (MineQuest.distance(entities[i].getLocation(), loc) < radius) {
+		for (i = 0; i < questers.length; i++) {
+			if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
 				flag = true;
 			}
 		}

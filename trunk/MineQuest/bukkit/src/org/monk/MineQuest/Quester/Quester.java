@@ -45,30 +45,30 @@ import org.monk.MineQuest.World.Town;
  * @author jmonk
  */
 public class Quester {
+	private Location before_quest;
 	private ChestSet chests;
+	private int class_exp;
 	private SkillClass classes[];
 	private double cubes;
+	private long damage_timer;
+	private boolean debug;
 	private double distance;
 	private boolean enabled;
 	private int exp;
 	private int health;
+	List<Integer> ids = new ArrayList<Integer>();
 	private String last;
 	private int level;
 	private int max_health;
 	private String name;
+	private Party party;
 	private Player player;
 	private int poison_timer;
+	private Quest quest;
 	private int rep;
-	private long damage_timer;
-	private int class_exp;
-	List<Integer> ids = new ArrayList<Integer>();
-	List<Long> times = new ArrayList<Long>();
 	private ItemStack[] spare_inven;
 	private ItemStack[] spare_inven_2;
-	private Quest quest;
-	private boolean debug;
-	private Party party;
-	private Location before_quest;
+	List<Long> times = new ArrayList<Long>();
 	
 	/**
 	 * Load player from MySQL Database.
@@ -174,10 +174,8 @@ public class Quester {
 	 * @param name Name of Ability
 	 * @param lr 1 for left, 0 for right
 	 */
-	public void bind_binder(Player player, String name, String ability, String item, String lr, String lr_2) {
+	public void bind(Player player, String name, String lr) {
 		int i;
-		Ability abil = new AbilityBinder(name, null, getAbility(ability), Integer.parseInt(item), lr_2.equals("l")?1:0);
-		classes[0].binderAdd(abil);
 		
 		for (i = 0; i < classes.length; i++) {
 			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
@@ -194,15 +192,6 @@ public class Quester {
 		}
 	}
 	
-	public Ability getAbility(String ability) {
-		for (SkillClass skill : classes) {
-			if (skill.getAbility(ability) != null) {
-				return skill.getAbility(ability);
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * Binds an Ability to left of right click of the item
 	 * in the players hand.
@@ -211,8 +200,10 @@ public class Quester {
 	 * @param name Name of Ability
 	 * @param lr 1 for left, 0 for right
 	 */
-	public void bind(Player player, String name, String lr) {
+	public void bind_binder(Player player, String name, String ability, String item, String lr, String lr_2) {
 		int i;
+		Ability abil = new AbilityBinder(name, null, getAbility(ability), Integer.parseInt(item), lr_2.equals("l")?1:0);
+		classes[0].binderAdd(abil);
 		
 		for (i = 0; i < classes.length; i++) {
 			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
@@ -284,7 +275,7 @@ public class Quester {
 		}
 		return 4;
 	}
-	
+
 	/**
 	 * Casts a left click bound ability on the given block.
 	 * 
@@ -316,7 +307,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	/**
 	 * Casts a right click bound ability on a given block.
 	 * 
@@ -347,7 +338,7 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	/**
 	 * Checks if a Quester has the required spell components.
 	 * to cast an ability. If the Quester has the components
@@ -372,6 +363,36 @@ public class Quester {
 		}
 		return true;
 	}
+	
+	/**
+     * This function will check if the damager in the event passed
+     * has damaged the quester too recently to damage again.
+     * This implements individual cool down for every entity.
+     * 
+     * @param event Event that holds the attacker
+     * @return True if damage should be cancelled
+     */
+    private boolean checkDamage(int id) {
+	    Calendar now = Calendar.getInstance();
+	    int i;
+	    MineQuest.log("Check id " + id);
+	    
+		for (i = 0; i < ids.size(); i++) {
+			if (ids.get(i) == id) {
+				if ((now.getTimeInMillis() - times.get(i)) > 500) {
+					times.set(i, now.getTimeInMillis());
+					return false;
+				} else {
+					return true;
+				}
+			}
+		}
+	    
+	    ids.add(id);
+	    times.add(now.getTimeInMillis());
+	    
+	    return false;
+    }
 	
 	/**
 	 * Checks if a Quester can use all of the equipment
@@ -484,6 +505,12 @@ public class Quester {
 		return false;
 	}
 
+	public void clearQuest() {
+		this.quest = null;
+		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, before_quest.getWorld().getSpawnLocation()));
+		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(11000, player, before_quest));
+	}
+	
 	/**
 	 * Creates database entry for this quester with starting
 	 * classes and health.
@@ -530,7 +557,12 @@ public class Quester {
 			MineQuest.getSQLServer().update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
 		}
 	}
-	
+
+	public void createParty() {
+		party = new Party();
+		party.addQuester(this);
+	}
+
 	/**
 	 * Cures all poison for the Quester.
 	 */
@@ -538,6 +570,10 @@ public class Quester {
 		poison_timer = 0;
 	}
 
+	public void debug() {
+		debug = !debug;
+	}
+	
 	/**
 	 * Called any time there is a generic damage event on 
 	 * the Quester.
@@ -547,7 +583,7 @@ public class Quester {
 	public void defend(EntityDamageEvent event) {
 		healthChange(event.getDamage(), event);
 	}
-
+	
 	/**
 	 * Called any time there is a damaged by block event
 	 * on the Quester.
@@ -570,10 +606,9 @@ public class Quester {
 		if (levelAdj == 0) {
 			levelAdj = 1;
 		} else {
-			amount *= levelAdj * 3;
+			amount *= levelAdj * 1;
 		}
 		amount /= 4;
-		MineQuest.log("Defend " + name + "!");
 		
 		if (entity instanceof LivingEntity) {
 			if (MineQuest.getMob((LivingEntity)entity) != null) {
@@ -586,7 +621,6 @@ public class Quester {
 //		}
 		
 		MineQuest.log("[INFO] Damage to " + name + " is " + amount);
-		if (!enabled) return;
 		
 		int i, sum = 0;
 		
@@ -610,8 +644,8 @@ public class Quester {
 		
 		return;
 	}
-	
-	/**
+
+    /**
 	 * Called anytime a Player is destroying a block. Checks to
 	 * see if it is bound to any abilities then attributes experience
 	 * to given class if required.
@@ -657,7 +691,7 @@ public class Quester {
 		
 		return false;
 	}
-	
+
 	/**
 	 * Disable an ability with the given name.
 	 * 
@@ -682,7 +716,7 @@ public class Quester {
 		rep -= i;
 	}
 
-    /**
+	/**
 	 * Enable an ability with the given name.
 	 * 
 	 * @param string Name of Ability
@@ -708,6 +742,10 @@ public class Quester {
 		return super.equals(obj);
 	}
 
+	public void expClassGain(int class_exp) {
+		this.class_exp = class_exp;
+	}
+
 	/**
 	 * Adds i experience to Quester and checks for level
 	 * up.
@@ -721,6 +759,15 @@ public class Quester {
 		}
 	}
 
+	public Ability getAbility(String ability) {
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(ability) != null) {
+				return skill.getAbility(ability);
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Gets the ChestSet for given player
 	 * 
@@ -760,6 +807,10 @@ public class Quester {
 		return classes;
 	}
 
+	public int getClassExp() {
+		return class_exp;
+	}
+
 	/**
 	 * Returns amount of cubes the Quester has.
 	 * 
@@ -794,7 +845,7 @@ public class Quester {
 		return level;
 	}
 
-	/**
+    /**
 	 * Returns maximum health of Quester.
 	 * 
 	 * @return
@@ -811,6 +862,10 @@ public class Quester {
 		return name;
 	}
 
+	public Party getParty() {
+		return party;
+	}
+
 	/**
 	 * Returns player that the Quester wraps.
 	 * 
@@ -818,6 +873,10 @@ public class Quester {
 	 */
 	public Player getPlayer() {
 		return player;
+	}
+
+	public Quest getQuest() {
+		return quest;
 	}
 
 	/**
@@ -828,7 +887,7 @@ public class Quester {
 	public Town getTown() {
 		return MineQuest.getTown(last);
 	}
-	
+
 	public void giveSpareInventory() {
 		if (spare_inven != null) {
 			Location loc = player.getLocation();
@@ -867,17 +926,18 @@ public class Quester {
 	 */
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		int newHealth;
-		
-        if ((event instanceof EntityDamageByEntityEvent) && ((((EntityDamageByEntityEvent)event).getDamager() != null) 
-        		&& checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId()))) {
-        	event.setCancelled(true);
-        	return false;
+                
+        if ((event instanceof EntityDamageByEntityEvent) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
+        	MineQuest.log("Cancelled!");
+            event.setCancelled(true);
+            return false;
         }
         if (((event.getCause() == DamageCause.FIRE) || 
         		(event.getCause() == DamageCause.FIRE_TICK) || 
         		(event.getCause() == DamageCause.SUFFOCATION) || 
         		(event.getCause() == DamageCause.DROWNING) || 
         		(event.getCause() == DamageCause.LAVA)) && checkDamage(42024)) {
+        	MineQuest.log("Cancelled!");
         	event.setCancelled(true);
         	return false;
         }
@@ -934,33 +994,12 @@ public class Quester {
         return false;
     }
 
-	/**
-	 * This function will check if the damager in the event passed
-	 * has damaged the quester too recently to damage again.
-	 * This implements individual cool down for every entity.
-	 * 
-	 * @param event Event that holds the attacker
-	 * @return True if damage should be cancelled
-	 */
-	private boolean checkDamage(int id) {
-		Calendar now = Calendar.getInstance();
-		int i;
-		
-		for (i = 0; i < ids.size(); i++) {
-			if (ids.get(i) == id) {
-				if ((now.getTimeInMillis() - times.get(i)) > 500) {
-					times.set(i, now.getTimeInMillis());
-					return false;
-				} else {
-					return true;
-				}
-			}
-		}
-		
-		ids.add(id);
-		times.add(now.getTimeInMillis());
-		
-		return false;
+	public boolean inQuest() {
+		return quest != null;
+	}
+
+	public boolean isDebug() {
+		return debug;
 	}
 
 	/**
@@ -1053,6 +1092,16 @@ public class Quester {
 		poison_timer += 10;
 	}
 
+	public void respawn(PlayerRespawnEvent event) {
+		health = max_health;
+		if (quest != null) {
+			event.setRespawnLocation(quest.getSpawn());
+		} else {
+			event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+		}
+		return;
+	}
+
 	/**
 	 * Saves any changes in the Quester to the MySQL
 	 * Database.
@@ -1070,7 +1119,7 @@ public class Quester {
 		}
 		enabled = false;
 	}
-
+	
 	/**
 	 * Sends a message to the Quester's Player.
 	 * 
@@ -1083,7 +1132,7 @@ public class Quester {
 			MineQuest.log("[WARNING] Quester " + name + " doesn't have player, not logged in?");
 		}
 	}
-
+	
 	/**
 	 * Sets the Cubes of the Quester.
 	 * 
@@ -1092,7 +1141,7 @@ public class Quester {
 	public void setCubes(double d) {
 		cubes = d;
 	}
-
+	
 	/**
 	 * Sets the Health of the Quester.
 	 * 
@@ -1109,6 +1158,10 @@ public class Quester {
 		updateHealth(player);
 	}
 
+	public void setParty(Party party) {
+		this.party = party;
+	}
+	
 	/**
 	 * Sets the reference to the Player.
 	 * 
@@ -1116,6 +1169,14 @@ public class Quester {
 	 */
 	public void setPlayer(Player player) {
 		this.player = player;
+	}
+	
+	public void setQuest(Quest quest, World world) {
+		this.quest = quest;
+		
+		before_quest = player.getLocation();
+		
+		player.teleportTo(world.getSpawnLocation());
 	}
 
 	/**
@@ -1128,6 +1189,22 @@ public class Quester {
 		MineQuest.getSQLServer().update("UPDATE players SET town='" + town.getName() + "' WHERE name='" + name + "'");
 	}
 
+	public void spendClassExp(String type, int amount) {
+		if (amount > class_exp) {
+			sendMessage("You only have " + class_exp + " available");
+			return;
+		}
+		if (getClass(type) == null) {
+			sendMessage(type + " is not a valid class for you");
+			return;
+		}
+		
+		class_exp -= amount;
+		
+		getClass(type).expAdd(amount);
+		sendMessage(amount + " experience spent on " + type);
+	}
+	
 	/**
 	 * Called whenever a Quester is teleported to check for
 	 * respawning.
@@ -1230,82 +1307,5 @@ public class Quester {
 		}
 		
 		player.setHealth(newValue);
-	}
-	
-	public void setQuest(Quest quest, World world) {
-		this.quest = quest;
-		
-		before_quest = player.getLocation();
-		
-		player.teleportTo(world.getSpawnLocation());
-	}
-	
-	public void clearQuest() {
-		this.quest = null;
-		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, before_quest.getWorld().getSpawnLocation()));
-		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(11000, player, before_quest));
-	}
-	
-	public boolean inQuest() {
-		return quest != null;
-	}
-
-	public void expClassGain(int class_exp) {
-		this.class_exp = class_exp;
-	}
-	
-	public int getClassExp() {
-		return class_exp;
-	}
-	
-	public void spendClassExp(String type, int amount) {
-		if (amount > class_exp) {
-			sendMessage("You only have " + class_exp + " available");
-			return;
-		}
-		if (getClass(type) == null) {
-			sendMessage(type + " is not a valid class for you");
-			return;
-		}
-		
-		class_exp -= amount;
-		
-		getClass(type).expAdd(amount);
-		sendMessage(amount + " experience spent on " + type);
-	}
-
-	public void respawn(PlayerRespawnEvent event) {
-		health = max_health;
-		if (quest != null) {
-			event.setRespawnLocation(quest.getSpawn());
-		} else {
-			event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
-		}
-		return;
-	}
-
-	public void debug() {
-		debug = !debug;
-	}
-	
-	public boolean isDebug() {
-		return debug;
-	}
-
-	public Party getParty() {
-		return party;
-	}
-
-	public void createParty() {
-		party = new Party();
-		party.addQuester(this);
-	}
-
-	public void setParty(Party party) {
-		this.party = party;
-	}
-
-	public Quest getQuest() {
-		return quest;
 	}
 }

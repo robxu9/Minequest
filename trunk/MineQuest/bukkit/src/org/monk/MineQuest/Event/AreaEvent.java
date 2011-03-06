@@ -1,23 +1,22 @@
 package org.monk.MineQuest.Event;
 
 import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
-import org.monk.MineQuest.Quest.QuestTask;
+import org.monk.MineQuest.Quester.Quester;
 
 public class AreaEvent extends QuestEvent {
-	protected LivingEntity[] entities;
+	protected Quester[] questers;
 	protected boolean[] flags;
 	protected int radius;
 	protected Location loc;
 
-	public AreaEvent(Quest quest, long delay, int index, LivingEntity entities[], Location loc, int radius) {
+	public AreaEvent(Quest quest, long delay, int index, Quester questers[], Location loc, int radius) {
 		super(quest, delay, index);
-		this.entities = entities;
+		this.questers = questers;
 		this.radius = radius;
 		this.loc = loc;
-		flags = new boolean[entities.length];
+		flags = new boolean[questers.length];
 		for (boolean bool : flags) {
 			bool = false;
 		}
@@ -28,8 +27,8 @@ public class AreaEvent extends QuestEvent {
 		eventParser.setComplete(false);
 		
 		int i;
-		for (i = 0; i < entities.length; i++) {
-			if (MineQuest.distance(entities[i].getLocation(), loc) < radius) {
+		for (i = 0; i < questers.length; i++) {
+			if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
 				flags[i] = true;
 			}
 		}

@@ -16,6 +16,8 @@ public class QuestTask {
 	}
 	
 	public Event[] getEvents() {
-		return events;
+		Event[] ret = events;
+		events = null;
+		return ret;
 	}
 }

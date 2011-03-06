@@ -90,22 +90,24 @@ public class Quest {
 						}
 					}
 				} else if (split[0].equals("Spawn")) {
-					int x = Integer.parseInt(split[1]);
-					int y = Integer.parseInt(split[2]);
-					int z = Integer.parseInt(split[3]);
+					MineQuest.log("Loaded Spawn");
+					double x = Double.parseDouble(split[1]);
+					double y = Double.parseDouble(split[2]);
+					double z = Double.parseDouble(split[3]);
 					this.spawn = new Location(world, x, y, z);
 				}
 			}
 			if (spawn == null) {
+				MineQuest.log("No Spawn Found");
 				spawn = world.getSpawnLocation();
 			}
 			
-			for (QuestTask task : tasks) {
-				MineQuest.log("Task: " + task.getId());
-				for (Event event : task.getEvents()) {
-					MineQuest.log(event.getName());
-				}
-			}
+//			for (QuestTask task : tasks) {
+//				MineQuest.log("Task: " + task.getId());
+//				for (Event event : task.getEvents()) {
+//					MineQuest.log(event.getName());
+//				}
+//			}
 			
 			for (Quester quester : party.getQuesters()) {
 				quester.setQuest(this, world);
@@ -234,7 +236,7 @@ public class Quest {
 			}
 			Location loc = new Location(world, Integer.parseInt(line[6]), Integer.parseInt(line[7]), Integer.parseInt(line[8]));
 			int radius = Integer.parseInt(line[9]);
-			events.add(new AreaEvent(this, delay, index, entities, loc, radius));
+			events.add(new AreaEvent(this, delay, index, questers, loc, radius));
 		} else if (type.equals("SingleAreaEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
@@ -252,7 +254,7 @@ public class Quest {
 			}
 			Location loc = new Location(world, Integer.parseInt(line[6]), Integer.parseInt(line[7]), Integer.parseInt(line[8]));
 			int radius = Integer.parseInt(line[9]);
-			events.add(new SingleAreaEvent(this, delay, index, entities, loc, radius));
+			events.add(new SingleAreaEvent(this, delay, index, questers, loc, radius));
 		} else if (type.equals("MessageEvent")) {
 			int delay = Integer.parseInt(line[3]);
 
@@ -426,11 +428,14 @@ public class Quest {
 			}
 			if (equals(event.getBlock().getLocation(), exceptions[i])) {
 				if (triggers[i] >= 0) {
-					for (Event e : getNextEvents(triggers[i])) {
-						if (quester.isDebug()) {
-							quester.sendMessage("Adding Event " + e.getName());
+					Event[] events = getNextEvents(triggers[i]);
+					if (events != null) {
+						for (Event e : events) {
+							if (quester.isDebug()) {
+								quester.sendMessage("Adding Event " + e.getName());
+							}
+							MineQuest.getEventParser().addEvent(e);
 						}
-						MineQuest.getEventParser().addEvent(e);
 					}
 				}
 				return false;
