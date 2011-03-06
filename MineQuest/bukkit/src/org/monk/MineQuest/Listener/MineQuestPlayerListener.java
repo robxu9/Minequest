@@ -91,7 +91,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.teleportTo(towns.get(index).getLocation());
 			event.setCancelled(true);
 		} else if (split[0].equals("/townloc")) {
-			player.sendMessage("You are at " + (int)player.getLocation().getX() + " " + (int)player.getLocation().getY() + " " + (int)player.getLocation().getZ());
+			player.sendMessage("You are at " + player.getLocation().getX() + " " + player.getLocation().getY() + " " + player.getLocation().getZ());
 			event.setCancelled(true);
 		} else if (split[0].equals("/mystash")) {
 			MineQuest.getQuester(player).getChestSet(player).add(player);

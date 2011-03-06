@@ -34,6 +34,7 @@ public class MineQuestEntityListener extends EntityListener {
         		MineQuest.log("Damage Event");
                 MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
             }
+			return;
 		}
 		if (event.getEntity() instanceof Player) {
 			MineQuest.getQuester((Player)event.getEntity()).defend(event);
