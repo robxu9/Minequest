@@ -6,8 +6,40 @@ This page is a description of how to write individual pieces of a quest file. It
 
 = Details =
 
-Quest files are ":" delimited for the most part. This means there is a single colon between major fields of any line. The first field in every line determines what kind of line that will be. There are currently 3 types of lines and there will inevitably be more at time continues.
+Quest files are ":" delimited for the most part. This means there is a single colon between major fields of any line. The first field in every line determines what kind of line that will be. There are currently 4 types of lines and there will inevitably be more at time continues.
 
 ----
 
 = World/LoadWorld =
+
+This option defines the place where the quest will take place, it should be the first thing in your quest file. Unless you want the quest to take place wherever the questers currently are. World is the simpler of the two of these as it simply loads the world specified the format is as follows.
+{{{
+World:world_name
+}}}
+The problem with this is that you might have wood that gets burned, or floors destroyed by traps, or even quest events that destroy your own dungeon. In the World option these affects are saved and the world cannot easily be reused. LoadWorld is the alternative it takes two parameters, the first is the world where the quest will take place, any existing world with that name will be deleted and the second name is copied and used in its place.
+{{{
+LoadWorld:junk_name:unaffected_load_world
+}}}
+I plan on adding an InstanceWorld option which will only take one parameter which is the name of the world to load from and randomly generates an available name to use for the world to quest in. This way multiple parties can load the same quest at the same time.
+
+= Spawn =
+This is used to set a re-spawn point for questers that are in the quest. If this is not set they will re-spawn at the re-spawn point for the world. This is vital for quests that block off the entrance point. This takes 3 doubles after it which are the spawn point.
+{{{
+Spawn:spawn_x:spawn_y:spawn_z
+}}}
+
+= Task/RepeatingTask =
+A task is a group of Events that will get activated when the task is issued. There are some Events that issue Tasks when certain things happen, and when Tasks are issued the activate Events. Tasks have an id (should be unique), and when Events that issue events are setup they must be given a Task id to activate. If the id is -1 then the quest is completed, and if the id is any other negative number than no task is issued. The task also takes a comma separated list of Event ids that should be activated when it is issued.
+{{{
+Task:id:event_id_1,event_id_2,event_id_3
+}}}
+A task will only activate the events one, so this is very useful for traps that go off once. Some traps you want to activate multiple times so a RepeatingTask can be used. This will activate the events every time that the task is issued.
+{{{
+Task:id:event_id_1,event_id_2,event_id_3
+}}}
+
+= Event =
+There are many types of Events that can be used to construct various types of quests but they all have a few common parameters that can be mentioned. The first is the id, this is just like task id in that it is unique. The task and event id spaces do not collide, so if an Event has id 6 and a Task has id 6, they are not necessarily related. They all have an event name after this, this defines what the event will do. In all cases but CanEdit events, this is followed by a delay. The delay is in milliseconds and defines how often the event will check for triggers, or how long until the event occurs.
+{{{
+Event:id:EventName:(delay ms):(other event data)
+}}}
