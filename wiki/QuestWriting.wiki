@@ -1,0 +1,13 @@
+Details pertaining to Writing and Formating .quest files
+
+= Introduction =
+
+This page is a description of how to write individual pieces of a quest file. It does not go into the more creative aspects required in making a detailed quest, but more simply how each small piece is put together.
+
+= Details =
+
+Quest files are ":" delimited for the most part. This means there is a single colon between major fields of any line. The first field in every line determines what kind of line that will be. There are currently 3 types of lines and there will inevitably be more at time continues.
+
+----
+
+= World/LoadWorld =
