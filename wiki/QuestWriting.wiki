@@ -28,7 +28,7 @@ Spawn:spawn_x:spawn_y:spawn_z
 }}}
 
 =Task / Repeating Task=
-A task is a group of Events that will get activated when the task is issued. There are some Events that issue Tasks when certain things happen, and when Tasks are issued the activate Events. Tasks have an id (should be unique), and when Events that issue events are setup they must be given a Task id to activate. If the id is -1 then the quest is completed, and if the id is any other negative number than no task is issued. The task also takes a comma separated list of Event ids that should be activated when it is issued.
+A task is a group of Events that will get activated when the task is issued. There are some Events that issue Tasks when certain things happen, and when Tasks are issued the activate Events. Tasks have an id (should be unique), and when Events that issue events are setup they must be given a Task id to activate. If the id is -1 then the quest is completed, and if the id is any other negative number then no task is issued. The task also takes a comma separated list of Event ids that should be activated when it is issued.
 {{{
 Task:id:event_id_1,event_id_2,event_id_3
 }}}
@@ -90,4 +90,40 @@ This section will describe the various types of entity spawners. They all take a
 This is the most generic entity spawner. It will spawn the specified creature type at the location. If the entity dies, it will re-spawn a new creature at the spawner. When the spawner is completed it will kill the entity it spawned if it is alive. The last parameter is either a t or an f for specifying whether the mob should be a super-mob or not (e.g. Poison Zombie).
 {{{
 Event:id:EntitySpawnerEvent:delay ms:loc x:loc y:loc z:super
+}}}
+
+=== Entity Spawner No Move Event ===
+This is great if you want some mobs in the distance to look like they are commanding or if you want sounds of zombies but don't want them finding the players yet. Basically it will spawn the mobs in the location and keep them from moving. If for some reason they die before the event is completed it they will re-spawn. They will not be killed when the event it completed unlike the normal spawner.
+{{{
+Event:id:EntitySpawnerNoMove:delay ms:loc x:loc y:loc z:super
+}}}
+
+=== Health Entity Spawn ===
+This is used to create an entity with a specific amount of health. This can be used to create a boss or even just a pig thats really hard to stop from squealing. This will hold the entity in place, keeping it from moving. When the entity is killed this event will issue a quest event with the id specified.
+{{{
+Event:id:HealthEntitySpawn:delay ms:task:loc x:loc y:loc z:health
+}}}
+
+== Entity Spawner Completion ==
+Currently there are two events which will complete an entity spawn event, but more will probably come along as things develop.
+
+=== Entity Spawner Complete ===
+This completes any entity spawners with the event idd specified. It takes the ids as a comma separated list. As mentioned previously if it is a normal spawner the spawned entities will die.
+{{{
+Event:id:EntitySpawnerCompleteEvent:delay ms:event id 1,event id 2, event id 3
+}}}
+
+=== Entity Spawner No Move Complete ===
+This complete event was designed for completing the Entity No Move Spawner. It completes any of the spawners with the ids specified however it also waits until the entities are dead, at which time it will issue a quest task. 
+{{{
+Event:id:EntitySpawnerCompleteNMEvent:delay ms:task:event id 1,event id 2, event id 3
+}}}
+
+== Area Events ==
+These are events that issue quest tasks when areas are entered by questers.
+
+=== Area Event ===
+These are the generic form of area events. When the entire party has been in the area at one time or another the quest task will be issued. They do not all have to be standing in the area at once.
+{{{
+Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
 }}}
