@@ -60,3 +60,34 @@ Event:id:BlockEvent:delay ms:second_delay ms:x:y:z:type
 }}}
 
 == Message Event ==
+A message event will send a message to all of the questers in the party that is in the quest. The only extra parameter is the message itself.
+{{{
+Event:id:MessageEvent:delay ms:message
+}}}
+
+== Lock World Time ==
+This is used to keep the world a specific time of day, for instance a quest that takes place at night. It takes two relative times that it will keep the world between. When the world gets past the later time it will go back to the earlier time. Experimentation showed that keeping these times too close together would cause user disorientation. Its better to only see the time change every so often. Having multiples of this event in one quest may cause problems.
+{{{
+Event:id:LockWorldTime:check period:first time:second time
+}}}
+
+== Arrow Event ==
+This launches an arrow when activated after the specified delay. It takes 6 doubles for the type, it has x, y, and z for both location and direction. The velocity and spread are set specifically inside the code, upon enough requests I would be happy to change this, I just don't currently see the need.
+{{{
+Event:id:ArrowEvent:delay ms:loc x:loc y: loc z: dir x: dir y: dir z
+}}}
+
+== Party Health Event ==
+This sets the health of the entire party after the specified delay based on fraction.
+{{{
+Event:id:PartyHealthEvent:delay ms:fraction of max
+}}}
+
+== Entity Spawners ==
+This section will describe the various types of entity spawners. They all take a creature type as a string and a location as ints.
+
+=== Entity Spawner Event ===
+This is the most generic entity spawner. It will spawn the specified creature type at the location. If the entity dies, it will re-spawn a new creature at the spawner. When the spawner is completed it will kill the entity it spawned if it is alive. The last parameter is either a t or an f for specifying whether the mob should be a super-mob or not (e.g. Poison Zombie).
+{{{
+Event:id:EntitySpawnerEvent:delay ms:loc x:loc y:loc z:super
+}}}
