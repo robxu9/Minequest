@@ -40,7 +40,6 @@ public class ResourceClass extends SkillClass {
 	 * @param itemStack Item to check.
 	 * @return True if wooden or stone
 	 */
-	@SuppressWarnings("unused")
 	protected boolean isStoneWoodenTool(ItemStack itemStack) {
 
 		switch (itemStack.getTypeId()) {
@@ -67,7 +66,6 @@ public class ResourceClass extends SkillClass {
 	 * @param type2 Block type destroyed
 	 * @return Item stack to go in inventory
 	 */
-	@SuppressWarnings("unused")
 	private ItemStack getItemGive(int type2) {
 		switch (type2) {
 		case 14: //gold

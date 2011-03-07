@@ -2,7 +2,6 @@ package org.monk.MineQuest.Event;
 
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
-import org.monk.MineQuest.Quest.QuestTask;
 
 public class QuestEvent extends PeriodicEvent {
 	private Quest quest;

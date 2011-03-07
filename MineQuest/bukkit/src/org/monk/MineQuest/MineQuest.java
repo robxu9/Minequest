@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -25,6 +24,8 @@ import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
+import org.monk.MineQuest.Mob.MQMob;
+import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.World.Town;
@@ -40,7 +41,6 @@ import org.monk.MineQuest.World.Town;
  */
 public class MineQuest extends JavaPlugin {
 	private static EventQueue eventQueue;
-	private static Logger log;
 	private static String namer;
 	private static List<Quester> questers = new ArrayList<Quester>();
 	private static Server server;
@@ -637,5 +637,16 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		return questers;
+	}
+	public static void setMQMob(MQMob specialMob) {
+		int i;
+		
+		for (i = 0; i < mobs.length; i++) {
+			if (mobs[i].getId() == specialMob.getId()) {
+				mobs[i] = specialMob;
+			}
+		}
+		
+		addMQMob(specialMob);
 	}
 }

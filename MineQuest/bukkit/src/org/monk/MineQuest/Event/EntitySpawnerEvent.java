@@ -5,9 +5,9 @@ import org.bukkit.World;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
-import org.monk.MineQuest.MQMob;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.SpecialMob;
+import org.monk.MineQuest.Mob.MQMob;
+import org.monk.MineQuest.Mob.SpecialMob;
 
 public class EntitySpawnerEvent extends PeriodicEvent {
 	protected LivingEntity entity;
@@ -41,9 +41,9 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 		if ((entity == null) || (entity.getHealth() <= 0)) {
 			entity = world.spawnCreature(location, creatureType);
 			if (superm) {
-				MineQuest.addMQMob(new SpecialMob((Monster)entity));
+				MineQuest.setMQMob(new SpecialMob((Monster)entity));
 			} else {
-				MineQuest.addMQMob(new MQMob((Monster)entity));
+				MineQuest.setMQMob(new MQMob((Monster)entity));
 			}
 		}
 		
