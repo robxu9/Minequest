@@ -1,7 +1,6 @@
 package org.monk.MineQuest.Event;
 
 import org.bukkit.entity.LivingEntity;
-import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
 
 public class EntitySpawnerCompleteNMEvent extends PeriodicEvent {
@@ -50,12 +49,7 @@ public class EntitySpawnerCompleteNMEvent extends PeriodicEvent {
 	}
 	
 	public void eventComplete() {
-		Event[] events = quest.getNextEvents(index);
-		if (events != null) {
-			for (Event event : events) {
-				MineQuest.getEventParser().addEvent(event);
-			}
-		}
+		quest.issueNextEvents(index);
 	}
 	
 	@Override

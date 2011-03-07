@@ -15,4 +15,14 @@ public class EventQueue {
 		newEventParser.setId(MineQuest.getSServer().getScheduler().scheduleSyncRepeatingTask(minequest, newEventParser, 1, 1));
 		return newEventParser.getId();
 	}
+
+	public void cancel(int[] ids) {
+		for (int id : ids) {
+			cancel(id);
+		}
+	}
+
+	public void cancel(int id) {
+		MineQuest.getSServer().getScheduler().cancelTask(id);
+	}
 }

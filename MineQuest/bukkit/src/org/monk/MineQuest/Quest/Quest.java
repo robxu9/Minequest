@@ -23,6 +23,7 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.AreaEvent;
 import org.monk.MineQuest.Event.ArrowEvent;
 import org.monk.MineQuest.Event.BlockCDEvent;
+import org.monk.MineQuest.Event.BlockDCEvent;
 import org.monk.MineQuest.Event.BlockEvent;
 import org.monk.MineQuest.Event.EntitySpawnerCompleteEvent;
 import org.monk.MineQuest.Event.EntitySpawnerCompleteNMEvent;
@@ -30,9 +31,11 @@ import org.monk.MineQuest.Event.EntitySpawnerEvent;
 import org.monk.MineQuest.Event.EntitySpawnerNoMove;
 import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.ExperienceAdd;
+import org.monk.MineQuest.Event.HealthEntitySpawn;
 import org.monk.MineQuest.Event.LockWorldTime;
 import org.monk.MineQuest.Event.MessageEvent;
 import org.monk.MineQuest.Event.NormalEvent;
+import org.monk.MineQuest.Event.PartyHealthEvent;
 import org.monk.MineQuest.Event.QuestEvent;
 import org.monk.MineQuest.Event.SingleAreaEvent;
 import org.monk.MineQuest.Quester.Quester;
@@ -66,7 +69,9 @@ public class Quest {
 				if (split[0].equals("Event")) {
 					createEvent(split);
 				} else if (split[0].equals("Task")) {
-					createTask(split);
+					createTask(split, false);
+				} else if (split[0].equals("RepeatingTask")) {
+					createTask(split, true);
 				} else if (split[0].equals("World")) {
 					World world = null;
 					if (MineQuest.getSServer().getWorld(split[1]) == null) {
@@ -188,7 +193,7 @@ public class Quest {
 		}
 	}
 
-	public void createTask(String line[]) {
+	public void createTask(String line[], boolean repeating) {
 		int id = Integer.parseInt(line[1]);
 		Event[] events;
 		if (line.length == 3) {
@@ -204,7 +209,11 @@ public class Quest {
 			events[0] = new NormalEvent(0);
 		}
 		
-		tasks.add(new QuestTask(events, id));
+		if (repeating) {
+			tasks.add(new RepeatingQuestTask(events, id));
+		} else {
+			tasks.add(new QuestTask(events, id));
+		}
 	}
 	
 	public void createEvent(String line[]) {
@@ -292,7 +301,7 @@ public class Quest {
 				MineQuest.log("Warning: Options other than all are not supported for ExperienceAdd");
 			}
 			
-			events.add(new ExperienceAdd(this, delay, questers, exp, class_exp));
+			events.add(new ExperienceAdd(delay, party, exp, class_exp));
 		} else if (type.equals("LockWorldTime")) {
 			long delay = Integer.parseInt(line[3]);
 			long time = Integer.parseInt(line[5]);
@@ -316,7 +325,7 @@ public class Quest {
 			Block block = world.getBlockAt(location);
 			int idd = Integer.parseInt(line[8]);
 			
-			events.add(new BlockCDEvent(delay, second_delay, block, Material.getMaterial(idd)));
+			events.add(new BlockDCEvent(delay, second_delay, block, Material.getMaterial(idd)));
 		} else if (type.equals("ArrowEvent")) {
 			long delay = Integer.parseInt(line[3]);
 			Location start = new Location(world,
@@ -350,8 +359,30 @@ public class Quest {
 			
 			exceptions = new_locs;
 			triggers = new_tasks;
-			MineQuest.log("Adding Edit " + new_loc.getX() + " " + new_loc.getY() + " " + new_loc.getZ() + " " + next_task);
+
+//			MineQuest.log("Added CanEdit");
+			return;
+		} else if (type.equals("PartyHealthEvent")) {
+			long delay = Integer.parseInt(line[3]);
+			double percent = Double.parseDouble(line[4]);
+			
+			events.add(new PartyHealthEvent(delay, party, percent));
+		} else if (type.equals("HealthEntitySpawn")) {
+			long delay = Integer.parseInt(line[3]);
+			int task = Integer.parseInt(line[4]);
+			Location location = new Location(world,
+					Double.parseDouble(line[5]),
+					Double.parseDouble(line[6]),
+					Double.parseDouble(line[7])
+					);
+			int health = Integer.parseInt(line[9]);
+			
+			
+			events.add(new HealthEntitySpawn(this, delay, task, location, CreatureType.fromName(line[8]), health));
 		}
+		
+		
+//		MineQuest.log("Added " + events.get(events.size() - 1).getName());
 		events.get(events.size() - 1).setId(id);
 	}
 	
@@ -365,23 +396,20 @@ public class Quest {
 		return null;
 	}
 
-	public Event[] getNextEvents(int index) {
+	public void issueNextEvents(int index) {
 		if (index == -1) {
 			for (Quester quester : questers) {
 				quester.clearQuest();
 			}
-			return null;
-		} else if (index == -2) {
-			return null;
+		} else if (index <= -2) {
+			return;
 		}
 		
 		for (QuestTask task : tasks) {
 			if (task.getId() == index) {
-				return task.getEvents();
+				task.issueEvents();
 			}
 		}
-		
-		return null;
 	}
 
 	public boolean canEdit(Quester quester, org.bukkit.event.block.BlockEvent event) {
@@ -391,16 +419,8 @@ public class Quest {
 				quester.sendMessage("Checking Trigger " + triggers[i]);
 			}
 			if (equals(event.getBlock().getLocation(), exceptions[i])) {
-				if (triggers[i] >= 0) {
-					Event[] events = getNextEvents(triggers[i]);
-					if (events != null) {
-						for (Event e : events) {
-							if (quester.isDebug()) {
-								quester.sendMessage("Adding Event " + e.getName());
-							}
-							MineQuest.getEventParser().addEvent(e);
-						}
-					}
+				if (triggers[i] >= -1) {
+					issueNextEvents(triggers[i]);
 				}
 				return false;
 			}

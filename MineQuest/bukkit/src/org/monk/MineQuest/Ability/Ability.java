@@ -535,7 +535,7 @@ public class Ability {
 		for (i = 0; i < entities.size(); i++) {
 			if (isType(entities.get(i), type)) {
 				moveOut(player, entities.get(i), distance);
-				entities.get(i).setHealth(entities.get(i).getHealth() - 1);
+				MineQuest.getMob(entities.get(i)).damage(1);
 			}
 		}
 		
