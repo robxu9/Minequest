@@ -122,9 +122,6 @@ public class Quest {
 	}
 	
 	public void removeQuester(Quester quester) {
-		Quester new_questers[] = new Quester[questers.length - 1];
-		int i = 0;
-		
 		party.remQuester(quester);
 		
 		quester.clearQuest();
@@ -223,53 +220,20 @@ public class Quest {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
 			
-			if (!line[5].equals("all")) {
-				entities = new LivingEntity[line[5].split(",").length];
-				int in = 0;
-				for (String name : line[5].split(",")) {
-					for (Quester quester : questers) {
-						if (quester.getName().equals(name)) {
-							entities[in++] = quester.getPlayer();
-						}
-					}
-				}
-			}
-			Location loc = new Location(world, Integer.parseInt(line[6]), Integer.parseInt(line[7]), Integer.parseInt(line[8]));
-			int radius = Integer.parseInt(line[9]);
-			events.add(new AreaEvent(this, delay, index, questers, loc, radius));
+			Location loc = new Location(world, Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
+			int radius = Integer.parseInt(line[8]);
+			events.add(new AreaEvent(this, delay, index, party, loc, radius));
 		} else if (type.equals("SingleAreaEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
 			
-			if (!line[5].equals("all")) {
-				entities = new LivingEntity[line[5].split(",").length];
-				int in = 0;
-				for (String name : line[5].split(",")) {
-					for (Quester quester : questers) {
-						if (quester.getName().equals(name)) {
-							entities[in++] = quester.getPlayer();
-						}
-					}
-				}
-			}
-			Location loc = new Location(world, Integer.parseInt(line[6]), Integer.parseInt(line[7]), Integer.parseInt(line[8]));
-			int radius = Integer.parseInt(line[9]);
-			events.add(new SingleAreaEvent(this, delay, index, questers, loc, radius));
+			Location loc = new Location(world, Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
+			int radius = Integer.parseInt(line[8]);
+			events.add(new SingleAreaEvent(this, delay, index, party, loc, radius));
 		} else if (type.equals("MessageEvent")) {
 			int delay = Integer.parseInt(line[3]);
 
-			if (!line[4].equals("all")) {
-				entities = new LivingEntity[line[4].split(",").length];
-				int in = 0;
-				for (String name : line[4].split(",")) {
-					for (Quester quester : questers) {
-						if (quester.getName().equals(name)) {
-							entities[in++] = quester.getPlayer();
-						}
-					}
-				}
-			}
-			events.add(new MessageEvent(delay, questers, line[5]));
+			events.add(new MessageEvent(delay, party, line[4]));
 		} else if (type.equals("BlockEvent")) {
 			int delay = Integer.parseInt(line[3]);
 

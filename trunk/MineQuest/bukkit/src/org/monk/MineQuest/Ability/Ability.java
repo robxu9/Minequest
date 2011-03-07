@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftCreeper;
@@ -126,7 +125,6 @@ public class Ability {
 	 */
 	static public int getNearestY(World world, int x, int y, int z) {
 		int i = y;
-		Server server = MineQuest.getSServer();
 		
 		if (world.getBlockAt(x, y, z).getTypeId() != 0) {
 			do {
@@ -259,7 +257,7 @@ public class Ability {
 	 * @param entity
 	 * @return distance between player and entity
 	 */
-	private int getDistance(Player player, LivingEntity entity) {
+	protected int getDistance(Player player, LivingEntity entity) {
 		return (int)MineQuest.distance(player.getLocation(), entity.getLocation());
 	}
 	
@@ -430,7 +428,7 @@ public class Ability {
 	 * @param radius
 	 * @return true if within radius
 	 */
-	private boolean isWithin(LivingEntity player, LivingEntity baseEntity, int radius) {
+	protected boolean isWithin(LivingEntity player, LivingEntity baseEntity, int radius) {
 		return MineQuest.distance(player.getLocation(), baseEntity.getLocation()) < radius;
 	}
 	
@@ -445,7 +443,7 @@ public class Ability {
 	 */
 	private void moveOut(LivingEntity player, LivingEntity other,
 			int distance) {
-		double x, y, z;
+		double x, z;
 		double unit_fix;
 		
 		x = other.getLocation().getX() - player.getLocation().getX();
@@ -455,8 +453,6 @@ public class Ability {
 		x *= distance / unit_fix;
 		z *= distance / unit_fix;
 		
-		y = MineQuest.getSServer().getWorlds().get(0).getHighestBlockYAt((int)x, (int)z) + 1;
-
 		other.teleportTo(new Location(other.getWorld(), x + player.getLocation().getX(), 
 				(double)getNearestY(player.getWorld(), (int)(x + player.getLocation().getX()), 
 				(int)other.getLocation().getY(), (int)(z + player.getLocation().getZ())), 
@@ -525,10 +521,8 @@ public class Ability {
 
 	/**
 	 * Moves all entities of given type outside of the distance specified
-	 * from the entity passed. Depracated currently until reimplemented in
-	 * bukkit.
+	 * from the entity passed. 
 	 * 
-	 * @deprecated
 	 * @param player
 	 * @param distance
 	 * @param type

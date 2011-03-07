@@ -1,7 +1,6 @@
 package org.monk.MineQuest.Event;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.CreatureType;
 
 public class EntitySpawnerNoMove extends EntitySpawnerEvent {

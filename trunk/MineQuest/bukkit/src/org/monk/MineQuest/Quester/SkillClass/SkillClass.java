@@ -483,7 +483,6 @@ public class SkillClass {
 	 * @param i Block Type
 	 * @return True for gold, diamond, and redstone
 	 */
-	@SuppressWarnings("unused")
 	protected boolean isBlockGiveType(int i) {
 		switch (i) {
 		case 14: //gold
@@ -505,8 +504,6 @@ public class SkillClass {
 	 * @return True if item is a class item.
 	 */
 	public boolean isClassItem(ItemStack item) {
-		int item_id = item.getTypeId();
-		
 		for (Ability abil : ability_list) {
 			if (abil.isBound(item)) {
 				return true;

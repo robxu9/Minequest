@@ -18,7 +18,6 @@ import org.monk.MineQuest.Store.Store;
 public class Town {
 	private int center_x, center_z;
 	private String name;
-	private String person;
 	private List<Property> properties;
 	private Location spawn;
 	private Location start;
@@ -104,7 +103,7 @@ public class Town {
 
 	public void createProperty(Player player) {
 		if (town.canEdit(MineQuest.getQuester(player))) {
-			person = player.getName();
+			player.getName();
 			start = player.getLocation();
 		} else {
 			player.sendMessage("You do not have town permissions");
@@ -113,7 +112,7 @@ public class Town {
 	
 	public void createStore(Player player) {
 		if (town.canEdit(MineQuest.getQuester(player))) {
-			person = player.getName();
+			player.getName();
 			start = player.getLocation();
 		} else {
 			player.sendMessage("You do not have town permissions");

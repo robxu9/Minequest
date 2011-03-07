@@ -46,11 +46,10 @@ import org.monk.MineQuest.World.Town;
  */
 public class Quester {
 	private Location before_quest;
-	private ChestSet chests;
+//	private ChestSet chests;
 	private int class_exp;
 	private SkillClass classes[];
 	private double cubes;
-	private long damage_timer;
 	private boolean debug;
 	private double distance;
 	private boolean enabled;
@@ -406,8 +405,6 @@ public class Quester {
 		
 		PlayerInventory inven = player.getInventory();
 		
-		int i;
-		
 		for (SkillClass skill : classes) {
 			skill.checkEquip(inven);
 		}
@@ -622,7 +619,7 @@ public class Quester {
 		
 		MineQuest.log("[INFO] Damage to " + name + " is " + amount);
 		
-		int i, sum = 0;
+		int sum = 0;
 		
 		for (SkillClass sclass : classes) {
 			if (entity instanceof LivingEntity) {
@@ -1148,8 +1145,6 @@ public class Quester {
 	 * @param i New Health
 	 */
 	public void setHealth(int i) {
-		int newValue;
-
 		if (i > max_health) {
 			i = max_health;
 		}
@@ -1259,7 +1254,7 @@ public class Quester {
 			enabled = results.getInt("enabled") > 0;
 			
 			cubes = results.getDouble("cubes");
-			chests = new ChestSet();
+//			chests = new ChestSet();
 			last = results.getString("last_town");
 		} catch (SQLException e) {
 			System.out.println("Issue getting parameters");
@@ -1271,8 +1266,6 @@ public class Quester {
 		for (i = 0; i < split.length; i++) {
 			classes[i] = SkillClass.newClass(this, split[i]);
 		}
-		damage_timer = 0;
-		
 		class_exp = 0;
 	}
 

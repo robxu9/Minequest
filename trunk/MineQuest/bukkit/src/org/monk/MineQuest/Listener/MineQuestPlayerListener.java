@@ -3,7 +3,6 @@ package org.monk.MineQuest.Listener;
 
 import java.util.List;
 
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;

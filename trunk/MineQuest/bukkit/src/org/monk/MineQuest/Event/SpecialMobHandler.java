@@ -9,8 +9,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.SpecialMob;
 import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Mob.SpecialMob;
 
 public class SpecialMobHandler extends PeriodicEvent {
 	protected SpecialMob mob;
