@@ -120,10 +120,16 @@ Event:id:EntitySpawnerCompleteNMEvent:delay ms:task:event id 1,event id 2, event
 }}}
 
 == Area Events ==
-These are events that issue quest tasks when areas are entered by questers.
+These are events that issue quest tasks when areas are entered by questers. I promise more area events will be coming that are not only spherical.
 
 === Area Event ===
 These are the generic form of area events. When the entire party has been in the area at one time or another the quest task will be issued. They do not all have to be standing in the area at once.
+{{{
+Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
+}}}
+
+=== Single Area Event ===
+This event works the same way as the previous except that it waits for any single quester to be inside the area. 
 {{{
 Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
 }}}
