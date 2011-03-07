@@ -23,6 +23,7 @@ Event:12:EntitySpawnerCompleteNMEvent:10:-2:9,10,11
 
 #complete quest
 Event:13:ExperienceAdd:1000:all:1000:1000
+Event:100:QuestEvent:1000:-1
 
 #wait to enter arrow trap
 Event:14:SingleAreaEvent:500:2:47:67:62:2
@@ -58,9 +59,8 @@ Event:32:CanEdit:59:67:48:6
 Event:34:CanEdit:59:67:53:7
 
 #open the door to upstairs
-Event:30:BlockEvent:10:56:67:64:0
-Event:31:BlockEvent:10:56:68:64:0
-Event:33:QuestEvent:1000:3
+Event:62:BlockEvent:10:56:67:64:0
+Event:63:BlockEvent:10:56:68:64:0
 
 #wait to enter floor trap
 Event:36:SingleAreaEvent:500:8:48:67:45:2
@@ -80,19 +80,19 @@ Event:43:EntitySpawnerCompleteNMEvent:10:-2:39,40,41,42
 #wait to enter jackolanter trap
 Event:44:SingleAreaEvent:500:10:59:67:60:2
 #light the floor on fire
-Event:45:BlockEvent:10:55:67:60:51
-Event:46:BlockEvent:10:56:67:60:51
-Event:47:BlockEvent:10:57:67:60:51
-Event:48:BlockEvent:10:58:67:60:51
-Event:49:BlockEvent:10:59:67:60:51
-Event:50:BlockEvent:10:55:67:61:51
-Event:51:BlockEvent:10:56:67:61:51
-Event:52:BlockEvent:10:57:67:61:51
-Event:53:BlockEvent:10:58:67:61:51
-Event:54:BlockEvent:10:59:67:61:51
+Event:45:BlockEvent:500:55:67:60:51
+Event:46:BlockEvent:500:56:67:60:51
+Event:47:BlockEvent:500:57:67:60:51
+Event:48:BlockEvent:500:58:67:60:51
+Event:49:BlockEvent:500:59:67:60:51
+Event:50:BlockEvent:500:55:67:61:51
+Event:51:BlockEvent:500:56:67:61:51
+Event:52:BlockEvent:500:57:67:61:51
+Event:53:BlockEvent:500:58:67:61:51
+Event:54:BlockEvent:500:59:67:61:51
 
 #wait to enter exit trap
-Event:55:AreaEvent:500:11:53:67:58:2
+Event:55:AreaEvent:500:11:53:67:58:1
 #Spawn poison, normal, and a skeleton
 Event:56:EntitySpawnerNoMove:5:56:67:55:Zombie:t
 Event:57:EntitySpawnerNoMove:5:58:67:56:Zombie:f
@@ -123,7 +123,7 @@ Task:4:20,21,22,23
 Task:6:29,30,31
 #open the door to upstairs
 #complete quest
-Task:7:33,34,13
+Task:7:62,63,13,100
 #remove the floor
 Task:8:35
 #spawn the zombies, and release them
