@@ -22,8 +22,10 @@ public class SpecialMobHandler extends PeriodicEvent {
 	
 	@Override
 	public void activate(EventParser eventParser) {
-		if (mob.getMonster().getTarget() == null) {
-			mob.getMonster().setTarget(getNearestPlayer(mob.getMonster()));
+		if (mob.getMonster() instanceof Monster) {
+			if (((Monster)mob.getMonster()).getTarget() == null) {
+				((Monster)mob.getMonster()).setTarget(getNearestPlayer(mob.getMonster()));
+			}
 		}
 		
 		Location loc = mob.getMonster().getLocation();
@@ -43,18 +45,18 @@ public class SpecialMobHandler extends PeriodicEvent {
 		}
 	}
 
-	private LivingEntity getNearestPlayer(Monster monster) {
-		List<LivingEntity> entities = monster.getWorld().getLivingEntities();
+	private LivingEntity getNearestPlayer(LivingEntity livingEntity) {
+		List<LivingEntity> entities = livingEntity.getWorld().getLivingEntities();
 		double distance = 100000;
 		LivingEntity player = null;
 		
 		for (LivingEntity entity : entities) {
 			if (entity instanceof Player) {
 				if (player == null) {
-					distance = MineQuest.distance(entity.getLocation(), monster.getLocation());
+					distance = MineQuest.distance(entity.getLocation(), livingEntity.getLocation());
 					player = entity;
-				} else if (MineQuest.distance(entity.getLocation(), monster.getLocation()) < distance) {
-					distance = MineQuest.distance(entity.getLocation(), monster.getLocation());
+				} else if (MineQuest.distance(entity.getLocation(), livingEntity.getLocation()) < distance) {
+					distance = MineQuest.distance(entity.getLocation(), livingEntity.getLocation());
 					player = entity;
 				}
 			}

@@ -18,9 +18,15 @@ public class AbilityBinder extends Ability {
 		this.bind = bind;
 		this.l = l;
 	}
-
+	
 	@Override
-	public void useAbility(Quester quester, Location location, int l, LivingEntity entity) {
+	public String getName() {
+		return "Binder " + ability.getName();
+	}
+	
+	@Override
+	public void castAbility(Quester quester, Location location,
+			LivingEntity entity) {
 		if (l > 0) {
 			ability.bindl(quester.getPlayer(), new ItemStack(bind, 1));
 		} else {

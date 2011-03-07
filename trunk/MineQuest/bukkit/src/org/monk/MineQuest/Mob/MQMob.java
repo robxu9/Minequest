@@ -1,16 +1,15 @@
 package org.monk.MineQuest.Mob;
 
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 
 public class MQMob {
-	protected Monster entity;
+	protected LivingEntity entity;
 
-	public MQMob(Monster entity) {
+	public MQMob(LivingEntity entity) {
 		this.entity = entity;
 	}
 	
-	public Monster getMonster() {
+	public LivingEntity getMonster() {
 		return entity;
 	}
 
@@ -35,6 +34,14 @@ public class MQMob {
 
 	public int getHealth() {
 		return entity.getHealth();
+	}
+
+	public void setHealth(int i) {
+		entity.setHealth(i);
+	}
+
+	public void damage(int i) {
+		setHealth(entity.getHealth() - i);
 	}
 
 }

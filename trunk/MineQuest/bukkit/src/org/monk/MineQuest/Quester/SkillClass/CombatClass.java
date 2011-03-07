@@ -6,7 +6,7 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Quester.Quester;
 
-public class CombatClass extends SkillClass {
+public class CombatClass extends SkillClass implements DefendingClass {
 
 	public CombatClass(Quester quester, String type) {
 		super(quester, type);

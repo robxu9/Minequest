@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
@@ -43,7 +44,7 @@ public class AbilityDrainLife extends Ability{
 		Player player = quester.getPlayer();
 		int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
 		if (entity != null) {
-			entity.setHealth(entity.getHealth() - drain);
+			MineQuest.getMob(entity).damage(drain);
 			quester.setHealth(player.getHealth() + drain);
 		} else {
 			player.sendMessage("Must be called on an Entity");

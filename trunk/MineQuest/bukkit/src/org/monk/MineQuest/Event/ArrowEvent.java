@@ -20,5 +20,10 @@ public class ArrowEvent extends NormalEvent {
 		
 		start.getWorld().spawnArrow(start, vector, (float).8, 8);
 	}
+	
+	@Override
+	public String getName() {
+		return "Arrow Event";
+	}
 
 }

@@ -3,6 +3,7 @@ package org.monk.MineQuest.Event;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.monk.MineQuest.MineQuest;
 
 public class NoMobs extends PeriodicEvent {
 	private boolean complete;
@@ -19,7 +20,7 @@ public class NoMobs extends PeriodicEvent {
 		
 		for (LivingEntity entity : world.getLivingEntities()) {
 			if (!(entity instanceof Player)) {
-				entity.setHealth(0);
+				MineQuest.getMob(entity).setHealth(0);
 			}
 		}
 		

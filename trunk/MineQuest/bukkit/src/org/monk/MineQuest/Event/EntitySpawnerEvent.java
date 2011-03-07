@@ -48,7 +48,7 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 		}
 		
 		if (complete) {
-			entity.setHealth(0);
+			MineQuest.getMob(entity).setHealth(0);
 		}
 		eventParser.setComplete(complete);
 	}

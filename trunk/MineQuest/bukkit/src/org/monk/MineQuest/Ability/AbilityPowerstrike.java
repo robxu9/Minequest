@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
@@ -39,7 +40,7 @@ public class AbilityPowerstrike extends Ability{
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
 		if (entity != null) {
-			entity.setHealth(entity.getHealth() - 10);
+			MineQuest.getMob(entity).damage(10);
 		} else {
 			giveManaCost(quester.getPlayer());
 			quester.getPlayer().sendMessage("PowerStrike must be bound to an attack");
