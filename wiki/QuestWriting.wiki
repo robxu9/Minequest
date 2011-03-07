@@ -1,17 +1,16 @@
 Details pertaining to Writing and Formating .quest files
 
-= Introduction =
+=Introduction=
 
 This page is a description of how to write individual pieces of a quest file. It does not go into the more creative aspects required in making a detailed quest, but more simply how each small piece is put together.
 
-= Details =
+=Details=
 
 Quest files are ":" delimited for the most part. This means there is a single colon between major fields of any line. The first field in every line determines what kind of line that will be. There are currently 4 types of lines and there will inevitably be more at time continues.
 
 ----
 
-= World/LoadWorld =
-
+=World/LoadWorld=
 This option defines the place where the quest will take place, it should be the first thing in your quest file. Unless you want the quest to take place wherever the questers currently are. World is the simpler of the two of these as it simply loads the world specified the format is as follows.
 {{{
 World:world_name
@@ -22,13 +21,13 @@ LoadWorld:junk_name:unaffected_load_world
 }}}
 I plan on adding an InstanceWorld option which will only take one parameter which is the name of the world to load from and randomly generates an available name to use for the world to quest in. This way multiple parties can load the same quest at the same time.
 
-= Spawn =
+=Spawn=
 This is used to set a re-spawn point for questers that are in the quest. If this is not set they will re-spawn at the re-spawn point for the world. This is vital for quests that block off the entrance point. This takes 3 doubles after it which are the spawn point.
 {{{
 Spawn:spawn_x:spawn_y:spawn_z
 }}}
 
-= Task/RepeatingTask =
+=Task/RepeatingTask=
 A task is a group of Events that will get activated when the task is issued. There are some Events that issue Tasks when certain things happen, and when Tasks are issued the activate Events. Tasks have an id (should be unique), and when Events that issue events are setup they must be given a Task id to activate. If the id is -1 then the quest is completed, and if the id is any other negative number than no task is issued. The task also takes a comma separated list of Event ids that should be activated when it is issued.
 {{{
 Task:id:event_id_1,event_id_2,event_id_3
