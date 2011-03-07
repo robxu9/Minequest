@@ -40,5 +40,23 @@ Task:id:event_id_1,event_id_2,event_id_3
 = Event =
 There are many types of Events that can be used to construct various types of quests but they all have a few common parameters that can be mentioned. The first is the id, this is just like task id in that it is unique. The task and event id spaces do not collide, so if an Event has id 6 and a Task has id 6, they are not necessarily related. They all have an event name after this, this defines what the event will do. In all cases but Can Edit events, this is followed by a delay. The delay is in milliseconds and defines how often the event will check for triggers, or how long until the event occurs.
 {{{
-Event:id:EventName:(delay ms):(other event data)
+Event:id:EventName:delay ms:other event data
 }}}
+
+== Quest Event ==
+This is one of the simplest events. It waits for the delay time to pass then will trigger the selected quest task.
+{{{
+Event:id:QuestTask:delay ms:task id
+}}}
+
+== Block Events ==
+Block events take the location of a block and set it to a given type after the delay. It takes the x, y, z location of the block after the delay then takes the type as an int.
+{{{
+Event:id:BlockEvent:delay ms:x:y:z:type
+}}}
+There are two other block events currently implemented, Block Create Destroy and Block Destroy Create. They can be created using standard block events with delays, but this reduces the number of events. They take two delays, the first till they Create/Destroy and then second time between until they Destroy/Create. They also still take x, y, z, and type.
+{{{
+Event:id:BlockEvent:delay ms:second_delay ms:x:y:z:type
+}}}
+
+== Message Event ==
