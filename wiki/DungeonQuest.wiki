@@ -1,13 +1,13 @@
-{{{
-LoadWorld:test:dungeon:Nether
+{{{LoadWorld:test:dungeon:Nether
+Spawn:35:67.5:57
 
 #enter the cave
-Event:0:AreaEvent:500:1:all:38:67:57:2
+Event:0:AreaEvent:500:1:38:67:57:2
 #clear the entrance
-Event:1:BlockEvent:500:33:67:57:0
-Event:2:BlockEvent:1000:33:67:56:0
-Event:3:BlockEvent:1500:33:68:57:0
-Event:4:BlockEvent:2000:33:68:56:0
+Event:1:BlockEvent:10:33:67:57:0
+Event:2:BlockEvent:10:33:67:56:0
+Event:3:BlockEvent:10:33:68:57:0
+Event:4:BlockEvent:10:33:68:56:0
 #block the entrance
 Event:5:BlockEvent:500:33:67:57:4
 Event:6:BlockEvent:1000:33:67:56:4
@@ -17,20 +17,117 @@ Event:8:BlockEvent:2000:33:68:56:4
 Event:9:EntitySpawnerNoMove:5:43:67:59:Zombie:f
 Event:10:EntitySpawnerNoMove:5:44:67:57:Zombie:f
 Event:11:EntitySpawnerNoMove:5:44:67:54:Zombie:f
-Event:12:EntitySpawnerCompleteNMEvent:10:2:9,10,11
+Event:12:EntitySpawnerCompleteNMEvent:10:-2:9,10,11
 
 #complete quest
-Event:13:ExperienceAdd:60000:all:1000:1000
-#wait to enter arrow trap
-Event:14:SingleAreaEvent:500:2:all:47:67:62:2
-#fire arrows
-Event:16:ArrowEvent:250:47:68:62:-1:0:0
-Event:17:ArrowEvent:500:47:68:62:-1:0:0
-Event:18:ArrowEvent:750:47:68:62:-1:0:0
-Event:19:ArrowEvent:1000:47:68:62:-1:0:0
+Event:13:ExperienceAdd:1000:all:1000:1000
 
+#wait to enter arrow trap
+Event:14:SingleAreaEvent:500:2:47:67:62:2
+#fire arrows
+Event:16:ArrowEvent:250:46.5:67.5:62.5:-1:.2:0
+Event:17:ArrowEvent:500:46.5:67.5:62.5:-1:.2:0
+Event:18:ArrowEvent:750:46.5:67.5:62.5:-1:.2:0
+Event:19:ArrowEvent:1000:46.5:67.5:62.5:-1:.2:0
+
+#wait to enter arrow trap
+Event:24:SingleAreaEvent:500:4:48:67:51:1
+#fire arrows
+Event:20:ArrowEvent:250:43.5:67.5:51.5:1:.2:0
+Event:21:ArrowEvent:500:43.5:67.5:51.5:1:.2:0
+Event:22:ArrowEvent:750:43.5:67.5:51.5:1:.2:0
+Event:23:ArrowEvent:1000:43.5:67.5:51.5:1:.2:0
+
+#spawn poison zombies
+Event:25:EntitySpawnerNoMove:5:52:67:48:Zombie:t
+Event:26:EntitySpawnerNoMove:5:52:67:49:Zombie:t
+Event:27:EntitySpawnerNoMove:5:54:67:49:Zombie:t
+Event:28:EntitySpawnerNoMove:5:54:67:48:Zombie:t
+
+#release the poison zombies
+Event:29:EntitySpawnerCompleteNMEvent:10:-2:25,26,27,28
+Event:30:BlockEvent:10:53:67:50:0
+Event:31:BlockEvent:10:53:68:50:0
+
+#lever 1 - poison zombies
+Event:32:CanEdit:59:67:48:6
+
+#lever 2 - open door
+Event:34:CanEdit:59:67:53:7
+
+#open the door to upstairs
+Event:30:BlockEvent:10:56:67:64:0
+Event:31:BlockEvent:10:56:68:64:0
+Event:33:QuestEvent:1000:3
+
+#wait to enter floor trap
+Event:36:SingleAreaEvent:500:8:48:67:45:2
+#remove the floor
+Event:35:BlockEvent:10:48:66:45:0
+
+#dark room zombie spawn
+Event:37:CanEdit:52:67:55:9
+Event:38:CanEdit:52:68:55:9
+#spawn the zombies, and release them
+Event:39:EntitySpawnerNoMove:5:51:67:53:Zombie:f
+Event:40:EntitySpawnerNoMove:5:51:67:54:Zombie:f
+Event:41:EntitySpawnerNoMove:5:54:67:53:Zombie:f
+Event:42:EntitySpawnerNoMove:5:54:67:53:Zombie:f
+Event:43:EntitySpawnerCompleteNMEvent:10:-2:39,40,41,42
+
+#wait to enter jackolanter trap
+Event:44:SingleAreaEvent:500:10:59:67:60:2
+#light the floor on fire
+Event:45:BlockEvent:10:55:67:60:51
+Event:46:BlockEvent:10:56:67:60:51
+Event:47:BlockEvent:10:57:67:60:51
+Event:48:BlockEvent:10:58:67:60:51
+Event:49:BlockEvent:10:59:67:60:51
+Event:50:BlockEvent:10:55:67:61:51
+Event:51:BlockEvent:10:56:67:61:51
+Event:52:BlockEvent:10:57:67:61:51
+Event:53:BlockEvent:10:58:67:61:51
+Event:54:BlockEvent:10:59:67:61:51
+
+#wait to enter exit trap
+Event:55:AreaEvent:500:11:53:67:58:2
+#Spawn poison, normal, and a skeleton
+Event:56:EntitySpawnerNoMove:5:56:67:55:Zombie:t
+Event:57:EntitySpawnerNoMove:5:58:67:56:Zombie:f
+Event:58:EntitySpawnerNoMove:5:57:67:58:Skeleton:f
+Event:59:EntitySpawnerCompleteNMEvent:10:-2:56,57,58
+Event:60:BlockEvent:10:54:67:56:0
+Event:61:BlockEvent:10:54:68:56:0
+
+#enter the cave
+#clear the entrance
 Task:0:0,1,2,3,4
-Task:1:5,6,7,8,9,10,11,12,14
+#block the entrance
+#spawn three zombies and wait for death
+#spawn poison zombies
+#wait to enter arrow trap
+#wait to enter arrow trap
+#lever 1 - poison zombies
+#lever 2 - open door
+#wait to enter floor trap
+#wait to enter jackolanter trap
+#wait to enter exit trap
+Task:1:5,6,7,8,9,10,11,12,14,24,25,26,27,28,36,44,55
+#fire arrows
 Task:2:16,17,18,19
-Task:3:13
+#fire arrows
+Task:4:20,21,22,23
+#release the poison zombies
+Task:6:29,30,31
+#open the door to upstairs
+#complete quest
+Task:7:33,34,13
+#remove the floor
+Task:8:35
+#spawn the zombies, and release them
+Task:9:39,40,41,42,43
+#light the floor on fire
+Task:10:45,46,47,48,49,50,51,52,53,54
+#Spawn poison, normal, and a skeleton
+Task:11:56,57,58,59,60,61
 }}}
