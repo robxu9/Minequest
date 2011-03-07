@@ -2,12 +2,14 @@
 
 = Introduction to MineQuest =
 
-Add your content here.
+MineQuest is designed to be an all encompassing system for minecraft, which runs as a bukkit plugin. This means that it manages towns, property, money, character levels, and damage all in one. I acknowledge that this is not the normal system for a bukkit plugin, as usually they do one specific aspect and have other plugins to do other things. If you like this system and are upset by the fact that my plugin is all encompassing my recommendation is that you don't use my plugin. Seriously, stop reading here.
+MineQuest is designed to make the game more progressive, while encouraging a community environment in the server. Currently MineQuest does not have PvP implemented but it is on the list of things to add. 
 
+= Towns =
+Everything is base around rectangularly defined towns. A town in MineQuest can hold a number of stores/properties. Each town has a mayor, the mayor can edit anything in town, as well as provide permissions to edit things in town. Each property in the town is very similar to the town itself, it has an owner and the owner can also give other people permission to edit it as needed. Stores have no owner as they are owned by the town.
 
-= Details =
+== Property ==
+Each property is rectangular. There are two types of properties, there are those with height and those without height. If a property does not have a height it simply reaches from adminium to the top of the sky. Each property currently defaults to a price of 10M Cubes (Cubes are the currency of MineQuest). I plan on making this be adjustable eventually, and I would like to make it depend on the market, but for now it is a flat fee of 10 M Cubes.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+== Stores ==
+Stores are shaped the same way as properties except that they do not have the editing permissions of a property, they are simply part of a town. The usage for stores and some details about commerce related commands can be found at http://code.google.com/p/minequest/wiki/Cubonomy. 
