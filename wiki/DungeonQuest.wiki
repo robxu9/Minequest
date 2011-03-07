@@ -1,3 +1,4 @@
+You can find the world at http://www.monksanctum.org/download/dungeon.tar
 {{{
 LoadWorld:test:dungeon:Nether
 Spawn:35:67.5:57
