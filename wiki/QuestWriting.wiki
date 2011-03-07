@@ -15,11 +15,11 @@ This option defines the place where the quest will take place, it should be the 
 {{{
 World:world_name
 }}}
-The problem with this is that you might have wood that gets burned, or floors destroyed by traps, or even quest events that destroy your own dungeon. In the World option these affects are saved and the world cannot easily be reused. LoadWorld is the alternative it takes two parameters, the first is the world where the quest will take place, any existing world with that name will be deleted and the second name is copied and used in its place.
+The problem with this is that you might have wood that gets burned, or floors destroyed by traps, or even quest events that destroy your own dungeon. In the World option these affects are saved and the world cannot easily be reused. Load World is the alternative it takes two parameters, the first is the world where the quest will take place, any existing world with that name will be deleted and the second name is copied and used in its place.
 {{{
 LoadWorld:junk_name:unaffected_load_world
 }}}
-I plan on adding an InstanceWorld option which will only take one parameter which is the name of the world to load from and randomly generates an available name to use for the world to quest in. This way multiple parties can load the same quest at the same time.
+I plan on adding an Instance World option which will only take one parameter which is the name of the world to load from and randomly generates an available name to use for the world to quest in. This way multiple parties can load the same quest at the same time.
 
 =Spawn=
 This is used to set a re-spawn point for questers that are in the quest. If this is not set they will re-spawn at the re-spawn point for the world. This is vital for quests that block off the entrance point. This takes 3 doubles after it which are the spawn point.
@@ -38,7 +38,7 @@ Task:id:event_id_1,event_id_2,event_id_3
 }}}
 
 = Event =
-There are many types of Events that can be used to construct various types of quests but they all have a few common parameters that can be mentioned. The first is the id, this is just like task id in that it is unique. The task and event id spaces do not collide, so if an Event has id 6 and a Task has id 6, they are not necessarily related. They all have an event name after this, this defines what the event will do. In all cases but CanEdit events, this is followed by a delay. The delay is in milliseconds and defines how often the event will check for triggers, or how long until the event occurs.
+There are many types of Events that can be used to construct various types of quests but they all have a few common parameters that can be mentioned. The first is the id, this is just like task id in that it is unique. The task and event id spaces do not collide, so if an Event has id 6 and a Task has id 6, they are not necessarily related. They all have an event name after this, this defines what the event will do. In all cases but Can Edit events, this is followed by a delay. The delay is in milliseconds and defines how often the event will check for triggers, or how long until the event occurs.
 {{{
 Event:id:EventName:(delay ms):(other event data)
 }}}
