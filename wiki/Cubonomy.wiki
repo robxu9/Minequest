@@ -2,12 +2,11 @@
 
 = Introduction =
 
-Add your content here.
+Cubonomy was the name of the plugin that I developed for Hey0. It was an in game economy which would vary prices based on how much was sold or bought. It was also a closed economy system, making it so no material would be produced from it, it would simply be shifted between players.
+
+Now I have taken all of the aspects of that plugin and merged them into MineQuest to form the economy system for it. While a few interface things have changed and the prices vary more finely with the market, it at its heart is still cubonomy.
 
 
-= Details =
+= Commands =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Details about commands will be here soon.
