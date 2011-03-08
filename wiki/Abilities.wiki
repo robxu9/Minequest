@@ -36,6 +36,15 @@ When Powerstrike is activated it does extra damage to the defender. It does an a
 Required Level: 5
 When sprint is cast it moves the caster forward one block. When cast successively it gives the illusion of moving very quickly. When sprinting at full speed a quester can move through walls that are only a couple blocks thick.
 
+=== Coming Soon ===
+|| Spell || Level || Components ||
+|| Toughness || 10 || 2 Cooked Meat ||
+|| Temporary Invulnerability || 50 || ||
+|| Health Regeneration || 20 || 2 Bread ||
+|| Bash || 7 || Stone Sword ||
+|| Rage || 30 || ||
+|| Whirlwind || 15 || 2 Feathers + Sword ||
+
 == Archer ==
 === Dodge ===
 
@@ -68,6 +77,12 @@ When repulsion is cast it moves all entities near the caster out to a distance o
 || 1 Coal ||
 Required Level: 0
 Firball lights the target on fire by lighting the 2 by 2 block that the target is standing on on fire. It also does 2 damage + 1 per 2 caster levels to the target.
+
+=== Fireball ===
+|| Components ||
+|| 5 Coal ||
+Required Level: 10
+Firball lights the target on fire by lighting the 2 by 2 block that the target is standing on on fire. It also does 2 damage + 1 per 2 caster levels to the target. Then has a 90 % chance to jump to a nearby enemy.
 
 === Drain Life ===
 || Components ||
