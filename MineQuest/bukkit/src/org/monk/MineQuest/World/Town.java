@@ -302,5 +302,6 @@ public class Town {
 		
 		MineQuest.getSQLServer().update("UPDATE " + name + " SET name='" + quester.getName() 
 				+ "' WHERE x='" + prop.getX() + "' AND z='" + prop.getZ() + "' AND y='" + prop.getY() + "'");
+		quester.sendMessage("You now own this property");
 	}
 }

@@ -32,8 +32,8 @@ public class Property {
 			z = (int)end.getZ();
 			max_z = (int)start.getZ();
 		}
+		y = (int)start.getY();
 		if (height) {
-			y = (int)start.getY();
 			this.height = (int)(start.getY() - end.getY());
 		}
 		
@@ -64,8 +64,6 @@ public class Property {
 			if (loc.getY() > (y + height)) {
 				return false;
 			}
-		} else {
-			y = 0;
 		}
 		
 		return true;
@@ -141,23 +139,23 @@ public class Property {
 		return super.equals(obj);
 	}
 
-	int getY() {
+	public int getY() {
 		return y;
 	}
 
-	int getMaxZ() {
+	public int getMaxZ() {
 		return max_z;
 	}
 
-	int getZ() {
+	public int getZ() {
 		return z;
 	}
 
-	int getMaxX() {
+	public int getMaxX() {
 		return max_x;
 	}
 
-	int getX() {
+	public int getX() {
 		return x;
 	}
 
