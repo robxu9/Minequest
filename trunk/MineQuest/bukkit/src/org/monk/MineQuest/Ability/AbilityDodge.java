@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -54,43 +55,41 @@ public class AbilityDodge extends Ability {
 		if (myclass.getGenerator().nextDouble() < (.01 + (.0025 * myclass.getLevel()))) {
 			double rot = player.getLocation().getYaw() % 360;
 			while (rot < 0) rot += 360;
+			Location location = player.getLocation();
 			
 			if ((rot  < 45) && (rot > 315)) {
-				player.sendMessage("Dodging1");
-				player.teleportTo(new Location(player.getWorld(), 
+				player.sendMessage("Dodging 1");
+				location = new Location(player.getWorld(), 
 						(int)player.getLocation().getX() - 1, 
-						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
-								(int)player.getLocation().getY(), 
-								(int)player.getLocation().getZ()),
+						(int)player.getLocation().getY(), 
 						player.getLocation().getZ(), player.getLocation().getYaw(), 
-						player.getLocation().getPitch()));
+						player.getLocation().getPitch());
 			} else if ((rot > 45) && (rot < 135)) {
-				player.sendMessage("Dodging2");
-				player.teleportTo(new Location(player.getWorld(), 
+				player.sendMessage("Dodging 2");
+				location = new Location(player.getWorld(), 
 						player.getLocation().getX(), 
-						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
-								(int)player.getLocation().getY(), 
-								(int)player.getLocation().getZ()),
+						(int)player.getLocation().getY(), 
 						player.getLocation().getZ() - 1, player.getLocation().getYaw(), 
-						player.getLocation().getPitch()));
+						player.getLocation().getPitch());
 			} else if ((rot > 135) && (rot < 225)) {
-				player.sendMessage("Dodging3");
-				player.teleportTo(new Location(player.getWorld(), 
+				player.sendMessage("Dodging 3");
+				location = new Location(player.getWorld(), 
 						(int)player.getLocation().getX() + 1, 
-						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
-								(int)player.getLocation().getY(), 
-								(int)player.getLocation().getZ()), 
+						(int)player.getLocation().getY(), 
 						player.getLocation().getZ(), player.getLocation().getYaw(), 
-						player.getLocation().getPitch()));
+						player.getLocation().getPitch());
 			} else {
-				player.sendMessage("Dodging4");
-				player.teleportTo(new Location(player.getWorld(), 
+				player.sendMessage("Dodging 4");
+				location = new Location(player.getWorld(), 
 						player.getLocation().getX(), 
 						getNearestY(player.getWorld(), (int)player.getLocation().getX(), 
 								(int)player.getLocation().getY(), 
 								(int)player.getLocation().getZ()),
 						player.getLocation().getZ() + 1, player.getLocation().getYaw(), 
-						player.getLocation().getYaw()));
+						player.getLocation().getPitch());
+			}
+			if (player.getWorld().getBlockAt(location).getType() == Material.AIR) {
+				player.teleportTo(location);
 			}
 			return amount;
 		}

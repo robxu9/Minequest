@@ -60,8 +60,9 @@ public class AbilitySprint extends Ability {
 		} else {
 			loc.setZ(loc.getZ() + 1);
 		}
-		player.teleportTo(loc);
-		
+		if ((quester.getQuest() == null) || (quester.getQuest().canEdit(quester, location.getWorld().getBlockAt(location)))) {
+			player.teleportTo(loc);
+		}
 	}
 
 }

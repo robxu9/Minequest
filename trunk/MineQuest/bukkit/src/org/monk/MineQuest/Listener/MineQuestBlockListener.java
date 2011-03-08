@@ -19,7 +19,7 @@ public class MineQuestBlockListener extends BlockListener {
 		}
 		
 		if (quester.inQuest()) {
-			event.setCancelled(quester.getQuest().canEdit(quester, event));
+			event.setCancelled(quester.getQuest().canEdit(quester, event.getBlock()));
 		}
 	
 		quester.checkItemInHand();
@@ -61,7 +61,7 @@ public class MineQuestBlockListener extends BlockListener {
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		if (quester.inQuest()) {
-			quester.getQuest().canEdit(quester, event);
+			quester.getQuest().canEdit(quester, event.getBlock());
 		}
 		
 		if (quester.isDebug()) {
@@ -86,7 +86,7 @@ public class MineQuestBlockListener extends BlockListener {
 		}
 		
 		if (quester.inQuest()) {
-			event.setCancelled(quester.getQuest().canEdit(quester, event));
+			event.setCancelled(quester.getQuest().canEdit(quester, event.getBlock()));
 		}
 		
 		quester.checkItemInHand();
