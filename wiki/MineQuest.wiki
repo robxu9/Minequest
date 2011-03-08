@@ -40,9 +40,9 @@ Mages do not have a class weapon, however if they did it would either be the sno
 All classes will receive abilities as they level up, mages more than others. All abilities have a class or sometimes two that they belong to. Some abilities are passive but most are active and require binding to be used. Often abilities have a casting time restricting how quickly they can be cast. More details about abilities can be found at [Abilities].
 
 == Abilities Binding ==
-The way that active spells are cast is that they are bound to a specific item, and a type of click. If you were a mage trying to cast fireball you would most likely bind it to right click for snow balls. This way you could throw a snowball at an enemy and cast fireball on them. The binding works as follows.
+The way that active spells are cast is that they are bound to a specific item. If you were a mage trying to cast fireball you would most likely bind it to right click for snow balls. This way you could throw a snowball at an enemy and cast fireball on them. The binding works as follows.
 {{{
-/bind Fireball l
+/bind Fireball
 }}}
 
 == Abilities Components ==
