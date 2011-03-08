@@ -73,3 +73,15 @@ When inside a quest players will re-spawn at the spawn point for the world that 
 /quit_quest
 }}}
 More details about quest file format and how quests work can be found  at http://code.google.com/p/minequest/wiki/QuestWriting.
+
+= Super Mobs =
+As players level up Super Mobs will become more apparent in the server. These look like regular mobs, but can be identified that they are so evil they turn the ground beneath them to dirt for a period of time. These mobs all have various special abilities and also are harder to kill. Creepers are the least exciting as the currently just do more damage and are hard to kill.
+
+== Poison Zombies ==
+Poison zombies are actually capable of poisoning you. Each time you are poisoned you can take a total of 10 points of damage. Damage from poison occurs based on distance you walk. Poison can only be cured by a PeaceMage. The zombies are also equipped with the ability dodge.
+
+== Mauling Spiders ==
+These spiders won't only be harder to kill but they also cast trap on you. Sending you down into a whole in the ground, where they will follow you and continue to attack.
+
+== Skeleton Mages ==
+These are skeletons that can cast spells. The get the list of abilities that WarMages can cast and select one at random. This means it is possible that they will do nothing. However it is also possible that they will cast IceSphere on you.
