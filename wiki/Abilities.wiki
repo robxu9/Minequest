@@ -15,22 +15,122 @@ All classes either currently have or will have abilities that they gain at some 
 === Deathblow ===
 || Components ||
 || 2 Iron ||
+Required Level: 12
 Deathblow is a passive ability. When enabled deathblow increases the critical chance of the quester on warrior attacks. It increases from 5 % to 10 %.
 
 === Dodge ===
 || Components ||
 || 5 Feathers ||
+Required Level: 1
 Dodge is a passive ability. When enabled there is a chance that any attack may be dodged. When an attack is dodged the quester moves the side one block and takes no damage. The chance for dodging is 1 % + .25 % per level of the Warrior.
 
 === Powerstrike ===
 || Components ||
 || Wooden Sword ||
+Required Level: 3
 When Powerstrike is activated it does extra damage to the defender. It does an additional 10 damage.
 
 === Sprint ===
 || Components ||
 || 1 Feather ||
-||When sprint is cast it moves the caster forward one block. When cast successively it gives the illusion of moving very quickly. When sprinting at full speed a quester can move through walls that are only a couple blocks thick.||
+Required Level: 5
+When sprint is cast it moves the caster forward one block. When cast successively it gives the illusion of moving very quickly. When sprinting at full speed a quester can move through walls that are only a couple blocks thick.
 
 == Archer ==
 === Dodge ===
+
+=== Sprint ===
+Required Level: 3
+
+=== Fire Arrow ===
+|| Components ||
+|| 1 Coal ||
+Required Level: 7
+When Fire Arrow is cast it lights the target on fire as well as doing the normal amount of damage from the arrow.
+
+=== Hail of Arrows ===
+|| Components ||
+|| 10 Arrows ||
+Required Level: 5
+Lays down a volley of arrows blanketing the area of the target.
+
+=== Repulsion ===
+|| Components ||
+|| 1 Torch ||
+|| 1 Cactus ||
+Required Level: 10
+When repulsion is cast it moves all entities near the caster out to a distance of 10 from them. It also does 1 point of damage to each of them.
+
+== War Mage ==
+
+=== Fireball ===
+|| Components ||
+|| 1 Coal ||
+Required Level: 0
+Firball lights the target on fire by lighting the 2 by 2 block that the target is standing on on fire. It also does 2 damage + 1 per 2 caster levels to the target.
+
+=== Drain Life ===
+|| Components ||
+|| 5 Glowstone Dust ||
+Required Level: 8
+Drains between 1 and 3 + Caster Level hit points from target and gives points to caster.
+
+=== Fire Resistance ===
+Required Level: 10
+Completely passive, gaining this ability makes you take half as much damage from fire as other questers.
+
+=== IceSphere ===
+|| Components ||
+|| 5 Snow balls ||
+Required Level: 7
+Freezes the target doing 3 + 1 per 2 caster levels damage to the target.
+
+=== Trap ===
+|| Components ||
+|| 6 Dirt ||
+|| 1 Wooden Spade ||
+Required Level: 2
+Removes the ground beneath the target dropping them into a hole.
+
+=== Wall of Fire ===
+|| Components ||
+|| 7 Dirt ||
+|| 3 Coal ||
+Required Level: 5
+Creates a wall of fire in front of the caster 7 blocks wide. 
+
+== Peace Mage ==
+
+=== Heal/Heal Other ===
+|| Components ||
+|| 1 Bucket of Water ||
+Required Level: 0
+Heals the target, either self or other, by 1-8 + Caster Level hit points.
+
+=== Cure Poison/Cure Poison Other ===
+|| Components ||
+|| 1 Brown Mushroom ||
+Required Level: 5
+Cures the target, either self or other, of any poison that it may have received.
+
+=== Trape ===
+Same as Trap but separate for experience reasons.
+
+=== Wall of Water ===
+|| Components ||
+|| 7 Dirt ||
+|| 2 Buckets of Water ||
+Required Level: 3
+Creates a wall of water in front of the caster 7 blocks wide for 60 seconds. 
+
+=== Damage Aura ===
+|| Components ||
+|| Flint and Steel ||
+Required Level: 7
+Damages enemies in a radius of 15 around the caster by 1 point every 10 seconds, for 5 minutes.
+
+=== Heal Aura ===
+|| Components ||
+|| 2 Bread ||
+Required Level: 8
+Heals questers in a radius of 15 around the caster by the Caster Level / 4 hit points every 10 seconds, for 2.5 minutes.
