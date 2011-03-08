@@ -1,0 +1,44 @@
+#Information regarding commands for towns/properties
+
+= Introduction =
+
+This page contains usage regarding commands for creating towns/properties/stores.
+
+
+= Details =
+
+{{{
+/createtown
+}}}
+This starts the creation of a town, it is based on your location. The place you are standing marks one corner of the town.
+
+{{{
+/finishtown <name>
+}}}
+This completes creation of a town with you standing at the opposite corner of the town. You are the mayor of the new town, and it has full height of the map. 
+
+{{{
+/createstore and /finishstore
+}}}
+Same as /createtown and /finishtown respectively.
+
+{{{
+/setmayor <name>
+}}}
+Sets the mayor of the town you are standing in.
+
+{{{
+/createproperty
+}}}
+This starts the creation of a property, it is based on your location. The place you are standing marks one corner of the property.
+
+{{{
+/finishproperty <height>
+}}}
+This completes creation of a property with you standing at the opposite corner of the property. If the height is zero it is the full height of the map.
+
+{{{
+/town
+}}}
+Tells you what town you are in.
+
