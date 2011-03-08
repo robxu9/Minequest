@@ -38,7 +38,7 @@ public class AuraEvent extends NormalEvent {
 			if (players) {
 				MineQuest.getQuester((Player)entity).setHealth(MineQuest.getQuester((Player)entity).getHealth() + change);
 			} else {
-				MineQuest.getMob(entity).setHealth(entity.getHealth() + change);
+				MineQuest.getMob(entity).damage(change);
 			}
 		}
 		

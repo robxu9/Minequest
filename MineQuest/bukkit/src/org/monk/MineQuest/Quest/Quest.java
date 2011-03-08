@@ -417,8 +417,12 @@ public class Quest {
 				MineQuest.log("Problem getting HealthEntitySpawner Parameters");
 				throw new Exception();
 			}
+			boolean stay = true;
+			if (line[8].equals("f")) {
+				stay = false;
+			}
 			 
-			new_event = new HealthEntitySpawn(this, delay, task, location, creature, health);
+			new_event = new HealthEntitySpawn(this, delay, task, location, creature, health, stay);
 		} else {
 			MineQuest.log("Unknown Event Type: " + type);
 			throw new Exception();

@@ -583,6 +583,7 @@ public class MineQuest extends JavaPlugin {
 	
 	public static void addMQMob(MQMob newMob) {
 		int i;
+		log("Adding Mob " + newMob.getId());
 		for (i = 0; i < mobs.length; i++) {
 			if (mobs[i] == null) {
 				mobs[i] = newMob;
@@ -599,6 +600,8 @@ public class MineQuest extends JavaPlugin {
 		while (i < newList.length){
 			newList[i++] = null;
 		}
+		
+		mobs = newList;
 	}
 	
 	public static MQMob getMob(LivingEntity entity) {
@@ -642,8 +645,10 @@ public class MineQuest extends JavaPlugin {
 		int i;
 		
 		for (i = 0; i < mobs.length; i++) {
-			if (mobs[i].getId() == specialMob.getId()) {
-				mobs[i] = specialMob;
+			if (mobs[i] != null) {
+				if (mobs[i].getId() == specialMob.getId()) {
+					mobs[i] = specialMob;
+				}
 			}
 		}
 		

@@ -162,6 +162,10 @@ public class Quester {
 					}
 				}
 			}
+			event.setDamage(event.getDamage() / 2);
+			((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
+			expGain(2);
+			return;
 		}
 	}
 	
@@ -641,7 +645,7 @@ public class Quester {
 //			amount = MineQuest.getSpecial((LivingEntity)attacker).attack(this, player, amount);
 //		}
 		
-		MineQuest.log("[INFO] Damage to " + name + " is " + amount);
+//		MineQuest.log("[INFO] Damage to " + name + " is " + amount);
 		
 		int sum = 0;
 		
@@ -947,11 +951,9 @@ public class Quester {
 		int newHealth;
                 
         if ((event instanceof EntityDamageByEntityEvent) && (((EntityDamageByEntityEvent)event).getDamager() != null) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
-        	MineQuest.log("Cancelled!");
             event.setCancelled(true);
             return false;
         } else if (checkDamage(event.getCause())) {
-        	MineQuest.log("Cancelled!");
         	event.setCancelled(true);
         	return false;
         }
@@ -1181,7 +1183,7 @@ public class Quester {
 	 */
 	public void setPlayer(Player player) {
 		if (player == null) {
-			party.remQuester(this);
+			if (party != null) party.remQuester(this);
 		}
 		this.player = player;
 	}
