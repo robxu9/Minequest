@@ -116,6 +116,54 @@ public class Quester {
 	}
 
 	/**
+	 * Binds an Ability to left of right click of the item
+	 * in the players hand.
+	 * 
+	 * @param player Player
+	 * @param name Name of Ability
+	 * @param lr 1 for left, 0 for right
+	 */
+	public void addBinder(String ability, int item) {
+		int i;
+		
+		SkillClass my_class = getClassFromAbil(ability);
+		if (my_class == null) {
+			sendMessage("You do not have an ability named " + ability);
+			return;
+		}
+		
+		for (i = 0; i < classes.length; i++) {
+			classes[i].unBind(player.getItemInHand());
+		}
+		
+		Ability abil = new AbilityBinder(my_class, ability, item);
+		abil.bind(this, player.getItemInHand());
+		my_class.addAbility(abil);
+		
+		sendMessage("Binder added");
+	}
+
+	protected void addBinder(String ability, int item, ItemStack item_hand) {
+		int i;
+		
+		SkillClass my_class = getClassFromAbil(ability);
+		if (my_class == null) {
+			return;
+		}
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i] != null) {
+				classes[i].unBind(item_hand);
+			}
+		}
+		
+		Ability abil = new AbilityBinder(my_class, ability, item);
+		my_class.addAbility(abil);
+		
+		abil.silentBind(this, item_hand);
+	}
+	
+	/**
 	 * Adds to both health and maximum health of quester.
 	 * Should be used on level up of character of 
 	 * SkillClasses.
@@ -126,7 +174,7 @@ public class Quester {
 		health += addition;
 		max_health += addition;
 	}
-
+	
 	/**
 	 * Called whenever a Quester attacks any other entity.
 	 * 
@@ -170,55 +218,36 @@ public class Quester {
 	}
 	
 	/**
-	 * Binds an Ability to left of right click of the item
+	 * Binds an Ability to click of the item
 	 * in the players hand.
 	 * 
 	 * @param player Player
 	 * @param name Name of Ability
-	 * @param lr 1 for left, 0 for right
 	 */
-	public void bind(Player player, String name, String lr) {
+	public void bind(String name) {
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
-			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
+			classes[i].unBind(player.getItemInHand());
 		}
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].getAbility(name) != null) {
-				if (lr.equals("l")) {
-					classes[i].getAbility(name).bindl(player, player.getItemInHand());
-				} else {
-					classes[i].getAbility(name).bindr(player, player.getItemInHand());
-				}
+				classes[i].getAbility(name).bind(this, player.getItemInHand());
 			}
 		}
 	}
-	
-	/**
-	 * Binds an Ability to left of right click of the item
-	 * in the players hand.
-	 * 
-	 * @param player Player
-	 * @param name Name of Ability
-	 * @param lr 1 for left, 0 for right
-	 */
-	public void bind_binder(Player player, String name, String ability, String item, String lr, String lr_2) {
+
+	public void bind(String ability, ItemStack itemStack) {
 		int i;
-		Ability abil = new AbilityBinder(name, null, getAbility(ability), Integer.parseInt(item), lr_2.equals("l")?1:0);
-		classes[0].binderAdd(abil);
 		
 		for (i = 0; i < classes.length; i++) {
-			classes[i].unBind(player.getItemInHand(), lr.equals("l"));
+			classes[i].silentUnBind(itemStack);
 		}
 		
 		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getAbility(name) != null) {
-				if (lr.equals("l")) {
-					classes[i].getAbility(name).bindl(player, player.getItemInHand());
-				} else {
-					classes[i].getAbility(name).bindr(player, player.getItemInHand());
-				}
+			if (classes[i].getAbility(ability) != null) {
+				classes[i].getAbility(ability).bind(this, itemStack);
 			}
 		}
 	}
@@ -284,64 +313,33 @@ public class Quester {
 	 * 
 	 * @param block
 	 */
-	public void callAbilityL(Block block) {
+	public void callAbility(Block block) {
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityL(block);
+				classes[i].callAbility(block);
 				return;
 			}
 		}
 	}
-	
+
 	/**
 	 * Casts a left click bound ability on the given entity
 	 * 
 	 * @param entity
 	 */
-	public void callAbilityL(Entity entity) {
+	public void callAbility(Entity entity) {
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityL(entity);
+				classes[i].callAbility(entity);
 				return;
 			}
 		}
 	}
 	
-	/**
-	 * Casts a right click bound ability on a given block.
-	 * 
-	 * @param block
-	 */
-	public void callAbilityR(Block block) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityR(block);
-				return;
-			}
-		}
-	}
-
-	/**
-	 * Casts a right click bound ability on a given entity.
-	 * @param entity
-	 */
-	public void callAbilityR(Entity entity) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbilityR(entity);
-				return;
-			}
-		}
-	}
-
 	/**
 	 * Checks if a Quester has the required spell components.
 	 * to cast an ability. If the Quester has the components
@@ -366,7 +364,7 @@ public class Quester {
 		}
 		return true;
 	}
-	
+
 	private boolean checkDamage(DamageCause cause) {
         if (cause == DamageCause.FIRE) {
         	return checkDamage(24040);
@@ -464,7 +462,7 @@ public class Quester {
 
 		return false;
 	}
-
+	
 	/**
 	 * Checks if the item in the Questers hand is bound
 	 * to any abilities. 
@@ -473,9 +471,9 @@ public class Quester {
 	public boolean checkItemInHandAbil() {
 		int i;
 		
-		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
-			return false;
-		}
+//		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
+//			return false;
+//		}
 
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())) {
@@ -486,54 +484,12 @@ public class Quester {
 		return false;
 	}
 
-	/**
-	 * Checks if the item in the Questers hand is left bound
-	 * to any abilities. 
-	 * @return true if left bound to an ability
-	 */
-	public boolean checkItemInHandAbilL() {
-		int i;
-		
-		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
-			return false;
-		}
-
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItemL(player.getItemInHand())) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	/**
-	 * Checks if the item in the Questers hand is right bound
-	 * to any abilities. 
-	 * @return true if right bound to an ability
-	 */
-	public boolean checkItemInHandAbilR() {
-		int i;
-		
-		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
-			return false;
-		}
-
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItemR(player.getItemInHand())) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
 	public void clearQuest() {
 		this.quest = null;
 		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, before_quest.getWorld().getSpawnLocation()));
 		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(11000, player, before_quest));
 	}
-
+	
 	/**
 	 * Creates database entry for this quester with starting
 	 * classes and health.
@@ -579,6 +535,8 @@ public class Quester {
 			MineQuest.getSQLServer().update(update_string);
 			MineQuest.getSQLServer().update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
 		}
+		
+		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (abil VARCHAR(30), bind int, bind_2 int)");
 	}
 
 	public void createParty() {
@@ -591,6 +549,10 @@ public class Quester {
 	 */
 	public void curePoison() {
 		poison_timer = 0;
+	}
+
+	public void damage(int i) {
+		setHealth(getHealth() - i);
 	}
 	
 	public void debug() {
@@ -784,8 +746,10 @@ public class Quester {
 	
 	public Ability getAbility(String ability) {
 		for (SkillClass skill : classes) {
-			if (skill.getAbility(ability) != null) {
-				return skill.getAbility(ability);
+			if (skill != null) {
+				if (skill.getAbility(ability) != null) {
+					return skill.getAbility(ability);
+				}
 			}
 		}
 		return null;
@@ -798,7 +762,6 @@ public class Quester {
 	 * @return ChestSet
 	 */
 	public ChestSet getChestSet(Player player) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -834,6 +797,17 @@ public class Quester {
 		return class_exp;
 	}
 
+	public SkillClass getClassFromAbil(String ability) {
+		for (SkillClass skill : classes) {
+			if (skill != null) {
+				if (skill.getAbility(ability) != null) {
+					return skill;
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Returns amount of cubes the Quester has.
 	 * 
@@ -842,7 +816,7 @@ public class Quester {
 	public double getCubes() {
 		return cubes;
 	}
-	
+
 	/**
 	 * Returns amount of experience for Quester.
 	 * @return
@@ -851,7 +825,7 @@ public class Quester {
 		return exp;
 	}
 
-	/**
+    /**
 	 * Returns health of Quester.
 	 * @return
 	 */
@@ -859,7 +833,7 @@ public class Quester {
 		return health;
 	}
 
-    /**
+	/**
 	 * Returns level of Quester.
 	 * 
 	 * @return
@@ -922,7 +896,7 @@ public class Quester {
 			block.setType(Material.CHEST);
 			
 			Chest chest = new CraftChest(block);
-			
+			 
 			chest.getInventory().setContents(spare_inven);
 			
 			block = world.getBlockAt((int)loc.getX() + 2,
@@ -1117,7 +1091,7 @@ public class Quester {
 		}
 		return;
 	}
-
+	
 	/**
 	 * Saves any changes in the Quester to the MySQL
 	 * Database.
@@ -1157,7 +1131,7 @@ public class Quester {
 	public void setCubes(double d) {
 		cubes = d;
 	}
-	
+
 	/**
 	 * Sets the Health of the Quester.
 	 * 
@@ -1171,7 +1145,7 @@ public class Quester {
 		
 		updateHealth();
 	}
-
+	
 	public void setParty(Party party) {
 		this.party = party;
 	}
@@ -1187,7 +1161,7 @@ public class Quester {
 		}
 		this.player = player;
 	}
-	
+
 	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
 		
@@ -1205,7 +1179,7 @@ public class Quester {
 		last = town.getName();
 		MineQuest.getSQLServer().update("UPDATE players SET town='" + town.getName() + "' WHERE name='" + name + "'");
 	}
-
+	
 	public void spendClassExp(String type, int amount) {
 		if (amount > class_exp) {
 			sendMessage("You only have " + class_exp + " available");
@@ -1221,7 +1195,7 @@ public class Quester {
 		getClass(type).expAdd(amount);
 		sendMessage(amount + " experience spent on " + type);
 	}
-	
+
 	/**
 	 * Called whenever a Quester is teleported to check for
 	 * respawning.
@@ -1245,11 +1219,10 @@ public class Quester {
 		int i;
 		
 		for (i = 0; i < classes.length; i++) {
-			classes[i].unBind(itemInHand, true);
-			classes[i].unBind(itemInHand, false);
+			classes[i].unBind(itemInHand);
 		}
 	}
-
+	
 	/**
 	 * Loads all of the Quester's status from the MySQL
 	 * database.
@@ -1258,6 +1231,8 @@ public class Quester {
 		ResultSet results;
 		String split[];
 		int i;
+
+		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (abil VARCHAR(30), bind int, bind_2 int)");
 		
 		try {
 			results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + name + "'");
@@ -1288,7 +1263,10 @@ public class Quester {
 		for (i = 0; i < split.length; i++) {
 			classes[i] = SkillClass.newClass(this, split[i]);
 		}
+		
 		class_exp = 0;
+		
+		updateBinds();
 	}
 
 	/**
@@ -1300,6 +1278,29 @@ public class Quester {
 		this.player = player;
 		update();
 		updateHealth();
+	}
+
+	public void updateBinds() {
+		ResultSet results;
+		try {
+			results = MineQuest.getSQLServer().query("SELECT * FROM " + name);
+			while (results.next()) {
+				String name = results.getString("abil");
+				if (name.contains(":") && name.split(":")[0].equals("Binder")) {
+					if (getAbility(name) == null) {
+						addBinder(name.split(":")[1], results.getInt("bind_2"), new ItemStack(results.getInt("bind")));
+					}
+				} else {
+					Ability ability = getAbility(name);
+					if (ability != null) {
+						ability.silentBind(this, new ItemStack(results.getInt("bind")));
+					}
+				}
+			}
+		} catch (SQLException e) {
+			MineQuest.log("Could not update binds for quester " + name);
+		}
+		
 	}
 
 	/**
@@ -1322,9 +1323,5 @@ public class Quester {
 		}
 		
 		player.setHealth(newValue);
-	}
-
-	public void damage(int i) {
-		setHealth(getHealth() - i);
 	}
 }

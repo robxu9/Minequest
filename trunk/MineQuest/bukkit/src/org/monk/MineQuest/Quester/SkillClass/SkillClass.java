@@ -114,6 +114,31 @@ public class SkillClass {
 		return list;
 	}
 
+	public void addAbility(Ability ability) {
+		Ability[] new_abil_list = new Ability[ability_list.length + 1];
+		int i;
+		for (i = 0; i < ability_list.length; i++) {
+			new_abil_list[i] = ability_list[i];
+		}
+		new_abil_list[i] = ability;
+		
+		ability_list = new_abil_list;
+	}
+	
+	public void remAbility(Ability ability) {
+		Ability[] new_list = new Ability[ability_list.length - 1];
+		int i = 0;
+		for (Ability abil : ability_list) {
+			if (abil != null) {
+				if (!abil.getName().equals(ability.getName())) {
+					new_list[i++] = abil;
+				}
+			}
+		}
+		
+		ability_list = new_list;
+	}
+
 	/**
 	 * Adds an ability to the class in the DB. Then
 	 * reloads the ability list for the class.
@@ -126,6 +151,7 @@ public class SkillClass {
 					+ "' WHERE abil_list_id='" + abil_list_id + "'");
 			ability_list = abilListSQL(abil_list_id);
 			quester.sendMessage("You gained the ability " + string);
+			quester.updateBinds();
 		} catch (SQLException e) {
 			System.out.println("Failed to add ability " + string + " to mysql server");
 			e.printStackTrace();
@@ -147,7 +173,7 @@ public class SkillClass {
 	public void blockDestroy(BlockDamageEvent event) {
 		for (Ability abil : ability_list) {
 			if (abil.isBound(quester.getPlayer().getItemInHand())) {
-				abil.parseLeftClick(quester, event.getBlock());
+				abil.parseClick(quester, event.getBlock());
 				return;
 			}
 		}
@@ -159,8 +185,8 @@ public class SkillClass {
 	 * 
 	 * @param block Block selected for Casting
 	 */
-	public void callAbilityL(Block block) {
-		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), 1, null);
+	public void callAbility(Block block) {
+		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), null);
 	}
 
 	/**
@@ -169,31 +195,9 @@ public class SkillClass {
 	 * 
 	 * @param entity Entity selected for Casting
 	 */
-	public void callAbilityL(Entity entity) {
+	public void callAbility(Entity entity) {
 		if (entity instanceof LivingEntity) {
-			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), 1, (LivingEntity)entity);
-		}
-	}
-
-	/**
-	 * Will activate any abilities that are right bound on
-	 * the quester's item in hand.
-	 * 
-	 * @param block Block selected for Casting
-	 */
-	public void callAbilityR(Block block) {
-		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), 0, null);
-	}
-
-	/**
-	 * Will activate any abilities that are right bound on
-	 * the quester's item in hand.
-	 * 
-	 * @param entity Entity selected for Casting
-	 */
-	public void callAbilityR(Entity entity) {
-		if (entity instanceof LivingEntity) {
-			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), 0, (LivingEntity)entity);
+			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), (LivingEntity)entity);
 		}
 	}
 
@@ -430,46 +434,10 @@ public class SkillClass {
 		int i;
 		
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(itemStack)) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	/**
-	 * Check if the given itemstack is left bound to an 
-	 * ability that this class is holding.
-	 * 
-	 * @param itemStack Itemstack to check
-	 * @return Boolean True if bound to an Ability.
-	 */
-	public boolean isAbilityItemL(ItemStack itemStack) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBoundL(itemStack)) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	/**
-	 * Check if the given itemstack is right bound to an 
-	 * ability that this class is holding.
-	 * 
-	 * @param itemStack Itemstack to check
-	 * @return Boolean True if bound to an Ability.
-	 */
-	public boolean isAbilityItemR(ItemStack itemStack) {
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBoundR(itemStack)) {
-				return true;
+			if (ability_list[i] != null) {
+				if (ability_list[i].isBound(itemStack)) {
+					return true;
+				}
 			}
 		}
 		
@@ -548,10 +516,10 @@ public class SkillClass {
 	 * @param itemInHand Item that the quester clicked with
 	 * @return True if left clicked parsed and is complete
 	 */
-	public boolean leftClick(ItemStack itemInHand) {
+	public boolean click(ItemStack itemInHand) {
 		for (Ability ability : ability_list) {
 			if (ability.isBound(quester.getPlayer().getItemInHand())) {
-				ability.parseLeftClick(quester, null);
+				ability.parseClick(quester, null);
 				return true;
 			}
 		}
@@ -566,10 +534,10 @@ public class SkillClass {
 	 * @param block Block that was clicked
 	 * @return True if left clicked parsed and is complete
 	 */
-	public boolean leftClick(Block block, int itemInHand) {
+	public boolean click(Block block, int itemInHand) {
 		for (Ability ability : ability_list) {
 			if (ability.isBound(quester.getPlayer().getItemInHand())) {
-				ability.parseLeftClick(quester, block);
+				ability.parseClick(quester, block);
 				return true;
 			}
 		}
@@ -605,24 +573,6 @@ public class SkillClass {
 	}
 
 	/**
-	 * Called when a block is right clicked by a Quester.
-	 * 
-	 * @param blockClicked Block that was Clicked
-	 * @param item Item used to click block.
-	 * @return True if click has been parsed and is complete
-	 */
-	public boolean rightClick(Block blockClicked, ItemStack item) {
-		for (Ability ability : ability_list) {
-			if (ability.isBoundR(quester.getPlayer().getItemInHand())) {
-				ability.parseRightClick(quester.getPlayer(), blockClicked, quester);
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	/**
 	 * Save any changes in this class to the MySQL Database.
 	 */
 	public void save() {
@@ -632,16 +582,14 @@ public class SkillClass {
 
 	/***
 	 * Unbind an item from any abilities it might be bound to.
-	 * 
-	 * @param itemInHand Item to unbind
-	 * @param l Left or Right bound
+	 * @param itemInHand 
 	 */
-	public void unBind(ItemStack itemInHand, boolean l) {
+	public void unBind(ItemStack itemInHand) {
 		for (Ability ability : ability_list) {
-			if (l && (ability.isBoundL(itemInHand))) {
-				ability.unBindL();
-			} else if (ability.isBoundR(itemInHand)) {
-				ability.unBindR();
+			if (ability != null) {
+				if (ability.isBound(itemInHand)) {
+					ability.unBind(quester);
+				}
 			}
 		}
 	}
@@ -661,6 +609,7 @@ public class SkillClass {
 			level = results.getInt("level");
 			abil_list_id = results.getInt("abil_list_id");
 			ability_list = abilListSQL(abil_list_id);
+			quester.updateBinds();
 		} catch (SQLException e) {
 			System.out.println("Problem reading Ability");
 			e.printStackTrace();
@@ -681,17 +630,15 @@ public class SkillClass {
 		}
 	}
 
-	public void binderAdd(Ability abil) {
-		Ability[] new_list = new Ability[ability_list.length + 1];
-		int i;
-		
-		for (i = 0; i < ability_list.length; i++) {
-			new_list[i] = ability_list[i];
+	public void silentUnBind(ItemStack itemStack) {
+		for (Ability ability : ability_list) {
+			if (ability != null) {
+				if (ability.isBound(itemStack)) {
+					ability.silentUnBind(quester);
+				}
+			}
 		}
-		new_list[i] = abil;
-		
-		ability_list = new_list;
-	}	
+	}
 	
 
 }

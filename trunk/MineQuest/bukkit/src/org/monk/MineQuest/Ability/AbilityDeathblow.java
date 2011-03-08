@@ -3,13 +3,10 @@ package org.monk.MineQuest.Ability;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
-public class AbilityDeathblow extends Ability {
+public class AbilityDeathblow extends Ability implements PassiveAbility {
 
 	public AbilityDeathblow(String name, SkillClass myclass) {
 		super(name, myclass);
@@ -33,12 +30,6 @@ public class AbilityDeathblow extends Ability {
 	@Override
 	public String getName() {
 		return "Deathblow";
-	}
-	
-	@Override
-	public void useAbility(Quester quester, Location location, int l,
-			LivingEntity entity) {
-		super.useAbility(quester, location, l, entity);
 	}
 
 }

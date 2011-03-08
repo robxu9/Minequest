@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
-public class AbilityDodge extends Ability {
+public class AbilityDodge extends Ability implements PassiveAbility {
 
 	public AbilityDodge(String name, SkillClass myclass) {
 		super(name, myclass);

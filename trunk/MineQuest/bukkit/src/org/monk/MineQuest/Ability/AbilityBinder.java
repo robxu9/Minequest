@@ -3,34 +3,50 @@ package org.monk.MineQuest.Ability;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityBinder extends Ability {
 
-	private Ability ability;
-	private int bind;
-	private int l;
+	private String ability;
+	private int bind_to;
 
-	public AbilityBinder(String name, SkillClass myclass, Ability ability, int bind, int l) {
-		super(name, myclass);
+	public AbilityBinder(SkillClass myclass, String ability, int bind) {
+		super("Should not Matter", myclass);
 		this.ability = ability;
-		this.bind = bind;
-		this.l = l;
+		this.bind_to = bind;
+	}
+	
+	@Override
+	public void bind(Quester quester, ItemStack item) {
+		if (bind != item.getTypeId()) {
+			bind = item.getTypeId();
+			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('" + getName() + "', '" + bind + "', '" + bind_to + "')");
+			quester.sendMessage(getName() + " is now bound to " + item.getTypeId());
+		}
 	}
 	
 	@Override
 	public String getName() {
-		return "Binder " + ability.getName();
+		return "Binder:" + ability;
 	}
 	
 	@Override
-	public void castAbility(Quester quester, Location location,
+	public void unBind(Quester quester) {
+		super.unBind(quester);
+		myclass.remAbility(this);
+		quester.sendMessage(getName() + " removed");
+	}
+	
+	@Override
+	public void useAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		if (l > 0) {
-			ability.bindl(quester.getPlayer(), new ItemStack(bind, 1));
-		} else {
-			ability.bindr(quester.getPlayer(), new ItemStack(bind, 1));
-		}
+		quester.bind(ability, new ItemStack(bind_to, 1));
+	}
+	
+	@Override
+	public void silentBind(Quester quester, ItemStack itemStack) {
+		bind = itemStack.getTypeId();
 	}
 }
