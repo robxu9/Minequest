@@ -70,6 +70,14 @@ Lays down a volley of arrows blanketing the area of the target.
 Required Level: 10
 When repulsion is cast it moves all entities near the caster out to a distance of 10 from them. It also does 1 point of damage to each of them.
 
+=== Coming Soon ===
+|| Spell || Level || Components ||
+|| Critical Shot || 20 || 2 Arrows ||
+|| Poison Arrow || 12 || Uncooked Meat ||
+|| Infinite Arrows || 50 || ||
+|| Deflect Missiles || 15 || 10 Leather ||
+|| Exploding Arrows || 30 || 5 Coal ||
+
 == War Mage ==
 
 === Fireball ===
@@ -114,6 +122,17 @@ Removes the ground beneath the target dropping them into a hole.
 Required Level: 5
 Creates a wall of fire in front of the caster 7 blocks wide. 
 
+=== Coming Soon ===
+|| Spell || Level || Components ||
+|| Encase || 20 || 10 Cobblestone ||
+|| Wall of Fire || 15 || ||
+|| Fireblast || 15 || 10 Coal ||
+|| Cone of Cold || 12 || 12 Water + 3 Snow ||
+|| Polymorph || 40 || Leather + Meat + Feather ||
+|| Mass Polymorph || 50 || 2 of Polymorph ||
+|| Crater || 80 || ||
+
+
 == Peace Mage ==
 
 === Heal/Heal Other ===
@@ -149,3 +168,15 @@ Damages enemies in a radius of 15 around the caster by 1 point every 10 seconds,
 || 2 Bread ||
 Required Level: 8
 Heals questers in a radius of 15 around the caster by the Caster Level / 4 hit points every 10 seconds, for 2.5 minutes.
+
+=== Coming Soon ===
+|| Spell || Level || Components ||
+|| Purge Zombie || 10 || 2 Torch + 2 Cacti ||
+|| Purge Spider || 10 || '' ||
+|| Purge Skeleton || 10 || '' ||
+|| Purge Creeper || 10 || '' ||
+|| Purge Mob || 25 || Jack o Lantern ||
+|| Teleport || 15 || Sign ||
+|| Mass Teleport || 80 || Sign + Mossy Cobblestone ||
+|| Explode Creepers || 15 || Gunpowder ||
+|| Transmute || 30 || Gold ||
