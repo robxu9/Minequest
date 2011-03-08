@@ -40,6 +40,7 @@ import org.monk.MineQuest.Quester.SkillClass.Combat.Archer;
 import org.monk.MineQuest.Quester.SkillClass.Combat.PeaceMage;
 import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
 import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
+import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
 
 /**
  * This is the base class for all abilities in MineQuest.
@@ -101,6 +102,9 @@ public class Ability {
 			abilities.add(new AbilityCurePoisonOther(name, myclass));
 			abilities.add(new AbilityTrape(name, myclass));
 			abilities.add(new AbilityWallofWater(name, myclass));
+		}
+		if ((myclass == null) || (myclass instanceof Miner)) {
+			abilities.add(new AbilityLavaToWater(name, myclass));
 		}
 		
 		return abilities;
