@@ -98,13 +98,13 @@ This section will describe the various types of entity spawners. They all take a
 === Entity Spawner Event ===
 This is the most generic entity spawner. It will spawn the specified creature type at the location. If the entity dies, it will re-spawn a new creature at the spawner. When the spawner is completed it will kill the entity it spawned if it is alive. The last parameter is either a t or an f for specifying whether the mob should be a super-mob or not (e.g. Poison Zombie).
 {{{
-Event:id:EntitySpawnerEvent:delay ms:loc x:loc y:loc z:super
+Event:id:EntitySpawnerEvent:delay ms:loc x:loc y:loc z:type:super
 }}}
 
 === Entity Spawner No Move Event ===
 This is great if you want some mobs in the distance to look like they are commanding or if you want sounds of zombies but don't want them finding the players yet. Basically it will spawn the mobs in the location and keep them from moving. If for some reason they die before the event is completed it they will re-spawn. They will not be killed when the event it completed unlike the normal spawner.
 {{{
-Event:id:EntitySpawnerNoMove:delay ms:loc x:loc y:loc z:super
+Event:id:EntitySpawnerNoMove:delay ms:loc x:loc y:loc z:type:super
 }}}
 
 === Health Entity Spawn ===
