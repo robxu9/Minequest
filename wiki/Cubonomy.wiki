@@ -9,4 +9,42 @@ Now I have taken all of the aspects of that plugin and merged them into MineQues
 
 = Commands =
 
-Details about commands will be here soon.
+{{{
+/cubes
+}}}
+This will tell you how many cubes you have.
+
+{{{
+/store [page_num]
+}}}
+This will display the items in the store. If the store has too many items it may display them in pages, in which case adding a number to the command will display a specific page.
+
+{{{
+/buy block_name quantity
+}}}
+Assuming you have sufficient funds this will buy the amount of the block specified. The block_name is a string, the same as what is shown in the store pages.
+
+{{{
+/buyi block_index quantity
+}}}
+This acts the same way as /buy however it uses the index given on the left side of the store listings for the block_index.
+
+{{{
+/sell and /selli
+}}}
+These work the same way as buy and buyi.
+
+{{{
+/costb and /costs
+}}}
+These use the same format as /buy and /sell however instead of performing the transaction they tell you the amount of money involved.
+
+{{{
+/price
+}}}
+Tells you the price of the town property that you are standing on.
+
+{{{
+/buyprop
+}}}
+Buys the property that you are standing on.
