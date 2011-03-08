@@ -23,8 +23,8 @@ public class MineQuestBlockListener extends BlockListener {
 		}
 	
 		quester.checkItemInHand();
-		if (quester.checkItemInHandAbilL()) {
-			quester.callAbilityL(event.getBlock());
+		if (quester.checkItemInHandAbil()) {
+			quester.callAbility(event.getBlock());
 		}
 		quester.destroyBlock(event);
 		
@@ -69,8 +69,8 @@ public class MineQuestBlockListener extends BlockListener {
 		}
 		
 		quester.checkItemInHand();
-		if (quester.checkItemInHandAbilR()) {
-			quester.callAbilityR(event.getBlock());
+		if (quester.checkItemInHandAbil()) {
+			quester.callAbility(event.getBlock());
 		}
 		
 		super.onBlockRightClick(event);
@@ -90,8 +90,8 @@ public class MineQuestBlockListener extends BlockListener {
 		}
 		
 		quester.checkItemInHand();
-		if (quester.checkItemInHandAbilR()) {
-			quester.callAbilityR(event.getBlock());
+		if (quester.checkItemInHandAbil()) {
+			quester.callAbility(event.getBlock());
 		}
 		
 		if (town != null) {

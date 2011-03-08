@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Quest.Quest;
@@ -36,6 +37,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			MineQuest.addQuester(new Quester(event.getPlayer(), 0));
 		}
 		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
+		MineQuest.getQuester(event.getPlayer()).update();
 		super.onPlayerJoin(event);
 	}
 	
@@ -161,14 +163,14 @@ public class MineQuestPlayerListener extends PlayerListener {
 			MineQuest.getQuester(player).disableabil(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/bind")) {
-			if (split.length < 3) {
-				player.sendMessage("Usage: /bind <ability> <l or r>");
+			if (split.length < 2) {
+				player.sendMessage("Usage: /bind <ability>");
 				event.setCancelled(true);
 			}
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length - 1; i++) abil = abil + " " + split[i];
-			MineQuest.getQuester(player).bind(player, abil, split[split.length - 1]);
+			MineQuest.getQuester(player).bind(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/class")) {
 			if (split.length < 2) {
@@ -531,6 +533,35 @@ public class MineQuestPlayerListener extends PlayerListener {
         	for (Quester quester : MineQuest.getQuester(player).getParty().getQuesters()) {
         		player.sendMessage(quester.getName());
         	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/binder")) {
+        	if (split.length < 3) {
+        		player.sendMessage("Usage: /binder Ability_Name item_id");
+        	} else {
+    			String abil = split[1];
+    			int i;
+    			for (i = 2; i < split.length - 1; i++) abil = abil + " " + split[i];
+            	int item = Integer.parseInt(split[i]);
+            	
+            	MineQuest.getQuester(player).addBinder(abil, item);
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/item_id")) {
+        	ItemStack item = player.getItemInHand();
+        	if (item != null) {
+        		player.sendMessage(item.getType().name() + " is item id " + item.getTypeId());
+        	} else {
+        		player.sendMessage("You are not holding anything");
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/new_binder")) {
+        	player.sendMessage("Item binding is now restricted to one binding per item.");
+        	player.sendMessage("This is because it was too confusing for right click binding");
+        	player.sendMessage("when it only works on some items. Now spells are bound to both.");
+        	player.sendMessage("either right click or left click will activate.");
+        	player.sendMessage("Rebinders have been added to the Server and can be created using");
+        	player.sendMessage("/binder Ability_Name item_id_to_bind");
+        	player.sendMessage("while holding the item to create it for.");
         	event.setCancelled(true);
         }
 		

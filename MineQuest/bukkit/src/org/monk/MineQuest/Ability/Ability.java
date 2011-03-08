@@ -141,8 +141,7 @@ public class Ability {
 		
 		return i;
 	}
-	protected int bindl;
-	protected int bindr;
+	protected int bind;
 	protected int cast_time;
 	protected int count;
 	protected boolean enabled;
@@ -161,11 +160,11 @@ public class Ability {
 		Calendar now = Calendar.getInstance();
 		this.name = name;
 		enabled = true;
+		if (this instanceof PassiveAbility) enabled = false;
 		this.myclass = myclass;
 		count = 0;
 		cast_time = getCastTime();
-		bindl = -1;
-		bindr = -1;
+		bind = -1;
 		time = now.getTimeInMillis();
 		last_msg = 0;
 	}
@@ -185,20 +184,13 @@ public class Ability {
 	 * @param player Player binding Ability
 	 * @param item Item to be bound
 	 */
-	public void bindl(Player player, ItemStack item) {
-		bindl = item.getTypeId();
-		player.sendMessage(name + " is now bound to Left " + item.getTypeId());
-	}
-
-	/**
-	 * Bind to right click of item.
-	 * 
-	 * @param player Player binding Ability
-	 * @param item Item to be bound
-	 */
-	public void bindr(Player player, ItemStack item) {
-		bindr = item.getTypeId();
-		player.sendMessage(name + " is now bound to Right " + item.getTypeId());
+	public void bind(Quester quester, ItemStack item) {
+		if (bind != item.getTypeId()) {
+			silentUnBind(quester);
+			bind = item.getTypeId();
+			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('" + getName() + "', '" + bind + "', '" + bind + "')");
+			quester.sendMessage(getName() + " is now bound to " + item.getTypeId());
+		}
 	}
 	
 	/**
@@ -231,14 +223,14 @@ public class Ability {
 	public void enable(Quester quester) {
 		if (quester.canCast(getManaCost())) {
 			enabled = true;
-			quester.sendMessage(name + " enabled");
+			quester.sendMessage(getName() + " enabled");
 		} else {
 			quester.sendMessage("Not Enough Mana");
 		}
 	}
 
 	public boolean equals(String name) {
-		return name.equals(this.name);
+		return name.equals(getName());
 	}
 
 	/**
@@ -262,7 +254,7 @@ public class Ability {
 	}
 	
 	/**
-	 * Gets the entities within a area of a player. 
+	 * Gets the entities within a area of a player. name
 	 * 
 	 * Not Implemented in bukkit yet!
 	 * 
@@ -352,29 +344,7 @@ public class Ability {
 	 * @return true if bound
 	 */
 	public boolean isBound(ItemStack itemStack) {
-		return (bindl == itemStack.getTypeId()) || (bindr == itemStack.getTypeId());
-	}
-	
-	/**
-	 * Checks if the itemInHand is bound to left click
-	 * for this ability.
-	 * 
-	 * @param itemInHand
-	 * @return true if bound
-	 */
-	public boolean isBoundL(ItemStack itemInHand) {
-		return (bindl == itemInHand.getTypeId());
-	}
-	
-	/**
-	 * Checks if the itemStack is bound to right click
-	 * for this ability.
-	 * 
-	 * @param itemStack
-	 * @return true if bound
-	 */
-	public boolean isBoundR(ItemStack itemStack) {
-		return (bindr == itemStack.getTypeId());
+		return (bind == itemStack.getTypeId());
 	}
 	
 	/**
@@ -397,10 +367,8 @@ public class Ability {
 	
 	/**
 	 * This was used to determine if entities are part of type
-	 * for purge spells, will be reimplemented differently in
-	 * bukkit.
+	 * for purge spells.
 	 * 
-	 * @deprecated
 	 * @param livingEntity
 	 * @param type
 	 * @return
@@ -470,13 +438,9 @@ public class Ability {
 	 * @return true if attack damage should be negated
 	 */
 	public boolean parseAttack(Quester quester, LivingEntity defend) {
-		Player player = quester.getPlayer();
-		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
-			useAbility(quester, defend.getLocation(), 0, defend);
-		} else {
-			useAbility(quester, defend.getLocation(), 1, defend);
-		}
-		if ((name.equals("Fire Arrow") || name.equals("PowerStrike"))) {
+		useAbility(quester, defend.getLocation(), defend);
+		
+		if ((getName().equals("Fire Arrow") || getName().equals("PowerStrike"))) {
 			return false;
 		}
 		
@@ -503,20 +467,8 @@ public class Ability {
 	 * @param quester
 	 * @param block
 	 */
-	public void parseLeftClick(Quester quester, Block block) {
-		useAbility(quester, block.getLocation(), 1, null);
-	}
-
-	/**
-	 * Parse any affects of the ability being activated
-	 * as part of a right click.
-	 * 
-	 * @param player
-	 * @param quester
-	 * @param block
-	 */
-	public void parseRightClick(Player player, Block block, Quester quester) {
-		useAbility(quester, block.getLocation(), 0, null);
+	public void parseClick(Quester quester, Block block) {
+		useAbility(quester, block.getLocation(), null);
 	}
 
 	/**
@@ -545,24 +497,19 @@ public class Ability {
 	 * Clears bindings for this ability.
 	 * @param player
 	 */
-	public void unbind(Player player) {
-		bindl = 0;
-		bindr = 0;
-		player.sendMessage(name + " is now unbound");
+	public void unBind(Quester quester) {
+		bind = 0;
+		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
+		quester.sendMessage(getName() + " is now unbound");
 	}
 
 	/**
-	 * Clears left click bindings for this ability.
+	 * Clears bindings for this ability.
+	 * @param player
 	 */
-	public void unBindL() {
-		bindl = 0;
-	}
-
-	/**
-	 * Clears right click bindings for this ability.
-	 */
-	public void unBindR() {
-		bindr = 0;
+	public void silentUnBind(Quester quester) {
+		bind = 0;
+		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
 	}
 
 	/**
@@ -575,22 +522,17 @@ public class Ability {
 	 * @param l 1 for left click, 0 for right click
 	 * @param entity Target
 	 */
-	public void useAbility(Quester quester, Location location, int l, LivingEntity entity) {
+	public void useAbility(Quester quester, Location location, LivingEntity entity) {
 		Player player = quester.getPlayer();
 		
 		if (!enabled) {
-			notify(quester, name + " is not enabled");
+			notify(quester, getName() + " is not enabled");
 			return;
 		}
-		// TODO: add DrainLife
-		// TODO: add DamageAura
-		// TODO: add HealAura
-		// TODO: fix Repulsion 
-		// TODO: fix FireChain
 		
 		if ((quester == null) || quester.canCast(getManaCost())) {
 			if (canCast() || (player == null)) {
-				if ((player == null) || player.getItemInHand().getTypeId() == ((l == 1)?bindl:bindr)) {
+				if ((player == null) || player.getItemInHand().getTypeId() == bind) {
 					notify(quester, "Casting " + name);
 					castAbility(quester, location, entity);
 					if (myclass != null) {
@@ -622,5 +564,9 @@ public class Ability {
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
 		
+	}
+
+	public void silentBind(Quester quester, ItemStack itemStack) {
+		bind = itemStack.getTypeId();
 	}
 }

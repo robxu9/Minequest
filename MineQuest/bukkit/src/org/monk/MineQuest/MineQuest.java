@@ -583,7 +583,6 @@ public class MineQuest extends JavaPlugin {
 	
 	public static void addMQMob(MQMob newMob) {
 		int i;
-		log("Adding Mob " + newMob.getId());
 		for (i = 0; i < mobs.length; i++) {
 			if (mobs[i] == null) {
 				mobs[i] = newMob;

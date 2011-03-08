@@ -6,7 +6,7 @@ import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
-public class AbilityFireResistance extends Ability {
+public class AbilityFireResistance extends Ability implements PassiveAbility {
 
 	public AbilityFireResistance(String name, SkillClass myclass) {
 		super(name, myclass);
