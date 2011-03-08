@@ -110,7 +110,7 @@ Event:id:EntitySpawnerNoMove:delay ms:loc x:loc y:loc z:type:super
 === Health Entity Spawn ===
 This is used to create an entity with a specific amount of health. This can be used to create a boss or even just a pig thats really hard to stop from squealing. This will hold the entity in place, keeping it from moving. When the entity is killed this event will issue a quest event with the id specified.
 {{{
-Event:id:HealthEntitySpawn:delay ms:task:loc x:loc y:loc z:health
+Event:id:HealthEntitySpawn:delay ms:task:loc x:loc y:loc z:type:health
 }}}
 
 == Entity Spawner Completion ==
