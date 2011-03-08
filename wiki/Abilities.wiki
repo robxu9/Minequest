@@ -15,4 +15,19 @@ All classes either currently have or will have abilities that they gain at some 
 === Deathblow ===
 || Components ||
 || 2 Iron ||
-When enabled deathblow increases the critical chance of the quester on warrior attacks. It increases from 5 % to 10 %.
+Deathblow is a passive ability. When enabled deathblow increases the critical chance of the quester on warrior attacks. It increases from 5 % to 10 %.
+
+=== Dodge ===
+|| Components ||
+|| 5 Feathers ||
+Dodge is a passive ability. When enabled there is a chance that any attack may be dodged. When an attack is dodged the quester moves the side one block and takes no damage. The chance for dodging is 1 % + .25 % per level of the Warrior.
+
+=== Powerstrike ===
+|| Components ||
+|| Wooden Sword ||
+When Powerstrike is activated it does extra damage to the defender. It does an additional 10 damage.
+
+=== Sprint ===
+|| Components ||
+|| 1 Feather ||
+When sprint is cast it moves the caster forward one block. When cast successively it gives the illusion of moving very quickly. When sprinting at full speed a quester can move through walls that are only a couple blocks thick.
