@@ -12,7 +12,7 @@ Everything is base around rectangularly defined towns. A town in MineQuest can h
 Each property is rectangular. There are two types of properties, there are those with height and those without height. If a property does not have a height it simply reaches from adminium to the top of the sky. Each property currently defaults to a price of 10M Cubes (Cubes are the currency of MineQuest). I plan on making this be adjustable eventually, and I would like to make it depend on the market, but for now it is a flat fee of 10 M Cubes.
 
 == Stores ==
-Stores are shaped the same way as properties except that they do not have the editing permissions of a property, they are simply part of a town. The usage for stores and some details about commerce related commands can be found at Cubonomy. 
+Stores are shaped the same way as properties except that they do not have the editing permissions of a property, they are simply part of a town. The usage for stores and some details about commerce related commands can be found at [Cubonomy]. 
 
 = Skill Classes =
 There are two types of classes in MineQuest, there are resource classes and combat classes. The resource classes are based around things like gathering materials and building things, whereas the combat classes are based around killing monsters and staying alive. 
@@ -37,7 +37,7 @@ Archer is the class built around using a bow, abilities gained can make arrows c
 Mages do not have a class weapon, however if they did it would either be the snowball or the bow as they are distance weapons. At level 0 War Mages are able to cast fireball, and PeaceMages are able to cast Heal/Heal Other. As they level up they gain new spells at various levels. The mage classes armors are gold.
 
 = Abilities =
-All classes will receive abilities as they level up, mages more than others. All abilities have a class or sometimes two that they belong to. Some abilities are passive but most are active and require binding to be used. Often abilities have a casting time restricting how quickly they can be cast. More details about abilities can be found at [http://code.google.com/p/minequest/wiki/Abilities]Abilities.
+All classes will receive abilities as they level up, mages more than others. All abilities have a class or sometimes two that they belong to. Some abilities are passive but most are active and require binding to be used. Often abilities have a casting time restricting how quickly they can be cast. More details about abilities can be found at [Abilities].
 
 == Abilities Binding ==
 The way that active spells are cast is that they are bound to a specific item, and a type of click. If you were a mage trying to cast fireball you would most likely bind it to right click for snow balls. This way you could throw a snowball at an enemy and cast fireball on them. The binding works as follows.
@@ -72,7 +72,7 @@ When inside a quest players will re-spawn at the spawn point for the world that 
 {{{
 /quit_quest
 }}}
-More details about quest file format and how quests work can be found  at QuestWriting.
+More details about quest file format and how quests work can be found  at [QuestWriting].
 
 = Super Mobs =
 As players level up Super Mobs will become more apparent in the server. These look like regular mobs, but can be identified that they are so evil they turn the ground beneath them to dirt for a period of time. These mobs all have various special abilities and also are harder to kill. Creepers are the least exciting as the currently just do more damage and are hard to kill.
