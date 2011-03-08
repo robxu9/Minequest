@@ -30,4 +30,7 @@ When Powerstrike is activated it does extra damage to the defender. It does an a
 === Sprint ===
 || Components ||
 || 1 Feather ||
-When sprint is cast it moves the caster forward one block. When cast successively it gives the illusion of moving very quickly. When sprinting at full speed a quester can move through walls that are only a couple blocks thick.
+||When sprint is cast it moves the caster forward one block. When cast successively it gives the illusion of moving very quickly. When sprinting at full speed a quester can move through walls that are only a couple blocks thick.||
+
+== Archer ==
+=== Dodge ===
