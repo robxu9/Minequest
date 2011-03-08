@@ -12,18 +12,20 @@ public class HealthEntitySpawn extends QuestEvent {
 	private CreatureType creatureType;
 	private LivingEntity entity;
 	private Location location;
+	private boolean stay;
 
-	public HealthEntitySpawn(Quest quest, long delay, int task, Location location, CreatureType creatureType, int health) {
+	public HealthEntitySpawn(Quest quest, long delay, int task, Location location, CreatureType creatureType, int health, boolean stay) {
 		super(quest, delay, task);
 		this.health = health;
 		this.creatureType = creatureType;
 		this.entity = null;
 		this.location = location;
+		this.stay = stay;
 	}
 	
 	@Override
 	public void activate(EventParser eventParser) {
-		MineQuest.log(getName() + " activate");
+		eventParser.setComplete(false);
 		if (entity == null) {
 			entity = location.getWorld().spawnCreature(location, creatureType);
 			if (entity != null) {
@@ -35,11 +37,11 @@ public class HealthEntitySpawn extends QuestEvent {
 			
 			return;
 		}
-		entity.teleportTo(location);
+		if (stay) {
+			entity.teleportTo(location);
+		}
 		
-		eventParser.setComplete(false);
 		if (!(entity.getHealth() > 0)) {
-			MineQuest.log("Health is " + entity.getHealth());
 			eventComplete();
 			eventParser.setComplete(true);
 		}

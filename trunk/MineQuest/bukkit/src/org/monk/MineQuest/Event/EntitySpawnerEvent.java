@@ -40,10 +40,12 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 		
 		if ((entity == null) || (entity.getHealth() <= 0)) {
 			entity = world.spawnCreature(location, creatureType);
-			if (superm) {
-				MineQuest.setMQMob(new SpecialMob((Monster)entity));
-			} else {
-				MineQuest.setMQMob(new MQMob((Monster)entity));
+			if (entity != null) {
+				if (superm) {
+					MineQuest.setMQMob(new SpecialMob((Monster)entity));
+				} else {
+					MineQuest.setMQMob(new MQMob((Monster)entity));
+				}
 			}
 		}
 		
