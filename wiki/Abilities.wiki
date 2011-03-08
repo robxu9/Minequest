@@ -2,12 +2,17 @@
 
 = Introduction =
 
-Add your content here.
+All classes either currently have or will have abilities that they gain at some levels they reach. Almost all abilities have components required to cast them and they can be checked like this.
+{{{
+/spellcomp Fireball
+}}}
 
 
-= Details =
+= Abilities =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+== Warrior ==
+
+=== Deathblow ===
+|| Components ||
+|| 2 Iron ||
+When enabled deathblow increases the critical chance of the quester on warrior attacks. It increases from 5 % to 10 %.
