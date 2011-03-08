@@ -47,3 +47,29 @@ The way that active spells are cast is that they are bound to a specific item, a
 
 == Abilities Components ==
 Almost every ability has components required to cast it. Each time the ability is cast the components are removed from the casters inventory. If the caster does not have the required components then the spell will not be cast.
+
+= Parties =
+Any quester can create a party at any time, but they are only really used for entering quests. When a quest is started MineQuest will attempt to bring an entire players party with them. A quester can create a party with the following command.
+{{{
+/createparty
+}}}
+Likewise a quester can join someone else's party using this command.
+{{{
+/joinparty username
+}}}
+Finally you can always list who is in your party by using this command.
+{{{
+/listparty
+}}}
+
+= Quests =
+Currently any player can start a quest at any time, eventually this will not be true. I would like it so that quests were tied to portals or something like that but that won't be around until a later version. MineQuest loads the .quest file in the minecraft server directory with the name of the quest requested and the .quest file contains the rest of the information. It will attempt to bring the party of the quester with them into the quest, if the quester is not in a party then it will create one with just them and start the quest.
+Quests can be started with the following command.
+{{{
+/startquest
+}}}
+When inside a quest players will re-spawn at the spawn point for the world that the quest takes place in, unless the .quest file defines a spawn point. When the quest is completed the questers will be returned to the locations they were standing when they started the quest. A player can leave the party and quit the quest without completing it with the following command.
+{{{
+/quit_quest
+}}}
+More details about quest file format and how quests work can be found  at http://code.google.com/p/minequest/wiki/QuestWriting.
