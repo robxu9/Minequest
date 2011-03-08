@@ -30,9 +30,11 @@ public class AreaEvent extends QuestEvent {
 		
 		int i;
 		Quester questers[] = party.getQuesterArray();
-		for (i = 0; i < questers.length; i++) {
-			if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
-				flags[i] = true;
+		if (questers != null) {
+			for (i = 0; i < questers.length; i++) {
+				if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
+					flags[i] = true;
+				}
 			}
 		}
 		

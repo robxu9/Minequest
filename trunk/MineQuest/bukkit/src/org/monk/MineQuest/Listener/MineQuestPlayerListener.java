@@ -365,11 +365,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         		MineQuest.finishTown(player, split[1]);
         	}
 			event.setCancelled(true);
-        } else if (split[0].equals("/setowner")) {
-        	if (MineQuest.getTown(player) != null) {
+        } else if (split[0].equals("/setmayor")) {
+        	if ((MineQuest.getTown(player) != null) && (MineQuest.getTown(player).getTownProperty().getOwner().equals(MineQuest.getQuester(player)))) {
         		MineQuest.getTown(player).setOwner(split[1]);
         	} else {
-        		player.sendMessage("You are not in a town");
+        		player.sendMessage("You are not in a town or you are not the mayor");
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/createproperty")) {
@@ -433,9 +433,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 				player.sendMessage("You are not in a town");
 			}
 			event.setCancelled(true);
-        } else if (split[0].equals("/give_spare")) {
-        	MineQuest.getQuester(event.getPlayer()).giveSpareInventory();
-        	event.setCancelled(true);
         } else if (split[0].equals("/startquest")) {
         	if (split.length < 2) {
         		player.sendMessage("Usage: /startquest filename");

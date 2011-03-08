@@ -1317,4 +1317,8 @@ public class Quester {
 		
 		player.setHealth(newValue);
 	}
+
+	public void damage(int i) {
+		setHealth(getHealth() - i);
+	}
 }

@@ -1,23 +1,24 @@
 package org.monk.MineQuest.Event;
 
 public class EntitySpawnerCompleteEvent extends NormalEvent {
-	protected EntitySpawnerEvent event;
+	protected EntitySpawnerEvent[] events;
 
-	public EntitySpawnerCompleteEvent(long delay, EntitySpawnerEvent event) {
+	public EntitySpawnerCompleteEvent(long delay, EntitySpawnerEvent[] eventss) {
 		super(delay);
-		this.event = event;
+		this.events = eventss;
 	}
 	
 	@Override
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		event.setComplete(true);
+		for (EntitySpawnerEvent event : events) {
+			event.setComplete(true);
+		}
 	}
 	
 	@Override
 	public String getName() {
 		return "Entity Spawner Destruction Event";
 	}
-
 }

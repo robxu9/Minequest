@@ -107,12 +107,12 @@ public class Quest {
 				spawn = world.getSpawnLocation();
 			}
 			
-//			for (QuestTask task : tasks) {
-//				MineQuest.log("Task: " + task.getId());
-//				for (Event event : task.getEvents()) {
-//					MineQuest.log(event.getName());
-//				}
-//			}
+			for (QuestTask task : tasks) {
+				MineQuest.log("Task: " + task.getId());
+				for (Event event : task.getEvents()) {
+					MineQuest.log(event.getName());
+				}
+			}
 			
 			for (Quester quester : party.getQuesters()) {
 				quester.setQuest(this, world);
@@ -290,9 +290,13 @@ public class Quest {
 			events.add(new EntitySpawnerCompleteNMEvent(this, delay, index, eventss));
 		} else if (type.equals("EntitySpawnerCompleteEvent")) {
 			int delay = Integer.parseInt(line[3]);
-			int event = Integer.parseInt(line[4]);
+			i = 0;
+			EntitySpawnerEvent[] eventss = new EntitySpawnerEvent[line[4].split(",").length];
+			for (String s : line[5].split(",")) {
+				eventss[i++] = (EntitySpawnerEvent)getEvent(Integer.parseInt(s));
+			}
 
-			events.add(new EntitySpawnerCompleteEvent(delay, (EntitySpawnerEvent)getEvent(event)));
+			events.add(new EntitySpawnerCompleteEvent(delay, eventss));
 		} else if (type.equals("ExperienceAdd")) {
 			long delay = Integer.parseInt(line[3]);
 			int exp = Integer.parseInt(line[5]);
@@ -401,6 +405,7 @@ public class Quest {
 			for (Quester quester : questers) {
 				quester.clearQuest();
 			}
+			return;
 		} else if (index <= -2) {
 			return;
 		}

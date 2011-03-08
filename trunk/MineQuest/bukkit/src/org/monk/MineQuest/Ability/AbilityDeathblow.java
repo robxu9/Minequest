@@ -13,7 +13,6 @@ public class AbilityDeathblow extends Ability {
 
 	public AbilityDeathblow(String name, SkillClass myclass) {
 		super(name, myclass);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
@@ -39,7 +38,6 @@ public class AbilityDeathblow extends Ability {
 	@Override
 	public void useAbility(Quester quester, Location location, int l,
 			LivingEntity entity) {
-		// TODO Auto-generated method stub
 		super.useAbility(quester, location, l, entity);
 	}
 
