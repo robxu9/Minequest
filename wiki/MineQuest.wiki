@@ -72,7 +72,14 @@ When inside a quest players will re-spawn at the spawn point for the world that 
 {{{
 /quit_quest
 }}}
-More details about quest file format and how quests work can be found  at [QuestWriting].
+More details about quest file format and how quests work can be found  at [QuestWriting]. At the end of a quest, the questers are awarded exp for both character and class. The class exp can be assigned to a specific class only before logout using the following command.
+{{{
+/assign_exp <class_name> <amount>
+}}}
+They can also check the amount they have available with the following.
+{{{
+/class_exp
+}}}
 
 = Super Mobs =
 As players level up Super Mobs will become more apparent in the server. These look like regular mobs, but can be identified that they are so evil they turn the ground beneath them to dirt for a period of time. These mobs all have various special abilities and also are harder to kill. Creepers are the least exciting as the currently just do more damage and are hard to kill.
