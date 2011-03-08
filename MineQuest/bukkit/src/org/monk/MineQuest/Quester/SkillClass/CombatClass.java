@@ -5,6 +5,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Quester.SkillClass.Combat.PeaceMage;
+import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
 
 public class CombatClass extends SkillClass implements DefendingClass {
 
@@ -29,7 +31,9 @@ public class CombatClass extends SkillClass implements DefendingClass {
 		for (Ability abil : ability_list) {
 			if (abil.isBound(quester.getPlayer().getItemInHand())) {
 				if (abil.parseAttack(quester, defend)) {
-					return true;
+					if ((this instanceof WarMage) || (this instanceof PeaceMage)) {
+						return true;
+					}
 				}
 			}
 		}

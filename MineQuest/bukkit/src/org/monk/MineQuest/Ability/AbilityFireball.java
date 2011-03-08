@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
@@ -80,5 +81,14 @@ public class AbilityFireball extends Ability {
 				(int)location.getZ() + z);
 		nblock.setTypeId(51);
 		
+		if (entity != null) {
+			if (MineQuest.getMob(entity) != null) {
+				MineQuest.getMob(entity).damage(2 + (myclass.getCasterLevel() / 2));
+			} else if (entity instanceof Player) {
+				MineQuest.getQuester((Player)entity).damage(2 + (myclass.getCasterLevel() / 2));
+			} else {
+				entity.setHealth(entity.getHealth() - (2 + (myclass.getCasterLevel() / 2)));
+			}
+		}
 	}
 }

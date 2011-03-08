@@ -29,6 +29,7 @@ public class HealthEntitySpawn extends QuestEvent {
 			
 			return;
 		}
+		entity.teleportTo(location);
 		
 		eventParser.setComplete(!(entity.getHealth() > 0));
 		if (!(entity.getHealth() > 0)) {

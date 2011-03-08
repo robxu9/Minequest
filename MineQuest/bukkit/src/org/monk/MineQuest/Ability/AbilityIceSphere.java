@@ -19,7 +19,7 @@ public class AbilityIceSphere extends Ability {
 		super(name, myclass);
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	@Override
 	public List<ItemStack> getManaCost() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
@@ -32,17 +32,17 @@ public class AbilityIceSphere extends Ability {
 		
 		return list;
 	}
-	
+
 	@Override
 	public int getReqLevel() {
 		return 7;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "IceSphere";
 	}
-	
+
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {

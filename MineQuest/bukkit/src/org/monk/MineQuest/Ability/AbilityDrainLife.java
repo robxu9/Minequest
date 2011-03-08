@@ -22,7 +22,11 @@ public class AbilityDrainLife extends Ability{
 	public List<ItemStack> getManaCost() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
-		list.add(new ItemStack(89, 1));
+		list.add(new ItemStack(348, 1));
+		list.add(new ItemStack(348, 1));
+		list.add(new ItemStack(348, 1));
+		list.add(new ItemStack(348, 1));
+		list.add(new ItemStack(348, 1));
 		
 		return list;
 	}
@@ -44,8 +48,15 @@ public class AbilityDrainLife extends Ability{
 		Player player = quester.getPlayer();
 		int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
 		if (entity != null) {
+			if (MineQuest.getMob(entity) != null) {
+				MineQuest.getMob(entity).damage(drain);
+			} else if (entity instanceof Player) {
+				MineQuest.getQuester((Player)entity).damage(drain);
+			} else {
+				entity.setHealth(entity.getHealth() - (drain));
+			}
 			MineQuest.getMob(entity).damage(drain);
-			quester.setHealth(player.getHealth() + drain);
+			if (quester != null) quester.setHealth(quester.getHealth() + drain);
 		} else {
 			player.sendMessage("Must be called on an Entity");
 		}

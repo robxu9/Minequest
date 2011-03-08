@@ -53,7 +53,7 @@ public class SpecialMob extends MQMob {
 	@Override
 	public int attack(int amount, LivingEntity player) {
 		if (entity instanceof Zombie) {
-			if (generator.nextDouble() < .5) {
+			if (generator.nextDouble() < .8) {
 				MineQuest.getQuester((Player)player).poison();
 			}
 		} else if (entity instanceof Spider) {
@@ -130,6 +130,19 @@ public class SpecialMob extends MQMob {
 			}
 		}
 		return damage / 2;
+	}
+	
+	@Override
+	public void damage(int i) {
+		if (i == 1) {
+			if (!half) {
+				half = true;
+			} else {
+				half = false;
+				super.damage(1);
+			}
+		}
+		super.damage(i / 2);
 	}
 
 }
