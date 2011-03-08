@@ -946,11 +946,11 @@ public class Quester {
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		int newHealth;
                 
-        if ((event instanceof EntityDamageByEntityEvent) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
+        if ((event instanceof EntityDamageByEntityEvent) && (((EntityDamageByEntityEvent)event).getDamager() != null) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
         	MineQuest.log("Cancelled!");
             event.setCancelled(true);
             return false;
-        } else if (checkDamage(event.getCause())){
+        } else if (checkDamage(event.getCause())) {
         	MineQuest.log("Cancelled!");
         	event.setCancelled(true);
         	return false;
@@ -1102,6 +1102,7 @@ public class Quester {
 	 * Updates the poison counter appropriately.
 	 */
 	public void poison() {
+		sendMessage("Poisoned!");
 		poison_timer += 10;
 	}
 
@@ -1179,6 +1180,9 @@ public class Quester {
 	 * @param player New Reference
 	 */
 	public void setPlayer(Player player) {
+		if (player == null) {
+			party.remQuester(this);
+		}
 		this.player = player;
 	}
 	

@@ -69,8 +69,10 @@ public class AbilityTrape extends Ability {
 			for (j = -1; j < 2; j++) {
 				for (k = -1; k < 2; k++) {
 					Block nblock = world.getBlockAt(x + j, y - i, z + k);
-					
-					nblock.setTypeId(0);
+
+					if ((quester.getQuest() == null) || (quester.getQuest().canEdit(quester, nblock))) {
+						nblock.setTypeId(0);
+					}
 				}
 			}
 		}

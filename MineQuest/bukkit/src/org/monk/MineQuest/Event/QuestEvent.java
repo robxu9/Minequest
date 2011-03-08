@@ -1,5 +1,6 @@
 package org.monk.MineQuest.Event;
 
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quest.Quest;
 
 public class QuestEvent extends PeriodicEvent {
@@ -19,6 +20,7 @@ public class QuestEvent extends PeriodicEvent {
 	}
 	
 	public void eventComplete() {
+		MineQuest.log("Event Complete");
 		quest.issueNextEvents(index);
 	}
 	

@@ -61,46 +61,59 @@ public class Quest {
 		try {
 			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
 			
-			String line;
+			String line = "";
+			int number = 0;
 			world = questers[0].getPlayer().getWorld();
 			spawn = null;
-			while ((line = bis.readLine()) != null) {
-				String split[] = line.split(":");
-				if (split[0].equals("Event")) {
-					createEvent(split);
-				} else if (split[0].equals("Task")) {
-					createTask(split, false);
-				} else if (split[0].equals("RepeatingTask")) {
-					createTask(split, true);
-				} else if (split[0].equals("World")) {
-					World world = null;
-					if (MineQuest.getSServer().getWorld(split[1]) == null) {
-						if ((split.length == 2) || (split[2].equals("NORMAL"))) {
-							world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
-						} else {
-							world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+			try {
+				while ((line = bis.readLine()) != null) {
+					number++;
+					String split[] = line.split(":");
+					if (split[0].equals("Event")) {
+						createEvent(split);
+					} else if (split[0].equals("Task")) {
+						createTask(split, false);
+					} else if (split[0].equals("RepeatingTask")) {
+						createTask(split, true);
+					} else if (split[0].equals("World")) {
+						World world = null;
+						if (MineQuest.getSServer().getWorld(split[1]) == null) {
+							if ((split.length == 2) || (split[2].equals("NORMAL"))) {
+								world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+							} else {
+								world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+							}
 						}
-					}
-					
-					teleport(party.getQuesterArray(), world);
-				} else if (split[0].equals("LoadWorld")) {
-					deleteDir(new File(split[1]));
-					copyDirectory(new File(split[2]), new File(split[1]));
-					world = null;
-					if (MineQuest.getSServer().getWorld(split[1]) == null) {
-						if ((split.length == 3) || (split[3].equals("NORMAL"))) {
-							world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
-						} else {
-							world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+						
+						teleport(party.getQuesterArray(), world);
+					} else if (split[0].equals("LoadWorld")) {
+						deleteDir(new File(split[1]));
+						copyDirectory(new File(split[2]), new File(split[1]));
+						world = null;
+						if (MineQuest.getSServer().getWorld(split[1]) == null) {
+							if ((split.length == 3) || (split[3].equals("NORMAL"))) {
+								world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+							} else {
+								world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+							}
 						}
+					} else if (split[0].equals("Spawn")) {
+						MineQuest.log("Loaded Spawn");
+						double x = Double.parseDouble(split[1]);
+						double y = Double.parseDouble(split[2]);
+						double z = Double.parseDouble(split[3]);
+						this.spawn = new Location(world, x, y, z);
 					}
-				} else if (split[0].equals("Spawn")) {
-					MineQuest.log("Loaded Spawn");
-					double x = Double.parseDouble(split[1]);
-					double y = Double.parseDouble(split[2]);
-					double z = Double.parseDouble(split[3]);
-					this.spawn = new Location(world, x, y, z);
 				}
+			} catch (Exception e) {
+				MineQuest.log("Unable to load Quest Problem on Line " + number);
+				MineQuest.log("  " + line);
+				try {
+					issueNextEvents(-1);
+				} catch (Exception e1) {
+					MineQuest.log("Unable to unload events properly");
+				}
+				return;
 			}
 			if (spawn == null) {
 				MineQuest.log("No Spawn Found");
@@ -193,7 +206,7 @@ public class Quest {
 		}
 	}
 
-	public void createTask(String line[], boolean repeating) {
+	public void createTask(String line[], boolean repeating) throws Exception {
 		int id = Integer.parseInt(line[1]);
 		Event[] events;
 		if (line.length == 3) {
@@ -201,6 +214,10 @@ public class Quest {
 			int i = 0;
 			
 			for (String event : line[2].split(",")) {
+				if (getEvent(Integer.parseInt(event)) == null) {
+					MineQuest.log("Problem Getting Event: " + event);
+					throw new Exception();
+				}
 				events[i++] = getEvent(Integer.parseInt(event));
 			}
 		} else {
@@ -216,9 +233,10 @@ public class Quest {
 		}
 	}
 	
-	public void createEvent(String line[]) {
+	public void createEvent(String line[]) throws Exception {
 		int id = Integer.parseInt(line[1]);
 		String type = line[2];
+		Event new_event;
 		LivingEntity entities[] = new LivingEntity[questers.length];
 		int i = 0;
 		for (Quester quester : questers) {
@@ -231,18 +249,18 @@ public class Quest {
 			
 			Location loc = new Location(world, Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
 			int radius = Integer.parseInt(line[8]);
-			events.add(new AreaEvent(this, delay, index, party, loc, radius));
+			new_event = new AreaEvent(this, delay, index, party, loc, radius);
 		} else if (type.equals("SingleAreaEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
 			
 			Location loc = new Location(world, Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
 			int radius = Integer.parseInt(line[8]);
-			events.add(new SingleAreaEvent(this, delay, index, party, loc, radius));
+			new_event = new SingleAreaEvent(this, delay, index, party, loc, radius);
 		} else if (type.equals("MessageEvent")) {
 			int delay = Integer.parseInt(line[3]);
 
-			events.add(new MessageEvent(delay, party, line[4]));
+			new_event = new MessageEvent(delay, party, line[4]);
 		} else if (type.equals("BlockEvent")) {
 			int delay = Integer.parseInt(line[3]);
 
@@ -250,12 +268,12 @@ public class Quest {
 			
 			int mat = Integer.parseInt(line[7]);
 			
-			events.add(new BlockEvent(delay, block, Material.getMaterial(mat)));
+			new_event = new BlockEvent(delay, block, Material.getMaterial(mat));
 		} else if (type.equals("QuestEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
 			
-			events.add(new QuestEvent(this, delay, index));
+			new_event = new QuestEvent(this, delay, index);
 		} else if (type.equals("EntitySpawnerEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			String creature = line[7];
@@ -266,7 +284,7 @@ public class Quest {
 			} else {
 				superm = true;
 			}
-			events.add(new EntitySpawnerEvent(delay, location, CreatureType.fromName(creature), superm));
+			new_event = new EntitySpawnerEvent(delay, location, CreatureType.fromName(creature), superm);
 		} else if (type.equals("EntitySpawnerNoMove")) {
 			int delay = Integer.parseInt(line[3]);
 			String creature = line[7];
@@ -277,26 +295,34 @@ public class Quest {
 			} else {
 				superm = true;
 			}
-			events.add(new EntitySpawnerNoMove(delay, location, CreatureType.fromName(creature), superm));			
+			new_event = new EntitySpawnerNoMove(delay, location, CreatureType.fromName(creature), superm);			
 		} else if (type.equals("EntitySpawnerCompleteNMEvent")) {
 			long delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
 			i = 0;
 			EntitySpawnerEvent[] eventss = new EntitySpawnerEvent[line[5].split(",").length];
 			for (String s : line[5].split(",")) {
+				if (getEvent(Integer.parseInt(s)) == null) {
+					MineQuest.log("Cannot Find Event: " + Integer.parseInt(s));
+					throw new Exception();
+				}
 				eventss[i++] = (EntitySpawnerEvent)getEvent(Integer.parseInt(s));
 			}
 
-			events.add(new EntitySpawnerCompleteNMEvent(this, delay, index, eventss));
+			new_event = new EntitySpawnerCompleteNMEvent(this, delay, index, eventss);
 		} else if (type.equals("EntitySpawnerCompleteEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			i = 0;
 			EntitySpawnerEvent[] eventss = new EntitySpawnerEvent[line[4].split(",").length];
 			for (String s : line[5].split(",")) {
+				if (getEvent(Integer.parseInt(s)) == null) {
+					MineQuest.log("Cannot Find Event: " + Integer.parseInt(s));
+					throw new Exception();
+				}
 				eventss[i++] = (EntitySpawnerEvent)getEvent(Integer.parseInt(s));
 			}
 
-			events.add(new EntitySpawnerCompleteEvent(delay, eventss));
+			new_event = new EntitySpawnerCompleteEvent(delay, eventss);
 		} else if (type.equals("ExperienceAdd")) {
 			long delay = Integer.parseInt(line[3]);
 			int exp = Integer.parseInt(line[5]);
@@ -305,13 +331,13 @@ public class Quest {
 				MineQuest.log("Warning: Options other than all are not supported for ExperienceAdd");
 			}
 			
-			events.add(new ExperienceAdd(delay, party, exp, class_exp));
+			new_event = new ExperienceAdd(delay, party, exp, class_exp);
 		} else if (type.equals("LockWorldTime")) {
 			long delay = Integer.parseInt(line[3]);
 			long time = Integer.parseInt(line[5]);
 			long time_2 = Integer.parseInt(line[6]);
 			
-			events.add(new LockWorldTime(delay, world, time, time_2));
+			new_event = new LockWorldTime(delay, world, time, time_2);
 		} else if (type.equals("BlockCDEvent")) {
 			long delay = Integer.parseInt(line[3]);
 			long second_delay = Integer.parseInt(line[4]);
@@ -320,7 +346,7 @@ public class Quest {
 			Block block = world.getBlockAt(location);
 			int idd = Integer.parseInt(line[8]);
 			
-			events.add(new BlockCDEvent(delay, second_delay, block, Material.getMaterial(idd)));
+			new_event = new BlockCDEvent(delay, second_delay, block, Material.getMaterial(idd));
 		} else if (type.equals("BlockDCEvent")) {
 			long delay = Integer.parseInt(line[3]);
 			long second_delay = Integer.parseInt(line[4]);
@@ -329,7 +355,7 @@ public class Quest {
 			Block block = world.getBlockAt(location);
 			int idd = Integer.parseInt(line[8]);
 			
-			events.add(new BlockDCEvent(delay, second_delay, block, Material.getMaterial(idd)));
+			new_event = new BlockDCEvent(delay, second_delay, block, Material.getMaterial(idd));
 		} else if (type.equals("ArrowEvent")) {
 			long delay = Integer.parseInt(line[3]);
 			Location start = new Location(world,
@@ -343,7 +369,7 @@ public class Quest {
 					Double.parseDouble(line[9])
 					);
 			
-			events.add(new ArrowEvent(delay, start, vector));
+			new_event = new ArrowEvent(delay, start, vector);
 		} else if (type.equals("CanEdit")) {
 			Location new_loc = new Location(world,
 					Integer.parseInt(line[3]),
@@ -370,24 +396,38 @@ public class Quest {
 			long delay = Integer.parseInt(line[3]);
 			double percent = Double.parseDouble(line[4]);
 			
-			events.add(new PartyHealthEvent(delay, party, percent));
+			new_event = new PartyHealthEvent(delay, party, percent);
 		} else if (type.equals("HealthEntitySpawn")) {
-			long delay = Integer.parseInt(line[3]);
-			int task = Integer.parseInt(line[4]);
-			Location location = new Location(world,
-					Double.parseDouble(line[5]),
-					Double.parseDouble(line[6]),
-					Double.parseDouble(line[7])
-					);
-			int health = Integer.parseInt(line[9]);
-			
-			
-			events.add(new HealthEntitySpawn(this, delay, task, location, CreatureType.fromName(line[8]), health));
+			long delay;
+			int task;
+			Location location;
+			int health;
+			CreatureType creature;
+			try {
+				creature = CreatureType.fromName(line[8]);
+				delay = Integer.parseInt(line[3]);
+				task = Integer.parseInt(line[4]);
+				location = new Location(world,
+						Double.parseDouble(line[5]),
+						Double.parseDouble(line[6]),
+						Double.parseDouble(line[7])
+						);
+				health = Integer.parseInt(line[9]);
+			} catch (Exception e2) {
+				MineQuest.log("Problem getting HealthEntitySpawner Parameters");
+				throw new Exception();
+			}
+			 
+			new_event = new HealthEntitySpawn(this, delay, task, location, creature, health);
+		} else {
+			MineQuest.log("Unknown Event Type: " + type);
+			throw new Exception();
 		}
 		
 		
 //		MineQuest.log("Added " + events.get(events.size() - 1).getName());
-		events.get(events.size() - 1).setId(id);
+		new_event.setId(id);
+		events.add(new_event);
 	}
 	
 	private Event getEvent(int id) {
@@ -405,6 +445,10 @@ public class Quest {
 			for (Quester quester : questers) {
 				quester.clearQuest();
 			}
+			
+			for (QuestTask task : tasks) {
+				task.clearEvents();
+			}
 			return;
 		} else if (index <= -2) {
 			return;
@@ -417,13 +461,13 @@ public class Quest {
 		}
 	}
 
-	public boolean canEdit(Quester quester, org.bukkit.event.block.BlockEvent event) {
+	public boolean canEdit(Quester quester, Block block) {
 		int i;
 		for (i = 0; i < exceptions.length; i++) {
 			if (quester.isDebug()) {
 				quester.sendMessage("Checking Trigger " + triggers[i]);
 			}
-			if (equals(event.getBlock().getLocation(), exceptions[i])) {
+			if (equals(block.getLocation(), exceptions[i])) {
 				if (triggers[i] >= -1) {
 					issueNextEvents(triggers[i]);
 				}

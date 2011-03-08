@@ -23,18 +23,31 @@ public class HealthEntitySpawn extends QuestEvent {
 	
 	@Override
 	public void activate(EventParser eventParser) {
+		MineQuest.log(getName() + " activate");
 		if (entity == null) {
 			entity = location.getWorld().spawnCreature(location, creatureType);
-			MineQuest.setMQMob(new HealthMob(entity, health));
+			if (entity != null) {
+				MineQuest.setMQMob(new HealthMob(entity, health));
+			} else {
+				MineQuest.log("Unable to create Health Entity");
+				eventParser.setComplete(true);
+			}
 			
 			return;
 		}
 		entity.teleportTo(location);
 		
-		eventParser.setComplete(!(entity.getHealth() > 0));
+		eventParser.setComplete(false);
 		if (!(entity.getHealth() > 0)) {
+			MineQuest.log("Health is " + entity.getHealth());
 			eventComplete();
+			eventParser.setComplete(true);
 		}
+	}
+	
+	@Override
+	public String getName() {
+		return "Health Entity Spawner";
 	}
 
 }

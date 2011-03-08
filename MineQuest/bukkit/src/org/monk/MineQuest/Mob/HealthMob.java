@@ -1,6 +1,7 @@
 package org.monk.MineQuest.Mob;
 
 import org.bukkit.entity.LivingEntity;
+import org.monk.MineQuest.MineQuest;
 
 public class HealthMob extends MQMob {
 	protected int health;
@@ -25,6 +26,7 @@ public class HealthMob extends MQMob {
 	    if (health > max_health) {
 	    	health = max_health;
 	    }
+	    MineQuest.log("Health Entity Health " + health);
         if (entity.getHealth() >= newHealth) {
         	return entity.getHealth() - newHealth;
         } else {
@@ -56,5 +58,15 @@ public class HealthMob extends MQMob {
 		}
 		
 		entity.setHealth(newValue);
+	    MineQuest.log("Health Entity Health " + health);
+	}
+
+	public int getHealth() {
+		return health;
+	}
+
+	public void setHealth(int i) {
+		health = i;
+		updateHealth();
 	}
 }
