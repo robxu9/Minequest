@@ -180,3 +180,16 @@ Heals questers in a radius of 15 around the caster by the Caster Level / 4 hit p
 || Mass Teleport || 80 || Sign + Mossy Cobblestone ||
 || Explode Creepers || 15 || Gunpowder ||
 || Transmute || 30 || Gold ||
+
+== Resource Abilities ==
+
+=== Coming Soon ===
+|| Class || Spell || Level || Components ||
+|| Miner || Bridge || 10 || ||
+|| Miner || Lava To Water || 30 || ||
+|| Farmer || Grow Wheat || 30 || ||
+|| Farmer || Purge Animals || 10 || ||
+|| Lumberjack || Grow Trees || 30 || ||
+|| Lumberjack || Harvest Leaves || 10 || ||
+|| Digger || Tower of Sand || 10 || ||
+|| Digger || Enhanced Flint || 30 || ||
