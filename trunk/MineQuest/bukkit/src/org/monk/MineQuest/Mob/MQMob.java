@@ -21,6 +21,9 @@ public class MQMob {
 	public double dodgeChance() {
 		return .01;
 	}
+	
+	public void cancel() {
+	}
 
 	public void dropLoot() {
 	}
