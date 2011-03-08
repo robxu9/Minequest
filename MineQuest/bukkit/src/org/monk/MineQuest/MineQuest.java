@@ -641,17 +641,18 @@ public class MineQuest extends JavaPlugin {
 		
 		return questers;
 	}
-	public static void setMQMob(MQMob specialMob) {
+	public static void setMQMob(MQMob newMob) {
 		int i;
 		
 		for (i = 0; i < mobs.length; i++) {
 			if (mobs[i] != null) {
-				if (mobs[i].getId() == specialMob.getId()) {
-					mobs[i] = specialMob;
+				if (mobs[i].getId() == newMob.getId()) {
+					mobs[i].cancel();
+					mobs[i] = newMob;
 				}
 			}
 		}
 		
-		addMQMob(specialMob);
+		addMQMob(newMob);
 	}
 }

@@ -20,15 +20,16 @@ import org.monk.MineQuest.Event.SpecialMobHandler;
 import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
 
 public class SpecialMob extends MQMob {
-	private boolean half;
+	protected boolean half;
 	protected Random generator;
+	protected int id;
 
 	public SpecialMob(Monster entity) {
 		super(entity);
 		half = false;
 		generator = new Random();
 		
-		MineQuest.getEventParser().addEvent(new SpecialMobHandler(1, this));
+		id = MineQuest.getEventParser().addEvent(new SpecialMobHandler(1, this));
 	}
 
 	@Override
@@ -48,6 +49,11 @@ public class SpecialMob extends MQMob {
 			entity.getWorld().dropItemNaturally(entity.getLocation(), new ItemStack(46));
 		}
 
+	}
+	
+	@Override
+	public void cancel() {
+		MineQuest.getEventParser().cancel(id);
 	}
 
 	@Override
