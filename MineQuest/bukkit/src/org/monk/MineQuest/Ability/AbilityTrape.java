@@ -14,9 +14,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityTrape extends Ability {
 
-	public AbilityTrape(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityTrape(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override
@@ -57,7 +56,7 @@ public class AbilityTrape extends Ability {
 		int x, y, z;
 		if (entity == null) {
 			giveManaCost(player);
-			player.sendMessage(name + " must be used on a living entity");
+			player.sendMessage(getName() + " must be used on a living entity");
 			return;
 		}
 		World world = entity.getWorld();

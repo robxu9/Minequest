@@ -13,9 +13,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityDamageAura extends Ability {
 
-	public AbilityDamageAura(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityDamageAura(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

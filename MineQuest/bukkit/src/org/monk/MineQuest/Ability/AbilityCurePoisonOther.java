@@ -13,9 +13,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityCurePoisonOther extends Ability {
 
-	public AbilityCurePoisonOther(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityCurePoisonOther(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override
@@ -62,7 +61,7 @@ public class AbilityCurePoisonOther extends Ability {
 			}
 		} else {
 			giveManaCost(player);
-			player.sendMessage(name + " must be cast on another player");
+			player.sendMessage(getName() + " must be cast on another player");
 		}
 	}
 

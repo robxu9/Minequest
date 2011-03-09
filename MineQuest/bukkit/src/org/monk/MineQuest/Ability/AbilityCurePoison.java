@@ -12,9 +12,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityCurePoison extends Ability {
 
-	public AbilityCurePoison(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityCurePoison(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

@@ -12,9 +12,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityFireChain extends Ability {
 
-	public AbilityFireChain(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityFireChain(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

@@ -13,8 +13,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityDodge extends Ability implements PassiveAbility {
 
-	public AbilityDodge(String name, SkillClass myclass) {
-		super(name, myclass);
+	public AbilityDodge(SkillClass myclass) {
+		super(myclass);
 		enabled = false;
 	}
 	

@@ -8,9 +8,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityFireResistance extends Ability implements PassiveAbility {
 
-	public AbilityFireResistance(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityFireResistance(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

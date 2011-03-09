@@ -13,7 +13,7 @@ public class AbilityBinder extends Ability {
 	private int bind_to;
 
 	public AbilityBinder(SkillClass myclass, String ability, int bind) {
-		super("Should not Matter", myclass);
+		super(myclass);
 		this.ability = ability;
 		this.bind_to = bind;
 	}

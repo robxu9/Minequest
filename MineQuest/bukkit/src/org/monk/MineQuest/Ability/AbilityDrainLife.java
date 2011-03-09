@@ -13,9 +13,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityDrainLife extends Ability{
 
-	public AbilityDrainLife(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityDrainLife(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

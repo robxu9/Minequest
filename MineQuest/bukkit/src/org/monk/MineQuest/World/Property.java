@@ -7,17 +7,18 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Property {
 	private int x, max_x;
 	private int z, max_z;
 	private int height, y;
-	private Quester owner;
+	private String owner;
 	private List<Quester> editors;
 	private long price;
 	
-	public Property(Quester owner, Location start, Location end, boolean height, long price) {
+	public Property(String owner, Location start, Location end, boolean height, long price) {
 		if (start.getX() < end.getX()) {
 			x = (int)start.getX();
 			max_x = (int)end.getX();
@@ -83,11 +84,11 @@ public class Property {
 	
 	
 	public Quester getOwner() {
-		return owner;
+		return MineQuest.getQuester(owner);
 	}
 	
 	public void setOwner(Quester quester) {
-		owner = quester;
+		owner = quester.getName();
 	}
 	
 	public boolean canEdit(Quester quester) {

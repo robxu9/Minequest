@@ -13,8 +13,8 @@ import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
 
 public class AbilitySprint extends Ability {
 
-	public AbilitySprint(String name, SkillClass myclass) {
-		super(name, myclass);
+	public AbilitySprint(SkillClass myclass) {
+		super(myclass);
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -46,7 +46,7 @@ public class AbilitySprint extends Ability {
 			LivingEntity entity) {
 		Player player = quester.getPlayer();
 		
-		player.sendMessage("Casting " + name);
+		player.sendMessage("Casting " + getName());
 		Location loc = player.getLocation();
 		double rot = loc.getYaw() % 360 - 90;
 		while (rot < 0) rot += 360;

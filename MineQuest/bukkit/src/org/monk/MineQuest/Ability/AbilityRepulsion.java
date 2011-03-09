@@ -11,9 +11,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityRepulsion extends Ability {
 
-	public AbilityRepulsion(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityRepulsion(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

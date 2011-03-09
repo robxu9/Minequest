@@ -17,8 +17,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityWallofFire extends Ability {
 
-	public AbilityWallofFire(String name, SkillClass myclass) {
-		super(name, myclass);
+	public AbilityWallofFire(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

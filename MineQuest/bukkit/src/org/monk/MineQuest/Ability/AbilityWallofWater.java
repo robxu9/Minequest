@@ -17,9 +17,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityWallofWater extends Ability {
 
-	public AbilityWallofWater(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityWallofWater(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override
