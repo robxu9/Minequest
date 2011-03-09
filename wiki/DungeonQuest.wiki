@@ -102,7 +102,7 @@ Event:60:BlockEvent:10:54:67:56:0
 Event:61:BlockEvent:10:54:68:56:0
 
 #enter the big room
-Event:64:SingleAreaEvent:10:12:54:69:60:2
+Event:64:SingleAreaEvent:10:12:54:71:60:2
 #open the door
 Event:65:CanEdit:56:70:60:12
 Event:66:CanEdit:56:71:60:12
