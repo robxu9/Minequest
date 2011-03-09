@@ -70,7 +70,7 @@ public class SpecialMob extends MQMob {
 		} else if (entity instanceof Skeleton) {
 			double num = generator.nextDouble();
 			WarMage warmage = new WarMage();
-			List<Ability> abilities = Ability.newAbilities("", warmage);
+			List<Ability> abilities = Ability.newAbilities(warmage);
 			int index = (int)(num * abilities.size());
 			
 			abilities.get(index).castAbility(null, player.getLocation(), player);

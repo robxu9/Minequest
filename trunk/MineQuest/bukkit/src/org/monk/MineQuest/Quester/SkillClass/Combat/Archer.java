@@ -10,7 +10,10 @@ public class Archer extends CombatClass {
 
 	public Archer(Quester quester, String type) {
 		super(quester, type);
-		// TODO Auto-generated constructor stub
+	}
+
+	public Archer() {
+		// Shell
 	}
 
 	@Override

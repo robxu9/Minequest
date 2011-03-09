@@ -1,5 +1,8 @@
 package org.monk.MineQuest.Ability;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -12,10 +15,13 @@ public class AbilityBinder extends Ability {
 	private String ability;
 	private int bind_to;
 
-	public AbilityBinder(SkillClass myclass, String ability, int bind) {
-		super(myclass);
+	public AbilityBinder(String ability, int bind) {
 		this.ability = ability;
 		this.bind_to = bind;
+	}
+	
+	public AbilityBinder() {
+		// Shell
 	}
 	
 	@Override
@@ -48,5 +54,22 @@ public class AbilityBinder extends Ability {
 	@Override
 	public void silentBind(Quester quester, ItemStack itemStack) {
 		bind = itemStack.getTypeId();
+	}
+
+	@Override
+	public void castAbility(Quester quester, Location location,
+			LivingEntity entity) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public SkillClass getClassType() {
+		return null;
+	}
+
+	@Override
+	public List<ItemStack> getManaCost() {
+		return new ArrayList<ItemStack>();
 	}
 }

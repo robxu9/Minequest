@@ -12,6 +12,10 @@ public class PeaceMage extends CombatClass {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public PeaceMage() {
+		// Shell
+	}
+
 	@Override
 	public int[] getClassArmorIds() {
 		int item_ids[] = new int[4];

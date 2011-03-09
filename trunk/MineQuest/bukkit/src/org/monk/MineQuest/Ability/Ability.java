@@ -18,9 +18,14 @@ package org.monk.MineQuest.Ability;
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+import java.io.FileInputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,11 +41,6 @@ import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
-import org.monk.MineQuest.Quester.SkillClass.Combat.Archer;
-import org.monk.MineQuest.Quester.SkillClass.Combat.PeaceMage;
-import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
-import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
-import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
 
 /**
  * This is the base class for all abilities in MineQuest.
@@ -48,7 +48,7 @@ import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
  * @author jmonk
  *
  */
-public class Ability {
+public abstract class Ability {
 	/**
 	 * Creates an instance of the proper ability based on name
 	 * and returns it as an Ability.
@@ -58,59 +58,92 @@ public class Ability {
 	 * @return new Ability created
 	 */
 	static public Ability newAbility(String name, SkillClass myclass) {
-		for (Ability ability : newAbilities(name, myclass)) {
+		for (Ability ability : newAbilities(myclass)) {
 			if (name.equalsIgnoreCase(ability.getName())) {
 				return ability;
 			}
 		}
 		MineQuest.log("Warning: Could not find ability " + name);
 		
-		return new Ability(myclass);
+		return null;
 	}
 	
-	static public List<Ability> newAbilities(String name, SkillClass myclass) {
+	@SuppressWarnings("unchecked")
+	static public List<Ability> newAbilities(SkillClass myclass) {
+		List<String> classes = new ArrayList<String>();
 		List<Ability> abilities = new ArrayList<Ability>();
 		
-		if ((myclass == null) || (myclass instanceof Warrior)) {
-			abilities.add(new AbilityPowerstrike(myclass));
-			abilities.add(new AbilityDodge(myclass));
-			abilities.add(new AbilityDeathblow(myclass));
-			abilities.add(new AbilitySprint(myclass));
-		} 
-		if ((myclass == null) || (myclass instanceof Archer)) {
-			abilities.add(new AbilityDodge(myclass));
-			abilities.add(new AbilitySprint(myclass));
-			abilities.add(new AbilityFireArrow(myclass));
-			abilities.add(new AbilityRepulsion(myclass));
-			abilities.add(new AbilityHailofArrows(myclass));
-		} 
-		if ((myclass == null) || (myclass instanceof WarMage)) {
-			abilities.add(new AbilityFireball(myclass));
-			abilities.add(new AbilityWallofFire(myclass));
-			abilities.add(new AbilityFireChain(myclass));
-			abilities.add(new AbilityFireResistance(myclass));
-			abilities.add(new AbilityDrainLife(myclass));
-			abilities.add(new AbilityIceSphere(myclass));
-			abilities.add(new AbilityTrap(myclass));
+		try {
+			classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
+		} catch (Exception e) {
+			MineQuest.log("Unable to get Abilities");
 		}
-		if ((myclass == null) || (myclass instanceof PeaceMage)) {
-			abilities.add(new AbilityHeal(myclass));
-			abilities.add(new AbilityHealOther(myclass));
-			abilities.add(new AbilityHealAura(myclass));
-			abilities.add(new AbilityDamageAura(myclass));
-			abilities.add(new AbilityCurePoison(myclass));
-			abilities.add(new AbilityCurePoisonOther(myclass));
-			abilities.add(new AbilityTrape(myclass));
-			abilities.add(new AbilityWallofWater(myclass));
+		for (String this_class : classes) {
+			try {
+				Ability ability = (Ability)getClass(this_class).newInstance();
+				
+				ability.setSkillClass(myclass);
+				
+				if (myclass == null) {
+					abilities.add(ability);
+				} else if (myclass.getClass().equals(ability.getClassType().getClass())) {
+					abilities.add(ability);
+				}
+			} catch (Exception e) {
+				MineQuest.log("Could not load Ability: " + this_class);
+			}
 		}
-		if ((myclass == null) || (myclass instanceof Miner)) {
-			abilities.add(new AbilityLavaToWater(myclass));
-		}
-		
+
 		return abilities;
 	}
 	
+	//following code came from http://snippets.dzone.com/posts/show/4831
+	@SuppressWarnings("unchecked")
+	public static List getClasseNamesInPackage(String jarName,
+			String packageName) {
+		boolean debug = false;
+		ArrayList classes = new ArrayList();
+
+		packageName = packageName.replaceAll("\\.", "/");
+		if (debug)
+			System.out
+					.println("Jar " + jarName + " looking for " + packageName);
+		try {
+			JarInputStream jarFile = new JarInputStream(new FileInputStream(
+					jarName));
+			JarEntry jarEntry;
+
+			while (true) {
+				jarEntry = jarFile.getNextJarEntry();
+				if (jarEntry == null) {
+					break;
+				}
+				if ((jarEntry.getName().startsWith(packageName))
+						&& (jarEntry.getName().endsWith(".class"))) {
+					if (debug)
+						System.out.println("Found "
+								+ jarEntry.getName().replaceAll("/", "\\."));
+					classes.add(jarEntry.getName().replaceAll("/", "\\."));
+				}
+			}
+		} catch (Exception e) {
+			MineQuest.log("Couldn't get Classes");
+		}
+		return classes;
+	}
 	
+	// http://www.devx.com/tips/Tip/38975
+	@SuppressWarnings("unchecked")
+	public static Class getClass(String the_class) throws Exception {
+		URL url = new URL("file:abilities.jar");
+		URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+		return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
+//		JarClassLoader classloader = new JarClassLoader();
+//		classloader.addJarFile("abilities.jar");
+//		classloader.setJarClassLoader(classloader);
+//		MineQuest.log(the_class.replaceAll(".class", ""));
+//		return Class.forName(the_class.replaceAll(".class", ""), true, classloader);
+	}
 	
 	public int getReqLevel() {
 		return 0;
@@ -159,16 +192,19 @@ public class Ability {
 	 * @param name Name of Ability
 	 * @param myclass SkillClass that holds Ability
 	 */
-	public Ability(SkillClass myclass) {
+	public Ability() {
 		Calendar now = Calendar.getInstance();
 		enabled = true;
 		if (this instanceof PassiveAbility) enabled = false;
-		this.myclass = myclass;
 		count = 0;
 		cast_time = getCastTime();
 		bind = -1;
 		time = now.getTimeInMillis();
 		last_msg = 0;
+	}
+	
+	public void setSkillClass(SkillClass skillclass) {
+		this.myclass = skillclass;
 	}
 	
 	public void notify(Quester quester, String message) {
@@ -244,6 +280,8 @@ public class Ability {
 		return 0;
 	}
 	
+	public abstract SkillClass getClassType();
+	
 	/**
 	 * Gets the distance between a Player and the entity.
 	 * 
@@ -296,20 +334,14 @@ public class Ability {
 	 * 
 	 * @return
 	 */
-	public List<ItemStack> getManaCost() {
-		List<ItemStack> list = new ArrayList<ItemStack>();
-
-		return list;
-	}
+	public abstract List<ItemStack> getManaCost();
 	
 	/**
 	 * Get the name of the Ability
 	 * 
 	 * @return
 	 */
-	public String getName() {
-		return "Generic Blank Ability";
-	}
+	public abstract String getName();
 	
 	/**
 	 * Gets a random entity within the radius of the entity
@@ -563,11 +595,9 @@ public class Ability {
 	 * @param location Location of Target
 	 * @param entity Target
 	 */
-	public void castAbility(Quester quester, Location location,
-			LivingEntity entity) {
-		MineQuest.log("Warning: Generic Cast Called");
-	}
-
+	public abstract void castAbility(Quester quester, Location location,
+			LivingEntity entity);
+	
 	public void silentBind(Quester quester, ItemStack itemStack) {
 		bind = itemStack.getTypeId();
 	}
