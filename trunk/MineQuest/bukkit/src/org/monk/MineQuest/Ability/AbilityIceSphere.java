@@ -15,9 +15,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityIceSphere extends Ability {
 
-	public AbilityIceSphere(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityIceSphere(SkillClass myclass) {
+		super(myclass);
 	}
 
 	@Override

@@ -35,9 +35,8 @@ public class Town {
 						(double)results.getInt("y"), (double)results.getInt("z"));
 				Location end = new Location(world, (double)results.getInt("max_x"), 
 						(double)results.getInt("y") + height, (double)results.getInt("max_z"));
-				Quester owner = MineQuest.getQuester(results.getString("owner"));
 				
-				town = new Property(owner, start, end, height > 0, 0);
+				town = new Property(results.getString("owner"), start, end, height > 0, 0);
 				center_x = town.getCenterX();
 				center_z = town.getCenterZ();
 				spawn = new Location(world, 
@@ -63,9 +62,8 @@ public class Town {
 					
 					stores.add(new Store(store, start, end));
 				} else {
-					Quester owner = MineQuest.getQuester(results.getString("name"));
 					
-					properties.add(new Property(owner, start, end, height > 0, results.getLong("price")));
+					properties.add(new Property(results.getString("name"), start, end, height > 0, results.getLong("price")));
 				}
 			}
 		} catch (SQLException e) {
@@ -97,7 +95,7 @@ public class Town {
 	
 	private void checkMob(Monster livingEntity) {
 		if (inTown(livingEntity.getLocation())) {
-			livingEntity.teleportTo(town.getEdge(livingEntity.getLocation()));
+			livingEntity.setHealth(0);
 		}
 	}
 
@@ -272,8 +270,9 @@ public class Town {
 
 	public void setOwner(String string) {
 		if (MineQuest.getQuester(string) != null) {
-			MineQuest.getSQLServer().update("UPDATE town SET owner='" + string + "' WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("UPDATE towns SET owner='" + string + "' WHERE name='" + name + "'");
 		}
+		town.setOwner(MineQuest.getQuester(string));
 	}
 
 	public void setPrice(Player player, long price) {

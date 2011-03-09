@@ -8,8 +8,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityDeathblow extends Ability implements PassiveAbility {
 
-	public AbilityDeathblow(String name, SkillClass myclass) {
-		super(name, myclass);
+	public AbilityDeathblow(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

@@ -54,7 +54,7 @@ public class MineQuestEntityListener extends EntityListener {
 		
 		if (event.getEntity() instanceof Player) {
 			MineQuest.getQuester((Player)event.getEntity()).defend(event);
-		} else if (MineQuest.getMob((LivingEntity)event.getEntity()) != null) {
+		} else if ((event.getEntity() instanceof LivingEntity) && MineQuest.getMob((LivingEntity)event.getEntity()) != null) {
 			MineQuest.getMob((LivingEntity)event.getEntity()).damage(event.getDamage());
         }
 	}

@@ -65,46 +65,46 @@ public class Ability {
 		}
 		MineQuest.log("Warning: Could not find ability " + name);
 		
-		return new Ability(name, myclass);
+		return new Ability(myclass);
 	}
 	
 	static public List<Ability> newAbilities(String name, SkillClass myclass) {
 		List<Ability> abilities = new ArrayList<Ability>();
 		
 		if ((myclass == null) || (myclass instanceof Warrior)) {
-			abilities.add(new AbilityPowerstrike(name, myclass));
-			abilities.add(new AbilityDodge(name, myclass));
-			abilities.add(new AbilityDeathblow(name, myclass));
-			abilities.add(new AbilitySprint(name, myclass));
+			abilities.add(new AbilityPowerstrike(myclass));
+			abilities.add(new AbilityDodge(myclass));
+			abilities.add(new AbilityDeathblow(myclass));
+			abilities.add(new AbilitySprint(myclass));
 		} 
 		if ((myclass == null) || (myclass instanceof Archer)) {
-			abilities.add(new AbilityDodge(name, myclass));
-			abilities.add(new AbilitySprint(name, myclass));
-			abilities.add(new AbilityFireArrow(name, myclass));
-			abilities.add(new AbilityRepulsion(name, myclass));
-			abilities.add(new AbilityHailofArrows(name, myclass));
+			abilities.add(new AbilityDodge(myclass));
+			abilities.add(new AbilitySprint(myclass));
+			abilities.add(new AbilityFireArrow(myclass));
+			abilities.add(new AbilityRepulsion(myclass));
+			abilities.add(new AbilityHailofArrows(myclass));
 		} 
 		if ((myclass == null) || (myclass instanceof WarMage)) {
-			abilities.add(new AbilityFireball(name, myclass));
-			abilities.add(new AbilityWallofFire(name, myclass));
-			abilities.add(new AbilityFireChain(name, myclass));
-			abilities.add(new AbilityFireResistance(name, myclass));
-			abilities.add(new AbilityDrainLife(name, myclass));
-			abilities.add(new AbilityIceSphere(name, myclass));
-			abilities.add(new AbilityTrap(name, myclass));
+			abilities.add(new AbilityFireball(myclass));
+			abilities.add(new AbilityWallofFire(myclass));
+			abilities.add(new AbilityFireChain(myclass));
+			abilities.add(new AbilityFireResistance(myclass));
+			abilities.add(new AbilityDrainLife(myclass));
+			abilities.add(new AbilityIceSphere(myclass));
+			abilities.add(new AbilityTrap(myclass));
 		}
 		if ((myclass == null) || (myclass instanceof PeaceMage)) {
-			abilities.add(new AbilityHeal(name, myclass));
-			abilities.add(new AbilityHealOther(name, myclass));
-			abilities.add(new AbilityHealAura(name, myclass));
-			abilities.add(new AbilityDamageAura(name, myclass));
-			abilities.add(new AbilityCurePoison(name, myclass));
-			abilities.add(new AbilityCurePoisonOther(name, myclass));
-			abilities.add(new AbilityTrape(name, myclass));
-			abilities.add(new AbilityWallofWater(name, myclass));
+			abilities.add(new AbilityHeal(myclass));
+			abilities.add(new AbilityHealOther(myclass));
+			abilities.add(new AbilityHealAura(myclass));
+			abilities.add(new AbilityDamageAura(myclass));
+			abilities.add(new AbilityCurePoison(myclass));
+			abilities.add(new AbilityCurePoisonOther(myclass));
+			abilities.add(new AbilityTrape(myclass));
+			abilities.add(new AbilityWallofWater(myclass));
 		}
 		if ((myclass == null) || (myclass instanceof Miner)) {
-			abilities.add(new AbilityLavaToWater(name, myclass));
+			abilities.add(new AbilityLavaToWater(myclass));
 		}
 		
 		return abilities;
@@ -150,7 +150,6 @@ public class Ability {
 	protected int count;
 	protected boolean enabled;
 	protected SkillClass myclass;
-	protected String name;
 	protected long time;
 	protected long last_msg;
 	
@@ -160,9 +159,8 @@ public class Ability {
 	 * @param name Name of Ability
 	 * @param myclass SkillClass that holds Ability
 	 */
-	public Ability(String name, SkillClass myclass) {
+	public Ability(SkillClass myclass) {
 		Calendar now = Calendar.getInstance();
-		this.name = name;
 		enabled = true;
 		if (this instanceof PassiveAbility) enabled = false;
 		this.myclass = myclass;
@@ -310,7 +308,7 @@ public class Ability {
 	 * @return
 	 */
 	public String getName() {
-		return name;
+		return "Generic Blank Ability";
 	}
 	
 	/**
@@ -537,7 +535,7 @@ public class Ability {
 		if ((quester == null) || quester.canCast(getManaCost())) {
 			if (canCast() || (player == null)) {
 				if ((player == null) || player.getItemInHand().getTypeId() == bind) {
-					notify(quester, "Casting " + name);
+					notify(quester, "Casting " + getName());
 					castAbility(quester, location, entity);
 					if (myclass != null) {
 						myclass.expAdd(getExp());
@@ -551,7 +549,7 @@ public class Ability {
 			}
 		} else {
 			if (player != null) {
-				notify(quester, "You do not have the materials to cast that - try /spellcomp " + name);
+				notify(quester, "You do not have the materials to cast that - try /spellcomp " + getName());
 			}
 		}
 	}
@@ -567,7 +565,7 @@ public class Ability {
 	 */
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		
+		MineQuest.log("Warning: Generic Cast Called");
 	}
 
 	public void silentBind(Quester quester, ItemStack itemStack) {

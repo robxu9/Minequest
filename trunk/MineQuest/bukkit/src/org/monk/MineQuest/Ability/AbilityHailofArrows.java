@@ -12,9 +12,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityHailofArrows extends Ability {
 
-	public AbilityHailofArrows(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityHailofArrows(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override

@@ -169,7 +169,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			}
 			String abil = split[1];
 			int i;
-			for (i = 2; i < split.length - 1; i++) abil = abil + " " + split[i];
+			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
 			MineQuest.getQuester(player).bind(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/class")) {

@@ -15,9 +15,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityFireball extends Ability {
 
-	public AbilityFireball(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityFireball(SkillClass myclass) {
+		super(myclass);
 	}
 
 	@Override

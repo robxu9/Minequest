@@ -13,9 +13,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 
 public class AbilityPowerstrike extends Ability{
 
-	public AbilityPowerstrike(String name, SkillClass myclass) {
-		super(name, myclass);
-		// TODO Auto-generated constructor stub
+	public AbilityPowerstrike(SkillClass myclass) {
+		super(myclass);
 	}
 	
 	@Override
