@@ -3,6 +3,7 @@ package org.monk.MineQuest.Quester.SkillClass;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Material;
@@ -567,6 +568,31 @@ public class SkillClass {
 		level++;
 		exp -= num * (level);
 		quester.getPlayer().sendMessage("Congratulations on becoming a level " + level + " " + type);
+		
+		fillAbilities();
+	}
+
+	private void fillAbilities() {
+		try {
+			ability_list = abilListSQL(abil_list_id);
+			
+			List<Ability> available = Ability.newAbilities(this);
+			
+			for (Ability ability : available) {
+				if (ability_list.length < 10) {
+					if (getAbility(ability.getName()) == null) {
+						if (level >= ability.getReqLevel()) {
+							addAbility(ability.getName());
+							ability_list = abilListSQL(abil_list_id);
+						}
+					}
+				}
+			}
+			
+		} catch (SQLException e) {
+			
+		}
+		quester.updateBinds();
 	}
 
 	/**
@@ -648,6 +674,32 @@ public class SkillClass {
 				}
 			}
 		}
+	}
+
+	public void replaceAbil(String old, String new_abil) {
+		int i;
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].getName().equals(old)) {
+				break;
+			}
+		}
+		
+		Ability new_ability = Ability.newAbility(new_abil, this);
+		
+		if (new_ability == null) {
+			quester.sendMessage(new_abil + " is not a valid ability");
+			return;
+		}
+		
+		if (level < new_ability.getReqLevel()) {
+			quester.sendMessage("You are not high enough level to cast " + new_abil);
+			return;
+		}
+		
+		ability_list[i] = new_ability;
+		MineQuest.getSQLServer().update("UPDATE abilities SET abil" + i + "='" + new_ability.getName()
+				+ "' WHERE abil_list_id='" + abil_list_id + "'");
+		quester.sendMessage(old + " Ability has been replaced with " + new_ability.getName() + " Ability in your spellbook");
 	}
 	
 
