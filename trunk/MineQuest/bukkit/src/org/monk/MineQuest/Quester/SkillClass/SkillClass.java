@@ -201,6 +201,10 @@ public class SkillClass {
 		}
 	}
 
+	public void callAbility() {
+		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, quester.getPlayer().getLocation(), null);
+	}
+
 	/**
 	 * Determines if the Quester is high enough level in
 	 * this class to use a specific item. if the item

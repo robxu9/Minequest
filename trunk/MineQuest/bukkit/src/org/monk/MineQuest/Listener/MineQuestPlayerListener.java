@@ -6,6 +6,8 @@ import java.util.List;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
@@ -24,6 +26,13 @@ import org.monk.MineQuest.World.Town;
 public class MineQuestPlayerListener extends PlayerListener {
 	
 	private NoMobs event;
+	
+	@Override
+	public void onPlayerAnimation(PlayerAnimationEvent event) {
+		if (event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
+			MineQuest.getQuester(event.getPlayer()).callAbility();
+		}
+	}
 
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
@@ -116,15 +125,13 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage("Minequest Commands:");
 			player.sendMessage("    /save - save progress of character");
 			player.sendMessage("    /load - load progress - removing unsaved experience/levels");
-			player.sendMessage("    /quest - enable minequest for your character (enabled by default)");
-			player.sendMessage("    /noquest - disable minequest for your character");
 			player.sendMessage("    /char - information about your character level");
 			player.sendMessage("    /class <classname> - information about a specific class");
 			player.sendMessage("    /health - display your health");
 			player.sendMessage("    /abillist [classname] - display all abilities or for a specific class");
 			player.sendMessage("    /enableabil <ability name> - enable an ability (enabled by default)");
 			player.sendMessage("    /disableabil <ability name> - disable an ability");
-			player.sendMessage("    /bind <ability name> <l or r> - bind an ability to current item");
+			player.sendMessage("    /bind <ability name> - bind an ability to current item");
 			player.sendMessage("    /unbind - unbind current item from all abilities");
 			player.sendMessage("    /spellcomp <ability name> - list the components required for an ability");
 			event.setCancelled(true);
