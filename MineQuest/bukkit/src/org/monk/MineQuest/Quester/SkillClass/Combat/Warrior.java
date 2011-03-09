@@ -12,6 +12,10 @@ public class Warrior extends CombatClass {
 		super(quester, type);
 	}
 	
+	public Warrior() {
+		// Shell
+	}
+
 	@Override
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();

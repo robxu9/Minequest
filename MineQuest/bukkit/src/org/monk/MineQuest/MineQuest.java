@@ -167,6 +167,7 @@ public class MineQuest extends JavaPlugin {
 	            size++;
             }
         }
+        if (size == 0) return 0;
         avgLevel /= size;
         
         return (avgLevel / 10);
@@ -456,9 +457,7 @@ public class MineQuest extends JavaPlugin {
 	@Override
 	public void onDisable() {
 	}
-	@Override
-	public void onEnable() {
-	}
+	
 	/**
 	 * Sets up an instance of MineQuest. There should never be more than
 	 * one instance of MineQuest required. If enabled this method will load all of the
@@ -468,92 +467,98 @@ public class MineQuest extends JavaPlugin {
 	 * This loads all adjustable parameters from minequest.properties, including
 	 * database location and login parameters.
 	 */
-    protected void setEnabled(boolean enabled) {
-    	// TODO Auto-generated method stub
-    	super.setEnabled(enabled);
-    	if (enabled) {			
-			server = getServer();
-	        
-			mobs = new MQMob[1];
-    		
-	        eventQueue = new EventQueue(this);
-	        
-	        quests = new ArrayList<Quest>();
-	        
-//	        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
-	        
-			List<String> names = new ArrayList<String>();
-			String url, port, db, user, pass;
-			PropertiesFile minequest = new PropertiesFile("minequest.properties");
-			url = minequest.getString("url", "localhost");
-			port = minequest.getString("port", "3306");
-			db = minequest.getString("db", "minequest_new");
-			user = minequest.getString("user", "root");
-			pass = minequest.getString("pass", "1234");
-			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 0));
-	
-			ResultSet results = sql_server.query("SELECT * FROM questers");
-			
-			try {
-				while (results.next()) {
-					names.add(results.getString("name"));
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	@Override
+	public void onEnable() {			
+		server = getServer();
+        
+		mobs = new MQMob[1];
+		
+        eventQueue = new EventQueue(this);
+        
+        quests = new ArrayList<Quest>();
+        
+//        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
+        
+		List<String> names = new ArrayList<String>();
+		String url, port, db, user, pass;
+		PropertiesFile minequest = new PropertiesFile("minequest.properties");
+		url = minequest.getString("url", "localhost");
+		port = minequest.getString("port", "3306");
+		db = minequest.getString("db", "minequest");
+		user = minequest.getString("user", "root");
+		pass = minequest.getString("pass", "1234");
+		sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1));
+		
+		sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
+				"last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150))");
+		sql_server.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
+		sql_server.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0'," +
+				"abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
+				
+
+		ResultSet results = sql_server.query("SELECT * FROM questers");
+		
+		try {
+			while (results.next()) {
+				names.add(results.getString("name"));
 			}
-			
-			for (String name : names) {
-				questers.add(new Quester(name));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for (String name : names) {
+			questers.add(new Quester(name));
+		}
+		
+		sql_server.update("CREATE TABLE IF NOT EXISTS towns (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, spawn_x INT, spawn_y INT, spawn_z INT, " +
+				"owner VARCHAR(30), height INT, y INT)");
+		names.clear();
+		results = sql_server.query("SELECT * FROM towns");
+		
+		try {
+			while (results.next()) {
+				names.add(results.getString("name"));
 			}
-			
-			names.clear();
-			results = sql_server.query("SELECT * FROM towns");
-			
-			try {
-				while (results.next()) {
-					names.add(results.getString("name"));
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			for (String name : names) {
-				towns.add(new Town(name, getServer().getWorld("world")));
-			}
-			
-			bl = new MineQuestBlockListener();
-			el = new MineQuestEntityListener();
-			pl = new MineQuestPlayerListener();
-	//		sl = new MineQuestServerListener();
-	//		wl = new MineQuestWorldListener();
-	//		vl = new MineQuestVehicleListener();
-			
-	        PluginManager pm = getServer().getPluginManager();
-	        
-	        pm.registerEvent(Event.Type.PLAYER_JOIN, pl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.PLAYER_QUIT, pl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, pl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.PLAYER_TELEPORT, pl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.PLAYER_RESPAWN, pl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.ENTITY_DAMAGED, el, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.BLOCK_DAMAGED, bl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.BLOCK_PLACED, bl, Priority.Normal, this);
-	        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED, bl, Priority.Normal, this);
-	        
-	        PluginDescriptionFile pdfFile = this.getDescription();
-	        System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
-	        start = null;
-			
-			for (Town town : towns) {
-				eventQueue.addEvent(new CheckMobEvent(town));
-			}
-    	}
-    }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for (String name : names) {
+			towns.add(new Town(name, getServer().getWorld("world")));
+		}
+		
+		bl = new MineQuestBlockListener();
+		el = new MineQuestEntityListener();
+		pl = new MineQuestPlayerListener();
+//		sl = new MineQuestServerListener();
+//		wl = new MineQuestWorldListener();
+//		vl = new MineQuestVehicleListener();
+		
+        PluginManager pm = getServer().getPluginManager();
+        
+        pm.registerEvent(Event.Type.PLAYER_JOIN, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_QUIT, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_TELEPORT, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_RESPAWN, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGED, el, Priority.Normal, this);
+        pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_DAMAGED, bl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_PLACED, bl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED, bl, Priority.Normal, this);
+        
+        PluginDescriptionFile pdfFile = this.getDescription();
+        System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
+        start = null;
+		
+		for (Town town : towns) {
+			eventQueue.addEvent(new CheckMobEvent(town));
+		}
+	}
     
     public static void checkMobs() {
     	int i;

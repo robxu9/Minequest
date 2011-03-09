@@ -13,6 +13,11 @@ public class Miner extends ResourceClass implements DefendingClass {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public Miner() {
+		// Shell
+		super();
+	}
+
 	@Override
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();

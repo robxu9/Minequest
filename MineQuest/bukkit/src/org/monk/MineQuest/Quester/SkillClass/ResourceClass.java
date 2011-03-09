@@ -11,6 +11,11 @@ public class ResourceClass extends SkillClass {
 		super(quester, type);
 	}
 	
+	public ResourceClass() {
+		// Shell
+		super();
+	}
+
 	@Override
 	public void blockDestroy(BlockDamageEvent event) {
 		super.blockDestroy(event);

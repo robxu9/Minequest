@@ -136,7 +136,7 @@ public class Quester {
 			classes[i].unBind(player.getItemInHand());
 		}
 		
-		Ability abil = new AbilityBinder(my_class, ability, item);
+		Ability abil = new AbilityBinder(ability, item);
 		abil.bind(this, player.getItemInHand());
 		my_class.addAbility(abil);
 		
@@ -157,7 +157,7 @@ public class Quester {
 			}
 		}
 		
-		Ability abil = new AbilityBinder(my_class, ability, item);
+		Ability abil = new AbilityBinder(ability, item);
 		my_class.addAbility(abil);
 		
 		abil.silentBind(this, item_hand);

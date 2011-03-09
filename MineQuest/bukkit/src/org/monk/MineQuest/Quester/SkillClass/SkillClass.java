@@ -147,6 +147,7 @@ public class SkillClass {
 	 */
 	protected void addAbility(String string) {
 		try {
+			if (ability_list.length == 10) return;
 			MineQuest.getSQLServer().update("UPDATE abilities SET abil" + ability_list.length + "='" + string
 					+ "' WHERE abil_list_id='" + abil_list_id + "'");
 			ability_list = abilListSQL(abil_list_id);
@@ -352,8 +353,10 @@ public class SkillClass {
 		int i;
 		
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].getName().equalsIgnoreCase(name)) {
-				return ability_list[i];
+			if (ability_list[i] != null) {
+				if (ability_list[i].getName().equalsIgnoreCase(name)) {
+					return ability_list[i];
+				}
 			}
 		}
 		
@@ -572,7 +575,9 @@ public class SkillClass {
 	 */
 	public void listAbil() {
 		for (Ability ability : ability_list) {
-			quester.sendMessage(ability.getName());
+			if (ability != null) {
+				quester.sendMessage(ability.getName());
+			}
 		}
 	}
 
