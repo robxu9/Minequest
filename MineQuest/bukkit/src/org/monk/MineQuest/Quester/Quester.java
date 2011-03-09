@@ -324,6 +324,17 @@ public class Quester {
 		}
 	}
 
+	public void callAbility() {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbility();
+				return;
+			}
+		}
+	}
+
 	/**
 	 * Casts a left click bound ability on the given entity
 	 * 
@@ -486,6 +497,7 @@ public class Quester {
 
 	public void clearQuest() {
 		this.quest = null;
+		poison_timer = 0;
 		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, before_quest.getWorld().getSpawnLocation()));
 		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(11000, player, before_quest));
 	}
@@ -594,6 +606,10 @@ public class Quester {
 			amount *= levelAdj * 1;
 		}
 		amount /= 4;
+		if ((((EntityDamageByEntityEvent)event).getDamager() != null) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
+            event.setCancelled(true);
+            return;
+        }
 		
 		if (entity instanceof LivingEntity) {
 			if (entity != null) {
@@ -924,10 +940,7 @@ public class Quester {
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		int newHealth;
                 
-        if ((event instanceof EntityDamageByEntityEvent) && (((EntityDamageByEntityEvent)event).getDamager() != null) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
-            event.setCancelled(true);
-            return false;
-        } else if (checkDamage(event.getCause())) {
+        if (checkDamage(event.getCause())) {
         	event.setCancelled(true);
         	return false;
         }
@@ -1084,6 +1097,7 @@ public class Quester {
 
 	public void respawn(PlayerRespawnEvent event) {
 		health = max_health;
+		poison_timer = 0;
 		if (quest != null) {
 			event.setRespawnLocation(quest.getSpawn());
 		} else {

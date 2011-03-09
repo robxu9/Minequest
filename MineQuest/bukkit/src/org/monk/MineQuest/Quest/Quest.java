@@ -418,7 +418,7 @@ public class Quest {
 				throw new Exception();
 			}
 			boolean stay = true;
-			if (line[8].equals("f")) {
+			if (line[10].equals("f")) {
 				stay = false;
 			}
 			 
