@@ -147,6 +147,7 @@ public class SkillClass {
 	 */
 	protected void addAbility(String string) {
 		try {
+			ability_list = abilListSQL(abil_list_id);
 			if (ability_list.length == 10) return;
 			MineQuest.getSQLServer().update("UPDATE abilities SET abil" + ability_list.length + "='" + string
 					+ "' WHERE abil_list_id='" + abil_list_id + "'");
