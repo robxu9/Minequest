@@ -98,7 +98,7 @@ public abstract class Ability {
 	}
 	
 	//following code came from http://snippets.dzone.com/posts/show/4831
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static List getClasseNamesInPackage(String jarName,
 			String packageName) {
 		boolean debug = false;
@@ -133,7 +133,7 @@ public abstract class Ability {
 	}
 	
 	// http://www.devx.com/tips/Tip/38975
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Class getClass(String the_class) throws Exception {
 		URL url = new URL("file:abilities.jar");
 		URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());

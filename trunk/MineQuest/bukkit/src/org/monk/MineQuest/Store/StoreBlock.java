@@ -100,7 +100,6 @@ public class StoreBlock {
 		quantity -= block_quantity;
 		
 		quester.setCubes(quester.getCubes() - cubes);
-		quester.update();
 		update();
 		
 
@@ -134,7 +133,6 @@ public class StoreBlock {
 		quantity += block_quantity;
 
 		quester.setCubes(quester.getCubes() + cubes);
-		quester.update();
 		update();
 		
     	String cubes_string;
