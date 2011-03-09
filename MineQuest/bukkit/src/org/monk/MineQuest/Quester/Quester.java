@@ -1114,8 +1114,8 @@ public class Quester {
 			int i;
 			
 		if (MineQuest.getSQLServer().update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
-				+ health + "', max_health='" + max_health + "', enabled='" + (enabled?1:0) 
-				+ "' WHERE name='" + name + "'") == -1) {
+				+ health + "', max_health='" + max_health + "', enabled='" + 1
+				+ "', cubes='" + (long)cubes + "' WHERE name='" + name + "'") == -1) {
 			player.sendMessage("May not have saved properly, please try again");
 		}
 		for (i = 0; i < classes.length; i++) {
