@@ -48,7 +48,7 @@ public class MineQuest extends JavaPlugin {
 	private static Location start;
 	private static List<Town> towns = new ArrayList<Town>();
 	private static MQMob mobs[];
-	private static List<Quest> quests;
+	private static Quest[] quests;
 //	private MineQuestServerListener sl;
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
@@ -475,7 +475,7 @@ public class MineQuest extends JavaPlugin {
 		
         eventQueue = new EventQueue(this);
         
-        quests = new ArrayList<Quest>();
+        quests = new Quest[0];
         
 //        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
         
@@ -503,8 +503,7 @@ public class MineQuest extends JavaPlugin {
 				names.add(results.getString("name"));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log("Error: Couldn't get list of questers");
 		}
 		
 		for (String name : names) {
@@ -521,8 +520,7 @@ public class MineQuest extends JavaPlugin {
 				names.add(results.getString("name"));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log("Unable to get list of towns");
 		}
 		
 		for (String name : names) {
@@ -620,14 +618,6 @@ public class MineQuest extends JavaPlugin {
 		return null;
 	}
 	
-	public static Quest getQuest(int index) {
-		return quests.get(index);
-	}
-	
-	public static void addQuest(Quest quest) {
-		quests.add(quest);
-	}
-	
 	public static Quester[] getActiveQuesters() {
 		List<Quester> active = new ArrayList<Quester>();
 		
@@ -658,5 +648,32 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		addMQMob(newMob);
+	}
+	public static Quest[] getQuests() {
+		return quests;
+	}
+	
+	public static void remQuest(Quest quest) {
+		Quest[] new_quests = new Quest[quests.length - 1];
+		int i = 0;
+		for (Quest qst : quests) {
+			if (!qst.equals(quest)) {
+				new_quests[i++] = qst;
+			}
+		}
+		
+		quests = new_quests;
+	}
+	
+	public static void addQuest(Quest quest) {
+		Quest[] new_quests = new Quest[quests.length + 1];
+		int i = 0;
+		for (Quest qst : quests) {
+			new_quests[i++] = qst;
+		}
+		
+		new_quests[i] = quest;
+		
+		quests = new_quests;
 	}
 }

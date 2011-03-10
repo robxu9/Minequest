@@ -701,6 +701,10 @@ public class SkillClass {
 				+ "' WHERE abil_list_id='" + abil_list_id + "'");
 		quester.sendMessage(old + " Ability has been replaced with " + new_ability.getName() + " Ability in your spellbook");
 	}
+
+	public void rightClick(Block block) {
+		expAdd(5);
+	}
 	
 
 }

@@ -1338,4 +1338,33 @@ public class Quester {
 		
 		player.setHealth(newValue);
 	}
+
+	public void rightClick(Block block) {
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(player.getItemInHand())) {
+				skill.rightClick(block);
+				expGain(3);
+				return;
+			}
+		}
+		
+		switch (blockToClass(block)) {
+		case 0: // Miner
+			getClass("Miner").rightClick(block);
+			return;
+		case 1: // Lumberjack
+			getClass("Lumberjack").rightClick(block);
+			return;
+		case 2: // Digger
+			getClass("Digger").rightClick(block);
+			return;
+		case 3: // Farmer
+			getClass("Farmer").rightClick(block);
+			return;
+		default:
+			break;
+		}
+		
+		return;
+	}
 }

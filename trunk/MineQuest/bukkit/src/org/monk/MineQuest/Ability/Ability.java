@@ -138,11 +138,6 @@ public abstract class Ability {
 		URL url = new URL("file:abilities.jar");
 		URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
 		return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
-//		JarClassLoader classloader = new JarClassLoader();
-//		classloader.addJarFile("abilities.jar");
-//		classloader.setJarClassLoader(classloader);
-//		MineQuest.log(the_class.replaceAll(".class", ""));
-//		return Class.forName(the_class.replaceAll(".class", ""), true, classloader);
 	}
 	
 	public int getReqLevel() {
@@ -363,7 +358,7 @@ public abstract class Ability {
 	 * @param player
 	 */
 	protected void giveManaCost(Player player) {
-		List<ItemStack> cost = getManaCost();
+		List<ItemStack> cost = addLevelCost(getManaCost());
 		int i;
 		
 		for (i = 0; i < cost.size(); i++) {
@@ -564,7 +559,7 @@ public abstract class Ability {
 			return;
 		}
 		
-		if ((quester == null) || quester.canCast(getManaCost())) {
+		if ((quester == null) || quester.canCast(addLevelCost(getManaCost()))) {
 			if (canCast() || (player == null)) {
 				if ((player == null) || player.getItemInHand().getTypeId() == bind) {
 					notify(quester, "Casting " + getName());
@@ -584,6 +579,17 @@ public abstract class Ability {
 				notify(quester, "You do not have the materials to cast that - try /spellcomp " + getName());
 			}
 		}
+	}
+
+	private List<ItemStack> addLevelCost(List<ItemStack> manaCost) {
+		if (myclass.getLevel() > 5) {
+			int i;
+			for (i = 0; i < (getReqLevel() / 4); i++) {
+				manaCost.add(new ItemStack(Material.REDSTONE, 1));
+			}
+		}
+		
+		return manaCost;
 	}
 
 	/**
