@@ -1,6 +1,7 @@
 package org.monk.MineQuest.Listener;
 
 
+import org.bukkit.Material;
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
@@ -71,7 +72,11 @@ public class MineQuestBlockListener extends BlockListener {
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbil()) {
 			quester.callAbility(event.getBlock());
+			event.getBlock().setType(Material.AIR);
+			return;
 		}
+		
+		quester.rightClick(event.getBlock());
 		
 		super.onBlockRightClick(event);
 	}

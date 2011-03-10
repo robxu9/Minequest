@@ -49,6 +49,12 @@ public class Quest {
 	private World world;
 	private Location[] exceptions;
 	private int[] triggers;
+	private double start_x;
+	private double start_y;
+	private double start_z;
+	private double end_x;
+	private double end_y;
+	private double end_z;
 	
 	public Quest(String filename, Party party) {
 		this.questers = party.getQuesterArray();
@@ -65,6 +71,7 @@ public class Quest {
 			int number = 0;
 			world = questers[0].getPlayer().getWorld();
 			spawn = null;
+			start_x = 0;
 			try {
 				while ((line = bis.readLine()) != null) {
 					number++;
@@ -87,15 +94,56 @@ public class Quest {
 						
 						teleport(party.getQuesterArray(), world);
 					} else if (split[0].equals("LoadWorld")) {
-						deleteDir(new File(split[1]));
-						copyDirectory(new File(split[2]), new File(split[1]));
-						world = null;
 						if (MineQuest.getSServer().getWorld(split[1]) == null) {
-							if ((split.length == 3) || (split[3].equals("NORMAL"))) {
-								world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
-							} else {
-								world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+							deleteDir(new File(split[1]));
+							copyDirectory(new File(split[2]), new File(split[1]));
+							world = null;
+							if (MineQuest.getSServer().getWorld(split[1]) == null) {
+								if ((split.length == 3) || (split[3].equals("NORMAL"))) {
+									world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+								} else {
+									world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+								}
 							}
+						} else {
+							World world = MineQuest.getSServer().getWorld(split[2]);
+							if (world == null) {
+								if ((split.length == 3) || (split[3].equals("NORMAL"))) {
+									world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
+								} else {
+									world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
+								}
+							}
+							World copy = MineQuest.getSServer().getWorld(split[1]);
+							
+							if (start_x == 0) {
+								MineQuest.log("Loaded world without quest area defined - missing QuestArea?");
+								throw new Exception();
+							}
+							
+							int i,j,k;
+							for (i = (int)start_x; i < (int)end_x; i++) {
+								for (j = (int)end_y; j < (int)start_y; j--) {
+									for (k = (int)start_z; k < (int)end_z; k++) {
+										Block new_block = copy.getBlockAt(i, j, k);
+										
+										new_block.setType(Material.AIR);
+									}
+								}
+							}
+							for (i = (int)start_x; i < (int)end_x; i++) {
+								for (j = (int)end_y; j < (int)start_y; j--) {
+									for (k = (int)start_z; k < (int)end_z; k++) {
+										Block original = world.getBlockAt(i, j, k);
+										Block new_block = copy.getBlockAt(i, j, k);
+										
+										new_block.setType(original.getType());
+										new_block.setData(original.getData());
+									}
+								}
+							}
+							
+							this.world = copy;
 						}
 					} else if (split[0].equals("Spawn")) {
 						MineQuest.log("Loaded Spawn");
@@ -103,6 +151,81 @@ public class Quest {
 						double y = Double.parseDouble(split[2]);
 						double z = Double.parseDouble(split[3]);
 						this.spawn = new Location(world, x, y, z);
+					} else if (split[0].equals("QuestArea")) {
+						start_x = Double.parseDouble(split[1]);
+						start_y = Double.parseDouble(split[2]);
+						start_z = Double.parseDouble(split[3]);
+						end_x = Double.parseDouble(split[4]);
+						end_y = Double.parseDouble(split[5]);
+						end_z = Double.parseDouble(split[6]);
+					} else if (split[0].equals("Instance")) {
+						int max = Integer.parseInt(split[1]);
+						int i;
+						for (i = 0; i < max; i++) {
+							boolean flag = true;
+							for (Quest quest : MineQuest.getQuests()) {
+								if (quest.getWorld().getName().equals(split[2] + i)) {
+									flag = false;
+								}
+							}
+							if (flag) break;
+						}
+						if (i == max) {
+							MineQuest.log("Instances Full - Unable to Start Quest");
+							MineQuest.getEventParser().addEvent(new MessageEvent(10, party, "Instances Full - Unable to Start Quest"));
+						}
+						split[2] = split[2] + i;
+						if (MineQuest.getSServer().getWorld(split[2]) == null) {
+							deleteDir(new File(split[2]));
+							copyDirectory(new File(split[3]), new File(split[2]));
+							world = null;
+							if (MineQuest.getSServer().getWorld(split[1]) == null) {
+								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
+									world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
+								} else {
+									world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
+								}
+							}
+						} else {
+							World world = MineQuest.getSServer().getWorld(split[3]);
+							if (world == null) {
+								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
+									world = MineQuest.getSServer().createWorld(split[3], Environment.NORMAL);
+								} else {
+									world = MineQuest.getSServer().createWorld(split[3], Environment.NETHER);
+								}
+							}
+							World copy = MineQuest.getSServer().getWorld(split[2]);
+							
+							if (start_x == 0) {
+								MineQuest.log("Loaded world without quest area defined - missing QuestArea?");
+								throw new Exception();
+							}
+							
+							int j,k;
+							for (i = (int)start_x; i < (int)end_x; i++) {
+								for (j = (int)end_y; j < (int)start_y; j--) {
+									for (k = (int)start_z; k < (int)end_z; k++) {
+										Block new_block = copy.getBlockAt(i, j, k);
+										
+										new_block.setType(Material.AIR);
+									}
+								}
+							}
+							for (i = (int)start_x; i < (int)end_x; i++) {
+								for (j = (int)end_y; j < (int)start_y; j--) {
+									for (k = (int)start_z; k < (int)end_z; k++) {
+										Block original = world.getBlockAt(i, j, k);
+										Block new_block = copy.getBlockAt(i, j, k);
+										
+										new_block.setType(original.getType());
+										new_block.setData(original.getData());
+									}
+								}
+							}
+							
+							this.world = copy;
+						}			
 					}
 				}
 			} catch (Exception e) {
@@ -139,10 +262,18 @@ public class Quest {
 		
 	}
 	
+	private World getWorld() {
+		return world;
+	}
+
 	public void removeQuester(Quester quester) {
 		party.remQuester(quester);
 		
 		quester.clearQuest();
+		
+		if (party.getQuesters().size() == 0) {
+			issueNextEvents(-1);
+		}
 	}
 	
 	public Location getSpawn() {
@@ -453,6 +584,7 @@ public class Quest {
 			for (QuestTask task : tasks) {
 				task.clearEvents();
 			}
+			MineQuest.remQuest(this);
 			return;
 		} else if (index <= -2) {
 			return;
