@@ -30,3 +30,19 @@ return new Archer();
 {{{
 public abstract List<ItemStack> getManaCost();
 }}}
+
+All abilities have components that are spent each time it is cast/enabled. Each Item should be listed separately with an amount of 2. This function should return the list that is constructed as follows.
+
+{{{
+list.add(newItemStack(Material.DIRT, 1)); // 4 Dirt
+list.add(newItemStack(Material.DIRT, 1));
+list.add(newItemStack(Material.DIRT, 1));
+list.add(newItemStack(Material.DIRT, 1));
+}}}
+
+== Cast Ability ==
+{{{
+public abstract void castAbility(Quester quester, Location location, LivingEntity entity);
+}}}
+
+This is called when non passive abilities are activated. Binding and spell cost will have already been been checked and no checking is required for casting. Quester will be null if the ability is being cast by a mob. The location is the location of the target if one exists, if it is only an arm swing then the location will be location of the caster. The entity will be the target if an attack triggers the casting, if there is not target then the entity will be null.
