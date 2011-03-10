@@ -1,0 +1,32 @@
+#This page is a intro to writing your own abilities and adding them into MineQuest.
+
+= Introduction =
+
+MineQuest is designed to load all of its abilities from the abilities.jar file located in the CraftBukkit directory. It loads all of the classes in the package org.monk.MineQuest.Ability. It assumes that all classes in the jar in that package are extensions of the abstract class Ability. This page will describe all of the abstract functions, and some other handy functions.
+
+= Details =
+
+== Get Name ==
+{{{
+public abstract String getName();
+}}}
+
+This function is pretty simple, it returns the name of the ability that will be used by MineQuest, also used to store it in the database.
+
+== Get Class Type ==
+
+{{{
+public abstract SkillClass getClassType();
+}}}
+
+This function determines what SkillClass will inherit this ability. Currently there are 8 options for this. They are Warrior, Archer, WarMage, PeaceMage, Miner, Digger, Lumberjack, and Farmer. This function should return a blank instance of the class it belongs to.
+
+{{{
+return new Archer();
+}}}
+
+== Get Mana Cost ==
+
+{{{
+public abstract List<ItemStack> getManaCost();
+}}}
