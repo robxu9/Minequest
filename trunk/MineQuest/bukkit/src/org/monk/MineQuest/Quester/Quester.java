@@ -1372,7 +1372,7 @@ public class Quester {
 		return;
 	}
 
-	public void healthIncrease(PlayerItemEvent event) {
+	public boolean healthIncrease(PlayerItemEvent event) {
 		Material type = event.getItem().getType();
 		
 		switch (type) {
@@ -1403,6 +1403,8 @@ public class Quester {
 		case COOKED_FISH:
 			health += 5;
 			break;
+		default:
+			return false;
 		}
 		event.setCancelled(true);
 		getPlayer().setItemInHand(null);
@@ -1410,5 +1412,7 @@ public class Quester {
 		if (health > max_health) health = max_health;
 		
 		updateHealth();
+		
+		return true;
 	}
 }

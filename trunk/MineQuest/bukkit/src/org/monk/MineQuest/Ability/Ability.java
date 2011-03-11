@@ -31,6 +31,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftAnimals;
 import org.bukkit.craftbukkit.entity.CraftCreeper;
 import org.bukkit.craftbukkit.entity.CraftSkeleton;
 import org.bukkit.craftbukkit.entity.CraftSpider;
@@ -50,19 +51,17 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
  */
 public abstract class Ability {
 	// http://www.devx.com/tips/Tip/38975
-	@SuppressWarnings("rawtypes")
-	public static Class getClass(String the_class) throws Exception {
+	public static Class<?> getClass(String the_class) throws Exception {
 		URL url = new URL("file:abilities.jar");
 		URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
 		return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
 	}
 	
 	//following code came from http://snippets.dzone.com/posts/show/4831
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static List getClasseNamesInPackage(String jarName,
+	public static List<String> getClasseNamesInPackage(String jarName,
 			String packageName) {
 		boolean debug = false;
-		ArrayList classes = new ArrayList();
+		ArrayList<String> classes = new ArrayList<String>();
 
 		packageName = packageName.replaceAll("\\.", "/");
 		if (debug)
@@ -83,7 +82,7 @@ public abstract class Ability {
 					if (debug)
 						System.out.println("Found "
 								+ jarEntry.getName().replaceAll("/", "\\."));
-					classes.add(jarEntry.getName().replaceAll("/", "\\."));
+					classes.add((String)jarEntry.getName().replaceAll("/", "\\."));
 				}
 			}
 		} catch (Exception e) {
@@ -109,12 +108,16 @@ public abstract class Ability {
 		if (world.getBlockAt(x, y, z).getTypeId() != 0) {
 			do {
 				i++;
-			} while (((world.getBlockAt(x, i, z).getType() != Material.SNOW) && (world.getBlockAt(x, i, z).getType() != Material.AIR)) && (i < 1000));
+			} while (((world.getBlockAt(x, i, z).getType() != Material.SNOW) 
+					&& (world.getBlockAt(x, i, z).getType() != Material.FIRE) 
+					&& (world.getBlockAt(x, i, z).getType() != Material.AIR)) && (i < 1000));
 			if (i == 1000) i = 0;
 		} else {
 			do {
 				i--;
-			} while (((world.getBlockAt(x, i, z).getType() == Material.SNOW) || (world.getBlockAt(x, i, z).getType() == Material.AIR)) && (i > -100));
+			} while (((world.getBlockAt(x, i, z).getType() == Material.SNOW) 
+					|| (world.getBlockAt(x, i, z).getType() == Material.FIRE) 
+					|| (world.getBlockAt(x, i, z).getType() == Material.AIR)) && (i > -100));
 			if (i == -100) i = 0;
 			i++;
 		}
@@ -122,7 +125,6 @@ public abstract class Ability {
 		return i;
 	}
 	
-	@SuppressWarnings("unchecked")
 	static public List<Ability> newAbilities(SkillClass myclass) {
 		List<String> classes = new ArrayList<String>();
 		List<Ability> abilities = new ArrayList<Ability>();
@@ -410,16 +412,19 @@ public abstract class Ability {
 	 * @param type
 	 * @return
 	 */
-	private boolean isType(LivingEntity livingEntity, int type) {
-		if (type == 1) {
+	private boolean isType(LivingEntity livingEntity, PurgeType type) {
+		switch (type) {
+		case ZOMBIE:
 			return livingEntity instanceof CraftZombie;
-		} else if (type == 2) {
-			return livingEntity instanceof CraftSkeleton;
-		} else if (type == 3) {
-			return livingEntity instanceof CraftCreeper;
-		} else if (type == 4) {
+		case SPIDER:
 			return livingEntity instanceof CraftSpider;
-		} else {
+		case SKELETON:
+			return livingEntity instanceof CraftSkeleton;
+		case CREEPER:
+			return livingEntity instanceof CraftCreeper;
+		case ANIMAL:
+			return livingEntity instanceof CraftAnimals;
+		default:
 			return true;
 		}
 	}
@@ -525,7 +530,7 @@ public abstract class Ability {
 	 * @param distance
 	 * @param type
 	 */
-	protected void purgeEntities(LivingEntity player, int distance, int type) {
+	protected void purgeEntities(LivingEntity player, int distance, PurgeType type) {
 		List<LivingEntity> entities = getEntities(player, distance);
 		
 		int i;
