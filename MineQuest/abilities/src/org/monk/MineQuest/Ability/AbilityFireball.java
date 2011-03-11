@@ -79,11 +79,11 @@ public class AbilityFireball extends Ability {
 		
 		if (entity != null) {
 			if (MineQuest.getMob(entity) != null) {
-				MineQuest.getMob(entity).damage(2 + (myclass.getCasterLevel() / 2));
+				MineQuest.getMob(entity).damage(2 + (myclass.getCasterLevel() / 3));
 			} else if (entity instanceof Player) {
-				MineQuest.getQuester((Player)entity).damage(2 + (myclass.getCasterLevel() / 2));
+				MineQuest.getQuester((Player)entity).damage(2 + (myclass.getCasterLevel() / 3));
 			} else {
-				entity.setHealth(entity.getHealth() - (2 + (myclass.getCasterLevel() / 2)));
+				entity.setHealth(entity.getHealth() - (2 + (myclass.getCasterLevel() / 3)));
 			}
 		}
 	}
