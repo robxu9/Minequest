@@ -10,7 +10,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
-import org.monk.MineQuest.Quester.SkillClass.Resource.Farmer;
+import org.monk.MineQuest.Quester.SkillClass.Resource.Lumberjack;
 
 public class AbilityHarvestLeaves extends Ability {
 
@@ -43,7 +43,7 @@ public class AbilityHarvestLeaves extends Ability {
 
 	@Override
 	public SkillClass getClassType() {
-		return new Farmer();
+		return new Lumberjack();
 	}
 
 	@Override
