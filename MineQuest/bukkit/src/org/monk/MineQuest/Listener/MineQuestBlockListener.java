@@ -1,7 +1,6 @@
 package org.monk.MineQuest.Listener;
 
 
-import org.bukkit.Material;
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
@@ -26,6 +25,8 @@ public class MineQuestBlockListener extends BlockListener {
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbil()) {
 			quester.callAbility(event.getBlock());
+			event.setCancelled(true);
+			return;
 		}
 		quester.destroyBlock(event);
 		
@@ -72,7 +73,6 @@ public class MineQuestBlockListener extends BlockListener {
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbil()) {
 			quester.callAbility(event.getBlock());
-			event.getBlock().setType(Material.AIR);
 			return;
 		}
 		
@@ -97,6 +97,8 @@ public class MineQuestBlockListener extends BlockListener {
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbil()) {
 			quester.callAbility(event.getBlock());
+			event.setCancelled(true);
+			return;
 		}
 		
 		if (town != null) {
@@ -122,7 +124,6 @@ public class MineQuestBlockListener extends BlockListener {
 					return;
 				}
 			}
-			
 		}
 		
 		super.onBlockPlace(event);
