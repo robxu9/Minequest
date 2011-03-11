@@ -64,5 +64,5 @@ This determines at what level the class will receive this ability. Also whatever
 
 All abilities that make structural changes to the world (i.e. removing the floor like Trap) should check to make sure the player is authorized to make these changes. This can be checked using the canEdit function for any quester. This will return true if the quester is allowed to edit the desired block. It will also set off any quest affects for trying to edit that specific block.
 {{{
-public boolean canEdit(Block affected);
+public boolean quester.canEdit(Block affected);
 }}}
