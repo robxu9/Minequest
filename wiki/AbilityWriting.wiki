@@ -31,7 +31,7 @@ return new Archer();
 public abstract List<ItemStack> getManaCost();
 }}}
 
-All abilities have components that are spent each time it is cast/enabled. Each Item should be listed separately with an amount of 2. This function should return the list that is constructed as follows.
+All abilities have components that are spent each time it is cast/enabled. Each Item should be listed separately with an amount of 1. This function should return the list that is constructed as follows.
 
 {{{
 list.add(newItemStack(Material.DIRT, 1)); // 4 Dirt
