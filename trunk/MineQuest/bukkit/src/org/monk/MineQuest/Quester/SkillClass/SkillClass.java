@@ -255,16 +255,38 @@ public class SkillClass {
 		}
 		
 		for (i = 0; i < item_ids.length; i++) {
-			for (ItemStack itemStack : equip.getArmorContents()) {
-				if (itemStack.getTypeId() == item_ids[i]) {
-					if (equip.firstEmpty() != -1) {
-						equip.addItem(new ItemStack(item_ids[i]));
-					} else {
-						player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
-					}
-					itemStack = null;
-					player.sendMessage("You are not high enough level to use those leggings");
+			if (equip.getBoots().getTypeId() == item_ids[i]) {
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
 				}
+				equip.setBoots(null);
+				player.sendMessage("You are not high enough level to use those boots");
+			} else if (equip.getChestplate().getTypeId() == item_ids[i]) {
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
+				}
+				equip.setChestplate(null);
+				player.sendMessage("You are not high enough level to use that chestplate");
+			} else if (equip.getHelmet().getTypeId() == item_ids[i]) {
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
+				}
+				equip.setHelmet(null);
+				player.sendMessage("You are not high enough level to use that helmet");
+			} else if (equip.getLeggings().getTypeId() == item_ids[i]) {
+				if (equip.firstEmpty() != -1) {
+					equip.addItem(new ItemStack(item_ids[i]));
+				} else {
+					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
+				}
+				equip.setLeggings(null);
+				player.sendMessage("You are not high enough level to use those leggings");
 			}
 		}
 		
