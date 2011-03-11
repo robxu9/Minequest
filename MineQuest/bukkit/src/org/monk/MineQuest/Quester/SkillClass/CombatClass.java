@@ -19,6 +19,7 @@
 package org.monk.MineQuest.Quester.SkillClass;
 
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
@@ -52,7 +53,15 @@ public class CombatClass extends SkillClass implements DefendingClass {
 			}
 		}
 
-		event.setDamage(getDamage(defend));
+		if (defend instanceof Player) {
+			Player player = (Player)defend;
+			MineQuest.getQuester(player).healthChange(getDamage(defend), event);
+		} else if (MineQuest.getMob(defend) != null) {
+			MineQuest.getMob(defend).defend(getDamage(defend), quester.getPlayer());
+			event.setDamage(getDamage(defend));
+		} else {
+			event.setDamage(getDamage(defend));
+		}
 
 		expAdd(getExpMob(defend) + MineQuest.getAdjustment());
 		
