@@ -21,7 +21,10 @@ public class HealthEvent extends NormalEvent {
 
 	@Override
 	public void activate(EventParser eventParser) {
-		entity.setHealth(newHealth);
+		if (entity.getHealth() > 0) {
+			entity.setHealth(newHealth);
+		}
+		super.activate(eventParser);
 	}
 
 	@Override

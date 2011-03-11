@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerItemEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -26,6 +27,13 @@ import org.monk.MineQuest.World.Town;
 public class MineQuestPlayerListener extends PlayerListener {
 	
 	private NoMobs event;
+	
+	@Override
+	public void onPlayerItem(PlayerItemEvent event) {
+		MineQuest.getQuester(event.getPlayer()).healthIncrease(event);
+		
+		super.onPlayerItem(event);
+	}
 	
 	@Override
 	public void onPlayerAnimation(PlayerAnimationEvent event) {
