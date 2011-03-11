@@ -19,6 +19,7 @@
 package org.monk.MineQuest.Listener;
 
 
+import org.bukkit.Material;
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
@@ -32,7 +33,8 @@ public class MineQuestBlockListener extends BlockListener {
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 
 					event.getBlock().getY() + " " + event.getBlock().getZ()
-					 + " " + event.getBlock().getType());
+					 + " " + event.getBlock().getType() + " " + 
+					 event.getBlock().getData());
 		}
 	
 		quester.checkItemInHand();
@@ -63,13 +65,18 @@ public class MineQuestBlockListener extends BlockListener {
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 
 					event.getBlock().getY() + " " + event.getBlock().getZ()
-					 + " " + event.getBlock().getType());
+					 + " " + event.getBlock().getType() + " " + 
+					 event.getBlock().getData());
 		}
 		
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbil()) {
 			quester.callAbility(event.getBlock());
 			return;
+		}
+		
+		if (event.getBlock().getType() == Material.CHEST) {
+			quester.getChestSet().clicked(event.getPlayer(), event.getBlock());
 		}
 		
 		quester.rightClick(event.getBlock());
@@ -84,7 +91,8 @@ public class MineQuestBlockListener extends BlockListener {
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 
 					event.getBlock().getY() + " " + event.getBlock().getZ()
-					 + " " + event.getBlock().getType());
+					 + " " + event.getBlock().getType() + " " + 
+					 event.getBlock().getData());
 		}
 		
 		quester.checkItemInHand();

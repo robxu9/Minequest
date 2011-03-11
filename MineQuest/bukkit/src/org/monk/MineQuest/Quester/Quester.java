@@ -67,7 +67,7 @@ import org.monk.MineQuest.World.Town;
  */
 public class Quester {
 	private Location before_quest;
-//	private ChestSet chests;
+	private ChestSet chests;
 	private int class_exp;
 	private SkillClass classes[];
 	private double cubes;
@@ -329,6 +329,17 @@ public class Quester {
 		return 4;
 	}
 
+	public void callAbility() {
+		int i;
+		
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].isAbilityItem(player.getItemInHand())){
+				classes[i].callAbility();
+				return;
+			}
+		}
+	}
+
 	/**
 	 * Casts a left click bound ability on the given block.
 	 * 
@@ -340,17 +351,6 @@ public class Quester {
 		for (i = 0; i < classes.length; i++) {
 			if (classes[i].isAbilityItem(player.getItemInHand())){
 				classes[i].callAbility(block);
-				return;
-			}
-		}
-	}
-
-	public void callAbility() {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbility();
 				return;
 			}
 		}
@@ -397,6 +397,44 @@ public class Quester {
 		return true;
 	}
 
+	public boolean canEdit(Block block) {
+		Town town = null;
+		if (block != null) {
+			town = MineQuest.getTown(block.getLocation());
+		} else {
+			return true;
+		}
+
+		if (inQuest()) {
+			return quest.canEdit(this, block);
+		}
+
+		if (town != null) {
+			Property prop = town.getProperty(block.getLocation());
+			
+			if (prop != null) {
+				if (prop.canEdit(this)) {
+					return true;
+				} else {
+					sendMessage("You are not authorized to modify this property - please get the proper authorization");
+					dropRep(20);
+					return false;
+				}
+			} else {
+				prop = town.getTownProperty();
+				if (prop.canEdit(this)) {
+					return true;
+				} else {
+					sendMessage("You are not authorized to modify town - please get the proper authorization");
+					dropRep(10);
+					return false;
+				}
+			}	
+		}
+
+		return true;
+	}
+	
 	private boolean checkDamage(DamageCause cause) {
         if (cause == DamageCause.FIRE) {
         	return checkDamage(24040);
@@ -494,7 +532,7 @@ public class Quester {
 
 		return false;
 	}
-	
+
 	/**
 	 * Checks if the item in the Questers hand is bound
 	 * to any abilities. 
@@ -515,14 +553,14 @@ public class Quester {
 		
 		return false;
 	}
-
+	
 	public void clearQuest() {
 		this.quest = null;
 		poison_timer = 0;
 		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, before_quest.getWorld().getSpawnLocation()));
 		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(11000, player, before_quest));
 	}
-	
+
 	/**
 	 * Creates database entry for this quester with starting
 	 * classes and health.
@@ -583,7 +621,7 @@ public class Quester {
 	public void curePoison() {
 		poison_timer = 0;
 	}
-
+	
 	public void damage(int i) {
 		setHealth(getHealth() - i);
 	}
@@ -591,7 +629,7 @@ public class Quester {
 	public void debug() {
 		debug = !debug;
 	}
-	
+
 	/**
 	 * Called any time there is a generic damage event on 
 	 * the Quester.
@@ -602,7 +640,7 @@ public class Quester {
 		healthChange(event.getDamage(), event);
 	}
 
-	/**
+    /**
 	 * Called any time there is a damaged by block event
 	 * on the Quester.
 	 * @param event
@@ -611,7 +649,7 @@ public class Quester {
 		healthChange(event.getDamage(), event);
 	}
 
-    /**
+	/**
 	 * Called any time the Quester is defending against an
 	 * attack from another entity.
 	 * 
@@ -641,12 +679,6 @@ public class Quester {
 				}
 			}
 		}
-		
-//		if (MineQuest.isSpecial((LivingEntity)attacker)) {
-//			amount = MineQuest.getSpecial((LivingEntity)attacker).attack(this, player, amount);
-//		}
-		
-//		MineQuest.log("[INFO] Damage to " + name + " is " + amount);
 		
 		int sum = 0;
 		
@@ -769,7 +801,7 @@ public class Quester {
 	public void expClassGain(int class_exp) {
 		this.class_exp = class_exp;
 	}
-
+	
 	/**
 	 * Adds i experience to Quester and checks for level
 	 * up.
@@ -782,7 +814,7 @@ public class Quester {
 			levelUp();
 		}
 	}
-	
+
 	public Ability getAbility(String ability) {
 		for (SkillClass skill : classes) {
 			if (skill != null) {
@@ -797,11 +829,10 @@ public class Quester {
 	/**
 	 * Gets the ChestSet for given player
 	 * 
-	 * @param player
 	 * @return ChestSet
 	 */
-	public ChestSet getChestSet(Player player) {
-		return null;
+	public ChestSet getChestSet() {
+		return chests;
 	}
 
 	/**
@@ -835,7 +866,7 @@ public class Quester {
 	public int getClassExp() {
 		return class_exp;
 	}
-
+	
 	public SkillClass getClassFromAbil(String ability) {
 		for (SkillClass skill : classes) {
 			if (skill != null) {
@@ -846,7 +877,7 @@ public class Quester {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns amount of cubes the Quester has.
 	 * 
@@ -856,7 +887,7 @@ public class Quester {
 		return cubes;
 	}
 
-	/**
+    /**
 	 * Returns amount of experience for Quester.
 	 * @return
 	 */
@@ -864,7 +895,7 @@ public class Quester {
 		return exp;
 	}
 
-    /**
+	/**
 	 * Returns health of Quester.
 	 * @return
 	 */
@@ -1019,6 +1050,50 @@ public class Quester {
         return false;
     }
 
+	public boolean healthIncrease(PlayerItemEvent event) {
+		Material type = event.getItem().getType();
+		
+		switch (type) {
+		case GRILLED_PORK:
+			health += 8;
+			break;
+		case PORK:
+			health += 3;
+			break;
+		case MUSHROOM_SOUP:
+			health += 10;
+			break;
+		case BREAD:
+			health += 5;
+			break;
+		case CAKE:
+			health += 3;
+			break;
+		case GOLDEN_APPLE:
+			health = max_health;
+			break;
+		case APPLE:
+			health += (int)(.15 * max_health);
+			break;
+		case RAW_FISH:
+			health += 2;
+			break;
+		case COOKED_FISH:
+			health += 5;
+			break;
+		default:
+			return false;
+		}
+		event.setCancelled(true);
+		getPlayer().setItemInHand(null);
+		
+		if (health > max_health) health = max_health;
+		
+		updateHealth();
+		
+		return true;
+	}
+
 	public boolean inQuest() {
 		return quest != null;
 	}
@@ -1108,7 +1183,7 @@ public class Quester {
 			setHealth(getHealth() - 1);
 		}
 	}
-
+	
 	/**
 	 * Called each time the player is poisoned.
 	 * Updates the poison counter appropriately.
@@ -1117,7 +1192,7 @@ public class Quester {
 		sendMessage("Poisoned!");
 		poison_timer += 10;
 	}
-
+	
 	public void respawn(PlayerRespawnEvent event) {
 		health = max_health;
 		poison_timer = 0;
@@ -1129,6 +1204,35 @@ public class Quester {
 		return;
 	}
 	
+	public void rightClick(Block block) {
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(player.getItemInHand())) {
+				skill.rightClick(block);
+				expGain(3);
+				return;
+			}
+		}
+		
+		switch (blockToClass(block)) {
+		case 0: // Miner
+			getClass("Miner").rightClick(block);
+			return;
+		case 1: // Lumberjack
+			getClass("Lumberjack").rightClick(block);
+			return;
+		case 2: // Digger
+			getClass("Digger").rightClick(block);
+			return;
+		case 3: // Farmer
+			getClass("Farmer").rightClick(block);
+			return;
+		default:
+			break;
+		}
+		
+		return;
+	}
+
 	/**
 	 * Saves any changes in the Quester to the MySQL
 	 * Database.
@@ -1182,7 +1286,7 @@ public class Quester {
 		
 		updateHealth();
 	}
-	
+
 	public void setParty(Party party) {
 		this.party = party;
 	}
@@ -1259,7 +1363,7 @@ public class Quester {
 			classes[i].unBind(itemInHand);
 		}
 	}
-	
+
 	/**
 	 * Loads all of the Quester's status from the MySQL
 	 * database.
@@ -1288,8 +1392,8 @@ public class Quester {
 			enabled = results.getInt("enabled") > 0;
 			
 			cubes = results.getDouble("cubes");
-//			chests = new ChestSet();
 			last = results.getString("last_town");
+			chests = new ChestSet(this, results.getString("selected_chest"));
 		} catch (SQLException e) {
 			System.out.println("Issue getting parameters");
 			e.printStackTrace();
@@ -1362,116 +1466,5 @@ public class Quester {
 		player.setHealth(newValue);
 		
 		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
-	}
-
-	public void rightClick(Block block) {
-		for (SkillClass skill : classes) {
-			if (skill.isClassItem(player.getItemInHand())) {
-				skill.rightClick(block);
-				expGain(3);
-				return;
-			}
-		}
-		
-		switch (blockToClass(block)) {
-		case 0: // Miner
-			getClass("Miner").rightClick(block);
-			return;
-		case 1: // Lumberjack
-			getClass("Lumberjack").rightClick(block);
-			return;
-		case 2: // Digger
-			getClass("Digger").rightClick(block);
-			return;
-		case 3: // Farmer
-			getClass("Farmer").rightClick(block);
-			return;
-		default:
-			break;
-		}
-		
-		return;
-	}
-
-	public boolean healthIncrease(PlayerItemEvent event) {
-		Material type = event.getItem().getType();
-		
-		switch (type) {
-		case GRILLED_PORK:
-			health += 8;
-			break;
-		case PORK:
-			health += 3;
-			break;
-		case MUSHROOM_SOUP:
-			health += 10;
-			break;
-		case BREAD:
-			health += 5;
-			break;
-		case CAKE:
-			health += 3;
-			break;
-		case GOLDEN_APPLE:
-			health = max_health;
-			break;
-		case APPLE:
-			health += (int)(.15 * max_health);
-			break;
-		case RAW_FISH:
-			health += 2;
-			break;
-		case COOKED_FISH:
-			health += 5;
-			break;
-		default:
-			return false;
-		}
-		event.setCancelled(true);
-		getPlayer().setItemInHand(null);
-		
-		if (health > max_health) health = max_health;
-		
-		updateHealth();
-		
-		return true;
-	}
-
-	public boolean canEdit(Block block) {
-		Town town = null;
-		if (block != null) {
-			town = MineQuest.getTown(block.getLocation());
-		} else {
-			return true;
-		}
-
-		if (inQuest()) {
-			return quest.canEdit(this, block);
-		}
-
-		if (town != null) {
-			Property prop = town.getProperty(block.getLocation());
-			
-			if (prop != null) {
-				if (prop.canEdit(this)) {
-					return true;
-				} else {
-					sendMessage("You are not authorized to modify this property - please get the proper authorization");
-					dropRep(20);
-					return false;
-				}
-			} else {
-				prop = town.getTownProperty();
-				if (prop.canEdit(this)) {
-					return true;
-				} else {
-					sendMessage("You are not authorized to modify town - please get the proper authorization");
-					dropRep(10);
-					return false;
-				}
-			}	
-		}
-
-		return true;
 	}
 }

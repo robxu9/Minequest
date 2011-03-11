@@ -233,14 +233,14 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	private void processQuester(String[] split, Player player, PlayerChatEvent event) {
 		if (split[0].equals("/mystash")) {
-			MineQuest.getQuester(player).getChestSet(player).add(player);
+			MineQuest.getQuester(player).getChestSet().add(player);
 			event.setCancelled(true);
 		} else if (split[0].equals("/cancel")) {
-			MineQuest.getQuester(player).getChestSet(player).cancelAdd(player);
+			MineQuest.getQuester(player).getChestSet().cancelAdd(player);
 			event.setCancelled(true);
 		} else if (split[0].equals("/dropstash")) {
 			Town town = MineQuest.getTown(player);
-			MineQuest.getQuester(player).getChestSet(player).rem(player, town);
+			MineQuest.getQuester(player).getChestSet().rem(player, town);
 			event.setCancelled(true);
 		} else if (split[0].equals("/char")) {
 			Quester quester = MineQuest.getQuester(player);
@@ -623,6 +623,44 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("This Property is not for sale");
         	}
         	event.setCancelled(true);
+        } else if (split[0].equals("/addedit")) {
+        	event.setCancelled(true);
+        	if (!MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+        		player.sendMessage("You cannot edit this area");
+        		return;
+        	}
+        	Town town = MineQuest.getTown(player);
+        	if (town != null) {
+        		Property prop = town.getProperty(player);
+        		if (prop == null) prop = town.getTownProperty();
+        		
+        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
+        			player.sendMessage("Usage: /addedit <username>");
+        		} else {
+        			prop.addEdit(MineQuest.getQuester(split[1]));
+        		}
+        	} else {
+        		player.sendMessage("You are not in a town");
+        	}
+        } else if (split[0].equals("/remedit")) {
+        	event.setCancelled(true);
+        	if (!MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+        		player.sendMessage("You cannot edit this area");
+        		return;
+        	}
+        	Town town = MineQuest.getTown(player);
+        	if (town != null) {
+        		Property prop = town.getProperty(player);
+        		if (prop == null) prop = town.getTownProperty();
+        		
+        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
+        			player.sendMessage("Usage: /addedit <username>");
+        		} else {
+        			prop.remEdit(MineQuest.getQuester(split[1]));
+        		}
+        	} else {
+        		player.sendMessage("You are not in a town");
+        	}
         }
 	}
 	
