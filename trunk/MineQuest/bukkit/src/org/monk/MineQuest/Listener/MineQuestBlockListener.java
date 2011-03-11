@@ -15,7 +15,9 @@ public class MineQuestBlockListener extends BlockListener {
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		if (quester.isDebug()) {
-			quester.sendMessage(event.getBlock().getX() + " " + event.getBlock().getY() + " " + event.getBlock().getZ());
+			quester.sendMessage(event.getBlock().getX() + " " + 
+					event.getBlock().getY() + " " + event.getBlock().getZ()
+					 + " " + event.getBlock().getType());
 		}
 		
 		if (quester.inQuest()) {
@@ -67,7 +69,9 @@ public class MineQuestBlockListener extends BlockListener {
 		}
 		
 		if (quester.isDebug()) {
-			quester.sendMessage(event.getBlock().getX() + " " + event.getBlock().getY() + " " + event.getBlock().getZ());
+			quester.sendMessage(event.getBlock().getX() + " " + 
+					event.getBlock().getY() + " " + event.getBlock().getZ()
+					 + " " + event.getBlock().getType());
 		}
 		
 		quester.checkItemInHand();
@@ -87,7 +91,9 @@ public class MineQuestBlockListener extends BlockListener {
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		if (quester.isDebug()) {
-			quester.sendMessage(event.getBlock().getX() + " " + event.getBlock().getY() + " " + event.getBlock().getZ());
+			quester.sendMessage(event.getBlock().getX() + " " + 
+					event.getBlock().getY() + " " + event.getBlock().getZ()
+					 + " " + event.getBlock().getType());
 		}
 		
 		if (quester.inQuest()) {
