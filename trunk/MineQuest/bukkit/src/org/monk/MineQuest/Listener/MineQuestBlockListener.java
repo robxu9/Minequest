@@ -1,27 +1,38 @@
+/*
+ * MineQuest - Bukkit Plugin for adding RPG characteristics to minecraft
+ * Copyright (C) 2010  Jason Monk
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 package org.monk.MineQuest.Listener;
 
 
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.World.Property;
-import org.monk.MineQuest.World.Town;
 
 public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockDamage(org.bukkit.event.block.BlockDamageEvent event) {
-		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 
 					event.getBlock().getY() + " " + event.getBlock().getZ()
 					 + " " + event.getBlock().getType());
-		}
-		
-		if (quester.inQuest()) {
-			event.setCancelled(quester.getQuest().canEdit(quester, event.getBlock()));
 		}
 	
 		quester.checkItemInHand();
@@ -30,32 +41,13 @@ public class MineQuestBlockListener extends BlockListener {
 			event.setCancelled(true);
 			return;
 		}
-		quester.destroyBlock(event);
-		
-		if (town != null) {
-			Property prop = town.getProperty(event.getBlock().getLocation());
-			
-			if (prop != null) {
-				if (prop.canEdit(quester)) {
-					return;
-				} else {
-					event.getPlayer().sendMessage("You are not authorized to modify this property - please get the proper authorization");
-					quester.dropRep(20);
-					event.setCancelled(true);
-					return;
-				}
-			} else {
-				prop = town.getTownProperty();
-				if (prop.canEdit(quester)) {
-					return;
-				} else {
-					event.getPlayer().sendMessage("You are not authorized to modify town - please get the proper authorization");
-					quester.dropRep(10);
-					event.setCancelled(true);
-					return;
-				}
-			}	
+
+		if (quester.canEdit(event.getBlock())) {
+			quester.destroyBlock(event);
+		} else {
+			event.setCancelled(true);
 		}
+		
 		
 		super.onBlockDamage(event);
 	}
@@ -87,17 +79,12 @@ public class MineQuestBlockListener extends BlockListener {
 	
 	@Override
 	public void onBlockPlace(org.bukkit.event.block.BlockPlaceEvent event) {
-		Town town = MineQuest.getTown(event.getBlock().getLocation());
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 
 					event.getBlock().getY() + " " + event.getBlock().getZ()
 					 + " " + event.getBlock().getType());
-		}
-		
-		if (quester.inQuest()) {
-			event.setCancelled(quester.getQuest().canEdit(quester, event.getBlock()));
 		}
 		
 		quester.checkItemInHand();
@@ -107,30 +94,7 @@ public class MineQuestBlockListener extends BlockListener {
 			return;
 		}
 		
-		if (town != null) {
-			Property prop = town.getProperty(event.getBlock().getLocation());
-			
-			if (prop != null) {
-				if (prop.canEdit(MineQuest.getQuester(event.getPlayer()))) {
-					return;
-				} else {
-					event.getPlayer().sendMessage("You are not authorized to modify this property - please get the proper authorization");
-					MineQuest.getQuester(event.getPlayer()).dropRep(20);
-					event.setCancelled(true);
-					return;
-				}
-			} else {
-				prop = town.getTownProperty();
-				if (prop.canEdit(MineQuest.getQuester(event.getPlayer()))) {
-					return;
-				} else {
-					event.getPlayer().sendMessage("You are not authorized to modify town - please get the proper authorization");
-					MineQuest.getQuester(event.getPlayer()).dropRep(10);
-					event.setCancelled(true);
-					return;
-				}
-			}
-		}
+		event.setCancelled(!quester.canEdit(event.getBlock()));
 		
 		super.onBlockPlace(event);
 	}
