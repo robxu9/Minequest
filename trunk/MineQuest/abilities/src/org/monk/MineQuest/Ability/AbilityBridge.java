@@ -107,4 +107,9 @@ public class AbilityBridge extends Ability {
 		return new Miner();
 	}
 
+	@Override
+	public int getReqLevel() {
+		return 10;
+	}
+
 }

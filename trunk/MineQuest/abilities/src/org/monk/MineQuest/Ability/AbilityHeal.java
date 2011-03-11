@@ -49,6 +49,11 @@ public class AbilityHeal extends Ability {
 	public SkillClass getClassType() {
 		return new PeaceMage();
 	}
+
+	@Override
+	public int getReqLevel() {
+		return 0;
+	}
 	
 
 }

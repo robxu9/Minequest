@@ -65,4 +65,9 @@ public class AbilityHealOther extends Ability {
 		return new PeaceMage();
 	}
 
+	@Override
+	public int getReqLevel() {
+		return 0;
+	}
+
 }
