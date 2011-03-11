@@ -8,9 +8,12 @@ public class Lumberjack extends ResourceClass {
 
 	public Lumberjack(Quester quester, String type) {
 		super(quester, type);
-		// TODO Auto-generated constructor stub
 	}
 	
+	public Lumberjack() {
+		// shell
+	}
+
 	@Override
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();

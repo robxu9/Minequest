@@ -30,7 +30,35 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerItem(PlayerItemEvent event) {
-		MineQuest.getQuester(event.getPlayer()).healthIncrease(event);
+		Town town = MineQuest.getTown(event.getBlockClicked().getLocation());
+		Quester quester = MineQuest.getQuester(event.getPlayer());
+		
+		if (!MineQuest.getQuester(event.getPlayer()).healthIncrease(event)) {
+			if (town != null) {
+				Property prop = town.getProperty(event.getBlockClicked().getLocation());
+				
+				if (prop != null) {
+					if (prop.canEdit(quester)) {
+						return;
+					} else {
+						event.getPlayer().sendMessage("You are not authorized to modify this property - please get the proper authorization");
+						quester.dropRep(20);
+						event.setCancelled(true);
+						return;
+					}
+				} else {
+					prop = town.getTownProperty();
+					if (prop.canEdit(quester)) {
+						return;
+					} else {
+						event.getPlayer().sendMessage("You are not authorized to modify town - please get the proper authorization");
+						quester.dropRep(10);
+						event.setCancelled(true);
+						return;
+					}
+				}	
+			}
+		}
 		
 		super.onPlayerItem(event);
 	}
