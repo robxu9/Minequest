@@ -368,7 +368,7 @@ public class MineQuest extends JavaPlugin {
 		Ability ability = Ability.newAbility(string, null);
 		String ret = new String();
 		
-		for (ItemStack item : reduce(ability.getManaCost())) {
+		for (ItemStack item : reduce(ability.getRealManaCost())) {
 			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
 		}
 		
