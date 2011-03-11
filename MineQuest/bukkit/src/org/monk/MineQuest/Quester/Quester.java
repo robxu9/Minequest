@@ -626,8 +626,10 @@ public class Quester {
 		} else {
 			amount *= levelAdj * 1;
 		}
+		
 		amount /= 4;
-		if ((((EntityDamageByEntityEvent)event).getDamager() != null) && checkDamage(((EntityDamageByEntityEvent)event).getDamager().getEntityId())) {
+		
+		if ((event.getDamager() != null) && checkDamage(event.getDamager().getEntityId())) {
             event.setCancelled(true);
             return;
         }
@@ -1436,7 +1438,12 @@ public class Quester {
 	}
 
 	public boolean canEdit(Block block) {
-		Town town = MineQuest.getTown(block.getLocation());
+		Town town = null;
+		if (block != null) {
+			town = MineQuest.getTown(block.getLocation());
+		} else {
+			return true;
+		}
 
 		if (inQuest()) {
 			return quest.canEdit(this, block);
