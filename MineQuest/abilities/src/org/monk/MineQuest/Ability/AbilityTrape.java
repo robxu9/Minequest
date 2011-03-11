@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
@@ -51,26 +51,21 @@ public class AbilityTrape extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		Player player = quester.getPlayer();
 		int i, j, k;
 		int x, y, z;
-		if (entity == null) {
-			giveManaCost(player);
-			player.sendMessage(getName() + " must be used on a living entity");
-			return;
-		}
-		World world = entity.getWorld();
-		x = (int)entity.getLocation().getX();
-		y = (int)entity.getLocation().getY();
-		z = (int)entity.getLocation().getZ();
+		World world = location.getWorld();
+		x = (int)location.getX();
+		y = (int)location.getY();
+		z = (int)location.getZ();
 		
 		for (i = 1; i < 3; i++) {
 			for (j = -1; j < 2; j++) {
 				for (k = -1; k < 2; k++) {
 					Block nblock = world.getBlockAt(x + j, y - i, z + k);
-
 					if ((quester.getQuest() == null) || (quester.getQuest().canEdit(quester, nblock))) {
-						nblock.setTypeId(0);
+						if (nblock.getType() != Material.BEDROCK) {
+							nblock.setTypeId(0);
+						}
 					}
 				}
 			}
