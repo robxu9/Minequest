@@ -575,7 +575,7 @@ public abstract class Ability {
 	 * @param player
 	 */
 	public void silentUnBind(Quester quester) {
-		bind = 0;
+		bind = -1;
 		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
 	}
 
@@ -584,7 +584,7 @@ public abstract class Ability {
 	 * @param player
 	 */
 	public void unBind(Quester quester) {
-		bind = 0;
+		bind = -1;
 		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
 		quester.sendMessage(getName() + " is now unbound");
 	}

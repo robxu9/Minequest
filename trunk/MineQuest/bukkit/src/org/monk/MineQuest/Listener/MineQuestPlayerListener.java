@@ -99,6 +99,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		MineQuest.getQuester(event.getPlayer()).respawn(event);
+		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 	}
 	
 	@Override
@@ -287,6 +288,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			if (split.length < 2) {
 				player.sendMessage("Usage: /bind <ability>");
 				event.setCancelled(true);
+				return;
 			}
 			String abil = split[1];
 			int i;

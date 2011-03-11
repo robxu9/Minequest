@@ -48,7 +48,8 @@ public class MineQuestEntityListener extends EntityListener {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
             if (evente.getDamager() instanceof Player) {
                 MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
-            } else if (event.getEntity() instanceof Player) {
+            }
+            if (event.getEntity() instanceof Player) {
                 MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
             } else if (MineQuest.getMob((LivingEntity)event.getEntity()) != null) {
             	evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
@@ -61,7 +62,8 @@ public class MineQuestEntityListener extends EntityListener {
 			EntityDamageByProjectileEvent evente = ((EntityDamageByProjectileEvent)event);
             if (evente.getDamager() instanceof Player) {
                 MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
-            } else if (event.getEntity() instanceof Player) {
+            }
+            if (event.getEntity() instanceof Player) {
                 MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
             } else if (MineQuest.getMob((LivingEntity)event.getEntity()) != null) {
             	evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
