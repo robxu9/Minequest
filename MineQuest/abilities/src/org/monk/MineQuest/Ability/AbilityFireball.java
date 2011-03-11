@@ -92,4 +92,9 @@ public class AbilityFireball extends Ability {
 	public SkillClass getClassType() {
 		return new WarMage();
 	}
+
+	@Override
+	public int getReqLevel() {
+		return 0;
+	}
 }
