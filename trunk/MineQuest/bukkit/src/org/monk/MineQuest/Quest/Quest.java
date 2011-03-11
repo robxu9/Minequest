@@ -625,13 +625,13 @@ public class Quest {
 				if (triggers[i] >= -1) {
 					issueNextEvents(triggers[i]);
 				}
-				return false;
+				return true;
 			}
 		}
 
 		quester.sendMessage("A Mystical Force is keeping you from Modifying the world!");
 		
-		return true;
+		return false;
 	}
 
 	private boolean equals(Location location, Location location2) {
