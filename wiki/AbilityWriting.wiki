@@ -53,3 +53,10 @@ public int getCastTime();
 }}}
 
 This restricts how often the ability can be cast. The time is in milliseconds and if the function is not overloaded it defaults to 0.
+
+== Get Required Level ==
+{{{
+public abstract getReqLevel();
+}}}
+
+This determines at what level the class will receive this ability. Also whatever spell components have been set it will cost an additional Redstone per 4th required level. To remove this restriction then the function getRealManaCost can be overloaded.
