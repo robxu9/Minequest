@@ -18,7 +18,6 @@ This function is pretty simple, it returns the name of the ability that will be 
 {{{
 public abstract SkillClass getClassType();
 }}}
-
 This function determines what SkillClass will inherit this ability. Currently there are 8 options for this. They are Warrior, Archer, WarMage, PeaceMage, Miner, Digger, Lumberjack, and Farmer. This function should return a blank instance of the class it belongs to.
 
 {{{
@@ -60,3 +59,10 @@ public abstract getReqLevel();
 }}}
 
 This determines at what level the class will receive this ability. Also whatever spell components have been set it will cost an additional Redstone per 4th required level. To remove this restriction then the function getRealManaCost can be overloaded.
+
+== Structural Changes ==
+
+All abilities that make structural changes to the world (i.e. removing the floor like Trap) should check to make sure the player is authorized to make these changes. This can be checked using the canEdit function for any quester. This will return true if the quester is allowed to edit the desired block. It will also set off any quest affects for trying to edit that specific block.
+{{{
+public boolean canEdit(Block affected);
+}}}
