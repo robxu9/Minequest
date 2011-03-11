@@ -1,3 +1,21 @@
+/*
+ * MineQuest - Bukkit Plugin for adding RPG characteristics to minecraft
+ * Copyright (C) 2010  Jason Monk
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 package org.monk.MineQuest.Quester;
 
 
@@ -37,6 +55,7 @@ import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.DefendingClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
 /**
@@ -1413,6 +1432,39 @@ public class Quester {
 		
 		updateHealth();
 		
+		return true;
+	}
+
+	public boolean canEdit(Block block) {
+		Town town = MineQuest.getTown(block.getLocation());
+
+		if (inQuest()) {
+			return quest.canEdit(this, block);
+		}
+
+		if (town != null) {
+			Property prop = town.getProperty(block.getLocation());
+			
+			if (prop != null) {
+				if (prop.canEdit(this)) {
+					return true;
+				} else {
+					sendMessage("You are not authorized to modify this property - please get the proper authorization");
+					dropRep(20);
+					return false;
+				}
+			} else {
+				prop = town.getTownProperty();
+				if (prop.canEdit(this)) {
+					return true;
+				} else {
+					sendMessage("You are not authorized to modify town - please get the proper authorization");
+					dropRep(10);
+					return false;
+				}
+			}	
+		}
+
 		return true;
 	}
 }
