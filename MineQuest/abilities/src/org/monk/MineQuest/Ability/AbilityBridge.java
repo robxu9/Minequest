@@ -92,12 +92,16 @@ public class AbilityBridge extends Ability {
 
 			Block block = loc_1.getWorld().getBlockAt(loc_1);
 			if (block.getType() == Material.AIR) {
-				block.setType(Material.COBBLESTONE);
+				if ((quester == null) || (quester.getQuest() == null) || (quester.getQuest().canEdit(quester, block))) {
+					block.setType(Material.COBBLESTONE);
+				}
 			}
 
 			block = loc_2.getWorld().getBlockAt(loc_2);
 			if (block.getType() == Material.AIR) {
-				block.setType(Material.COBBLESTONE);
+				if ((quester == null) || (quester.getQuest() == null) || (quester.getQuest().canEdit(quester, block))) {
+					block.setType(Material.COBBLESTONE);
+				}
 			}
 		}
 	}
