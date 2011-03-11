@@ -8,9 +8,12 @@ public class Farmer extends ResourceClass {
 
 	public Farmer(Quester quester, String type) {
 		super(quester, type);
-		// TODO Auto-generated constructor stub
 	}
 	
+	public Farmer() {
+		// Shell
+	}
+
 	@Override
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
