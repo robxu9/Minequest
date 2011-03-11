@@ -259,7 +259,11 @@ public class MineQuestPlayerListener extends PlayerListener {
 			if (split.length < 2) {
 				MineQuest.getQuester(player).listAbil();
 			} else {
-				MineQuest.getQuester(player).getClass(split[1]).listAbil();
+				if (MineQuest.getQuester(player).getClass(split[1]) != null) {
+					MineQuest.getQuester(player).getClass(split[1]).listAbil();
+				} else {
+					player.sendMessage(split[1] + " is not a valid class");
+				}
 			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/unbind")) {
@@ -616,6 +620,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		player.sendMessage("This Property is not for sale");
         	}
+        	event.setCancelled(true);
         }
 	}
 	
