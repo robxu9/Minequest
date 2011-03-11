@@ -1,5 +1,8 @@
 package org.monk.MineQuest.Quester.SkillClass.Resource;
 
+import org.bukkit.Material;
+import org.bukkit.block.BlockDamageLevel;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
@@ -8,9 +11,27 @@ public class Digger extends ResourceClass {
 
 	public Digger(Quester quester, String type) {
 		super(quester, type);
-		// TODO Auto-generated constructor stub
 	}
 	
+	public Digger() {
+		// Shell
+	}
+	
+	@Override
+	public void blockDestroy(BlockDamageEvent event) {
+		super.blockDestroy(event);
+		
+		if (event.getDamageLevel() == BlockDamageLevel.BROKEN) {
+			if (event.getBlock().getType() == Material.GRAVEL) {
+				if ((getAbility("Enhanced Flint") != null) && 
+						(getAbility("Enhanced Flint").isEnabled())) {
+					event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(),
+							new ItemStack(Material.FLINT, 1));
+				}
+			}
+		}
+	}
+
 	@Override
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
