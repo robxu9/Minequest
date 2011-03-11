@@ -1,6 +1,6 @@
 /*
  * MineQuest - Bukkit Plugin for adding RPG characteristics to minecraft
- * Copyright (C) 2010  Jason Monk
+ * Copyright (C) 2011  Jason Monk
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
