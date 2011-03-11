@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.player.PlayerItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -30,6 +31,7 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityBinder;
 import org.monk.MineQuest.Event.EntityTeleportEvent;
+import org.monk.MineQuest.Event.HealthEvent;
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
@@ -1337,6 +1339,8 @@ public class Quester {
 		}
 		
 		player.setHealth(newValue);
+		
+		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
 	}
 
 	public void rightClick(Block block) {
@@ -1366,5 +1370,45 @@ public class Quester {
 		}
 		
 		return;
+	}
+
+	public void healthIncrease(PlayerItemEvent event) {
+		Material type = event.getItem().getType();
+		
+		switch (type) {
+		case GRILLED_PORK:
+			health += 8;
+			break;
+		case PORK:
+			health += 3;
+			break;
+		case MUSHROOM_SOUP:
+			health += 10;
+			break;
+		case BREAD:
+			health += 5;
+			break;
+		case CAKE:
+			health += 3;
+			break;
+		case GOLDEN_APPLE:
+			health = max_health;
+			break;
+		case APPLE:
+			health += (int)(.15 * max_health);
+			break;
+		case RAW_FISH:
+			health += 2;
+			break;
+		case COOKED_FISH:
+			health += 5;
+			break;
+		}
+		event.setCancelled(true);
+		getPlayer().setItemInHand(null);
+		
+		if (health > max_health) health = max_health;
+		
+		updateHealth();
 	}
 }
