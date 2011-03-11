@@ -49,52 +49,12 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
  *
  */
 public abstract class Ability {
-	/**
-	 * Creates an instance of the proper ability based on name
-	 * and returns it as an Ability.
-	 * 
-	 * @param name Name of Ability
-	 * @param myclass Instance of SkillClass holding the Ability
-	 * @return new Ability created
-	 */
-	static public Ability newAbility(String name, SkillClass myclass) {
-		for (Ability ability : newAbilities(myclass)) {
-			if (name.equalsIgnoreCase(ability.getName())) {
-				return ability;
-			}
-		}
-		MineQuest.log("Warning: Could not find ability " + name);
-		
-		return null;
-	}
-	
-	@SuppressWarnings("unchecked")
-	static public List<Ability> newAbilities(SkillClass myclass) {
-		List<String> classes = new ArrayList<String>();
-		List<Ability> abilities = new ArrayList<Ability>();
-		
-		try {
-			classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
-		} catch (Exception e) {
-			MineQuest.log("Unable to get Abilities");
-		}
-		for (String this_class : classes) {
-			try {
-				Ability ability = (Ability)getClass(this_class).newInstance();
-				
-				ability.setSkillClass(myclass);
-				
-				if (myclass == null) {
-					abilities.add(ability);
-				} else if (myclass.getClass().equals(ability.getClassType().getClass())) {
-					abilities.add(ability);
-				}
-			} catch (Exception e) {
-				MineQuest.log("Could not load Ability: " + this_class);
-			}
-		}
-
-		return abilities;
+	// http://www.devx.com/tips/Tip/38975
+	@SuppressWarnings("rawtypes")
+	public static Class getClass(String the_class) throws Exception {
+		URL url = new URL("file:abilities.jar");
+		URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+		return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
 	}
 	
 	//following code came from http://snippets.dzone.com/posts/show/4831
@@ -132,18 +92,6 @@ public abstract class Ability {
 		return classes;
 	}
 	
-	// http://www.devx.com/tips/Tip/38975
-	@SuppressWarnings("rawtypes")
-	public static Class getClass(String the_class) throws Exception {
-		URL url = new URL("file:abilities.jar");
-		URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
-		return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
-	}
-	
-	public int getReqLevel() {
-		return 0;
-	}
-	
 	/**
 	 * Returns the nearest empty block to location. Location is not
 	 * Guaranteed to be closest to location. If the block is solid
@@ -173,14 +121,62 @@ public abstract class Ability {
 		
 		return i;
 	}
+	
+	@SuppressWarnings("unchecked")
+	static public List<Ability> newAbilities(SkillClass myclass) {
+		List<String> classes = new ArrayList<String>();
+		List<Ability> abilities = new ArrayList<Ability>();
+		
+		try {
+			classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
+		} catch (Exception e) {
+			MineQuest.log("Unable to get Abilities");
+		}
+		for (String this_class : classes) {
+			try {
+				Ability ability = (Ability)getClass(this_class).newInstance();
+				
+				ability.setSkillClass(myclass);
+				
+				if (myclass == null) {
+					abilities.add(ability);
+				} else if (myclass.getClass().equals(ability.getClassType().getClass())) {
+					abilities.add(ability);
+				}
+			} catch (Exception e) {
+				MineQuest.log("Could not load Ability: " + this_class);
+			}
+		}
+
+		return abilities;
+	}
+	
+	/**
+	 * Creates an instance of the proper ability based on name
+	 * and returns it as an Ability.
+	 * 
+	 * @param name Name of Ability
+	 * @param myclass Instance of SkillClass holding the Ability
+	 * @return new Ability created
+	 */
+	static public Ability newAbility(String name, SkillClass myclass) {
+		for (Ability ability : newAbilities(myclass)) {
+			if (name.equalsIgnoreCase(ability.getName())) {
+				return ability;
+			}
+		}
+		MineQuest.log("Warning: Could not find ability " + name);
+		
+		return null;
+	}
+	
 	protected int bind;
 	protected int cast_time;
 	protected int count;
 	protected boolean enabled;
+	protected long last_msg;
 	protected SkillClass myclass;
 	protected long time;
-	protected long last_msg;
-	
 	/**
 	 * Creates an Ability
 	 * 
@@ -196,19 +192,6 @@ public abstract class Ability {
 		bind = -1;
 		time = now.getTimeInMillis();
 		last_msg = 0;
-	}
-	
-	public void setSkillClass(SkillClass skillclass) {
-		this.myclass = skillclass;
-	}
-	
-	public void notify(Quester quester, String message) {
-		Calendar now = Calendar.getInstance();
-		
-		if ((now.getTimeInMillis() - last_msg) > 2000) {
-			last_msg = now.getTimeInMillis();
-			quester.sendMessage(message);
-		}		
 	}
 	
 	/**
@@ -242,6 +225,18 @@ public abstract class Ability {
 	}
 	
 	/**
+	 * This is called when non-passive abilities are activated.
+	 * Must be overloaded for all non-passive abilities. Binding
+	 * and casting cost have already been checked.
+	 * 
+	 * @param quester Caster
+	 * @param location Location of Target
+	 * @param entity Target
+	 */
+	public abstract void castAbility(Quester quester, Location location,
+			LivingEntity entity);
+	
+	/**
 	 * Disable the ability
 	 */
 	public void disable() {
@@ -254,18 +249,18 @@ public abstract class Ability {
 	 * @param quester Quester enabling the ability
 	 */
 	public void enable(Quester quester) {
-		if (quester.canCast(getManaCost())) {
+		if (quester.canCast(getRealManaCost())) {
 			enabled = true;
 			quester.sendMessage(getName() + " enabled");
 		} else {
 			quester.sendMessage("Not Enough Mana");
 		}
 	}
-
+	
 	public boolean equals(String name) {
 		return name.equals(getName());
 	}
-
+	
 	/**
 	 * Get the casting time of the spell that restricts
 	 * how often it can be cast.
@@ -274,9 +269,9 @@ public abstract class Ability {
 	public int getCastTime() {
 		return 0;
 	}
-	
+
 	public abstract SkillClass getClassType();
-	
+
 	/**
 	 * Gets the distance between a Player and the entity.
 	 * 
@@ -352,20 +347,33 @@ public abstract class Ability {
 		return entities.get(i);
 	}
 	
+	public List<ItemStack> getRealManaCost() {
+		List<ItemStack> cost = getManaCost();
+
+		int i;
+		for (i = 0; i < (getReqLevel() / 4); i++) {
+			cost.add(new ItemStack(Material.REDSTONE, 1));
+		}
+
+		return cost;
+	}
+	
+	public abstract int getReqLevel();
+	
 	/**
 	 * Gives the casting cost back to the player.
 	 * 
 	 * @param player
 	 */
 	protected void giveManaCost(Player player) {
-		List<ItemStack> cost = addLevelCost(getManaCost());
+		List<ItemStack> cost = getRealManaCost();
 		int i;
 		
 		for (i = 0; i < cost.size(); i++) {
 			player.getInventory().addItem(cost.get(i));
 		}
 	}
-
+	
 	/**
 	 * Checks if the itemStack is bound to this ability.
 	 * 
@@ -375,7 +383,7 @@ public abstract class Ability {
 	public boolean isBound(ItemStack itemStack) {
 		return (bind == itemStack.getTypeId());
 	}
-	
+
 	/**
 	 * Checks if this ability affects defending.
 	 * 
@@ -415,7 +423,7 @@ public abstract class Ability {
 			return true;
 		}
 	}
-
+	
 	/**
 	 * Determines if player and baseEntity are within radius distance
 	 * of each other.
@@ -428,7 +436,7 @@ public abstract class Ability {
 	protected boolean isWithin(LivingEntity player, LivingEntity baseEntity, int radius) {
 		return MineQuest.distance(player.getLocation(), baseEntity.getLocation()) < radius;
 	}
-	
+
 	/**
 	 * Moves the entity other so that it is not within the distance
 	 * specified of the player. It keeps the direction of location
@@ -457,6 +465,15 @@ public abstract class Ability {
 		
 		return;
 	}
+	
+	public void notify(Quester quester, String message) {
+		Calendar now = Calendar.getInstance();
+		
+		if ((now.getTimeInMillis() - last_msg) > 2000) {
+			last_msg = now.getTimeInMillis();
+			quester.sendMessage(message);
+		}		
+	}
 
 	/**
 	 * Parse any affects of the ability being activated as part
@@ -477,6 +494,17 @@ public abstract class Ability {
 	}
 
 	/**
+	 * Parse any affects of the ability being activated
+	 * as part of a left click.
+	 * 
+	 * @param quester
+	 * @param block
+	 */
+	public void parseClick(Quester quester, Block block) {
+		useAbility(quester, block.getLocation(), null);
+	}
+	
+	/**
 	 * Parse any affects of the ability being activated as part
 	 * of a defense.
 	 * 
@@ -487,17 +515,6 @@ public abstract class Ability {
 	 */
 	public int parseDefend(Quester quester, LivingEntity mob, int amount) {
 		return 0;
-	}
-	
-	/**
-	 * Parse any affects of the ability being activated
-	 * as part of a left click.
-	 * 
-	 * @param quester
-	 * @param block
-	 */
-	public void parseClick(Quester quester, Block block) {
-		useAbility(quester, block.getLocation(), null);
 	}
 
 	/**
@@ -522,14 +539,12 @@ public abstract class Ability {
 		
 	}
 
-	/**
-	 * Clears bindings for this ability.
-	 * @param player
-	 */
-	public void unBind(Quester quester) {
-		bind = 0;
-		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
-		quester.sendMessage(getName() + " is now unbound");
+	public void setSkillClass(SkillClass skillclass) {
+		this.myclass = skillclass;
+	}
+
+	public void silentBind(Quester quester, ItemStack itemStack) {
+		bind = itemStack.getTypeId();
 	}
 
 	/**
@@ -541,6 +556,16 @@ public abstract class Ability {
 		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
 	}
 
+	/**
+	 * Clears bindings for this ability.
+	 * @param player
+	 */
+	public void unBind(Quester quester) {
+		bind = 0;
+		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
+		quester.sendMessage(getName() + " is now unbound");
+	}
+	
 	/**
 	 * This activates non-passive abilities. First makes sure that
 	 * the ability is enabled, can be cast, and is bound. Then will
@@ -559,7 +584,7 @@ public abstract class Ability {
 			return;
 		}
 		
-		if ((quester == null) || quester.canCast(addLevelCost(getManaCost()))) {
+		if ((quester == null) || quester.canCast(getRealManaCost())) {
 			if (canCast() || (player == null)) {
 				if ((player == null) || player.getItemInHand().getTypeId() == bind) {
 					notify(quester, "Casting " + getName());
@@ -579,32 +604,5 @@ public abstract class Ability {
 				notify(quester, "You do not have the materials to cast that - try /spellcomp " + getName());
 			}
 		}
-	}
-
-	private List<ItemStack> addLevelCost(List<ItemStack> manaCost) {
-		if (myclass.getLevel() > 5) {
-			int i;
-			for (i = 0; i < (getReqLevel() / 4); i++) {
-				manaCost.add(new ItemStack(Material.REDSTONE, 1));
-			}
-		}
-		
-		return manaCost;
-	}
-
-	/**
-	 * This is called when non-passive abilities are activated.
-	 * Must be overloaded for all non-passive abilities. Binding
-	 * and casting cost have already been checked.
-	 * 
-	 * @param quester Caster
-	 * @param location Location of Target
-	 * @param entity Target
-	 */
-	public abstract void castAbility(Quester quester, Location location,
-			LivingEntity entity);
-	
-	public void silentBind(Quester quester, ItemStack itemStack) {
-		bind = itemStack.getTypeId();
 	}
 }

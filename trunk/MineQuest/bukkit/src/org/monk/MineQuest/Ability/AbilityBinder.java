@@ -72,4 +72,9 @@ public class AbilityBinder extends Ability {
 	public List<ItemStack> getManaCost() {
 		return new ArrayList<ItemStack>();
 	}
+
+	@Override
+	public int getReqLevel() {
+		return 0;
+	}
 }
