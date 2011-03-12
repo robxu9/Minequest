@@ -38,15 +38,19 @@ public class AbilityHarvestLeaves extends Ability {
 		int i, j, k;
 		Location loc = new Location(location.getWorld(), (int)location.getX() - 15,
 				(int)location.getY() - 15, (int)location.getZ() - 15);
-		
+
+		quester.sendMessage("Checking Block " + loc.getX() + " " + loc.getY() + " " + loc.getZ());
 		for (i = 0; i < 30; i++) {
+			loc.setY(location.getY() - 15);
 			for (j = 0; j < 30; j++) {
+				loc.setZ(location.getZ() - 15);
 				for (k = 0; k < 30; k++) {
 					Block block = loc.getWorld().getBlockAt(loc);
 					
+					
 					if (block.getType() == Material.LEAVES) {
 						block.setType(Material.AIR);
-						if (myclass.getGenerator().nextDouble() < .6) {
+						if (myclass.getGenerator().nextDouble() < .1) {
 							loc.getWorld().dropItemNaturally(loc, new ItemStack(Material.SAPLING, 1));
 						}
 					}
