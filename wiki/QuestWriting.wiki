@@ -20,15 +20,22 @@ Quest files are ":" delimited for the most part. This means there is a single co
 ----
 
 =World / Load World=
-This option defines the place where the quest will take place, it should be the first thing in your quest file. Unless you want the quest to take place wherever the questers currently are. World is the simpler of the two of these as it simply loads the world specified the format is as follows.
+This option defines the place where the quest will take place, it should be the first thing in your quest file. Unless you want the quest to take place wherever the questers currently are. World is the simpler of the two of these as it simply loads the world specified the format is as follows. If it is a nether world then there is a added parameter on the end.
 {{{
-World:world_name
+World:world_name[:Nether]
 }}}
 The problem with this is that you might have wood that gets burned, or floors destroyed by traps, or even quest events that destroy your own dungeon. In the World option these affects are saved and the world cannot easily be reused. Load World is the alternative it takes two parameters, the first is the world where the quest will take place, any existing world with that name will be deleted and the second name is copied and used in its place.
 {{{
-LoadWorld:junk_name:unaffected_load_world
+LoadWorld:junk_name:unaffected_load_world[:Nether]
 }}}
-I plan on adding an Instance World option which will only take one parameter which is the name of the world to load from and randomly generates an available name to use for the world to quest in. This way multiple parties can load the same quest at the same time.
+An instance option is currently being worked on and is in a semi-working state. Excluding issues listed on the [KnownIssues] page. It will allow up to the specified max number of parallel parties running the quest in the world. Other than the max parameter it works just like the LoadWorld option except the names of each world are the junk_name followed by the instance number _i.
+{{{
+LoadWorld:junk_name:unaffected_load_world[:Nether]
+}}}
+When using the Instance option or the LoadWorld, one more thing needs to be specified in the quest file. That is the QuestArea. When the instance world is reused the block types of all of the blocks in the QuestArea will be reloaded. This parameter should come before the world option in the file.
+{{{
+QuestArea:min x:min y:min z:max x:max y:max z
+}}}
 
 =Spawn=
 This is used to set a re-spawn point for questers that are in the quest. If this is not set they will re-spawn at the re-spawn point for the world. This is vital for quests that block off the entrance point. This takes 3 doubles after it which are the spawn point.
