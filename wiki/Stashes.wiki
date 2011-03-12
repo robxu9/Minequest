@@ -1,0 +1,30 @@
+= Introduction =
+
+This page describes the stash system implemented in MineQuest.
+
+
+= Details =
+
+MineQuest is equipped with a system that simulates the stash you would find in a classic RPG such as Diablo 2. This is a chest of stuff that will follow you from town to town, so you are never without your important belongings. You wouldn't want to bring such things with you on a quest as you might lose them when you die.
+
+The stash system in MineQuest is designed so that you are allowed any one chest of your choosing in a town to be an instance of your stash, as well as one which is not in any chest. Currently this is restricted to a single chest but future releases of MineQuest will allow for double chests. 
+
+When a chest is a part of your stash it works as follows. When you open the chest it will check if your stash is located in the chest, if it is already there it will do nothing. However if your stash is currently sitting in another town it will move it to you before your window opens. This means all of your equipments is physically located wherever you opened your stash last.
+
+= Commands =
+
+You can initiate adding a chest to your stash by using the following command then right clicking on the desired chest.
+{{{
+/mystash
+}}}
+
+If you issue the command above and decide you don't want to add any chest to your stash then you can cancel the add using the following command.
+{{{
+/cancel
+}}}
+
+You can remove the stash you have in the current town using the following command. If you have more than one stash it will move the contents to another instance of your stash when removed. If this is the last instance of your stash then it will leave the contents of the chest untouched.
+{{{
+/dropstash
+}}}
+
