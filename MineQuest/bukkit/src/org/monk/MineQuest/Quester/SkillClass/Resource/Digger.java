@@ -22,24 +22,29 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
 
 public class Digger extends ResourceClass {
+	private int dig_count;
 
 	public Digger(Quester quester, String type) {
 		super(quester, type);
+		dig_count = 0;
 	}
 	
 	public Digger() {
 		// Shell
+		dig_count = 0;
 	}
 	
 	@Override
 	public void blockDestroy(BlockDamageEvent event) {
 		super.blockDestroy(event);
-		
-		if (event.getDamageLevel() == BlockDamageLevel.BROKEN) {
+		dig_count++;
+
+		if (dig_count == 3) {
 			if (event.getBlock().getType() == Material.GRAVEL) {
 				if ((getAbility("Enhanced Flint") != null) && 
 						(getAbility("Enhanced Flint").isEnabled())) {
@@ -47,6 +52,7 @@ public class Digger extends ResourceClass {
 							new ItemStack(Material.FLINT, 1));
 				}
 			}
+			dig_count = 0;
 		}
 	}
 
