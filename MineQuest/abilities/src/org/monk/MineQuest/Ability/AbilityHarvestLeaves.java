@@ -36,8 +36,8 @@ public class AbilityHarvestLeaves extends Ability {
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
 		int i, j, k;
-		Location loc = new Location(location.getWorld(), location.getX() - 15,
-				location.getY() - 15, location.getZ() - 15);
+		Location loc = new Location(location.getWorld(), (int)location.getX() - 15,
+				(int)location.getY() - 15, (int)location.getZ() - 15);
 		
 		for (i = 0; i < 30; i++) {
 			for (j = 0; j < 30; j++) {
