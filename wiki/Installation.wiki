@@ -1,0 +1,9 @@
+#How to install MineQuest
+
+= Details=
+
+MineQuest installation for the most part is fairly simple. It installs like a simple bukkit plugin, except you also have to add the abilities.jar file to your root bukkit directory (not in plugins). Upon the first startup it will probably not work, probably because you haven't set up your properties file yet.
+
+Set up the properties file with access to a MySQL database. You probably want to make sure silent is equal to 1 to make sure it doesn't spam your screen with MySQL queries constantly. I would recommend you give it a blank database as it has a whole bunch of tables and whatnot that it fills in. That should be it, after that things should be working for you. 
+
+If you do have any problems with installation I would be happy to try to help you sort things out, so just send me an email at jmonk@critical-failure.us.
