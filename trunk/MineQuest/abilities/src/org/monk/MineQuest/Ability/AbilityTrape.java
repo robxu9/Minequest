@@ -63,7 +63,7 @@ public class AbilityTrape extends Ability {
 	
 	@Override
 	public int getCastTime() {
-		return 5000;
+		return 2500;
 	}
 	
 	@Override

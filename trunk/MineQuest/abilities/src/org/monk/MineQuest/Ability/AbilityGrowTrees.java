@@ -64,7 +64,7 @@ public class AbilityGrowTrees extends Ability {
 		cost.add(new ItemStack(Material.SAPLING, 1));
 		cost.add(new ItemStack(Material.SAPLING, 1));
 		
-		return null;
+		return cost;
 	}
 
 	@Override
