@@ -4,6 +4,7 @@
 
 MineQuest is designed to be an all encompassing system for minecraft, which runs as a bukkit plugin. This means that it manages towns, property, money, character levels, and damage all in one. I acknowledge that this is not the normal system for a bukkit plugin, as usually they do one specific aspect and have other plugins to do other things. If you like this system and are upset by the fact that my plugin is all encompassing, or you think something like this already exists, then my recommendation is that you don't use my plugin. Seriously, stop reading here.
 MineQuest is designed to make the game more progressive, while encouraging a community environment in the server. Currently MineQuest does have pvp support, but not all spells work correctly for it yet. 
+There is a list of [KnownIssues] available.
 
 = Towns =
 Everything is base around rectangularly defined towns. A town in MineQuest can hold a number of stores/properties. Each town has a mayor, the mayor can edit anything in town, as well as provide permissions to edit things in town. Each property in the town is very similar to the town itself, it has an owner and the owner can also give other people permission to edit it as needed. Stores have no owner as they are owned by the town.
