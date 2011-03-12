@@ -19,10 +19,8 @@
 package org.monk.MineQuest.Quester.SkillClass.Resource;
 
 import org.bukkit.Material;
-import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
 
