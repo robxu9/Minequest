@@ -149,3 +149,15 @@ This event works the same way as the previous except that it waits for any singl
 {{{
 Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
 }}}
+
+== Can Edit Events ==
+These work differently than all other events. They have an event id to conform with the Event formatting, however these events can never be added to a Task. Instead these allow players to edit a specific block in the world, this will also prevent the message about not editing the world. They also can activate a specific quest task. This means you can have a lever pull cause a task to be issued. 
+{{{
+Event:id:CanEdit:loc x:loc y:loc z:task id
+}}}
+
+=== Advanced Edit Events ===
+I know that more options for edit events is very important and one of the first things I will do is add areas/shapes to CanEdit events so there don't have to be 50 billion in a quest. Also more advanced ones that take edits on multiple locations to work will be implemented.
+
+= More Events =
+Keep in mind that MineQuest is a work in progress and still has a lot of work ahead of it. I plan on adding many more events in the future, but I feel like this should be enough for a good proof of concept. If you are ever working on a quest that you have a very important specific event you want me to code up, then just send me an email (jmonk@critical-failure.us) and I will do my best to get it done for you.
