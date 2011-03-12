@@ -15,7 +15,7 @@ Each property is rectangular. There are two types of properties, there are those
 Stores are shaped the same way as properties except that they do not have the editing permissions of a property, they are simply part of a town. The usage for stores and some details about commerce related commands can be found at [Cubonomy]. 
 
 == Stashes ==
-MineQuest has a simple way for questers to move their equipment as they travel from town to town using the built-in [stash] system. It allows one chest contents to follow the quester from town to town.
+MineQuest has a simple way for questers to move their equipment as they travel from town to town using the built-in [stashes] system. It allows one chest contents to follow the quester from town to town.
 
 = Skill Classes =
 There are two types of classes in MineQuest, there are resource classes and combat classes. The resource classes are based around things like gathering materials and building things, whereas the combat classes are based around killing monsters and staying alive. 
