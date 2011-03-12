@@ -46,6 +46,10 @@ public class AbilityGrowWheat extends Ability {
 							(int)location.getX() + x, 
 							(int)location.getY(), 
 							(int)location.getZ() + z).setType(Material.CROPS);
+					location.getWorld().getBlockAt(
+							(int)location.getX() + x, 
+							(int)location.getY(), 
+							(int)location.getZ() + z).setData((byte)0x07);
 				}
 			}
 		}
