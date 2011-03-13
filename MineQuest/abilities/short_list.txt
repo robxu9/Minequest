@@ -1,0 +1,24 @@
+Warrior
+Bash
+Toughness
+Whirlwind
+Health Regeneration
+
+Archer
+Poison Arrow
+Deflect Missiles
+Critical Shot
+
+WarMage
+Cone of Cold
+Fireblast
+Wall of Lava
+Encase
+
+PeaceMage
+Purge Zombie
+Purge Spider
+Purge Skeleton
+Purge Creeper
+Teleport
+Explode Creepers
