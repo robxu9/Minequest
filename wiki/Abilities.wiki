@@ -157,7 +157,7 @@ Creates a wall of fire in front of the caster 7 blocks wide.
 === Coming Soon ===
 || Spell || Level || Components ||
 || Encase || 20 || 10 Cobblestone ||
-|| Wall of Fire || 15 || ||
+|| Wall of Lava || 15? || ||
 || Fireblast || 15 || 10 Coal ||
 || Cone of Cold || 12 || 12 Water + 3 Snow ||
 || Polymorph || 40 || Leather + Meat + Feather ||
