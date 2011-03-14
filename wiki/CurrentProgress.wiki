@@ -1,0 +1,15 @@
+#What I am currently working on.
+
+I'm going to try to use this page to keep track of stuff that I am currently working on. It is possible that I won't keep up with this properly so keep an eye on the updated date.
+
+= Abilities =
+
+I am trying to implement all of the spells I originally had in mind for levels 10-20 of combat classes. A list of most of these can be found on the [Abilities] page.
+
+= NPCs =
+
+I really think what MineQuest needs to be complete is some system to have NPCs in game. This will start by having them available to add to dungeons and to towns, and eventually will result in mercenaries that you can hire to follow you.
+
+= Dungeon Instances =
+
+This is driving me crazy. I'm having way too hard a time getting the dungeon instances to reset properly. Its really just an issue with doors, but for all I know this could also affect red stone or other things with information stored in the data byte. I tried setting the top of the doors to have data 0x08, like mentioned in a bukkit forum thread I found. That had no affect. I also tried setting the data of every block in the world to the data of the original world, that also seemed to have no affect. I really just need a way to unload worlds from bukkit.
