@@ -21,6 +21,7 @@ package org.monk.MineQuest.Listener;
 
 import java.util.List;
 
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
@@ -41,6 +42,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.Store;
 import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
+
+import redecouverte.npcspawner.NpcSpawner;
 
 public class MineQuestPlayerListener extends PlayerListener {
 	
@@ -694,6 +697,9 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/mobs")) {
         	this.event.setComplete(true);
         	event.setCancelled(true);
+        } else if (split[0].equals("/spawnnpc")) {
+        	Location location = player.getLocation();
+        	NpcSpawner.SpawnBasicHumanNpc(split[1], split[2], player.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         }
 	}
 }
