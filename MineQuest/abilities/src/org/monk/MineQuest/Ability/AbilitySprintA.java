@@ -59,7 +59,6 @@ public class AbilitySprintA extends Ability {
 		if (quester == null) return;
 		Player player = quester.getPlayer();
 		
-		player.sendMessage("Casting " + getName());
 		Location loc = player.getLocation();
 		double rot = loc.getYaw() % 360 - 90;
 		while (rot < 0) rot += 360;

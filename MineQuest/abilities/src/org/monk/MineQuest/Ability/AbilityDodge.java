@@ -30,10 +30,9 @@ import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
 
-public class AbilityDodge extends Ability implements PassiveAbility {
+public class AbilityDodge extends Ability implements PassiveAbility, DefendingAbility {
 
 	public AbilityDodge() {
-		enabled = false;
 	}
 	
 	@Override
@@ -58,13 +57,7 @@ public class AbilityDodge extends Ability implements PassiveAbility {
 	public String getName() {
 		return "Dodge";
 	}
-
-	@Override
-	public boolean isDefending() {
-		return enabled;
-	}
 	
-	@Override
 	public int parseDefend(Quester quester, LivingEntity mob, int amount) {
 		if (!enabled) return 0;
 		
