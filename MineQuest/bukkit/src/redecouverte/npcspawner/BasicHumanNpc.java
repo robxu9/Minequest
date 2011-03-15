@@ -2,8 +2,10 @@ package redecouverte.npcspawner;
 
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
+
 import net.minecraft.server.EntityLiving;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 
@@ -16,7 +18,7 @@ public class BasicHumanNpc extends BasicNpc {
         super(uniqueId, name);
 
         this.mcEntity = entity;
-    }
+    } 
 
     public HumanEntity getBukkitEntity() {
         return (HumanEntity) this.mcEntity.getBukkitEntity();
@@ -33,7 +35,7 @@ public class BasicHumanNpc extends BasicNpc {
     public void attackLivingEntity(LivingEntity ent) {
         try {
             this.mcEntity.animateArmSwing();
-            Field f = CraftLivingEntity.class.getDeclaredField("entity");
+            Field f = CraftEntity.class.getDeclaredField("entity");
             f.setAccessible(true);
             EntityLiving lEntity = (EntityLiving) f.get(ent);
             this.mcEntity.h(lEntity);

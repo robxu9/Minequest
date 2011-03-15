@@ -699,7 +699,23 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/spawnnpc")) {
         	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STATIONARY, player.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ()));
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STATIONARY, player.getWorld(), location));
+        	event.setCancelled(true);
+        } else if (split[0].equals("/attack")) {
+        	if ((MineQuest.getQuester(split[1]) instanceof NPCQuester) && (MineQuest.getQuester(split[2]) != null)) {
+        		((NPCQuester)MineQuest.getQuester(split[1])).getEntity().attackLivingEntity(MineQuest.getQuester(split[2]).getPlayer());
+        	} else {
+        		player.sendMessage("Invalid Quester names");
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/movetome")) {
+        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
+        		((NPCQuester)MineQuest.getQuester(split[1])).getEntity().moveTo(
+        				player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), 
+        				(float)player.getLocation().getYaw(), (float)player.getLocation().getPitch());
+        	} else {
+        		player.sendMessage("Invalid Quester names");
+        	}
         	event.setCancelled(true);
         }
 	}
