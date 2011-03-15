@@ -44,6 +44,7 @@ import org.monk.MineQuest.Listener.MineQuestPlayerListener;
 import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.Quest;
+import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.World.Town;
 
@@ -496,7 +497,6 @@ public class MineQuest extends JavaPlugin {
         
 //        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
         
-		List<String> names = new ArrayList<String>();
 		String url, port, db, user, pass;
 		PropertiesFile minequest = new PropertiesFile("minequest.properties");
 		url = minequest.getString("url", "localhost");
@@ -507,17 +507,24 @@ public class MineQuest extends JavaPlugin {
 		sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1));
 		
 		sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
-				"last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150))");
+				"last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150), " +
+				"mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x INT DEFAULT '0', y INT DEFAULT '0', z INT DEFAULT '0')");
 		sql_server.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
 		sql_server.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0'," +
 				"abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
 				
 
 		ResultSet results = sql_server.query("SELECT * FROM questers");
+		List<String> names = new ArrayList<String>();
+		List<String> npcs = new ArrayList<String>();
 		
 		try {
 			while (results.next()) {
-				names.add(results.getString("name"));
+				if (results.getString("mode").equals("Quester")) {
+					names.add(results.getString("name"));
+				} else {
+					npcs.add(results.getString("name"));
+				}
 			}
 		} catch (SQLException e) {
 			log("Error: Couldn't get list of questers");
@@ -525,6 +532,10 @@ public class MineQuest extends JavaPlugin {
 		
 		for (String name : names) {
 			questers.add(new Quester(name));
+		}
+		
+		for (String name : npcs) {
+			questers.add(new NPCQuester(name));
 		}
 		
 		sql_server.update("CREATE TABLE IF NOT EXISTS towns (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, spawn_x INT, spawn_y INT, spawn_z INT, " +
@@ -654,6 +665,7 @@ public class MineQuest extends JavaPlugin {
 		
 		return questers;
 	}
+	
 	public static void setMQMob(MQMob newMob) {
 		int i;
 		
@@ -694,5 +706,19 @@ public class MineQuest extends JavaPlugin {
 		new_quests[i] = quest;
 		
 		quests = new_quests;
+	}
+	public static void damage(LivingEntity entity, int i) {
+		if (entity instanceof Player) {
+			Quester quester = getQuester((Player)entity);
+			quester.setHealth(quester.getHealth() - i);
+		} else if (getMob(entity) != null) {
+			getMob(entity).damage(i);
+		} else {
+			int newHealth = entity.getHealth() - i;
+			
+			if (newHealth <= 0) newHealth = 0;
+			
+			entity.setHealth(newHealth);
+		}
 	}
 }

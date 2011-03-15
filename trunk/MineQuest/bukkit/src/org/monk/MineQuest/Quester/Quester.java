@@ -33,6 +33,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockDamageEvent;
@@ -72,7 +73,7 @@ public class Quester {
 	private SkillClass classes[];
 	private double cubes;
 	private boolean debug;
-	private double distance;
+	protected double distance;
 	private boolean enabled;
 	private int exp;
 	private int health;
@@ -80,15 +81,18 @@ public class Quester {
 	private String last;
 	private int level;
 	private int max_health;
-	private String name;
+	protected String name;
 	private Party party;
-	private Player player;
+	private HumanEntity player;
 	private int poison_timer;
 	private Quest quest;
 	private int rep;
 	private ItemStack[] spare_inven;
 	private ItemStack[] spare_inven_2;
 	List<Long> times = new ArrayList<Long>();
+	
+	public Quester() {
+	}
 	
 	/**
 	 * Load player from MySQL Database.
@@ -525,7 +529,9 @@ public class Quester {
 				}
 				
 				inven.setItemInHand(null);
-				player.sendMessage("You are not high enough level to use that weapon");
+				if (player instanceof Player) {
+					((Player)player).sendMessage("You are not high enough level to use that weapon");
+				}
 				return true;
 			}
 		}
@@ -939,7 +945,11 @@ public class Quester {
 	 * @return
 	 */
 	public Player getPlayer() {
-		return player;
+		if (player instanceof Player) {
+			return (Player)player;
+		} else {
+			return null;
+		}
 	}
 
 	public Quest getQuest() {
@@ -1243,7 +1253,11 @@ public class Quester {
 		if (MineQuest.getSQLServer().update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
 				+ health + "', max_health='" + max_health + "', enabled='" + 1
 				+ "', cubes='" + (long)cubes + "' WHERE name='" + name + "'") == -1) {
-			player.sendMessage("May not have saved properly, please try again");
+			if (player instanceof Player) {
+				((Player)player).sendMessage("May not have saved properly, please try again");
+			} else {
+				MineQuest.log("May not have saved properly, please try again");
+			}
 		}
 		for (i = 0; i < classes.length; i++) {
 			classes[i].save();
@@ -1257,8 +1271,8 @@ public class Quester {
 	 * @param string Message
 	 */
 	public void sendMessage(String string) {
-		if (player != null) {
-			player.sendMessage(string);
+		if ((player != null) && (player instanceof Player)) {
+			((Player)player).sendMessage(string);
 		} else {
 			MineQuest.log("[WARNING] Quester " + name + " doesn't have player, not logged in?");
 		}
@@ -1296,7 +1310,7 @@ public class Quester {
 	 * 
 	 * @param player New Reference
 	 */
-	public void setPlayer(Player player) {
+	public void setPlayer(HumanEntity player) {
 		if (player == null) {
 			if (party != null) party.remQuester(this);
 		}

@@ -22,6 +22,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
 
 public class CombatClass extends SkillClass implements DefendingClass {
@@ -127,6 +128,7 @@ public class CombatClass extends SkillClass implements DefendingClass {
 				flag = false;
 			}
 		}
+		
 		if (flag) {
 			if (generator.nextDouble() < .4) {
 				sum++;
@@ -138,8 +140,8 @@ public class CombatClass extends SkillClass implements DefendingClass {
 		}
 		
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isDefending()) {
-				return sum + ability_list[i].parseDefend(quester, entity, amount - sum);
+			if (ability_list[i] instanceof DefendingAbility) {
+				sum += ((DefendingAbility)ability_list[i]).parseDefend(quester, entity, amount - sum);
 			}
 		}
 		
