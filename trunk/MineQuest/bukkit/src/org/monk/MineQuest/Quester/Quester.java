@@ -1022,28 +1022,6 @@ public class Quester {
         	health = max_health;
         }
         
-//        if (health <= 0) {
-//        	MineQuest.log("Clearing Inventory!!");
-//        	
-//        	spare_inven = new ItemStack[27];
-//        	int i;
-//        	for (i = 0; i < 27; i++) {
-//        		spare_inven[i] = player.getInventory().getItem(i);
-//        	}
-//        	spare_inven_2 = new ItemStack[27];
-//        	for (i = 0; i < (player.getInventory().getSize() - 27); i++) {
-//        		spare_inven_2[i] = player.getInventory().getItem(i + 27);
-//        	}
-//        	while ((i - (player.getInventory().getSize() - 27)) < player.getInventory().getArmorContents().length) {
-//        		MineQuest.log("Armor! " + i + " " + (i - (player.getInventory().getSize() - 27)));
-//        		spare_inven_2[i] = player.getInventory().getArmorContents()[i - (player.getInventory().getSize() - 27)];
-//        		i++;
-//        	}
-//        	
-//        	player.getInventory().clear();
-//        	
-//        }
-        
         if (player.getHealth() >= newHealth) {
         	event.setDamage(player.getHealth() - newHealth);
         } else {

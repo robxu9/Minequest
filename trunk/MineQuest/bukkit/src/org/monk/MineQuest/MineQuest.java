@@ -474,6 +474,11 @@ public class MineQuest extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		for (Quester quester : questers) {
+			if (quester.getPlayer() != null) {
+				quester.save();
+			}
+		}
 	}
 	
 	/**
@@ -508,7 +513,8 @@ public class MineQuest extends JavaPlugin {
 		
 		sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
 				"last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150), " +
-				"mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x INT DEFAULT '0', y INT DEFAULT '0', z INT DEFAULT '0')");
+				"mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x DOUBLE DEFAULT '0', y DOUBLE DEFAULT '0', z DOUBLE DEFAULT '0', " +
+				"pitch DOUBLE DEFAULT '0', yaw DOUBLE DEFAULT '0')");
 		sql_server.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
 		sql_server.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0'," +
 				"abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
