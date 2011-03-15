@@ -65,8 +65,7 @@ public class Quest {
 	private Location spawn;
 	private Party party;
 	private World world;
-	private Location[] exceptions;
-	private int[] triggers;
+	private CanEdit[] edits;
 	private double start_x;
 	private double start_y;
 	private double start_z;
@@ -79,8 +78,7 @@ public class Quest {
 		this.party = party;
 		tasks = new ArrayList<QuestTask>();
 		events = new ArrayList<Event>();
-		exceptions = new Location[0];
-		triggers = new int[0];
+		edits = new CanEdit[0];
 
 		try {
 			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
@@ -527,17 +525,13 @@ public class Quest {
 					);
 			int next_task = Integer.parseInt(line[6]);
 			
-			Location new_locs[] = new Location[exceptions.length + 1];
-			int new_tasks[] = new int[triggers.length + 1];
-			for (i = 0; i < exceptions.length; i++) {
-				new_locs[i] = exceptions[i];
-				new_tasks[i] = triggers[i];
+			CanEdit new_edits[] = new CanEdit[edits.length + 1];
+			for (i = 0; i < edits.length; i++) {
+				new_edits[i] = edits[i];
 			}
-			new_locs[i] = new_loc;
-			new_tasks[i] = next_task;
+			new_edits[i] = new CanEditBlock(new_loc, next_task);
 			
-			exceptions = new_locs;
-			triggers = new_tasks;
+			edits = new_edits;
 
 //			MineQuest.log("Added CanEdit");
 			return;
@@ -617,13 +611,10 @@ public class Quest {
 
 	public boolean canEdit(Quester quester, Block block) {
 		int i;
-		for (i = 0; i < exceptions.length; i++) {
-			if (quester.isDebug()) {
-				quester.sendMessage("Checking Trigger " + triggers[i]);
-			}
-			if (equals(block.getLocation(), exceptions[i])) {
-				if (triggers[i] >= -1) {
-					issueNextEvents(triggers[i]);
+		for (i = 0; i < edits.length; i++) {
+			if (edits[i].canEdit(quester, block.getLocation())) {
+				if (edits[i].getQuestIndex() >= -1) {
+					issueNextEvents(edits[i].getQuestIndex());
 				}
 				return true;
 			}
@@ -632,19 +623,5 @@ public class Quest {
 		quester.sendMessage("A Mystical Force is keeping you from Modifying the world!");
 		
 		return false;
-	}
-
-	private boolean equals(Location location, Location location2) {
-		if (((int)location.getX()) != ((int)location2.getX())) {
-			return false;
-		}
-		if (((int)location.getY()) != ((int)location2.getY())) {
-			return false;
-		}
-		if (((int)location.getZ()) != ((int)location2.getZ())) {
-			return false;
-		}
-		
-		return true;
 	}
 }

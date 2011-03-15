@@ -25,10 +25,16 @@ import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;
 
 public class SingleAreaEvent extends AreaEvent {
+	private Quester quester;
 
 	public SingleAreaEvent(Quest quest, long delay, int index,
 			Party party, Location loc, int radius) {
 		super(quest, delay, index, party, loc, radius);
+		quester = null;
+	}
+	
+	public Quester getTarget() {
+		return quester;
 	}
 	
 	@Override
@@ -42,6 +48,7 @@ public class SingleAreaEvent extends AreaEvent {
 		if (questers != null) {
 			for (i = 0; i < questers.length; i++) {
 				if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
+					this.quester = questers[i];
 					flag = true;
 				}
 			}
