@@ -101,6 +101,7 @@ public class NPCQuester extends Quester {
 					map.put(player.getName(), map.get(player.getName()) + 1);
 					if (map.get(player.getName()) == 5) {
 						MineQuest.getQuester(player).damage(200);
+						map.put(player.getName(), 1);
 					}
 				}
 			}
