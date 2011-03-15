@@ -403,15 +403,6 @@ public abstract class Ability {
 	public boolean isBound(ItemStack itemStack) {
 		return (bind == itemStack.getTypeId());
 	}
-
-	/**
-	 * Checks if this ability affects defending.
-	 * 
-	 * @return true if defending
-	 */
-	public boolean isDefending() {
-		return false;
-	}
 	
 	/**
 	 * Checks if ability is enabled.
@@ -525,19 +516,6 @@ public abstract class Ability {
 	 */
 	public void parseClick(Quester quester, Block block) {
 		useAbility(quester, block.getLocation(), null);
-	}
-	
-	/**
-	 * Parse any affects of the ability being activated as part
-	 * of a defense.
-	 * 
-	 * @param quester Defender
-	 * @param mob Attacker
-	 * @param amount Damage to be taken
-	 * @return amount of damage that should be negated
-	 */
-	public int parseDefend(Quester quester, LivingEntity mob, int amount) {
-		return 0;
 	}
 
 	/**

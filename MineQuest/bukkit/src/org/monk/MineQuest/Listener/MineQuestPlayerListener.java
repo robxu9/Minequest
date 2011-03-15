@@ -37,13 +37,13 @@ import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Quest.Quest;
+import org.monk.MineQuest.Quester.NPCMode;
+import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.Store;
 import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
-
-import redecouverte.npcspawner.NpcSpawner;
 
 public class MineQuestPlayerListener extends PlayerListener {
 	
@@ -699,7 +699,8 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/spawnnpc")) {
         	Location location = player.getLocation();
-        	NpcSpawner.SpawnBasicHumanNpc(split[1], split[2], player.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STATIONARY, player.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ()));
+        	event.setCancelled(true);
         }
 	}
 }

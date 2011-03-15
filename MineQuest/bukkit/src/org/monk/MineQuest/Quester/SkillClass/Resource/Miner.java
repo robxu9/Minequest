@@ -20,6 +20,7 @@ package org.monk.MineQuest.Quester.SkillClass.Resource;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.DefendingClass;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
@@ -84,8 +85,8 @@ public class Miner extends ResourceClass implements DefendingClass {
 		}
 		
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isDefending()) {
-				return sum + ability_list[i].parseDefend(quester, entity, amount - sum);
+			if (ability_list[i] instanceof DefendingAbility) {
+				sum += ((DefendingAbility)ability_list[i]).parseDefend(quester, entity, amount - sum);
 			}
 		}
 		
