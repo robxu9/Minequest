@@ -38,24 +38,24 @@ import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Event.AreaEvent;
-import org.monk.MineQuest.Event.ArrowEvent;
-import org.monk.MineQuest.Event.BlockCDEvent;
-import org.monk.MineQuest.Event.BlockDCEvent;
-import org.monk.MineQuest.Event.BlockEvent;
-import org.monk.MineQuest.Event.EntitySpawnerCompleteEvent;
-import org.monk.MineQuest.Event.EntitySpawnerCompleteNMEvent;
-import org.monk.MineQuest.Event.EntitySpawnerEvent;
-import org.monk.MineQuest.Event.EntitySpawnerNoMove;
 import org.monk.MineQuest.Event.Event;
-import org.monk.MineQuest.Event.ExperienceAdd;
-import org.monk.MineQuest.Event.HealthEntitySpawn;
-import org.monk.MineQuest.Event.LockWorldTime;
-import org.monk.MineQuest.Event.MessageEvent;
 import org.monk.MineQuest.Event.NormalEvent;
-import org.monk.MineQuest.Event.PartyHealthEvent;
-import org.monk.MineQuest.Event.QuestEvent;
-import org.monk.MineQuest.Event.SingleAreaEvent;
+import org.monk.MineQuest.Event.Absolute.AreaEvent;
+import org.monk.MineQuest.Event.Absolute.ArrowEvent;
+import org.monk.MineQuest.Event.Absolute.BlockCDEvent;
+import org.monk.MineQuest.Event.Absolute.BlockDCEvent;
+import org.monk.MineQuest.Event.Absolute.BlockEvent;
+import org.monk.MineQuest.Event.Absolute.EntitySpawnerCompleteEvent;
+import org.monk.MineQuest.Event.Absolute.EntitySpawnerCompleteNMEvent;
+import org.monk.MineQuest.Event.Absolute.EntitySpawnerEvent;
+import org.monk.MineQuest.Event.Absolute.EntitySpawnerNoMove;
+import org.monk.MineQuest.Event.Absolute.ExperienceAdd;
+import org.monk.MineQuest.Event.Absolute.HealthEntitySpawn;
+import org.monk.MineQuest.Event.Absolute.LockWorldTime;
+import org.monk.MineQuest.Event.Absolute.MessageEvent;
+import org.monk.MineQuest.Event.Absolute.PartyHealthEvent;
+import org.monk.MineQuest.Event.Absolute.QuestEvent;
+import org.monk.MineQuest.Event.Absolute.SingleAreaEvent;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Quest {
@@ -577,7 +577,7 @@ public class Quest {
 		events.add(new_event);
 	}
 	
-	private Event getEvent(int id) {
+	Event getEvent(int id) {
 		for (Event event : events) {
 			if (event.getId() == id) {
 				return event;
@@ -623,5 +623,13 @@ public class Quest {
 		quester.sendMessage("A Mystical Force is keeping you from Modifying the world!");
 		
 		return false;
+	}
+
+	public Target getTarget(int parseInt) {
+		return null;
+	}
+
+	public Party getParty() {
+		return party;
 	}
 }
