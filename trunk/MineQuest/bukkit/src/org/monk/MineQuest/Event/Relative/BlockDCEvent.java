@@ -16,29 +16,47 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.monk.MineQuest.Event;
+package org.monk.MineQuest.Event.Relative;
 
-import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.monk.MineQuest.Event.Event;
+import org.monk.MineQuest.Event.EventParser;
 
-public class EntityTeleportEvent extends NormalEvent {
-	protected LivingEntity entity;
-	protected Location location;
+public class BlockDCEvent extends BlockEvent {
+	private long second_delay;
+	private Material otherType;
+	private boolean first;
 
-	public EntityTeleportEvent(long delay, LivingEntity entity, Location location) {
-		super(delay);
-		this.entity = entity;
-		this.location = location;
+	public BlockDCEvent(long delay, long second_delay, Block block, Material newType) {
+		super(delay, block, newType);
+		this.newType = Material.AIR;
+		this.otherType = newType;
+		this.second_delay = second_delay;
+		first = false;
 	}
-
+	
 	@Override
 	public void activate(EventParser eventParser) {
-		entity.teleportTo(location);
+		if (!first) {
+			super.activate(eventParser);
+			
+			first = true;
+			
+			eventParser.setComplete(false);
+			delay = second_delay;
+		} else {
+			Event event = new BlockEvent(second_delay, block, otherType);
+			
+			event.activate(eventParser);
+			
+			eventParser.setComplete(true);
+		}
 	}
-
+	
 	@Override
 	public String getName() {
-		return "Generic Teleport Event";
+		return "Block Create-Destroy Event";
 	}
 
 }
