@@ -16,34 +16,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.monk.MineQuest.Event.Absolute;
+package org.monk.MineQuest.Event.Relative;
 
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Event.NormalEvent;
-import org.monk.MineQuest.Quest.Party;
-import org.monk.MineQuest.Quester.Quester;
 
-public class MessageEvent extends NormalEvent {
-	private String message;
-	private Party party;
+public class BlockEvent extends NormalEvent {
+	protected Material newType;
+	protected Block block;
+	
+	public BlockEvent(long delay, World world, int x, int y,
+			int z, Material newType) {
+		this(delay, world.getBlockAt(x, y, z), newType);
+	}
 
-	public MessageEvent(long delay, Party party, String message) {
+	public BlockEvent(long delay, Block block, Material newType) {
 		super(delay);
-		this.party = party;
-		this.message = message;
+		this.block = block;
+		this.newType = newType;
 	}
 	
 	@Override
 	public void activate(EventParser eventParser) {
-		super.activate(eventParser);
-		for (Quester quester : party.getQuesterArray()) {
-			quester.sendMessage(message);
-		}
+		block.setType(newType);
 	}
-	
+
 	@Override
 	public String getName() {
-		return "Message Event";
+		return "Generic Block Type Event";
 	}
 
 }

@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.monk.MineQuest.Event;
+package org.monk.MineQuest.Event.Relative;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Event.EventParser;
+import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Quester.Quester;
 
 public class AuraEvent extends NormalEvent {

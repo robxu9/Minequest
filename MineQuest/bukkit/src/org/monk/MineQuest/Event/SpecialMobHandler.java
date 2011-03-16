@@ -28,6 +28,7 @@ import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Event.Absolute.BlockEvent;
 import org.monk.MineQuest.Mob.SpecialMob;
 
 public class SpecialMobHandler extends PeriodicEvent {

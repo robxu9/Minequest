@@ -16,10 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.monk.MineQuest.Event;
+package org.monk.MineQuest.Event.Relative;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.monk.MineQuest.Event.Event;
+import org.monk.MineQuest.Event.EventParser;
 
 public class BlockCDEvent extends BlockEvent {
 	private long second_delay;

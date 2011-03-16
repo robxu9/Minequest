@@ -24,6 +24,8 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
@@ -716,6 +718,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		player.sendMessage("Invalid Quester names");
         	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/explode")) {
+        	CraftWorld world = (CraftWorld)player.getWorld();
+        	Location l = player.getLocation();
+        	world.getHandle().a(((CraftEntity)player).getHandle(), l.getX(), l.getY(), l.getZ() + 5, (float)Double.parseDouble(split[1]));
         	event.setCancelled(true);
         }
 	}
