@@ -312,14 +312,14 @@ public abstract class Ability {
 	 * @param radius
 	 * @return List of Entities within the area
 	 */
-	public List<LivingEntity> getEntities(LivingEntity player, int radius) {
+	public static List<LivingEntity> getEntities(LivingEntity entity, int radius) {
 		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
-		List<LivingEntity> serverList = player.getWorld().getLivingEntities();
+		List<LivingEntity> serverList = entity.getWorld().getLivingEntities();
 		int i;
 		
 		for (i = 0; i < serverList.size(); i++) {
-			if ((MineQuest.distance(player.getLocation(), serverList.get(i).getLocation()) < radius) 
-				&& (serverList.get(i).getEntityId() != player.getEntityId())) {
+			if ((MineQuest.distance(entity.getLocation(), serverList.get(i).getLocation()) < radius) 
+				&& (serverList.get(i).getEntityId() != entity.getEntityId())) {
 				entities.add(serverList.get(i));
 			}
 		}
