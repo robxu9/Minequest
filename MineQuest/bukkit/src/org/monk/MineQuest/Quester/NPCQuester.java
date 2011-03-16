@@ -12,7 +12,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Event.SpawnNPCEvent;
+import org.monk.MineQuest.Event.Absolute.SpawnNPCEvent;
 
 import redecouverte.npcspawner.BasicHumanNpc;
 import redecouverte.npcspawner.NpcSpawner;
