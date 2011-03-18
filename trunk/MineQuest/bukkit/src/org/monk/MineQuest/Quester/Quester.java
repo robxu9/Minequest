@@ -70,7 +70,7 @@ public class Quester {
 	private Location before_quest;
 	private ChestSet chests;
 	private int class_exp;
-	private SkillClass classes[];
+	private List<SkillClass> classes;
 	private double cubes;
 	private boolean debug;
 	protected double distance;
@@ -149,16 +149,14 @@ public class Quester {
 	 * @param lr 1 for left, 0 for right
 	 */
 	public void addBinder(String ability, int item) {
-		int i;
-		
 		SkillClass my_class = getClassFromAbil(ability);
 		if (my_class == null) {
 			sendMessage("You do not have an ability named " + ability);
 			return;
 		}
 		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].unBind(player.getItemInHand());
+		for (SkillClass skill : classes) {
+			skill.unBind(player.getItemInHand());
 		}
 		
 		Ability abil = new AbilityBinder(ability, item);
@@ -169,16 +167,14 @@ public class Quester {
 	}
 
 	protected void addBinder(String ability, int item, ItemStack item_hand) {
-		int i;
-		
 		SkillClass my_class = getClassFromAbil(ability);
 		if (my_class == null) {
 			return;
 		}
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i] != null) {
-				classes[i].unBind(item_hand);
+
+		for (SkillClass skill : classes) {
+			if (skill != null) {
+				skill.unBind(item_hand);
 			}
 		}
 		
@@ -186,6 +182,44 @@ public class Quester {
 		my_class.addAbility(abil);
 		
 		abil.silentBind(this, item_hand);
+	}
+	
+	public void addClass(String name) {
+		if (getClass(name) != null) {
+			sendMessage("You already have the class " + name);
+			return;
+		}
+		if (getCombatClasses().size() == MineQuest.getMaxClasses()) {
+			sendMessage("You do not have space for any more combat classes");
+			return;
+		}
+		String names[] = new String[] {"WarMage", "PeaceMage", "Archer", "Warrior"};
+		boolean flag = false;
+		for (String clazz : names) {
+			if (name.equals(clazz)) {
+				flag = true;
+			}
+		}
+		if (!flag) {
+			sendMessage(name + " is not a valid class currently");
+		}
+		
+		save();
+		try {
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + this.name + "'");
+			results.next();
+			String classes = results.getString("classes");
+			
+			classes = classes + ", " + name;
+			
+			MineQuest.getSQLServer().update("UPDATE questers SET classes='" + classes + "' WHERE name='" + this.name + "'");
+			
+			createClass(name, MineQuest.getNextAbilId());
+			sendMessage(name + " class added!");
+		} catch (SQLException e) {
+			MineQuest.log("Unable to update class list");
+		}
+		update();
 	}
 	
 	/**
@@ -229,15 +263,19 @@ public class Quester {
 						expGain(5);
 						return;
 					} else {
-						((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
-						expGain(3);
+						if (getClass("Warrior") != null) {
+							((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
+							expGain(3);
+						}
 						return;
 					}
 				}
 			}
 			event.setDamage(event.getDamage() / 2);
-			((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
-			expGain(2);
+			if (getClass("Warrior") != null) {
+				((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
+				expGain(2);
+			}
 			return;
 		}
 	}
@@ -250,29 +288,25 @@ public class Quester {
 	 * @param name Name of Ability
 	 */
 	public void bind(String name) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].unBind(player.getItemInHand());
+		for (SkillClass skill : classes) {
+			skill.unBind(player.getItemInHand());
 		}
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getAbility(name) != null) {
-				classes[i].getAbility(name).bind(this, player.getItemInHand());
+
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(name) != null) {
+				skill.getAbility(name).bind(this, player.getItemInHand());
 			}
 		}
 	}
 
 	public void bind(String ability, ItemStack itemStack) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].silentUnBind(itemStack);
+		for (SkillClass skill : classes) {
+			skill.silentUnBind(itemStack);
 		}
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getAbility(ability) != null) {
-				classes[i].getAbility(ability).bind(this, itemStack);
+
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(ability) != null) {
+				skill.getAbility(ability).bind(this, itemStack);
 			}
 		}
 	}
@@ -334,11 +368,9 @@ public class Quester {
 	}
 
 	public void callAbility() {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbility();
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())){
+				skill.callAbility();
 				return;
 			}
 		}
@@ -350,11 +382,9 @@ public class Quester {
 	 * @param block
 	 */
 	public void callAbility(Block block) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbility(block);
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())){
+				skill.callAbility(block);
 				return;
 			}
 		}
@@ -366,11 +396,9 @@ public class Quester {
 	 * @param entity
 	 */
 	public void callAbility(Entity entity) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())){
-				classes[i].callAbility(entity);
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())){
+				skill.callAbility(entity);
 				return;
 			}
 		}
@@ -516,12 +544,11 @@ public class Quester {
 	 * @return
 	 */
 	public boolean checkItemInHand() {
-		int i;
 		PlayerInventory inven = player.getInventory();
 		ItemStack item = player.getItemInHand();
-		
-		for (i = 0; i < classes.length; i++) {
-			if (!classes[i].canUse(item)) {
+
+		for (SkillClass skill : classes) {
+			if (!skill.canUse(item)) {
 				if (inven.firstEmpty() != -1) {
 					inven.addItem(item);
 				} else {
@@ -545,14 +572,12 @@ public class Quester {
 	 * @return true if bound to an ability
 	 */
 	public boolean checkItemInHandAbil() {
-		int i;
-		
 //		if ((player.getItemInHand().getTypeId() == 261) || (player.getItemInHand().getTypeId() == 332)) {
 //			return false;
 //		}
 
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].isAbilityItem(player.getItemInHand())) {
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())) {
 				return true;
 			}
 		}
@@ -572,48 +597,47 @@ public class Quester {
 	 * classes and health.
 	 */
 	public void create() {
-		int i, num;
-		ResultSet results;
-		String class_names[] = {
-				"Warrior",
-				"Archer",
-				"WarMage",
-				"PeaceMage",
-				"Miner",
-				"Lumberjack",
-				"Digger",
-				"Farmer"
-		};
+		int num;
+		List<String> class_names = new ArrayList<String>();
+		class_names.add("Miner");
+		class_names.add("Lumberjack");
+		class_names.add("Digger");
+		class_names.add("Farmer");
+		if (MineQuest.getMaxClasses() == 4) {
+			class_names.add("Warrior");
+			class_names.add("Archer");
+			class_names.add("WarMage");
+			class_names.add("PeaceMage");
+			MineQuest.log("Adding all classes");
+		}
 		
 		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health) VALUES('"
 			+ name + "', '" + name + "', '500000', '0', '0', 'Bitville', '";
-		update_string = update_string + class_names[0];
-		for (i = 1; i < class_names.length; i++) {
-			update_string = update_string + ", " + class_names[i];
+		update_string = update_string + class_names.get(0);
+		for (String name : class_names) {
+			if (!name.equals(class_names.get(0))) {
+				update_string = update_string + ", " + name;
+			}
 		}
 		update_string = update_string + "', '10', '10')";
 
 		MineQuest.getSQLServer().update(update_string);
-
-		num = 0;
-		try {
-			results = MineQuest.getSQLServer().query("SELECT * FROM abilities");
-			while (results.next()) {
-				num++;
-			}
-		} catch (SQLException e) {
-			System.out.println("Unable to get max ability id");
-		}
 		
-		for (i = 0; i < class_names.length; i++) {
-			update_string = "INSERT INTO classes (name, class, exp, level, abil_list_id) VALUES('"
-								+ name + "', '" + class_names[i] + "', '0', '0', '" + (num + i) + "')";
-
-			MineQuest.getSQLServer().update(update_string);
-			MineQuest.getSQLServer().update("INSERT INTO abilities (abil_list_id) VALUES('" + (num + i) + "')");
+		num = MineQuest.getNextAbilId();
+		
+		for (String clazz : class_names) {
+			createClass(clazz, num++);
 		}
 		
 		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (abil VARCHAR(30), bind int, bind_2 int)");
+	}
+	
+	public void createClass(String clazz, int abil_list_id) {
+		String update_string = "INSERT INTO classes (name, class, exp, level, abil_list_id) VALUES('"
+			+ name + "', '" + clazz + "', '0', '0', '" + abil_list_id + "')";
+
+		MineQuest.getSQLServer().update(update_string);
+		MineQuest.getSQLServer().update("INSERT INTO abilities (abil_list_id) VALUES('" + abil_list_id + "')");
 	}
 
 	public void createParty() {
@@ -663,7 +687,7 @@ public class Quester {
 	 * @param event
 	 */
 	public void defendEntity(Entity entity, EntityDamageByEntityEvent event) {
-		int amount = classes[0].getGenerator().nextInt(10);
+		int amount = classes.get(0).getGenerator().nextInt(10);
 		int levelAdj = MineQuest.getAdjustment();
 		if (levelAdj == 0) {
 			levelAdj = 1;
@@ -760,11 +784,9 @@ public class Quester {
 	 * @param string Name of Ability
 	 */
 	public void disableabil(String string) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getAbility(string) != null) {
-				classes[i].getAbility(string).disable();
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(string) != null) {
+				skill.getAbility(string).disable();
 			}
 		}
 	}
@@ -784,11 +806,9 @@ public class Quester {
 	 * @param string Name of Ability
 	 */
 	public void enableabil(String string) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getAbility(string) != null) {
-				classes[i].getAbility(string).enable(this);
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(string) != null) {
+				skill.getAbility(string).enable(this);
 			}
 		}
 	}
@@ -850,11 +870,9 @@ public class Quester {
 	 * @return SkillClass
 	 */
 	public SkillClass getClass(String string) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			if (classes[i].getType().equalsIgnoreCase(string)) {
-				return classes[i];
+		for (SkillClass skill : classes) {
+			if (skill.getType().equalsIgnoreCase(string)) {
+				return skill;
 			}
 		}
 		
@@ -865,8 +883,19 @@ public class Quester {
 	 * Gets a list of SkillClasses that this Quester has.
 	 * @return
 	 */
-	public SkillClass[] getClasses() {
+	public List<SkillClass> getClasses() {
 		return classes;
+	}
+	
+	public List<SkillClass> getCombatClasses() {
+		List<SkillClass> ret = new ArrayList<SkillClass>();
+		for (SkillClass skill : classes) {
+			if (skill instanceof CombatClass) {
+				ret.add(skill);
+			}
+		}
+		
+		return ret;
 	}
 
 	public int getClassExp() {
@@ -1130,10 +1159,8 @@ public class Quester {
 	 * Display list of abilities that Quester has.
 	 */
 	public void listAbil() {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].listAbil();
+		for(SkillClass skill : classes) {
+			skill.listAbil();
 		}
 	}
 
@@ -1153,12 +1180,12 @@ public class Quester {
 		
 		Town last_town = MineQuest.getNearestTown(to);
 		if (last_town != null) {
-			last = last_town.getName();
+			if (!last.equals(last_town.getName())) {
+				last = last_town.getName();
+				MineQuest.getSQLServer().update("UPDATE questers SET last_town='" + last + "'");
+			}
 		} else {
 			last = null;
-		}
-		if (last != null) {
-			MineQuest.getSQLServer().update("UPDATE questers SET last_town='" + last + "'");
 		}
 		
 		if (poison_timer > 0) {
@@ -1187,7 +1214,9 @@ public class Quester {
 		if (quest != null) {
 			event.setRespawnLocation(quest.getSpawn());
 		} else {
-			event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+			if (MineQuest.getTown(last) != null) {
+				event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+			}
 		}
 		return;
 	}
@@ -1226,8 +1255,6 @@ public class Quester {
 	 * Database.
 	 */
 	public void save() {
-			int i;
-			
 		if (MineQuest.getSQLServer().update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
 				+ health + "', max_health='" + max_health + "', enabled='" + 1
 				+ "', cubes='" + (long)cubes + "' WHERE name='" + name + "'") == -1) {
@@ -1237,8 +1264,8 @@ public class Quester {
 				MineQuest.log("May not have saved properly, please try again");
 			}
 		}
-		for (i = 0; i < classes.length; i++) {
-			classes[i].save();
+		for(SkillClass skill : classes) {
+			skill.save();
 		}
 		enabled = false;
 	}
@@ -1349,10 +1376,8 @@ public class Quester {
 	 * @param itemInHand
 	 */
 	public void unBind(ItemStack itemInHand) {
-		int i;
-		
-		for (i = 0; i < classes.length; i++) {
-			classes[i].unBind(itemInHand);
+		for(SkillClass skill : classes) {
+			skill.unBind(itemInHand);
 		}
 	}
 
@@ -1372,7 +1397,6 @@ public class Quester {
 			results.next();
 		} catch (SQLException e) {
 			System.out.println("Issue querying name");
-			e.printStackTrace();
 			return;
 		}
 		try {
@@ -1388,13 +1412,12 @@ public class Quester {
 			chests = new ChestSet(this, results.getString("selected_chest"));
 		} catch (SQLException e) {
 			System.out.println("Issue getting parameters");
-			e.printStackTrace();
 			return;
 		}
 		
-		classes = new SkillClass[split.length];
+		classes = new ArrayList<SkillClass>();
 		for (i = 0; i < split.length; i++) {
-			classes[i] = SkillClass.newClass(this, split[i]);
+			classes.add(SkillClass.newClass(this, split[i]));
 		}
 		
 		class_exp = 0;
@@ -1433,7 +1456,6 @@ public class Quester {
 		} catch (SQLException e) {
 			MineQuest.log("Could not update binds for quester " + name);
 		}
-		
 	}
 
 	/**
@@ -1455,7 +1477,11 @@ public class Quester {
 			newValue = 0;
 		}
 		
-		player.setHealth(newValue);
+		if (newValue < player.getHealth()) {
+			player.damage(player.getHealth() - newValue);
+		} else if (newValue != player.getHealth()) {
+			player.setHealth(newValue);
+		}
 		
 		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
 	}

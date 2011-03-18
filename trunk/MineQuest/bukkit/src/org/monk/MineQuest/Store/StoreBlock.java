@@ -104,11 +104,18 @@ public class StoreBlock {
 		lefts = block_quantity % 64;
 		try {
 			while (multis-- > 0) {
-				player.getInventory().addItem(new ItemStack(id, 64));
+				if (player.getInventory().firstEmpty() == -1) {
+					player.getWorld().dropItemNaturally(player.getLocation(), new ItemStack(id, 64));
+				} else {
+					player.getInventory().addItem(new ItemStack(id, 64));
+				}
 			}
 			if (lefts != 0) {
-				//System.out.println("Giviing " + lefts + " of " + id);
-				player.getInventory().addItem(new ItemStack(id, lefts));
+				if (player.getInventory().firstEmpty() == -1) {
+					player.getWorld().dropItemNaturally(player.getLocation(), new ItemStack(id, lefts));
+				} else {
+					player.getInventory().addItem(new ItemStack(id, lefts));
+				}
 			}
 		} catch (Exception e) {
 			System.out.println("Strange problem " + e);
@@ -212,10 +219,10 @@ public class StoreBlock {
         while (change-- > 0) {
             if (buy) {
                 cost += (new_price);
-                new_price *= 1.0005;
+                new_price *= 1.00009;
             } else {
                 cost += (new_price);
-                new_price /= 1.0005;
+                new_price /= 1.00009;
             }
         }
 
@@ -225,7 +232,7 @@ public class StoreBlock {
 		
 		return ((int)cost);
 	}
-	
+
 	@SuppressWarnings("unused")
 	private int cubesToBlocks(int cubes, boolean buy) {
         int blocks = 0;
@@ -238,9 +245,9 @@ public class StoreBlock {
             blocks++;
             if ((blocks % 64) == 0) {
                 if (buy) {
-                	new_price *= 1.0005;
+                	new_price *= 1.00009;
                 } else {
-                	new_price /= 1.0005;
+                	new_price /= 1.00009;
                 }
             }
         }
@@ -256,7 +263,7 @@ public class StoreBlock {
 		
 		player.sendMessage("    " + i + ": " + type + " - " + my_price + " - " + quantity);
 	}
-	
+
 	public void display(Quester quester, int i) {
 		display(quester.getPlayer(), i);
 	}

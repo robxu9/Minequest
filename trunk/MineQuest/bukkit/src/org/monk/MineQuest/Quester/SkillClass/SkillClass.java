@@ -175,7 +175,6 @@ public class SkillClass {
 			quester.updateBinds();
 		} catch (SQLException e) {
 			System.out.println("Failed to add ability " + string + " to mysql server");
-			e.printStackTrace();
 		}
 		
 		quester.sendMessage("Gained ability " + string);
@@ -675,35 +674,24 @@ public class SkillClass {
 	 * changes.
 	 */
 	public void update() {
-		ResultSet results;
-		
-		results = MineQuest.getSQLServer().query("SELECT * FROM classes WHERE name='" + quester.getName() + "' AND class='" + type + "'");
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM classes WHERE name='" + quester.getName() + "' AND class='" + type + "'");
 		
 		try {
-			results.next();
-			exp = results.getInt("exp");
-			level = results.getInt("level");
-			abil_list_id = results.getInt("abil_list_id");
-			ability_list = abilListSQL(abil_list_id);
-			quester.updateBinds();
+			if (results.next()) {
+				exp = results.getInt("exp");
+				level = results.getInt("level");
+				abil_list_id = results.getInt("abil_list_id");
+				ability_list = abilListSQL(abil_list_id);
+				quester.updateBinds();
+			} else {
+				abil_list_id = -1;
+				ability_list = new Ability[0];
+			}
 		} catch (SQLException e) {
 			System.out.println("Problem reading Ability");
-			e.printStackTrace();
 		}
-		if ((type.equals("WarMage") || type.equals("PeaceMage"))) {
-			if (type.equals("WarMage")) {
-				if (getAbility("Fireball") == null) {
-					addAbility("Fireball");
-				}
-			} else {
-				if (getAbility("Heal") == null) {
-					addAbility("Heal");
-				}
-				if (getAbility("Heal Other") == null) {
-					addAbility("Heal Other");
-				}
-			}
-		}
+		
+		fillAbilities();
 	}
 
 	public void silentUnBind(ItemStack itemStack) {

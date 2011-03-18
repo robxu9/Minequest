@@ -67,6 +67,7 @@ public class MineQuest extends JavaPlugin {
 	private static List<Town> towns = new ArrayList<Town>();
 	private static MQMob mobs[];
 	private static Quest[] quests;
+	private static int maxClass;
 //	private MineQuestServerListener sl;
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
@@ -104,6 +105,10 @@ public class MineQuest extends JavaPlugin {
 		}
 	}
 	
+	public static int getMaxClasses() {
+		return maxClass;
+	}
+	
 
 	
 	
@@ -123,6 +128,20 @@ public class MineQuest extends JavaPlugin {
 		z = loc1.getZ() - loc2.getZ();
 		
 		return Math.sqrt(x*x + y*y + z*z);
+	}
+	
+	public static int getNextAbilId() {
+		int num = 0;
+		try {
+			ResultSet results = sql_server.query("SELECT * FROM abilities");
+			while (results.next()) {
+				num++;
+			}
+		} catch (SQLException e) {
+			System.out.println("Unable to get max ability id");
+		}
+		
+		return num;
 	}
     
     /**
@@ -479,6 +498,8 @@ public class MineQuest extends JavaPlugin {
 				quester.save();
 			}
 		}
+        PluginDescriptionFile pdfFile = this.getDescription();
+        System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is disabled!" );
 	}
 	
 	/**
@@ -500,25 +521,31 @@ public class MineQuest extends JavaPlugin {
         
         quests = new Quest[0];
         
-//        getServer().getScheduler().scheduleAsyncRepeatingTask(this, eventQueue, 10, 10);
-        
-		String url, port, db, user, pass;
-		PropertiesFile minequest = new PropertiesFile("minequest.properties");
-		url = minequest.getString("url", "localhost");
-		port = minequest.getString("port", "3306");
-		db = minequest.getString("db", "minequest");
-		user = minequest.getString("user", "root");
-		pass = minequest.getString("pass", "1234");
-		sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1));
-		
-		sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
-				"last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150), " +
-				"mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x DOUBLE DEFAULT '0', y DOUBLE DEFAULT '0', z DOUBLE DEFAULT '0', " +
-				"pitch DOUBLE DEFAULT '0', yaw DOUBLE DEFAULT '0')");
-		sql_server.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
-		sql_server.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0'," +
-				"abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
-				
+        try {
+			String url, port, db, user, pass;
+			PropertiesFile minequest = new PropertiesFile("minequest.properties");
+			url = minequest.getString("url", "localhost");
+			port = minequest.getString("port", "3306");
+			db = minequest.getString("db", "minequest");
+			user = minequest.getString("user", "root");
+			pass = minequest.getString("pass", "1234");
+			maxClass = minequest.getInt("max_classes", 4);
+			boolean real = minequest.getBoolean("mysql", true);
+			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
+			
+			sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
+					"last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150), " +
+					"mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x DOUBLE DEFAULT '0', y DOUBLE DEFAULT '0', z DOUBLE DEFAULT '0', " +
+					"pitch DOUBLE DEFAULT '0', yaw DOUBLE DEFAULT '0')");
+			sql_server.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
+			sql_server.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0'," +
+					"abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
+        } catch (Exception e) {
+        	MineQuest.log("Unable to initialize database");
+        	MineQuest.log("Check minequest.properties");
+        	setEnabled(false);
+        	return;
+        }
 
 		ResultSet results = sql_server.query("SELECT * FROM questers");
 		List<String> names = new ArrayList<String>();
@@ -583,6 +610,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGED, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACED, bl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED, bl, Priority.Normal, this);
         
         PluginDescriptionFile pdfFile = this.getDescription();
