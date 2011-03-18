@@ -33,7 +33,6 @@ import org.monk.MineQuest.Quester.Quester;
 public class AuraEvent extends NormalEvent {
 	protected LivingEntity player;
 	protected World world;
-	private Ability ability;
 	private long total_time;
 	private int change;
 	private boolean players;
@@ -43,7 +42,6 @@ public class AuraEvent extends NormalEvent {
 		super(delay);
 		player = quester.getPlayer();
 		world = player.getWorld();
-		this.ability = ability;
 		this.total_time = total_time;
 		this.count = 0;
 		this.change = change;
@@ -51,7 +49,7 @@ public class AuraEvent extends NormalEvent {
 	}
 
 	public void activate(EventParser eventParser) {
-		List<LivingEntity> nearby = ability.getEntities(player, 15);
+		List<LivingEntity> nearby = Ability.getEntities(player, 15);
 		List<LivingEntity> affected = sort(nearby, players);
 		
 		for (LivingEntity entity : affected) {

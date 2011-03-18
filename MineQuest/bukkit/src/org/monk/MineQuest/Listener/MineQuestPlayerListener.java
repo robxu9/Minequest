@@ -129,7 +129,14 @@ public class MineQuestPlayerListener extends PlayerListener {
 	}
 	
 	private void processHelp(String[] split, Player player, PlayerChatEvent event) {
-		if (split[0].equals("/minequest")) {
+		if (split[0].equals("/help")) {
+			player.sendMessage("To get started with the leveling, abilities");
+			player.sendMessage("and experience system type /minequest");
+			player.sendMessage("To get started with the economy system try");
+			player.sendMessage("/cubonomy");
+			player.sendMessage("To get started with the questing system try ");
+			player.sendMessage("/quest");
+		} else if (split[0].equals("/minequest")) {
 			player.sendMessage("Minequest Commands:");
 			player.sendMessage("    /save - save progress of character");
 			player.sendMessage("    /load - load progress - removing unsaved experience/levels");
@@ -349,6 +356,13 @@ public class MineQuestPlayerListener extends PlayerListener {
         		} else {
         			skill.replaceAbil(split[1], split[2]);
         		}
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/addclass")) {
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /addclass <combat_class>");
+        	} else {
+        		MineQuest.getQuester(player).addClass(split[1]);
         	}
         	event.setCancelled(true);
         }

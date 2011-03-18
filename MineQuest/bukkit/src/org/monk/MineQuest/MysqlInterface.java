@@ -25,6 +25,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.monk.MineQuest.Ability.AbilityBinder;
+
 /**
  * MysqlInterface is a class that wraps the JDBC
  * 
@@ -32,10 +34,12 @@ import java.sql.Statement;
  */
 public class MysqlInterface {
 	private Statement stmt;
-	String url;
-	java.sql.Connection con;
-    String user, pass;
-    boolean silent;
+	private String url;
+	private java.sql.Connection con;
+	private String user, pass;
+    private boolean silent;
+    private ResultSet last;
+    private boolean real;
 	
 	/**
 	 * Creates a Wrapper to query a MySQL DB.
@@ -46,16 +50,31 @@ public class MysqlInterface {
 	 * @param user Username to connect
 	 * @param pass Password to connect
 	 * @param silent Whether or not to log queries
+	 * @throws Exception 
 	 */
-	public MysqlInterface(String location, String port, String db, String user, String pass, int silent) {
-		url = "jdbc:mysql://" + location + ":" + port + "/" + db;
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException e) {
-			System.out.println("You appear to be missing MySQL JDBC");
-			e.printStackTrace();
-			return;
+	public MysqlInterface(String location, String port, String db, String user, String pass, int silent, boolean real_sql) throws Exception {
+		if (real_sql) {
+			url = "jdbc:mysql://" + location + ":" + port + "/" + db;
+			try {
+				Class.forName("com.mysql.jdbc.Driver", true, (new AbilityBinder()).getClass().getClassLoader());
+			} catch (ClassNotFoundException e) {
+				MineQuest.log("You appear to be missing MySQL JDBC");
+				con = null;
+				stmt = null;
+				throw new Exception();
+			}
+		} else {
+			url = "jdbc:sqlite:" + db + ".db";
+			try {
+				Class.forName("org.sqlite.JDBC", true, (new AbilityBinder()).getClass().getClassLoader());
+			} catch (ClassNotFoundException e) {
+				MineQuest.log("You appear to be missing SQLite JDBC");
+				con = null;
+				stmt = null;
+				throw new Exception();
+			}
 		}
+		this.real = real_sql;
 		this.user = user;
 		this.pass = pass;
 		reconnect();
@@ -63,6 +82,7 @@ public class MysqlInterface {
 			this.silent = true;
 			return;
 		}
+		last = null;
 		this.silent = false;
 	}
 	
@@ -71,10 +91,13 @@ public class MysqlInterface {
 	 */
 	public void reconnect() {
 		try {
-			con = (Connection) DriverManager.getConnection(url, user, pass);
+			if (real) {
+				con = (Connection) DriverManager.getConnection(url, user, pass);
+			} else {
+				con = (Connection) DriverManager.getConnection(url);
+			}
 		} catch (SQLException e) {
 			MineQuest.log("[ERROR] Unable to Connect to MySQL Databse");
-			e.printStackTrace();
 			return;
 		}
 		
@@ -82,7 +105,6 @@ public class MysqlInterface {
 			stmt = (Statement) con.createStatement();
 		} catch (SQLException e) {
 			MineQuest.log("[ERROR] Failed to setup MySQL Statement");
-			e.printStackTrace();
 		}
 	}
 	
@@ -94,17 +116,26 @@ public class MysqlInterface {
 	 * @return ResultSet from query.
 	 */
 	public ResultSet query(String the_query) {
+		if (stmt == null) {
+			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+		}
 		if (!silent) {
-			MineQuest.log("[MineQuest] (MySQL) " + the_query);
+			MineQuest.log("(MySQL) " + the_query);
 		}
 		try {
-			return stmt.executeQuery(the_query);
+			if (last != null) {
+				last.close();
+				last = null;
+			}
+			last = stmt.executeQuery(the_query);
+			return last;
 		} catch (SQLException e) {
+			MineQuest.log("(MySQL) " + the_query);
 			MineQuest.log("[ERROR] Failed to query database");
-			e.printStackTrace();
 			reconnect();
 			try {
-				return stmt.executeQuery(the_query);
+				last = stmt.executeQuery(the_query);
+				return last;
 			} catch (SQLException e1) {
 				return null;
 			}
@@ -119,17 +150,27 @@ public class MysqlInterface {
 	 * @return Non-zero upon failure
 	 */
 	public int update(String sql) {
+		int ret;
+		if (stmt == null) {
+			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+		}
 		if (!silent) {
 			MineQuest.log("(MySQL) " + sql);
 		}
 		try {
-			return stmt.executeUpdate(sql);
+			if (last != null) {
+				last.close();
+				last = null;
+			}
+			ret = stmt.executeUpdate(sql);
+			return ret;
 		} catch (SQLException e) {
+			MineQuest.log("(MySQL) " + sql);
 			MineQuest.log("[ERROR] Failed to update database");
-			e.printStackTrace();
 			reconnect();
 			try {
-				return stmt.executeUpdate(sql);
+				ret = stmt.executeUpdate(sql);
+				return ret;
 			} catch (SQLException e1) {
 				return 1;
 			}

@@ -76,8 +76,7 @@ public class Store {
 			this.start = start;
 			this.end = end;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MineQuest.log("Unable to load store " + name + " in " + town);
 			return;
 		}
 	}
@@ -245,13 +244,11 @@ public class Store {
 					blocks.add(new StoreBlock(this, results.getString("type"), results.getInt("quantity"), results.getDouble("price"), results.getInt("item_id")));
 				} catch (SQLException e) {
 					MineQuest.log("[MineQuest] Unable to query data for block");
-					e.printStackTrace();
 					return;
 				}
 			}
 		} catch (SQLException e) {
 			MineQuest.log("[MineQuest] Unable to query data for store");
-			e.printStackTrace();
 		}
 		
 		num_page = blocks.size() / 6;

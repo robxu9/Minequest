@@ -104,7 +104,7 @@ public abstract class Ability {
 				}
 			}
 		} catch (Exception e) {
-			MineQuest.log("Couldn't get Classes");
+			MineQuest.log("Couldn't get Ability Classes - Missing abilities.jar?");
 		}
 		return classes;
 	}

@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -203,14 +204,14 @@ public class Quest {
 								}
 							}
 						} else {
-							World world = MineQuest.getSServer().getWorld(split[3]);
-							if (world == null) {
-								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
-									world = MineQuest.getSServer().createWorld(split[3], Environment.NORMAL);
-								} else {
-									world = MineQuest.getSServer().createWorld(split[3], Environment.NETHER);
-								}
-							}
+//							World world = MineQuest.getSServer().getWorld(split[3]);
+//							if (world == null) {
+//								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
+//									world = MineQuest.getSServer().createWorld(split[3], Environment.NORMAL);
+//								} else {
+//									world = MineQuest.getSServer().createWorld(split[3], Environment.NETHER);
+//								}
+//							}
 							World copy = MineQuest.getSServer().getWorld(split[2]);
 							
 							if (start_x == 0) {
@@ -218,27 +219,39 @@ public class Quest {
 								throw new Exception();
 							}
 							
-							int j,k;
-							for (i = (int)start_x; i < (int)end_x; i++) {
-								for (j = (int)end_y; j < (int)start_y; j--) {
-									for (k = (int)start_z; k < (int)end_z; k++) {
-										Block new_block = copy.getBlockAt(i, j, k);
-										
-										new_block.setType(Material.AIR);
-									}
-								}
+							List<Integer> x = new ArrayList<Integer>();
+							List<Integer> z = new ArrayList<Integer>();
+							for (Chunk chunk : copy.getLoadedChunks()) {
+								copy.unloadChunk(chunk.getX(), chunk.getZ());
+								x.add(chunk.getX());
+								z.add(chunk.getZ());
 							}
-							for (i = (int)start_x; i < (int)end_x; i++) {
-								for (j = (int)end_y; j < (int)start_y; j--) {
-									for (k = (int)start_z; k < (int)end_z; k++) {
-										Block original = world.getBlockAt(i, j, k);
-										Block new_block = copy.getBlockAt(i, j, k);
-										
-										new_block.setType(original.getType());
-										new_block.setData(original.getData());
-									}
-								}
+							copyDirectory(new File(split[2]), new File(split[1]));
+							for (i = 0; i < x.size(); i++) {
+								copy.loadChunk(x.get(i), z.get(i));
 							}
+							
+//							int j,k;
+//							for (i = (int)start_x; i < (int)end_x; i++) {
+//								for (j = (int)end_y; j < (int)start_y; j--) {
+//									for (k = (int)start_z; k < (int)end_z; k++) {
+//										Block new_block = copy.getBlockAt(i, j, k);
+//										
+//										new_block.setType(Material.AIR);
+//									}
+//								}
+//							}
+//							for (i = (int)start_x; i < (int)end_x; i++) {
+//								for (j = (int)end_y; j < (int)start_y; j--) {
+//									for (k = (int)start_z; k < (int)end_z; k++) {
+//										Block original = world.getBlockAt(i, j, k);
+//										Block new_block = copy.getBlockAt(i, j, k);
+//										
+//										new_block.setType(original.getType());
+//										new_block.setData(original.getData());
+//									}
+//								}
+//							}
 							
 							this.world = copy;
 						}			
@@ -272,7 +285,12 @@ public class Quest {
 			
 			MineQuest.getEventParser().addEvent(new QuestEvent(this, 100, 0));
 		} catch (Exception e) {
-			e.printStackTrace();
+			MineQuest.log("Unable to load Quest - Generic Error");
+			try {
+				issueNextEvents(-1);
+			} catch (Exception e1) {
+				MineQuest.log("Unable to unload events properly");
+			}
 		}
 		
 		

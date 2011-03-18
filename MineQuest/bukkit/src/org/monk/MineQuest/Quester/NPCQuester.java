@@ -99,7 +99,13 @@ public class NPCQuester extends Quester {
 					map.put(player.getName(), 1);
 				} else {
 					map.put(player.getName(), map.get(player.getName()) + 1);
-					if (map.get(player.getName()) == 5) {
+					if (map.get(player.getName()) == 2) {
+						player.sendMessage("<" + getName() + "> Owe!");
+					} else if (map.get(player.getName()) == 3) {
+						player.sendMessage("<" + getName() + "> Don't do that!");
+					} else if (map.get(player.getName()) == 5) {
+						player.sendMessage("<" + getName() + "> You won't like me when I'm angry!");
+					} else if (map.get(player.getName()) == 9) {
 						MineQuest.getQuester(player).damage(200);
 						map.put(player.getName(), 1);
 					}
@@ -162,7 +168,6 @@ public class NPCQuester extends Quester {
 			MineQuest.getEventParser().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
 		} catch (SQLException e) {
 			MineQuest.log("Unable to add NPCQuester");
-			e.printStackTrace();
 		}
 	}
 }

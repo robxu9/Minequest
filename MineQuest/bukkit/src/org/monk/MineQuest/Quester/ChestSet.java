@@ -61,7 +61,6 @@ public class ChestSet {
 			}
 		} catch (SQLException e) {
 			System.out.println("[TownSpawn] [ChestSet] Error: reading query");
-			e.printStackTrace();
 		}
 	}
 
