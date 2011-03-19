@@ -30,7 +30,7 @@ LoadWorld:junk_name:unaffected_load_world[:Nether]
 }}}
 An instance option is currently being worked on and is in a semi-working state. Excluding issues listed on the [KnownIssues] page. It will allow up to the specified max number of parallel parties running the quest in the world. Other than the max parameter it works just like the LoadWorld option except the names of each world are the junk_name followed by the instance number _i.
 {{{
-LoadWorld:junk_name:unaffected_load_world[:Nether]
+Instance:max:junk_name:unaffected_load_world[:Nether]
 }}}
 When using the Instance option or the LoadWorld, one more thing needs to be specified in the quest file. That is the QuestArea. When the instance world is reused the block types of all of the blocks in the QuestArea will be reloaded. This parameter should come before the world option in the file.
 {{{
