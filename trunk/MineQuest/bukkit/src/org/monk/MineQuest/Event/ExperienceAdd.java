@@ -39,9 +39,9 @@ public class ExperienceAdd extends NormalEvent {
 		
 		for (Quester quester : party.getQuesterArray()) {
 			quester.sendMessage("You gained " + exp + " exp from a quest");
-			quester.expGain(exp);
+			quester.expGain(exp / party.getQuesters().size());
 			quester.sendMessage("You gained " + class_exp + " unassigned exp from a quest");
-			quester.expClassGain(class_exp);
+			quester.expClassGain(class_exp / party.getQuesters().size());
 		}
 	}
 
