@@ -27,11 +27,11 @@ import org.monk.MineQuest.Quester.Quester;
 
 public class AreaEvent extends QuestEvent {
 	protected boolean[] flags;
-	protected int radius;
+	protected double radius;
 	protected Location loc;
 	protected Party party;
 
-	public AreaEvent(Quest quest, long delay, int index, Party party, Location loc, int radius) {
+	public AreaEvent(Quest quest, long delay, int index, Party party, Location loc, double radius) {
 		super(quest, delay, index);
 		this.party = party;
 		this.radius = radius;

@@ -412,15 +412,15 @@ public class Quest {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
 			
-			Location loc = new Location(world, Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
-			int radius = Integer.parseInt(line[8]);
+			Location loc = new Location(world, Double.parseDouble(line[5]), Double.parseDouble(line[6]), Double.parseDouble(line[7]));
+			double radius = Double.parseDouble(line[8]);
 			new_event = new AreaEvent(this, delay, index, party, loc, radius);
 		} else if (type.equals("SingleAreaEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
 			
-			Location loc = new Location(world, Integer.parseInt(line[5]), Integer.parseInt(line[6]), Integer.parseInt(line[7]));
-			int radius = Integer.parseInt(line[8]);
+			Location loc = new Location(world, Double.parseDouble(line[5]), Double.parseDouble(line[6]), Double.parseDouble(line[7]));
+			double radius = Double.parseDouble(line[8]);
 			new_event = new SingleAreaEvent(this, delay, index, party, loc, radius);
 		} else if (type.equals("MessageEvent")) {
 			int delay = Integer.parseInt(line[3]);
@@ -442,7 +442,7 @@ public class Quest {
 		} else if (type.equals("EntitySpawnerEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			String creature = line[7];
-			Location location = new Location(world, Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6]));
+			Location location = new Location(world, Double.parseDouble(line[4]), Double.parseDouble(line[5]), Double.parseDouble(line[6]));
 			boolean superm;
 			if (line[8].equals("f")) {
 				superm = false;
@@ -453,7 +453,7 @@ public class Quest {
 		} else if (type.equals("EntitySpawnerNoMove")) {
 			int delay = Integer.parseInt(line[3]);
 			String creature = line[7];
-			Location location = new Location(world, Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6]));
+			Location location = new Location(world, Double.parseDouble(line[4]), Double.parseDouble(line[5]), Double.parseDouble(line[6]));
 			boolean superm;
 			if (line[8].equals("f")) {
 				superm = false;

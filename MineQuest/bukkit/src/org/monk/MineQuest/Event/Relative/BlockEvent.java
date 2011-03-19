@@ -21,22 +21,25 @@ package org.monk.MineQuest.Event.Relative;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Event.NormalEvent;
 
 public class BlockEvent extends NormalEvent {
 	protected Material newType;
 	protected Block block;
+	protected Entity entity;
 	
-	public BlockEvent(long delay, World world, int x, int y,
+	public BlockEvent(long delay, World world, Entity entity, int x, int y,
 			int z, Material newType) {
-		this(delay, world.getBlockAt(x, y, z), newType);
+		this(delay, world.getBlockAt(x, y, z), entity, newType);
 	}
 
-	public BlockEvent(long delay, Block block, Material newType) {
+	public BlockEvent(long delay, Block block, Entity entity, Material newType) {
 		super(delay);
 		this.block = block;
 		this.newType = newType;
+		this.entity = entity;
 	}
 	
 	@Override

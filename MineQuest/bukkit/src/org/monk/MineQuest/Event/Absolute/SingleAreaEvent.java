@@ -29,7 +29,7 @@ public class SingleAreaEvent extends AreaEvent {
 	private Quester quester;
 
 	public SingleAreaEvent(Quest quest, long delay, int index,
-			Party party, Location loc, int radius) {
+			Party party, Location loc, double radius) {
 		super(quest, delay, index, party, loc, radius);
 		quester = null;
 	}

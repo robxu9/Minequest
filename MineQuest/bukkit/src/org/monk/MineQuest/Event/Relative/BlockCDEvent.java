@@ -20,15 +20,17 @@ package org.monk.MineQuest.Event.Relative;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.EventParser;
 
 public class BlockCDEvent extends BlockEvent {
 	private long second_delay;
 	private boolean first;
+	private Entity entity;
 
-	public BlockCDEvent(long delay, long second_delay, Block block, Material newType) {
-		super(delay, block, newType);
+	public BlockCDEvent(long delay, long second_delay, Entity entity, Block block, Material newType) {
+		super(delay, block, entity, newType);
 		this.second_delay = second_delay;
 		first = false;
 	}
@@ -42,7 +44,7 @@ public class BlockCDEvent extends BlockEvent {
 			eventParser.setComplete(false);
 			delay = second_delay;
 		} else {
-			Event event = new BlockEvent(second_delay, block, Material.AIR);
+			Event event = new BlockEvent(second_delay, block, entity, Material.AIR);
 			
 			event.activate(eventParser);
 			eventParser.setComplete(true);
