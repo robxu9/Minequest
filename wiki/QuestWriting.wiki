@@ -59,7 +59,7 @@ There are many types of Events that can be used to construct various types of qu
 Event:id:EventName:delay ms:other event data
 }}}
 
-== Quest Event ==
+== Quest Event (QE) ==
 This is one of the simplest events. It waits for the delay time to pass then will trigger the selected quest task.
 {{{
 Event:id:QuestTask:delay ms:task id
@@ -114,7 +114,7 @@ This is great if you want some mobs in the distance to look like they are comman
 Event:id:EntitySpawnerNoMove:delay ms:loc x:loc y:loc z:type:super
 }}}
 
-=== Health Entity Spawn ===
+=== Health Entity Spawn (QE) ===
 This is used to create an entity with a specific amount of health. This can be used to create a boss or even just a pig thats really hard to stop from squealing. When the entity is killed this event will issue a quest event with the id specified. The last parameter (stay) is a t or f, t will hold the entity in place, and the f will allow it to roam freely.
 {{{
 Event:id:HealthEntitySpawn:delay ms:task:loc x:loc y:loc z:type:health:stay
@@ -129,28 +129,28 @@ This completes any entity spawners with the event idd specified. It takes the id
 Event:id:EntitySpawnerCompleteEvent:delay ms:event id 1,event id 2, event id 3
 }}}
 
-=== Entity Spawner No Move Complete ===
+=== Entity Spawner No Move Complete (QE) ===
 This complete event was designed for completing the Entity No Move Spawner. It completes any of the spawners with the ids specified however it also waits until the entities are dead, at which time it will issue a quest task. 
 {{{
 Event:id:EntitySpawnerCompleteNMEvent:delay ms:task:event id 1,event id 2, event id 3
 }}}
 
-== Area Events ==
+== Area Events (QE) ==
 These are events that issue quest tasks when areas are entered by questers. I promise more area events will be coming that are not only spherical.
 
-=== Area Event ===
+=== Area Event (QE) ===
 These are the generic form of area events. When the entire party has been in the area at one time or another the quest task will be issued. They do not all have to be standing in the area at once.
 {{{
 Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
 }}}
 
-=== Single Area Event ===
+=== Single Area Event (QE) ===
 This event works the same way as the previous except that it waits for any single quester to be inside the area. 
 {{{
 Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
 }}}
 
-== Can Edit Events ==
+== Can Edit Events (QE) ==
 These work differently than all other events. They have an event id to conform with the Event formatting, however these events can never be added to a Task. Instead these allow players to edit a specific block in the world, this will also prevent the message about not editing the world. They also can activate a specific quest task. This means you can have a lever pull cause a task to be issued. 
 {{{
 Event:id:CanEdit:loc x:loc y:loc z:task id
