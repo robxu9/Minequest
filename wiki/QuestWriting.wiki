@@ -50,7 +50,7 @@ Task:id:event_id_1,event_id_2,event_id_3
 }}}
 A task will only activate the events one, so this is very useful for traps that go off once. Some traps you want to activate multiple times so a RepeatingTask can be used. This will activate the events every time that the task is issued.
 {{{
-Task:id:event_id_1,event_id_2,event_id_3
+RepeatingTask:id:event_id_1,event_id_2,event_id_3
 }}}
 
 = Event =
