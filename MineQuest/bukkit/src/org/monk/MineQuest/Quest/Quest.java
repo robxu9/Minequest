@@ -29,7 +29,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -52,11 +51,14 @@ import org.monk.MineQuest.Event.Absolute.EntitySpawnerCompleteEvent;
 import org.monk.MineQuest.Event.Absolute.EntitySpawnerCompleteNMEvent;
 import org.monk.MineQuest.Event.Absolute.EntitySpawnerEvent;
 import org.monk.MineQuest.Event.Absolute.EntitySpawnerNoMove;
+import org.monk.MineQuest.Event.Absolute.ExplosionEvent;
 import org.monk.MineQuest.Event.Absolute.HealthEntitySpawn;
 import org.monk.MineQuest.Event.Absolute.LockWorldTime;
 import org.monk.MineQuest.Event.Absolute.PartyHealthEvent;
 import org.monk.MineQuest.Event.Absolute.QuestEvent;
 import org.monk.MineQuest.Event.Absolute.SingleAreaEvent;
+import org.monk.MineQuest.Quester.NPCMode;
+import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Quest {
@@ -73,6 +75,7 @@ public class Quest {
 	private double end_x;
 	private double end_y;
 	private double end_z;
+	private List<NPCQuester> npcs;
 	
 	public Quest(String filename, Party party) {
 		this.questers = party.getQuesterArray();
@@ -80,6 +83,7 @@ public class Quest {
 		tasks = new ArrayList<QuestTask>();
 		events = new ArrayList<Event>();
 		edits = new CanEdit[0];
+		npcs = new ArrayList<NPCQuester>();
 
 		try {
 			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
@@ -137,22 +141,16 @@ public class Quest {
 								MineQuest.log("Loaded world without quest area defined - missing QuestArea?");
 								throw new Exception();
 							}
-							
-							int i,j,k;
-							for (i = (int)start_x; i < (int)end_x; i++) {
-								for (j = (int)end_y; j < (int)start_y; j--) {
-									for (k = (int)start_z; k < (int)end_z; k++) {
-										Block new_block = copy.getBlockAt(i, j, k);
-										
-										new_block.setType(Material.AIR);
-									}
-								}
+							for (LivingEntity entity : copy.getLivingEntities()) {
+								entity.remove();
 							}
-							for (i = (int)start_x; i < (int)end_x; i++) {
-								for (j = (int)end_y; j < (int)start_y; j--) {
-									for (k = (int)start_z; k < (int)end_z; k++) {
-										Block original = world.getBlockAt(i, j, k);
-										Block new_block = copy.getBlockAt(i, j, k);
+							
+							int x,y,z;
+							for (x = (int)start_x; x < (int)end_x; x++) {
+								for (z = (int)start_z; z < (int)end_z; z++) {
+									for (y = (int)end_y; y > (int)start_y; y--) {
+										Block original = world.getBlockAt(x, y, z);
+										Block new_block = copy.getBlockAt(x, y, z);
 										
 										new_block.setType(original.getType());
 										new_block.setData(original.getData());
@@ -204,57 +202,51 @@ public class Quest {
 								}
 							}
 						} else {
-//							World world = MineQuest.getSServer().getWorld(split[3]);
-//							if (world == null) {
-//								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
-//									world = MineQuest.getSServer().createWorld(split[3], Environment.NORMAL);
-//								} else {
-//									world = MineQuest.getSServer().createWorld(split[3], Environment.NETHER);
-//								}
-//							}
+							World world = MineQuest.getSServer().getWorld(split[3]);
+							if (world == null) {
+								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
+									world = MineQuest.getSServer().createWorld(split[3], Environment.NORMAL);
+								} else {
+									world = MineQuest.getSServer().createWorld(split[3], Environment.NETHER);
+								}
+							}
 							World copy = MineQuest.getSServer().getWorld(split[2]);
 							
 							if (start_x == 0) {
-								MineQuest.log("Loaded world without quest area defined - missing QuestArea?");
+								MineQuest.log("Instanced world without quest area defined - missing QuestArea?");
 								throw new Exception();
 							}
-							
-							List<Integer> x = new ArrayList<Integer>();
-							List<Integer> z = new ArrayList<Integer>();
-							for (Chunk chunk : copy.getLoadedChunks()) {
-								copy.unloadChunk(chunk.getX(), chunk.getZ());
-								x.add(chunk.getX());
-								z.add(chunk.getZ());
-							}
-							copyDirectory(new File(split[2]), new File(split[1]));
-							for (i = 0; i < x.size(); i++) {
-								copy.loadChunk(x.get(i), z.get(i));
+							for (LivingEntity entity : copy.getLivingEntities()) {
+								entity.remove();
 							}
 							
-//							int j,k;
-//							for (i = (int)start_x; i < (int)end_x; i++) {
-//								for (j = (int)end_y; j < (int)start_y; j--) {
-//									for (k = (int)start_z; k < (int)end_z; k++) {
-//										Block new_block = copy.getBlockAt(i, j, k);
-//										
-//										new_block.setType(Material.AIR);
-//									}
-//								}
-//							}
-//							for (i = (int)start_x; i < (int)end_x; i++) {
-//								for (j = (int)end_y; j < (int)start_y; j--) {
-//									for (k = (int)start_z; k < (int)end_z; k++) {
-//										Block original = world.getBlockAt(i, j, k);
-//										Block new_block = copy.getBlockAt(i, j, k);
-//										
-//										new_block.setType(original.getType());
-//										new_block.setData(original.getData());
-//									}
-//								}
-//							}
+							int x,y,z;
+							for (x = (int)start_x; x < (int)end_x; x++) {
+								for (z = (int)start_z; z < (int)end_z; z++) {
+									for (y = (int)end_y; y > (int)start_y; y--) {
+										Block original = world.getBlockAt(x, y, z);
+										Block new_block = copy.getBlockAt(x, y, z);
+										
+										new_block.setType(original.getType());
+										new_block.setData(original.getData());
+									}
+								}
+							}
 							
 							this.world = copy;
 						}			
+					} else if (split[0].equals("NPC")) {
+						String name = split[1];
+						Location location = new Location(world,
+								Double.parseDouble(split[2]),
+								Double.parseDouble(split[3]),
+								Double.parseDouble(split[4]),
+								Float.parseFloat(split[5]),
+								Float.parseFloat(split[6]));
+						MineQuest.log("Adding NPC " + name);
+						npcs.add(new NPCQuester(name, NPCMode.QUEST_NPC, world, location));
+						MineQuest.log("Added " + name);
+						MineQuest.addQuester(npcs.get(npcs.size() - 1));
 					}
 				}
 			} catch (Exception e) {
@@ -272,12 +264,12 @@ public class Quest {
 				spawn = world.getSpawnLocation();
 			}
 			
-			for (QuestTask task : tasks) {
-				MineQuest.log("Task: " + task.getId());
-				for (Event event : task.getEvents()) {
-					MineQuest.log(event.getName());
-				}
-			}
+//			for (QuestTask task : tasks) {
+//				MineQuest.log("Task: " + task.getId());
+//				for (Event event : task.getEvents()) {
+//					MineQuest.log(event.getName());
+//				}
+//			}
 			
 			for (Quester quester : party.getQuesters()) {
 				quester.setQuest(this, world);
@@ -584,6 +576,15 @@ public class Quest {
 			}
 			 
 			new_event = new HealthEntitySpawn(this, delay, task, location, creature, health, stay);
+		} else if (type.equals("ExplosionEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			double x = Double.parseDouble(line[4]);
+			double y = Double.parseDouble(line[5]);
+			double z = Double.parseDouble(line[6]);
+			double radius = Double.parseDouble(line[7]);
+			int damage = Integer.parseInt(line[8]);
+			
+			new_event = new ExplosionEvent(delay, world, x, y, z, (float)radius, damage);
 		} else {
 			MineQuest.log("Unknown Event Type: " + type);
 			throw new Exception();
@@ -615,6 +616,12 @@ public class Quest {
 				task.clearEvents();
 			}
 			MineQuest.remQuest(this);
+			
+			for (NPCQuester quester : npcs) {
+				MineQuest.remQuester(quester);
+				quester.damage(20000);
+			}
+			
 			return;
 		} else if (index <= -2) {
 			return;

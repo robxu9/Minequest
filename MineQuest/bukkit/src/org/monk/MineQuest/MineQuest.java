@@ -71,6 +71,7 @@ public class MineQuest extends JavaPlugin {
 //	private MineQuestServerListener sl;
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
+	private static String server_owner;
 	
 	/**
 	 * Adds a Quester to the MineQuest Server.
@@ -182,6 +183,7 @@ public class MineQuest extends JavaPlugin {
 				sql_server.update("CREATE TABLE IF NOT EXISTS " + name + 
 						"(height INT, x INT, y INT, z INT, max_x INT, max_z INT, price INT, name VARCHAR(30), store_prop BOOLEAN)");
 				towns.add(new Town(name, getSServer().getWorld("world")));
+				player.sendMessage("Town " + name + " created");
 			} else {
 				player.sendMessage(namer + " is in the process of creating a town - use /createtown to start a new creation");
 			}
@@ -382,7 +384,10 @@ public class MineQuest extends JavaPlugin {
 	 * @return Boolean true if Quester is a Mayor
 	 */
 	public static boolean isMayor(Quester quester) {
-		if (quester.equals("jmonk")) {
+		if (quester.equals(server_owner)) {
+			return true;
+		}
+		if (quester.getPlayer().isOp()) {
 			return true;
 		}
 		
@@ -531,6 +536,7 @@ public class MineQuest extends JavaPlugin {
 			pass = minequest.getString("pass", "1234");
 			maxClass = minequest.getInt("max_classes", 4);
 			boolean real = minequest.getBoolean("mysql", true);
+			server_owner = minequest.getString("mayor", "jmonk");
 			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
 			
 			sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +

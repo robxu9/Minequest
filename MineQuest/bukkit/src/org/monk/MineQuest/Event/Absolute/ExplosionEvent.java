@@ -3,6 +3,7 @@ package org.monk.MineQuest.Event.Absolute;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
@@ -18,9 +19,9 @@ public class ExplosionEvent extends NormalEvent {
 	private int damage;
 	private CraftWorld world;
 
-	public ExplosionEvent(long delay, CraftWorld world, double x, double y, double z, float radius, int damage) {
+	public ExplosionEvent(long delay, World world, double x, double y, double z, float radius, int damage) {
 		super(delay);
-		this.world = world;
+		this.world = (CraftWorld)world;
 		this.x = x;
 		this.y = y;
 		this.z = z;
