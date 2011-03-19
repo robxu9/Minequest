@@ -53,6 +53,12 @@ A task will only activate the events one, so this is very useful for traps that 
 RepeatingTask:id:event_id_1,event_id_2,event_id_3
 }}}
 
+= NPCs =
+You can spawn npcs in your world. Currently they do nothing more than stand in place with a name above their head. However this in combination with an SingleAreaEvent and MessageEvents, NPCs in your world can tell you stuff when you get close. To spawn an npc the syntax is as follows, must come after all of the world parameters.
+{{{
+NPC:name:loc x:loc y:loc z:pitch:yaw
+}}}
+
 = Event =
 There are many types of Events that can be used to construct various types of quests but they all have a few common parameters that can be mentioned. The first is the id, this is just like task id in that it is unique. The task and event id spaces do not collide, so if an Event has id 6 and a Task has id 6, they are not necessarily related. They all have an event name after this, this defines what the event will do. In all cases but Can Edit events, this is followed by a delay. The delay is in milliseconds and defines how often the event will check for triggers, or how long until the event occurs.
 {{{
