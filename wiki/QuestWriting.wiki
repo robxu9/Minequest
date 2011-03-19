@@ -93,6 +93,12 @@ This launches an arrow when activated after the specified delay. It takes 6 doub
 Event:id:ArrowEvent:delay ms:loc x:loc y: loc z: dir x: dir y: dir z
 }}}
 
+== Explosion Event ==
+This causes an explosion at the defined x, y, z location. It has explosion radius as specified. It also allows for a damage parameter to do extra damage to the targets within the radius.
+{{{
+Event:id:ExplosionEvent:delay ms:loc x:loc y:loc z:radius:damage
+}}}
+
 == Party Health Event ==
 This sets the health of the entire party after the specified delay based on fraction.
 {{{
