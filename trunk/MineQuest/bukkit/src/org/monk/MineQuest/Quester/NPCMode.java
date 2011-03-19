@@ -5,7 +5,8 @@ import java.util.Map;
 
 public enum NPCMode {
 	STATIONARY, 
-	GOD;
+	GOD,
+	QUEST_NPC;
 	
     private static final Map<String, NPCMode> lookupName = new HashMap<String, NPCMode>();
 

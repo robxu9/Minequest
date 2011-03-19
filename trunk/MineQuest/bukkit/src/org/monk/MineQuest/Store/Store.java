@@ -278,4 +278,10 @@ public class Store {
 		}
 	}
 
+	public void addBlock(String type, String price, String item_id) {
+		MineQuest.getSQLServer().update("INSERT INTO " + name + " (item_id, price, quantity, type) VALUES('" + 
+				Integer.parseInt(item_id) + "', '" + Integer.parseInt(price) + "', '0', '" + type + "')");
+		blocks.add(new StoreBlock(this, type, 0, Integer.parseInt(price), Integer.parseInt(item_id)));
+	}
+
 }

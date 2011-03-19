@@ -181,6 +181,7 @@ public class Town {
 					" (name, x, y, z, max_x, max_z, height, store_prop, price) VALUES('null', '" + x + "', '" + y + "', '" + z
 					+ "', '" + max_x + "', '" + max_z + "', '" + height
 					+ "', '0', '10000000')");
+			player.sendMessage("Property Created!");
 		} else {
 			player.sendMessage("You do not have town permissions");
 		}
@@ -219,6 +220,7 @@ public class Town {
 			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (item_id INT, price DOUBLE, quantity INT, type VARCHAR(30))");
 			stores.add(new Store(name, this.name));
 			stores.get(stores.size() - 1).queryData();
+			player.sendMessage("Store " + name + " created");
 		} else {
 			player.sendMessage("You do not have town permissions");
 		}
@@ -298,6 +300,7 @@ public class Town {
 			getProperty(player).setPrice(price);
 			MineQuest.getSQLServer().update("UPDATE " + name + " SET price='" + price + "' WHERE x='" + 
 					prop.getX() + "' AND y='" + prop.getY() + "' AND z='" + prop.getZ() + "'");
+			player.sendMessage("Price Set!");
 		}
 	}
 

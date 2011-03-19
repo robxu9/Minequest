@@ -24,6 +24,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
@@ -511,6 +512,25 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage("You have " + cubes_string);
 			event.setCancelled(true);
         	return;
+        } else if (split[0].equals("/addblock")) {
+        	if (split.length < 4) {
+        		player.sendMessage("Usage: /addblock type price item_id");
+        		return;
+        	}
+        	
+    		Town town = MineQuest.getTown(player);
+    		if (town != null) {
+    			Store store = town.getStore(player);
+
+    			if (store != null) {
+    				Block block = player.getWorld().getBlockAt(player.getLocation());
+    				if (MineQuest.getQuester(player).canEdit(block)) {
+        				store.addBlock(split[1], split[2], split[3]);
+        				player.sendMessage(split[1] + " added to store");
+    				}
+    			}
+    		}
+			event.setCancelled(true);
         }
 	}
 	
@@ -536,7 +556,8 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.teleportTo(towns.get(index).getLocation());
 			event.setCancelled(true);
 		} else if (split[0].equals("/townloc")) {
-			player.sendMessage("You are at " + player.getLocation().getX() + " " + player.getLocation().getY() + " " + player.getLocation().getZ());
+			player.sendMessage("You are at " + player.getLocation().getX() + " " + player.getLocation().getY() + " " + 
+					player.getLocation().getZ() + " P:" + player.getLocation().getPitch() + " Y:" + player.getLocation().getYaw());
 			event.setCancelled(true);
 		}else if (split[0].equals("/createtown")) {
         	MineQuest.createTown(player);
@@ -612,6 +633,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/setspawn")) {
 			if (MineQuest.getTown(player) != null) {
 				MineQuest.getTown(player).setSpawn(player.getLocation());
+				player.sendMessage("Spawn location set");
 			} else {
 				player.sendMessage("You are not in a town");
 			}
@@ -657,6 +679,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         			player.sendMessage("Usage: /addedit <username>");
         		} else {
         			prop.addEdit(MineQuest.getQuester(split[1]));
+        			player.sendMessage("Editor " + split[1] + " added");
         		}
         	} else {
         		player.sendMessage("You are not in a town");
@@ -676,6 +699,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         			player.sendMessage("Usage: /addedit <username>");
         		} else {
         			prop.remEdit(MineQuest.getQuester(split[1]));
+        			player.sendMessage("Editor " + split[1] + " removed");
         		}
         	} else {
         		player.sendMessage("You are not in a town");

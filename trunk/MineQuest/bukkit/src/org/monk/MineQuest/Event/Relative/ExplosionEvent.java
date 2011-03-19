@@ -35,10 +35,11 @@ public class ExplosionEvent extends NormalEvent {
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		world.getHandle().a(null, x, y, z, radius);
+		Location loc = entity.getLocation();
+		world.getHandle().a(null, x + loc.getX(), y + loc.getY(), z + loc.getZ(), radius);
 		
 		List<LivingEntity> entities = world.getLivingEntities();
-		Location location = new Location(null, x, y, z);
+		Location location = new Location(null, x + loc.getX(), y + loc.getY(), z + loc.getZ());
 		for (LivingEntity entity : entities) {
 			if (MineQuest.distance(location, entity.getLocation()) < radius) {
 				MineQuest.damage(entity, damage);

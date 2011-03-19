@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -35,8 +37,13 @@ public class NPCQuester extends Quester {
 		double z = location.getZ();
 		double pitch = location.getPitch();
 		double yaw = location.getYaw();
-		create(mode, world, x, y, z, pitch, yaw);
-		update();
+		if (mode != NPCMode.QUEST_NPC) {
+			create(mode, world, x, y, z, pitch, yaw);
+			update();
+		} else {
+			makeNPC(world.getName(), x, y, z, (float)pitch, (float)yaw);
+			health = max_health = 2000;
+		}
 		distance = 0;
 		entity = null;
 	}
@@ -51,21 +58,24 @@ public class NPCQuester extends Quester {
 	}
 	
 	public void create(NPCMode mode, World world, double x, double y, double z, double pitch, double yaw) {
-		super.create();
-
-		MineQuest.getSQLServer().update("UPDATE questers SET x='" + 
-				x + "', y='" + 
-				y + "', z='" + 
-				z + "', pitch='" + 
-				pitch + "', yaw='" + 
-				yaw + "', mode='" + 
-				mode + "', world='" + 
-				world.getName() + "' WHERE name='"
-				+ name + "'");
+		if (mode != NPCMode.QUEST_NPC) {
+			super.create();
+	
+			MineQuest.getSQLServer().update("UPDATE questers SET x='" + 
+					x + "', y='" + 
+					y + "', z='" + 
+					z + "', pitch='" + 
+					pitch + "', yaw='" + 
+					yaw + "', mode='" + 
+					mode + "', world='" + 
+					world.getName() + "' WHERE name='"
+					+ name + "'");
+		}
 	}
 	
 	@Override
 	public void save() {
+		if (mode == NPCMode.QUEST_NPC) return;
 		super.save();
 		
 		if (entity == null) return;
@@ -148,6 +158,9 @@ public class NPCQuester extends Quester {
 	}
 
 	public void update() {
+		if (mode == NPCMode.QUEST_NPC) {
+			return;
+		}
 		super.update();
 
 		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + name + "'");
@@ -161,13 +174,18 @@ public class NPCQuester extends Quester {
 			double pitch = results.getDouble("pitch");
 			double yaw = results.getDouble("yaw");
 			String world = results.getString("world");
-			if (entity != null) {
-				entity.getBukkitEntity().setHealth(0);
-				entity = null;
-			}
-			MineQuest.getEventParser().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
+			makeNPC(world, x, y, z, (float)pitch, (float)yaw);
 		} catch (SQLException e) {
 			MineQuest.log("Unable to add NPCQuester");
 		}
+	}
+
+	private void makeNPC(String world, double x, double y, double z,
+			float pitch, float yaw) {
+		if (entity != null) {
+			entity.getBukkitEntity().setHealth(0);
+			entity = null;
+		}
+		MineQuest.getEventParser().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
 	}
 }

@@ -67,29 +67,29 @@ import org.monk.MineQuest.World.Town;
  * @author jmonk
  */
 public class Quester {
-	private Location before_quest;
-	private ChestSet chests;
-	private int class_exp;
-	private List<SkillClass> classes;
-	private double cubes;
-	private boolean debug;
+	protected Location before_quest;
+	protected ChestSet chests;
+	protected int class_exp;
+	protected List<SkillClass> classes;
+	protected double cubes;
+	protected boolean debug;
 	protected double distance;
-	private boolean enabled;
-	private int exp;
-	private int health;
-	List<Integer> ids = new ArrayList<Integer>();
-	private String last;
-	private int level;
-	private int max_health;
+	protected boolean enabled;
+	protected int exp;
+	protected int health;
+	protected List<Integer> ids = new ArrayList<Integer>();
+	protected String last;
+	protected int level;
+	protected int max_health;
 	protected String name;
-	private Party party;
-	private HumanEntity player;
-	private int poison_timer;
-	private Quest quest;
-	private int rep;
-	private ItemStack[] spare_inven;
-	private ItemStack[] spare_inven_2;
-	List<Long> times = new ArrayList<Long>();
+	protected Party party;
+	protected HumanEntity player;
+	protected int poison_timer;
+	protected Quest quest;
+	protected int rep;
+	protected ItemStack[] spare_inven;
+	protected ItemStack[] spare_inven_2;
+	protected List<Long> times = new ArrayList<Long>();
 	
 	public Quester() {
 	}
@@ -687,7 +687,12 @@ public class Quester {
 	 * @param event
 	 */
 	public void defendEntity(Entity entity, EntityDamageByEntityEvent event) {
-		int amount = classes.get(0).getGenerator().nextInt(10);
+		int amount;
+		if ((classes != null) && (classes.get(0) != null) && (classes.get(0).getGenerator() != null)) {
+			amount = classes.get(0).getGenerator().nextInt(10);
+		} else {
+			amount = 5;
+		}
 		int levelAdj = MineQuest.getAdjustment();
 		if (levelAdj == 0) {
 			levelAdj = 1;
@@ -712,10 +717,12 @@ public class Quester {
 		
 		int sum = 0;
 		
-		for (SkillClass sclass : classes) {
-			if (entity instanceof LivingEntity) {
-				if (sclass instanceof DefendingClass) {
-					sum += ((DefendingClass)sclass).defend((LivingEntity)entity, amount);
+		if (classes != null) {
+			for (SkillClass sclass : classes) {
+				if (entity instanceof LivingEntity) {
+					if (sclass instanceof DefendingClass) {
+						sum += ((DefendingClass)sclass).defend((LivingEntity)entity, amount);
+					}
 				}
 			}
 		}
