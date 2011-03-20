@@ -23,6 +23,11 @@ This completes creation of a town with you standing at the opposite corner of th
 Same as /createtown and /finishtown respectively.
 
 {{{
+/setspawn
+}}}
+Sets the spawn location for a town.
+
+{{{
 /setmayor <name>
 }}}
 Sets the mayor of the town you are standing in.
@@ -41,4 +46,3 @@ This completes creation of a property with you standing at the opposite corner o
 /town
 }}}
 Tells you what town you are in.
-
