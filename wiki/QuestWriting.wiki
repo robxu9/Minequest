@@ -6,6 +6,8 @@ This page is a description of how to write individual pieces of a quest file. It
 
 Currently two quests have been/are being written. One is significantly more in depth and exciting than the other. I'll let you be the judge of which. [PirateShipQuest] and [DungeonQuest].
 
+A good way to get started with quests can be found at http://www.monksanctum.org/node/54.
+
 When developing a quest the following commands are vital.
 {{{
 /goto world_name [Nether or Normal]
