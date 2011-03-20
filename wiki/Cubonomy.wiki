@@ -48,3 +48,8 @@ Tells you the price of the town property that you are standing on.
 /buyprop
 }}}
 Buys the property that you are standing on.
+
+{{{
+/addblock name price item_id
+}}}
+Will add a block to the store you are in. Must have permission to edit the town to do this.
