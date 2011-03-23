@@ -27,10 +27,9 @@ import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.EventParser;
-import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Quester.Quester;
 
-public class AuraEvent extends NormalEvent {
+public class AuraEvent extends RelativeEvent {
 	protected LivingEntity player;
 	protected World world;
 	private long total_time;

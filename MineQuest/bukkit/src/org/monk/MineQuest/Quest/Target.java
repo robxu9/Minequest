@@ -1,6 +1,8 @@
 package org.monk.MineQuest.Quest;
 
 import org.bukkit.Location;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Quester.Quester;
 
 public abstract class Target {
@@ -35,8 +37,10 @@ public abstract class Target {
 			
 			target = new Targetter(events);
 		} else {
+			MineQuest.log("Error: Unknown Target Type " + split[2]);
 			throw new Exception();
 		}
+		
 		target.setId(id);
 		
 		return target;

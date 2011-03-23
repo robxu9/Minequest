@@ -26,6 +26,7 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -246,11 +247,11 @@ public class MineQuest extends JavaPlugin {
 	/**
 	 * Gets a Quester of a specific Player
 	 * 
-	 * @param player Player that is a Quester
+	 * @param entity Player that is a Quester
 	 * @return Quester or NULL if none found
 	 */
-	static public Quester getQuester(Player player) {
-		return getQuester(player.getName());
+	static public Quester getQuester(HumanEntity entity) {
+		return getQuester(entity.getName());
 	}
 	
 	/**
@@ -747,9 +748,10 @@ public class MineQuest extends JavaPlugin {
 		
 		quests = new_quests;
 	}
+	
 	public static void damage(LivingEntity entity, int i) {
-		if (entity instanceof Player) {
-			Quester quester = getQuester((Player)entity);
+		if (entity instanceof HumanEntity) {
+			Quester quester = getQuester((HumanEntity)entity);
 			quester.setHealth(quester.getHealth() - i);
 		} else if (getMob(entity) != null) {
 			getMob(entity).damage(i);
@@ -759,6 +761,28 @@ public class MineQuest extends JavaPlugin {
 			if (newHealth <= 0) newHealth = 0;
 			
 			entity.setHealth(newHealth);
+		}
+	}
+	
+	public static void setHealth(LivingEntity entity, double percent) {
+		if (entity instanceof HumanEntity) {
+			getQuester((HumanEntity)entity).setHealth((int)(percent * getQuester((HumanEntity)entity).getHealth()));
+		} else if (getMob(entity) != null) {
+			getMob(entity).setHealth((int)(getMob(entity).getHealth() * percent));
+		} else {
+			entity.setHealth((int)(entity.getHealth() * percent));
+		}
+	}
+
+	public static void setHealth(LivingEntity entity, int health) {
+		if (entity instanceof HumanEntity) {
+			getQuester((HumanEntity)entity).setHealth(health);
+		} else if (getMob(entity) != null) {
+			getMob(entity).setHealth(health);
+		} else {
+			if (health > 20) health = 20;
+			if (health < 0) health = 0;
+			entity.setHealth(health);
 		}
 	}
 }

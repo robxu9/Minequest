@@ -1,6 +1,7 @@
 package org.monk.MineQuest.Quest;
 
 import org.bukkit.Location;
+import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Quester.Quester;
 
 public interface CanEdit extends TargetEvent {

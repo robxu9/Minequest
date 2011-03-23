@@ -97,7 +97,7 @@ public class MysqlInterface {
 				con = (Connection) DriverManager.getConnection(url);
 			}
 		} catch (SQLException e) {
-			MineQuest.log("[ERROR] Unable to Connect to MySQL Databse");
+			MineQuest.log("[ERROR] Unable to Connect to MySQL Database");
 			return;
 		}
 		

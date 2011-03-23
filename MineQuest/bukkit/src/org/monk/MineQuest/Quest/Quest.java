@@ -57,6 +57,8 @@ import org.monk.MineQuest.Event.Absolute.LockWorldTime;
 import org.monk.MineQuest.Event.Absolute.PartyHealthEvent;
 import org.monk.MineQuest.Event.Absolute.QuestEvent;
 import org.monk.MineQuest.Event.Absolute.SingleAreaEvent;
+import org.monk.MineQuest.Event.Relative.RelativeEvent;
+import org.monk.MineQuest.Event.Target.TargetedEvent;
 import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
@@ -76,6 +78,7 @@ public class Quest {
 	private double end_y;
 	private double end_z;
 	private List<NPCQuester> npcs;
+	private List<Target> targets;
 	
 	public Quest(String filename, Party party) {
 		this.questers = party.getQuesterArray();
@@ -84,6 +87,7 @@ public class Quest {
 		events = new ArrayList<Event>();
 		edits = new CanEdit[0];
 		npcs = new ArrayList<NPCQuester>();
+		targets = new ArrayList<Target>();
 
 		try {
 			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
@@ -97,157 +101,7 @@ public class Quest {
 				while ((line = bis.readLine()) != null) {
 					number++;
 					String split[] = line.split(":");
-					if (split[0].equals("Event")) {
-						createEvent(split);
-					} else if (split[0].equals("Task")) {
-						createTask(split, false);
-					} else if (split[0].equals("RepeatingTask")) {
-						createTask(split, true);
-					} else if (split[0].equals("World")) {
-						World world = null;
-						if (MineQuest.getSServer().getWorld(split[1]) == null) {
-							if ((split.length == 2) || (split[2].equals("NORMAL"))) {
-								world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
-							} else {
-								world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
-							}
-						}
-						
-						teleport(party.getQuesterArray(), world);
-					} else if (split[0].equals("LoadWorld")) {
-						if (MineQuest.getSServer().getWorld(split[1]) == null) {
-							deleteDir(new File(split[1]));
-							copyDirectory(new File(split[2]), new File(split[1]));
-							world = null;
-							if (MineQuest.getSServer().getWorld(split[1]) == null) {
-								if ((split.length == 3) || (split[3].equals("NORMAL"))) {
-									world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
-								} else {
-									world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
-								}
-							}
-						} else {
-							World world = MineQuest.getSServer().getWorld(split[2]);
-							if (world == null) {
-								if ((split.length == 3) || (split[3].equals("NORMAL"))) {
-									world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
-								} else {
-									world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
-								}
-							}
-							World copy = MineQuest.getSServer().getWorld(split[1]);
-							
-							if (start_x == 0) {
-								MineQuest.log("Loaded world without quest area defined - missing QuestArea?");
-								throw new Exception();
-							}
-							for (LivingEntity entity : copy.getLivingEntities()) {
-								entity.remove();
-							}
-							
-							int x,y,z;
-							for (x = (int)start_x; x < (int)end_x; x++) {
-								for (z = (int)start_z; z < (int)end_z; z++) {
-									for (y = (int)end_y; y > (int)start_y; y--) {
-										Block original = world.getBlockAt(x, y, z);
-										Block new_block = copy.getBlockAt(x, y, z);
-										
-										new_block.setType(original.getType());
-										new_block.setData(original.getData());
-									}
-								}
-							}
-							
-							this.world = copy;
-						}
-					} else if (split[0].equals("Spawn")) {
-						MineQuest.log("Loaded Spawn");
-						double x = Double.parseDouble(split[1]);
-						double y = Double.parseDouble(split[2]);
-						double z = Double.parseDouble(split[3]);
-						this.spawn = new Location(world, x, y, z);
-					} else if (split[0].equals("QuestArea")) {
-						start_x = Double.parseDouble(split[1]);
-						start_y = Double.parseDouble(split[2]);
-						start_z = Double.parseDouble(split[3]);
-						end_x = Double.parseDouble(split[4]);
-						end_y = Double.parseDouble(split[5]);
-						end_z = Double.parseDouble(split[6]);
-					} else if (split[0].equals("Instance")) {
-						int max = Integer.parseInt(split[1]);
-						int i;
-						for (i = 0; i < max; i++) {
-							boolean flag = true;
-							for (Quest quest : MineQuest.getQuests()) {
-								if (quest.getWorld().getName().equals(split[2] + i)) {
-									flag = false;
-								}
-							}
-							if (flag) break;
-						}
-						if (i == max) {
-							MineQuest.log("Instances Full - Unable to Start Quest");
-							MineQuest.getEventParser().addEvent(new MessageEvent(10, party, "Instances Full - Unable to Start Quest"));
-						}
-						split[2] = split[2] + i;
-						if (MineQuest.getSServer().getWorld(split[2]) == null) {
-							deleteDir(new File(split[2]));
-							copyDirectory(new File(split[3]), new File(split[2]));
-							world = null;
-							if (MineQuest.getSServer().getWorld(split[1]) == null) {
-								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
-									world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
-								} else {
-									world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
-								}
-							}
-						} else {
-							World world = MineQuest.getSServer().getWorld(split[3]);
-							if (world == null) {
-								if ((split.length == 4) || (split[4].equals("NORMAL"))) {
-									world = MineQuest.getSServer().createWorld(split[3], Environment.NORMAL);
-								} else {
-									world = MineQuest.getSServer().createWorld(split[3], Environment.NETHER);
-								}
-							}
-							World copy = MineQuest.getSServer().getWorld(split[2]);
-							
-							if (start_x == 0) {
-								MineQuest.log("Instanced world without quest area defined - missing QuestArea?");
-								throw new Exception();
-							}
-							for (LivingEntity entity : copy.getLivingEntities()) {
-								entity.remove();
-							}
-							
-							int x,y,z;
-							for (x = (int)start_x; x < (int)end_x; x++) {
-								for (z = (int)start_z; z < (int)end_z; z++) {
-									for (y = (int)end_y; y > (int)start_y; y--) {
-										Block original = world.getBlockAt(x, y, z);
-										Block new_block = copy.getBlockAt(x, y, z);
-										
-										new_block.setType(original.getType());
-										new_block.setData(original.getData());
-									}
-								}
-							}
-							
-							this.world = copy;
-						}			
-					} else if (split[0].equals("NPC")) {
-						String name = split[1];
-						Location location = new Location(world,
-								Double.parseDouble(split[2]),
-								Double.parseDouble(split[3]),
-								Double.parseDouble(split[4]),
-								Float.parseFloat(split[5]),
-								Float.parseFloat(split[6]));
-						MineQuest.log("Adding NPC " + name);
-						npcs.add(new NPCQuester(name, NPCMode.QUEST_NPC, world, location));
-						MineQuest.log("Added " + name);
-						MineQuest.addQuester(npcs.get(npcs.size() - 1));
-					}
+					parseLine(split);
 				}
 			} catch (Exception e) {
 				MineQuest.log("Unable to load Quest Problem on Line " + number);
@@ -288,6 +142,154 @@ public class Quest {
 		
 	}
 	
+	private void parseLine(String[] split) throws Exception {
+		if (split[0].equals("Event")) {
+			if (split[2].equals("R")) {
+				events.add(RelativeEvent.newRelative(split, this));
+			} else if (split[2].equals("T")) {
+				events.add(TargetedEvent.newTargeted(split, this));
+			} else {
+				createEvent(split);
+			}
+		} else if (split[0].equals("Task")) {
+			createTask(split, false);
+		} else if (split[0].equals("RepeatingTask")) {
+			createTask(split, true);
+		} else if (split[0].contains("World") || split[0].contains("Instance")) {
+			createWorld(split);
+		} else if (split[0].equals("Spawn")) {
+			double x = Double.parseDouble(split[1]);
+			double y = Double.parseDouble(split[2]);
+			double z = Double.parseDouble(split[3]);
+			this.spawn = new Location(world, x, y, z);
+		} else if (split[0].equals("QuestArea")) {
+			start_x = Double.parseDouble(split[1]);
+			start_y = Double.parseDouble(split[2]);
+			start_z = Double.parseDouble(split[3]);
+			end_x = Double.parseDouble(split[4]);
+			end_y = Double.parseDouble(split[5]);
+			end_z = Double.parseDouble(split[6]);
+		} else if (split[0].equals("NPC")) {
+			String name = split[1];
+			Location location = new Location(world,
+					Double.parseDouble(split[2]),
+					Double.parseDouble(split[3]),
+					Double.parseDouble(split[4]),
+					Float.parseFloat(split[5]),
+					Float.parseFloat(split[6]));
+			MineQuest.log("Adding NPC " + name);
+			npcs.add(new NPCQuester(name, NPCMode.QUEST_NPC, world, location));
+			MineQuest.log("Added " + name);
+			MineQuest.addQuester(npcs.get(npcs.size() - 1));
+		} else if (split[0].equals("Target")) {
+			targets.add(Target.newTarget(split, this));
+		}
+	}
+
+	private void createWorld(String[] split) throws Exception {
+		if (split[0].equals("World")) {
+			World world = null;
+			if (MineQuest.getSServer().getWorld(split[1]) == null) {
+				if ((split.length == 2) || (split[2].equals("NORMAL"))) {
+					world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+				} else {
+					world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+				}
+			}
+			
+			teleport(party.getQuesterArray(), world);
+		} else if (split[0].equals("LoadWorld")) {
+			if (MineQuest.getSServer().getWorld(split[1]) == null) {
+				deleteDir(new File(split[1]));
+				copyDirectory(new File(split[2]), new File(split[1]));
+				world = null;
+				if (MineQuest.getSServer().getWorld(split[1]) == null) {
+					if ((split.length == 3) || (split[3].equals("NORMAL"))) {
+						world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
+					} else {
+						world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
+					}
+				}
+			} else {
+				boolean flag = false;
+				if ((split.length == 3) || (split[3].equals("NORMAL"))) {
+					flag = true;
+				}
+				copyWorld(split[3], split[2], flag);
+			}
+		} else if (split[0].equals("Instance")) {
+			int max = Integer.parseInt(split[1]);
+			int i;
+			for (i = 0; i < max; i++) {
+				boolean flag = true;
+				for (Quest quest : MineQuest.getQuests()) {
+					if (quest.getWorld().getName().equals(split[2] + i)) {
+						flag = false;
+					}
+				}
+				if (flag) break;
+			}
+			if (i == max) {
+				MineQuest.log("Instances Full - Unable to Start Quest");
+				MineQuest.getEventParser().addEvent(new MessageEvent(10, party, "Instances Full - Unable to Start Quest"));
+			}
+			split[2] = split[2] + i;
+			if (MineQuest.getSServer().getWorld(split[2]) == null) {
+				deleteDir(new File(split[2]));
+				copyDirectory(new File(split[3]), new File(split[2]));
+				world = null;
+				if (MineQuest.getSServer().getWorld(split[1]) == null) {
+					if ((split.length == 4) || (split[4].equals("NORMAL"))) {
+						world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
+					} else {
+						world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
+					}
+				}
+			} else {
+				boolean flag = false;
+				if ((split.length == 4) || (split[4].equals("NORMAL"))) {
+					flag = true;
+				}
+				copyWorld(split[3], split[2], flag);
+			}
+		}
+	}
+
+	private void copyWorld(String orig, String cp, boolean normal) throws Exception {
+		World world = MineQuest.getSServer().getWorld(orig);
+		if (world == null) {
+			if (normal) {
+				world = MineQuest.getSServer().createWorld(orig, Environment.NORMAL);
+			} else {
+				world = MineQuest.getSServer().createWorld(orig, Environment.NETHER);
+			}
+		}
+		World copy = MineQuest.getSServer().getWorld(cp);
+		
+		if (start_x == 0) {
+			MineQuest.log("Instanced world without quest area defined - missing QuestArea?");
+			throw new Exception();
+		}
+		for (LivingEntity entity : copy.getLivingEntities()) {
+			entity.remove();
+		}
+		
+		int x,y,z;
+		for (x = (int)start_x; x < (int)end_x; x++) {
+			for (z = (int)start_z; z < (int)end_z; z++) {
+				for (y = (int)end_y; y > (int)start_y; y--) {
+					Block original = world.getBlockAt(x, y, z);
+					Block new_block = copy.getBlockAt(x, y, z);
+					
+					new_block.setType(original.getType());
+					new_block.setData(original.getData());
+				}
+			}
+		}
+		
+		this.world = copy;
+	}
+
 	private World getWorld() {
 		return world;
 	}
