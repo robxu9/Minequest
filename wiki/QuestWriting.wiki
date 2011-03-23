@@ -73,6 +73,12 @@ This is one of the simplest events. It waits for the delay time to pass then wil
 Event:id:QuestTask:delay ms:task id
 }}}
 
+== Experience Events ==
+These give experience to all of the questers in the party. The syntax will at some point remove the word all, but for now it works like this. The first exp is given to the players character, and the second exp number is unassigned available to be any class the quester choses.
+{{{
+Event:id:ExperienceAdd:delay ms:all:char_exp:unassigned_exp
+}}}
+
 == Block Events ==
 Block events take the location of a block and set it to a given type after the delay. It takes the x, y, z location of the block after the delay then takes the type as an int.
 {{{
