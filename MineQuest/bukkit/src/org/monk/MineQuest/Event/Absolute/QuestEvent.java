@@ -40,7 +40,6 @@ public class QuestEvent extends PeriodicEvent {
 	}
 	
 	public void eventComplete() {
-		MineQuest.log("Event Complete");
 		quest.issueNextEvents(index);
 	}
 	

@@ -55,6 +55,7 @@ import org.monk.MineQuest.Event.Absolute.ExplosionEvent;
 import org.monk.MineQuest.Event.Absolute.HealthEntitySpawn;
 import org.monk.MineQuest.Event.Absolute.LockWorldTime;
 import org.monk.MineQuest.Event.Absolute.PartyHealthEvent;
+import org.monk.MineQuest.Event.Absolute.PartyKill;
 import org.monk.MineQuest.Event.Absolute.QuestEvent;
 import org.monk.MineQuest.Event.Absolute.SingleAreaEvent;
 import org.monk.MineQuest.Event.Relative.RelativeEvent;
@@ -290,7 +291,7 @@ public class Quest {
 		this.world = copy;
 	}
 
-	private World getWorld() {
+	public World getWorld() {
 		return world;
 	}
 
@@ -587,6 +588,31 @@ public class Quest {
 			int damage = Integer.parseInt(line[8]);
 			
 			new_event = new ExplosionEvent(delay, world, x, y, z, (float)radius, damage);
+		} else if (type.equals("KillEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			int task = Integer.parseInt(line[4]);
+			String[] kill_names = line[5].split(",");
+			int[] kills = new int[line[6].split(",").length];
+			if (kill_names.length != kills.length) {
+				MineQuest.log("Error: Unmatched Length of Names and Quantities");
+				throw new Exception();
+			}
+			for (String kill_name : kill_names) {
+				if (CreatureType.fromName(kill_name) == null) {
+					MineQuest.log("Error: Invalid Creature Name " + kill_name);
+					throw new Exception();
+				}
+			}
+			i = 0;
+			for (String count : line[6].split(",")) {
+				kills[i++] = Integer.parseInt(count);
+			}
+			if (kill_names.length == 0) {
+				MineQuest.log("Error: Cannot Have 0 Targets");
+				throw new Exception();
+			}
+			
+			new_event = new PartyKill(this, delay, task, party, kill_names, kills);
 		} else {
 			MineQuest.log("Unknown Event Type: " + type);
 			throw new Exception();

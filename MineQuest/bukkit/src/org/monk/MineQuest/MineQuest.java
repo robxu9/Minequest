@@ -26,9 +26,12 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.World;
+import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -37,6 +40,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Event.CheckMQMobs;
 import org.monk.MineQuest.Event.CheckMobEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
@@ -247,11 +251,12 @@ public class MineQuest extends JavaPlugin {
 	/**
 	 * Gets a Quester of a specific Player
 	 * 
-	 * @param entity Player that is a Quester
+	 * @param player Player that is a Quester
 	 * @return Quester or NULL if none found
 	 */
-	static public Quester getQuester(HumanEntity entity) {
-		return getQuester(entity.getName());
+	static public Quester getQuester(LivingEntity player) {
+		if (!(player instanceof HumanEntity)) return null;
+		return getQuester(((HumanEntity)player).getName());
 	}
 	
 	/**
@@ -553,6 +558,10 @@ public class MineQuest extends JavaPlugin {
         	setEnabled(false);
         	return;
         }
+        
+//        getEventParser().addEvent(new CheckMQMobs(10000));
+        
+        checkAllMobs();
 
 		ResultSet results = sql_server.query("SELECT * FROM questers");
 		List<String> names = new ArrayList<String>();
@@ -628,19 +637,35 @@ public class MineQuest extends JavaPlugin {
 			eventQueue.addEvent(new CheckMobEvent(town));
 		}
 	}
+	
+	public static void checkAllMobs() {
+    	for (World world : getSServer().getWorlds()) {
+    		for (LivingEntity entity : world.getLivingEntities()) {
+    			if ((entity instanceof Monster) || (entity instanceof PigZombie) || (entity instanceof Ghast)) {
+    				if (getMob(entity) == null) {
+    					addMob(entity);
+    				}
+    			}
+    		}
+    	}
+	}
     
     public static void checkMobs() {
     	int i;
     	
     	for (i = 0; i < mobs.length; i++) {
-    		if ((mobs[i] != null) && (mobs[i].getHealth() <= 0)) {
+    		if ((mobs[i] != null) && ((mobs[i].getHealth() <= 0) || (mobs[i].isDead()))) {
+    			MineQuest.log("Dead Mob");
     			mobs[i].dropLoot();
+    			if (mobs[i].getLastAttacker() != null) {
+    				mobs[i].getLastAttacker().addKill(mobs[i]);
+    			}
     			mobs[i] = null;
     		}
     	}
     }
 
-	public static void addMob(Monster entity) {
+	public static void addMob(LivingEntity entity) {
 		Random generator = new Random();
 		MQMob newMob;
 		
@@ -749,6 +774,21 @@ public class MineQuest extends JavaPlugin {
 		quests = new_quests;
 	}
 	
+	public static void damage(LivingEntity entity, int i, Quester source) {
+		if (entity instanceof HumanEntity) {
+			Quester quester = getQuester((HumanEntity)entity);
+			quester.setHealth(quester.getHealth() - i);
+		} else if (getMob(entity) != null) {
+			getMob(entity).damage(i, source);
+		} else {
+			int newHealth = entity.getHealth() - i;
+			
+			if (newHealth <= 0) newHealth = 0;
+			
+			entity.setHealth(newHealth);
+		}
+	}
+	
 	public static void damage(LivingEntity entity, int i) {
 		if (entity instanceof HumanEntity) {
 			Quester quester = getQuester((HumanEntity)entity);
@@ -784,5 +824,14 @@ public class MineQuest extends JavaPlugin {
 			if (health < 0) health = 0;
 			entity.setHealth(health);
 		}
+	}
+	public static int getMobSize() {
+		int i = 0;
+		
+		for (MQMob mob : mobs) {
+			if (mob != null) i++;
+		}
+		
+		return i;
 	}
 }

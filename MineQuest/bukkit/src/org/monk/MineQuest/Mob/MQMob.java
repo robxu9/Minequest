@@ -19,12 +19,26 @@
 package org.monk.MineQuest.Mob;
 
 import org.bukkit.entity.LivingEntity;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Quester.Quester;
 
 public class MQMob {
 	protected LivingEntity entity;
+	private Quester last_attack;
+	protected boolean dead;
 
 	public MQMob(LivingEntity entity) {
 		this.entity = entity;
+		last_attack = null;
+		dead = false;
+	}
+	
+	public boolean isDead() {
+		return dead;
+	}
+	
+	public Quester getLastAttacker() {
+		return last_attack;
 	}
 	
 	public LivingEntity getMonster() {
@@ -46,6 +60,12 @@ public class MQMob {
 	}
 
 	public int defend(int damage, LivingEntity player) {
+		if ((entity.getHealth() - damage) <= 0) {
+			dead = true;
+		}
+		if (MineQuest.getQuester(player) != null) {
+			last_attack = MineQuest.getQuester(player);
+		}
 		return damage;
 	}
 
@@ -67,7 +87,17 @@ public class MQMob {
 	}
 
 	public void damage(int i) {
-		setHealth(entity.getHealth() - i);
+		if ((entity.getHealth() - i) <= 0) {
+			dead = true;
+		}
+		entity.damage(i);
+	}
+
+	public void damage(int i, Quester source) {
+		damage(i);
+		if (source != null) {
+			this.last_attack = source;
+		}
 	}
 
 }

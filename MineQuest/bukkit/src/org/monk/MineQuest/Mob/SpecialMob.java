@@ -26,7 +26,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Spider;
@@ -42,7 +41,7 @@ public class SpecialMob extends MQMob {
 	protected Random generator;
 	protected int id;
 
-	public SpecialMob(Monster entity) {
+	public SpecialMob(LivingEntity entity) {
 		super(entity);
 		half = false;
 		generator = new Random();
@@ -149,9 +148,15 @@ public class SpecialMob extends MQMob {
 			if (!half) {
 				half = true;
 			} else {
+				if ((entity.getHealth() - 1) <= 0) {
+					dead = true;
+				}
 				half = false;
 				return 1;
 			}
+		}
+		if ((entity.getHealth() - (damage / 2)) <= 0) {
+			dead = true;
 		}
 		return damage / 2;
 	}

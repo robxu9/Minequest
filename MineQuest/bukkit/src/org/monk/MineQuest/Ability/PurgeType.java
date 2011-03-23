@@ -18,11 +18,51 @@
  */
 package org.monk.MineQuest.Ability;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum PurgeType {
-	ZOMBIE,
-	SPIDER,
-	SKELETON,
-	CREEPER,
-	ANIMAL,
-	ALL
+	ZOMBIE(0),
+	SPIDER(1),
+	SKELETON(2),
+	CREEPER(3),
+	GHAST(6),
+	PIGZOMBIE(7),
+	ANIMAL(4),
+	ALL(5);
+	
+	private int id;
+	private static int max;
+    private static final Map<Integer, PurgeType> lookupId = new HashMap<Integer, PurgeType>();
+    private static final Map<String, PurgeType> lookupName = new HashMap<String, PurgeType>();
+	
+	PurgeType(int id) {
+		this.id = id;
+	}
+	
+	public int getId() {
+		return id;
+	}
+
+    public static PurgeType getMaterial(final int id) {
+        return lookupId.get(id);
+    }
+
+    public static PurgeType getMaterial(final String name) {
+        return lookupName.get(name);
+    }
+    
+    public static int getMaxId() {
+    	return max;
+    }
+
+    static {
+        for (PurgeType purgeType : values()) {
+            lookupId.put(purgeType.getId(), purgeType);
+            lookupName.put(purgeType.name(), purgeType);
+            if (purgeType.getId() > max) {
+            	max = purgeType.getId();
+            }
+        }
+    }
 }
