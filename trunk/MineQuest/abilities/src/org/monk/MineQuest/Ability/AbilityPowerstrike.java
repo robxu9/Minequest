@@ -55,13 +55,7 @@ public class AbilityPowerstrike extends Ability{
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
 		if (entity != null) {
-			if (MineQuest.getMob(entity) != null) {
-				MineQuest.getMob(entity).damage(10);
-			} else if (entity instanceof Player) {
-				MineQuest.getQuester((Player)entity).damage(10);
-			} else {
-				entity.setHealth(entity.getHealth() - 10);
-			}
+			MineQuest.damage(entity, 10, quester);
 		} else {
 			giveManaCost(quester.getPlayer());
 			quester.getPlayer().sendMessage("PowerStrike must be bound to an attack");
