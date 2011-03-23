@@ -51,6 +51,7 @@ public class SingleAreaEvent extends AreaEvent {
 				if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
 					this.quester = questers[i];
 					flag = true;
+					target = questers[i];
 				}
 			}
 		}

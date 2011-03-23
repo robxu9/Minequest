@@ -14,7 +14,7 @@ public class PoisonEvent extends PeriodicEvent {
 		super(delay);
 		this.entity = entity;
 		if (entity instanceof Player) {
-			((Player)entity).sendMessage("Time Poisoned!");
+			((Player)entity).sendMessage("Time Poisoned! No Cure Available!");
 		}
 		this.amount = amount;
 		this.total = total;

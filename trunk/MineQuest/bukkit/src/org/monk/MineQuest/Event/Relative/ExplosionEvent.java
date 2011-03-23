@@ -8,9 +8,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
-import org.monk.MineQuest.Event.NormalEvent;
 
-public class ExplosionEvent extends NormalEvent {
+public class ExplosionEvent extends RelativeEvent {
 
 	private double x;
 	private double y;

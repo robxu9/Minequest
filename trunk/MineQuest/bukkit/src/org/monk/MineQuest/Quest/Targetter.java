@@ -1,5 +1,9 @@
 package org.monk.MineQuest.Quest;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Targetter extends Target {
@@ -11,12 +15,13 @@ public class Targetter extends Target {
 	
 	@Override
 	public Quester[] getTargets() {
-		Quester[] questers = new Quester[events.length];
-		int i = 0;
+		List<Quester> questers = new ArrayList<Quester>();
 		
 		for (TargetEvent event : events) {
-			questers[i++] = event.getTarget();
+			if (event.getTarget() != null) {
+				questers.add(event.getTarget());
+			}
 		}
-		return questers;
+		return (Quester[])questers.toArray();
 	}
 }

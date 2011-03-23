@@ -21,15 +21,17 @@ package org.monk.MineQuest.Event.Absolute;
 import org.bukkit.Location;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
+import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;
 
-public class AreaEvent extends QuestEvent {
+public class AreaEvent extends QuestEvent implements TargetEvent {
 	protected boolean[] flags;
 	protected double radius;
 	protected Location loc;
 	protected Party party;
+	protected Quester target;
 
 	public AreaEvent(Quest quest, long delay, int index, Party party, Location loc, double radius) {
 		super(quest, delay, index);
@@ -41,6 +43,7 @@ public class AreaEvent extends QuestEvent {
 		for (i = 0; i < flags.length; i++) {
 			flags[i] = false;
 		}
+		target = null;
 	}
 
 	@Override
@@ -54,6 +57,7 @@ public class AreaEvent extends QuestEvent {
 			for (i = 0; i < questers.length; i++) {
 				if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
 					flags[i] = true;
+					target = questers[i];
 				}
 			}
 		}
@@ -76,5 +80,10 @@ public class AreaEvent extends QuestEvent {
 	@Override
 	public String getName() {
 		return "Area Event";
+	}
+
+	@Override
+	public Quester getTarget() {
+		return target;
 	}
 }

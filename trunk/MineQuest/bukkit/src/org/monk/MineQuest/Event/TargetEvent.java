@@ -1,4 +1,4 @@
-package org.monk.MineQuest.Quest;
+package org.monk.MineQuest.Event;
 
 import org.monk.MineQuest.Quester.Quester;
 

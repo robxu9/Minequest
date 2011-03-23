@@ -16,39 +16,35 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.monk.MineQuest.Event.Relative;
+package org.monk.MineQuest.Event.Target;
 
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
+import org.monk.MineQuest.Event.NormalEvent;
+import org.monk.MineQuest.Quest.Target;
+import org.monk.MineQuest.Quester.Quester;
 
-public class BlockEvent extends RelativeEvent {
-	protected Material newType;
-	protected Block block;
-	protected Entity entity;
+public class HealthEvent extends TargetedEvent {
+	protected LivingEntity entity;
+	private double percent;
 	
-	public BlockEvent(long delay, World world, Entity entity, int x, int y,
-			int z, Material newType) {
-		this(delay, world.getBlockAt(x, y, z), entity, newType);
+	public HealthEvent(long delay, Target target, double percent) {
+		super(delay, target);
+		this.percent = percent;
 	}
 
-	public BlockEvent(long delay, Block block, Entity entity, Material newType) {
-		super(delay);
-		this.block = block;
-		this.newType = newType;
-		this.entity = entity;
-	}
-	
 	@Override
 	public void activate(EventParser eventParser) {
-		block.setType(newType);
+		for (Quester quester : target.getTargets()) {
+			MineQuest.setHealth(quester.getPlayer(), percent);
+		}
+		super.activate(eventParser);
 	}
 
 	@Override
 	public String getName() {
-		return "Generic Block Type Event";
+		return "Generic Health Event";
 	}
 
 }
