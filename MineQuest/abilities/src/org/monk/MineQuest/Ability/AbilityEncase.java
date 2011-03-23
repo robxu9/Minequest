@@ -6,9 +6,12 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.Absolute.BlockEvent;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
@@ -40,9 +43,86 @@ public class AbilityEncase extends Ability {
 		
 		// In progress
 		if (x > 0) {
-			
+			if (z > 0) {
+				Location loc = new Location(location.getWorld(),
+						location.getX() + 1,
+						location.getY(),
+						location.getZ() + 1);
+				encase(loc.getWorld().getBlockAt(loc), true);
+				loc = new Location(location.getWorld(),
+						location.getX() - 2,
+						location.getY(),
+						location.getZ() - 2);
+				encase(loc.getWorld().getBlockAt(loc), true);
+			} else {
+				Location loc = new Location(location.getWorld(),
+						location.getX() + 1,
+						location.getY(),
+						location.getZ() + 2);
+				encase(loc.getWorld().getBlockAt(loc), true);
+				loc = new Location(location.getWorld(),
+						location.getX() - 2,
+						location.getY(),
+						location.getZ() - 1);
+				encase(loc.getWorld().getBlockAt(loc), true);
+			}
 		} else {
-			
+			if (z < 0) {
+				Location loc = new Location(location.getWorld(),
+						location.getX() + 2,
+						location.getY(),
+						location.getZ() + 1);
+				encase(loc.getWorld().getBlockAt(loc), true);
+				loc = new Location(location.getWorld(),
+						location.getX() - 1,
+						location.getY(),
+						location.getZ() - 2);
+				encase(loc.getWorld().getBlockAt(loc), true);
+			} else {
+				Location loc = new Location(location.getWorld(),
+						location.getX() + 2,
+						location.getY(),
+						location.getZ() + 2);
+				encase(loc.getWorld().getBlockAt(loc), true);
+				loc = new Location(location.getWorld(),
+						location.getX() - 1,
+						location.getY(),
+						location.getZ() - 1);
+				encase(loc.getWorld().getBlockAt(loc), true);
+			}
+		}
+		Location loc = new Location(location.getWorld(),
+				location.getX(),
+				location.getY() + 2,
+				location.getZ());
+		encase(loc.getWorld().getBlockAt(loc), false);
+		loc = new Location(location.getWorld(),
+				location.getX() + x,
+				location.getY() + 2,
+				location.getZ());
+		encase(loc.getWorld().getBlockAt(loc), false);
+		loc = new Location(location.getWorld(),
+				location.getX() + x,
+				location.getY() + 2,
+				location.getZ() + z);
+		encase(loc.getWorld().getBlockAt(loc), false);
+		loc = new Location(location.getWorld(),
+				location.getX(),
+				location.getY() + 2,
+				location.getZ() + z);
+		encase(loc.getWorld().getBlockAt(loc), false);
+	}
+
+	private void encase(Block block, boolean tall) {
+		Material mat = block.getType();
+		MineQuest.getEventParser().addEvent(new BlockEvent(15000, block, mat));
+		MineQuest.getEventParser().addEvent(new BlockEvent(10, block, Material.COBBLESTONE));
+		if (tall) {
+			Location loc = new Location(block.getWorld(),
+					block.getLocation().getX(),
+					block.getLocation().getY() + 1,
+					block.getLocation().getZ());
+			encase(loc.getWorld().getBlockAt(loc), false);
 		}
 	}
 
