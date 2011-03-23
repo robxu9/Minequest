@@ -16,32 +16,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.monk.MineQuest.Event.Absolute;
+package org.monk.MineQuest.Event.Target;
 
 import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
 import org.monk.MineQuest.Event.EventParser;
-import org.monk.MineQuest.Event.NormalEvent;
+import org.monk.MineQuest.Quest.Target;
 import org.monk.MineQuest.Quester.Quester;
 
-public class EntityTeleportEvent extends NormalEvent {
-	protected LivingEntity entity;
+public class EntityTeleportEvent extends TargetedEvent {
 	protected Location location;
 
-	public EntityTeleportEvent(long delay, LivingEntity entity, Location location) {
-		super(delay);
-		this.entity = entity;
+	public EntityTeleportEvent(long delay, Target target, Location location) {
+		super(delay, target);
 		this.location = location;
-	}
-
-	public EntityTeleportEvent(int delay, Quester quester,
-			Location spawnLocation) {
-		super(delay);
 	}
 
 	@Override
 	public void activate(EventParser eventParser) {
-		entity.teleportTo(location);
+		super.activate(eventParser);
+		
+		for (Quester quester : target.getTargets()) {
+			quester.getPlayer().teleportTo(location);
+		}
 	}
 
 	@Override

@@ -80,9 +80,9 @@ public class CombatClass extends SkillClass implements DefendingClass {
 			damage /= 2;
 		}
 		
-		if (MineQuest.getMob(defend) != null) {
-			damage = MineQuest.getMob(defend).defend(damage, quester.getPlayer());
-		}
+//		if (MineQuest.getMob(defend) != null) {
+//			damage = MineQuest.getMob(defend).defend(damage, quester.getPlayer());
+//		}
 		
 		return damage;
 	}

@@ -1,5 +1,6 @@
 package org.monk.MineQuest.Event.Target;
 
+import org.bukkit.Location;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Quest.Quest;
@@ -34,6 +35,15 @@ public class TargetedEvent extends NormalEvent {
 			double percent = Double.parseDouble(split[6]);
 			
 			targetEvent = new HealthEvent(delay, target, percent);
+		} else if (split[3].equals("TeleportEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Location location = new Location(quest.getWorld(),
+					Double.parseDouble(split[6]),
+					Double.parseDouble(split[7]),
+					Double.parseDouble(split[8]));
+			
+			targetEvent = new EntityTeleportEvent(delay, target, location);
 		} else if (split[3].equals("PoisonEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));

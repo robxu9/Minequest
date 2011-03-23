@@ -72,6 +72,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
+		MineQuest.checkMobs();
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).move(event.getFrom(), event.getTo());
 		super.onPlayerMove(event);
@@ -762,6 +763,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	Location l = player.getLocation();
         	world.getHandle().a(((CraftEntity)player).getHandle(), l.getX(), l.getY(), l.getZ() + 5, (float)Double.parseDouble(split[1]));
         	event.setCancelled(true);
+        } else if (split[0].equals("/mobss")) {
+        	if (player.getWorld().getLivingEntities() == null) {
+        		player.sendMessage("No Living Entities List");
+        	} else {
+        		player.sendMessage("There are " + MineQuest.getMobSize() + " " + player.getWorld().getLivingEntities().size());
+        	}
         }
 	}
 }

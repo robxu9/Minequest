@@ -43,10 +43,13 @@ public class HealthMob extends MQMob {
 	    if (health > max_health) {
 	    	health = max_health;
 	    }
+	    if (newHealth <= 0) {
+	    	dead = true;
+	    }
         if (entity.getHealth() >= newHealth) {
         	return entity.getHealth() - newHealth;
         } else {
-        	if (entity.getHealth() < 10) {
+        	if (entity.getHealth() < 20) {
         		player.setHealth(health + 1);
         		return 1;
         	} else {

@@ -32,10 +32,19 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.craftbukkit.block.CraftChest;
+import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MobType;
+import org.bukkit.entity.Monster;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Spider;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -51,6 +60,7 @@ import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityBinder;
 import org.monk.MineQuest.Event.Absolute.EntityTeleportEvent;
 import org.monk.MineQuest.Event.Absolute.HealthEvent;
+import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
@@ -90,6 +100,7 @@ public class Quester {
 	protected ItemStack[] spare_inven;
 	protected ItemStack[] spare_inven_2;
 	protected List<Long> times = new ArrayList<Long>();
+	protected CreatureType[] kills;
 	
 	public Quester() {
 	}
@@ -588,8 +599,11 @@ public class Quester {
 	public void clearQuest() {
 		this.quest = null;
 		poison_timer = 0;
-		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(10000, player, before_quest.getWorld().getSpawnLocation()));
-		MineQuest.getEventParser().addEvent(new EntityTeleportEvent(11000, player, before_quest));
+		if (!before_quest.getWorld().getName().equals(player.getWorld().getName())) {
+			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(5000, this, before_quest.getWorld().getSpawnLocation()));
+			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(6000, this, before_quest));
+		}
+		kills = new CreatureType[0];
 	}
 
 	/**
@@ -1334,7 +1348,9 @@ public class Quester {
 		
 		before_quest = player.getLocation();
 		
-		player.teleportTo(world.getSpawnLocation());
+		if (!world.getName().equals(player.getWorld().getName())) {
+			player.teleportTo(world.getSpawnLocation());
+		}
 	}
 
 	/**
@@ -1430,6 +1446,7 @@ public class Quester {
 		class_exp = 0;
 		
 		updateBinds();
+		kills = new CreatureType[0];
 	}
 
 	/**
@@ -1491,5 +1508,39 @@ public class Quester {
 		}
 		
 		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
+	}
+
+	public void addKill(MQMob mqMob) {
+		if (quest == null) return;
+		LivingEntity monster = mqMob.getMonster();
+		
+		String name = monster.getClass().getName();
+		if (name.split(".").length > 0) {
+			String type = name.split(".")[name.split(".").length - 1];
+			MineQuest.log("Type is " + type);
+			if (CreatureType.fromName(type) != null) {
+				addKill(CreatureType.fromName(type));
+			}
+		}
+	}
+
+	private void addKill(CreatureType kill) {
+		CreatureType[] new_kills = new CreatureType[kills.length + 1];
+		int i;
+		
+		for (i = 0; i < kills.length; i++) {
+			new_kills[i] = kills[i];
+		}
+		new_kills[i] = kill;
+		
+		kills = new_kills;
+	}
+	
+	public void clearKills() {
+		kills = new CreatureType[0];
+	}
+	
+	public CreatureType[] getKills() {
+		return kills;
 	}
 }

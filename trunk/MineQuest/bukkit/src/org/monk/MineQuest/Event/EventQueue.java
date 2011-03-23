@@ -33,6 +33,12 @@ public class EventQueue {
 		newEventParser.setId(MineQuest.getSServer().getScheduler().scheduleSyncRepeatingTask(minequest, newEventParser, 1, 1));
 		return newEventParser.getId();
 	}
+	
+	public int addEventAsync(Event event) {
+		EventParser newEventParser = new EventParser(event);
+		newEventParser.setId(MineQuest.getSServer().getScheduler().scheduleAsyncRepeatingTask(minequest, newEventParser, 1, 1));
+		return newEventParser.getId();
+	}
 
 	public void cancel(int[] ids) {
 		for (int id : ids) {

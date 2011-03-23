@@ -26,18 +26,7 @@ public class PoisonEvent extends PeriodicEvent {
 		
 		total -= amount;
 		
-		if (entity instanceof Player) {
-			Quester quester = MineQuest.getQuester((Player)entity);
-			quester.setHealth(quester.getHealth() - amount);
-		} else if (MineQuest.getMob(entity) != null) {
-			MineQuest.getMob(entity).damage(amount);
-		} else {
-			int newHealth = entity.getHealth() - amount;
-			
-			if (newHealth < 0) newHealth = 0;
-			
-			entity.setHealth(newHealth);
-		}
+		MineQuest.damage(entity, amount);
 		
 		if (total <= 0) {
 			eventParser.setComplete(true);
