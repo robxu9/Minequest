@@ -1,6 +1,6 @@
 = Known Issues for MineQuest =
 
-== Instanced Dungeons ==
+== Instanced Dungeons (Should be Fixed) ==
 
 Re-spawning of doors does not work properly. If a door has been used in a previous instance then it will keep the state of whether or not it was open. Also if a door is removed, such a steel door, it will not re-spawn correctly currently.
 
