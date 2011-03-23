@@ -62,14 +62,7 @@ public class AbilityDrainLife extends Ability{
 		Player player = quester.getPlayer();
 		int drain = myclass.getGenerator().nextInt(3 + myclass.getCasterLevel()) + 1;
 		if (entity != null) {
-			if (MineQuest.getMob(entity) != null) {
-				MineQuest.getMob(entity).damage(drain);
-			} else if (entity instanceof Player) {
-				MineQuest.getQuester((Player)entity).damage(drain);
-			} else {
-				entity.setHealth(entity.getHealth() - (drain));
-			}
-			MineQuest.getMob(entity).damage(drain);
+			MineQuest.damage(entity, drain, quester);
 			if (quester != null) quester.setHealth(quester.getHealth() + drain);
 		} else {
 			player.sendMessage("Must be called on an Entity");

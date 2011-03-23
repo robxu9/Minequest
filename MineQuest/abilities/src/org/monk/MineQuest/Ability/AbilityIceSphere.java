@@ -99,12 +99,7 @@ public class AbilityIceSphere extends Ability {
 			}
 		}
 		
-		if (entity instanceof Player) {
-			Quester quest = MineQuest.getQuester((Player)entity);
-			quest.setHealth(quest.getHealth() - 3 - (myclass.getCasterLevel() / 2));
-		} else {
-			MineQuest.getMob(entity).damage(3 + (myclass.getCasterLevel() / 2));
-		}
+		MineQuest.damage(entity, 3 + (myclass.getCasterLevel() / 2), quester);
 	}
 
 	@Override
