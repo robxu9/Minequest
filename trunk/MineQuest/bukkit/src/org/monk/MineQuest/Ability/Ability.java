@@ -318,7 +318,7 @@ public abstract class Ability {
 		int i;
 		
 		for (i = 0; i < serverList.size(); i++) {
-			if ((MineQuest.distance(entity.getLocation(), serverList.get(i).getLocation()) < radius) 
+			if ((MineQuest.distance(entity.getLocation(), serverList.get(i).getLocation()) <= radius) 
 				&& (serverList.get(i).getEntityId() != entity.getEntityId())) {
 				entities.add(serverList.get(i));
 			}
@@ -605,5 +605,9 @@ public abstract class Ability {
 				notify(quester, "You do not have the materials to cast that - try /spellcomp " + getName());
 			}
 		}
+	}
+
+	public void eventActivate() {
+		
 	}
 }
