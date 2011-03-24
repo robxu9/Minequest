@@ -27,21 +27,29 @@ import org.monk.MineQuest.Quester.Quester;
 public class EntityTeleportEvent extends NormalEvent {
 	protected LivingEntity entity;
 	protected Location location;
+	private Quester quester;
 
 	public EntityTeleportEvent(long delay, LivingEntity entity, Location location) {
 		super(delay);
 		this.entity = entity;
 		this.location = location;
+		quester = null;
 	}
 
 	public EntityTeleportEvent(int delay, Quester quester,
-			Location spawnLocation) {
+			Location location) {
 		super(delay);
+		this.quester = quester;
+		this.location = location;
 	}
 
 	@Override
 	public void activate(EventParser eventParser) {
-		entity.teleportTo(location);
+		if (quester != null) {
+			quester.getPlayer().teleportTo(location);
+		} else {
+			entity.teleportTo(location);
+		}
 	}
 
 	@Override

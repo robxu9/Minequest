@@ -36,8 +36,9 @@ public class AuraEvent extends RelativeEvent {
 	private int change;
 	private boolean players;
 	private long count;
+	private int radius;
 
-	public AuraEvent(Ability ability, Quester quester, long delay, long total_time, int change, boolean players) {
+	public AuraEvent(Quester quester, long delay, long total_time, int change, boolean players, int radius) {
 		super(delay);
 		player = quester.getPlayer();
 		world = player.getWorld();
@@ -45,10 +46,11 @@ public class AuraEvent extends RelativeEvent {
 		this.count = 0;
 		this.change = change;
 		this.players = players;
+		this.radius = radius;
 	}
 
 	public void activate(EventParser eventParser) {
-		List<LivingEntity> nearby = Ability.getEntities(player, 15);
+		List<LivingEntity> nearby = Ability.getEntities(player, radius);
 		List<LivingEntity> affected = sort(nearby, players);
 		
 		for (LivingEntity entity : affected) {

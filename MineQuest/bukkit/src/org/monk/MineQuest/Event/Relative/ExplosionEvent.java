@@ -3,6 +3,7 @@ package org.monk.MineQuest.Event.Relative;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -19,9 +20,9 @@ public class ExplosionEvent extends RelativeEvent {
 	private CraftWorld world;
 	private Entity entity;
 
-	public ExplosionEvent(long delay, CraftWorld world, Entity entity, double x, double y, double z, float radius, int damage) {
+	public ExplosionEvent(long delay, World world, Entity entity, double x, double y, double z, float radius, int damage) {
 		super(delay);
-		this.world = world;
+		this.world = (CraftWorld)world;
 		this.x = x;
 		this.y = y;
 		this.z = z;
