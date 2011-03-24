@@ -54,7 +54,7 @@ public class AbilityDamageAura extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		MineQuest.getEventParser().addEvent(new AuraEvent(this, quester, 10000, 300000, -1, false));
+		MineQuest.getEventParser().addEvent(new AuraEvent(quester, 10000, 300000, -1, false, 15));
 	}
 
 	@Override
