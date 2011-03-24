@@ -55,7 +55,7 @@ public class AbilityHealAura extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		MineQuest.getEventParser().addEvent(new AuraEvent(this, quester, 10000, 150000, myclass.getCasterLevel() / 4, true));
+		MineQuest.getEventParser().addEvent(new AuraEvent(quester, 10000, 150000, myclass.getCasterLevel() / 4, true, 15));
 	}
 
 	@Override

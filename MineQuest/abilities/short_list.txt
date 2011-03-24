@@ -1,6 +1,5 @@
 Warrior
 Bash
-Whirlwind
 Health Regeneration
 
 WarMage
