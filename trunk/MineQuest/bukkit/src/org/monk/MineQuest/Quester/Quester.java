@@ -260,8 +260,10 @@ public class Quester {
 					if (skill instanceof CombatClass) {
 						((CombatClass)skill).attack((LivingEntity)entity, event);
 						expGain(5);
+					} else {
+						skill.callAbility(entity);
 					}
-					return;
+					break;
 				}
 			}
 		}
