@@ -1,7 +1,2 @@
-Warrior
-Bash
-Health Regeneration
-
 WarMage
 Cone of Cold
-Fireblast

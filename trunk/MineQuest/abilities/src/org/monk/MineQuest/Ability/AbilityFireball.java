@@ -36,6 +36,8 @@ import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
 
 public class AbilityFireball extends Ability {
 
+	private Location location;
+
 	@Override
 	public List<ItemStack> getManaCost() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
@@ -48,6 +50,45 @@ public class AbilityFireball extends Ability {
 	@Override
 	public String getName() {
 		return "Fireball";
+	}
+	
+	public void setCast(Location location)
+	{
+		this.location = location;
+	}
+	
+	@Override
+	public void eventActivate() {
+		double leftx, leftz;
+		int x, z;
+		World world = location.getWorld();
+		
+		leftx = location.getX() % 1;
+		leftz = location.getZ() % 1;
+		x = (leftx < .5)?-1:1;
+		z = (leftz < .5)?-1:1;
+		
+		Block nblock = world.getBlockAt((int)location.getX(), 
+				getNearestY(location.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ()), 
+				(int)location.getZ());
+		MineQuest.getEventParser().addEvent(new BlockCDEvent(10, 30000, nblock, Material.FIRE));
+		nblock.setTypeId(51);
+		
+		nblock = world.getBlockAt((int)location.getX() + x, 
+				getNearestY(location.getWorld(), (int)location.getX() + x, (int)location.getY(), (int)location.getZ()), 
+				(int)location.getZ());
+		MineQuest.getEventParser().addEvent(new BlockCDEvent(10, 30000, nblock, Material.FIRE));
+		
+		nblock = world.getBlockAt((int)location.getX() + x, 
+				getNearestY(location.getWorld(), (int)location.getX() + x, (int)location.getY(), (int)location.getZ() + z), 
+				(int)location.getZ() + z);
+		MineQuest.getEventParser().addEvent(new BlockCDEvent(10, 30000, nblock, Material.FIRE));
+		
+		nblock = world.getBlockAt((int)location.getX(), 
+				getNearestY(location.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ() + z), 
+				(int)location.getZ() + z);
+		MineQuest.getEventParser().addEvent(new BlockCDEvent(10, 30000, nblock, Material.FIRE));
+		super.eventActivate();
 	}
 	
 	@Override

@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
@@ -56,11 +57,7 @@ public class AbilityIceSphere extends Ability {
 	public List<ItemStack> getManaCost() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
-		list.add(new ItemStack(332, 1));
-		list.add(new ItemStack(332, 1));
-		list.add(new ItemStack(332, 1));
-		list.add(new ItemStack(332, 1));
-		list.add(new ItemStack(332, 1));
+		list.add(new ItemStack(Material.SNOW_BLOCK, 1));
 		
 		return list;
 	}
