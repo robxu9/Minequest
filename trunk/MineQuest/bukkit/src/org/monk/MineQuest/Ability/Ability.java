@@ -328,6 +328,29 @@ public abstract class Ability {
 	}
 	
 	/**
+	 * Gets the entities within a area of a player. name
+	 * 
+	 * Not Implemented in bukkit yet!
+	 * 
+	 * @param player
+	 * @param radius
+	 * @return List of Entities within the area
+	 */
+	public static List<LivingEntity> getEntities(Location location, int radius) {
+		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
+		List<LivingEntity> serverList = location.getWorld().getLivingEntities();
+		int i;
+		
+		for (i = 0; i < serverList.size(); i++) {
+			if ((MineQuest.distance(location, serverList.get(i).getLocation()) <= radius)) {
+				entities.add(serverList.get(i));
+			}
+		}
+		
+		return entities;
+	}
+	
+	/**
 	 * Get the experience gained from using this ability.
 	 * 
 	 * @return
@@ -385,6 +408,7 @@ public abstract class Ability {
 	 * 
 	 * @param player
 	 */
+	@SuppressWarnings("deprecation")
 	protected void giveManaCost(Player player) {
 		List<ItemStack> cost = getRealManaCost();
 		int i;
@@ -392,6 +416,7 @@ public abstract class Ability {
 		for (i = 0; i < cost.size(); i++) {
 			player.getInventory().addItem(cost.get(i));
 		}
+		player.updateInventory();
 	}
 	
 	/**
@@ -580,6 +605,11 @@ public abstract class Ability {
 	public void useAbility(Quester quester, Location location, LivingEntity entity) {
 		Player player = quester.getPlayer();
 		
+		if (this instanceof PassiveAbility) {
+			notify(quester, getName() + " is a passive ability");
+			return;
+		}
+		
 		if (!enabled) {
 			notify(quester, getName() + " is not enabled");
 			return;
@@ -587,12 +617,10 @@ public abstract class Ability {
 		
 		if ((quester == null) || quester.canCast(getRealManaCost())) {
 			if (canCast() || (player == null)) {
-				if ((player == null) || player.getItemInHand().getTypeId() == bind) {
-					notify(quester, "Casting " + getName());
-					castAbility(quester, location, entity);
-					if (myclass != null) {
-						myclass.expAdd(getExp());
-					}
+				notify(quester, "Casting " + getName());
+				castAbility(quester, location, entity);
+				if (myclass != null) {
+					myclass.expAdd(getExp());
 				}
 			} else {
 				if (player != null) {

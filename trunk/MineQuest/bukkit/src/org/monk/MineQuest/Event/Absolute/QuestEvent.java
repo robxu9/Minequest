@@ -18,7 +18,6 @@
  */
 package org.monk.MineQuest.Event.Absolute;
 
-import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Event.PeriodicEvent;
 import org.monk.MineQuest.Quest.Quest;

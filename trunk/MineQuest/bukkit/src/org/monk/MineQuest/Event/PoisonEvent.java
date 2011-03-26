@@ -3,7 +3,6 @@ package org.monk.MineQuest.Event;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Quester.Quester;
 
 public class PoisonEvent extends PeriodicEvent {
 	private LivingEntity entity;
@@ -31,6 +30,11 @@ public class PoisonEvent extends PeriodicEvent {
 		if (total <= 0) {
 			eventParser.setComplete(true);
 		}
+	}
+	
+	@Override
+	public String getName() {
+		return "Poison Event";
 	}
 
 }

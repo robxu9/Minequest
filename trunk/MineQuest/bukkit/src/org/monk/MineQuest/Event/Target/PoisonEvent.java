@@ -1,8 +1,5 @@
 package org.monk.MineQuest.Event.Target;
 
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Quest.Target;
 import org.monk.MineQuest.Quester.Quester;

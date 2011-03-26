@@ -3,7 +3,6 @@ package org.monk.MineQuest.Event.Absolute;
 import org.bukkit.entity.CreatureType;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
-import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.Quester;

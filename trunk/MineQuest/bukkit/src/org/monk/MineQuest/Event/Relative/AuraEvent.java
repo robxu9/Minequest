@@ -25,7 +25,6 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Quester.Quester;
 
@@ -36,9 +35,9 @@ public class AuraEvent extends RelativeEvent {
 	private int change;
 	private boolean players;
 	private long count;
-	private int radius;
+	private double radius;
 
-	public AuraEvent(Quester quester, long delay, long total_time, int change, boolean players, int radius) {
+	public AuraEvent(Quester quester, long delay, long total_time, int change, boolean players, double radius) {
 		super(delay);
 		player = quester.getPlayer();
 		world = player.getWorld();
@@ -50,7 +49,7 @@ public class AuraEvent extends RelativeEvent {
 	}
 
 	public void activate(EventParser eventParser) {
-		List<LivingEntity> nearby = Ability.getEntities(player, radius);
+		List<LivingEntity> nearby = getEntities(player, radius);
 		List<LivingEntity> affected = sort(nearby, players);
 		
 		for (LivingEntity entity : affected) {
@@ -67,6 +66,29 @@ public class AuraEvent extends RelativeEvent {
 		} else {
 			eventParser.setComplete(true);
 		}
+	}
+	
+	/**
+	 * Gets the entities within a area of a player. name
+	 * 
+	 * Not Implemented in bukkit yet!
+	 * 
+	 * @param player
+	 * @param radius
+	 * @return List of Entities within the area
+	 */
+	public List<LivingEntity> getEntities(LivingEntity entity, double radius) {
+		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
+		List<LivingEntity> serverList = entity.getWorld().getLivingEntities();
+		int i;
+		
+		for (i = 0; i < serverList.size(); i++) {
+			if ((MineQuest.distance(entity.getLocation(), serverList.get(i).getLocation()) <= (radius + .001))) {
+				entities.add(serverList.get(i));
+			}
+		}
+		
+		return entities;
 	}
 
 	private List<LivingEntity> sort(List<LivingEntity> nearby, boolean players) {
