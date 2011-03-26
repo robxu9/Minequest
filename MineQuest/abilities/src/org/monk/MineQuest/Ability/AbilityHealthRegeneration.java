@@ -27,6 +27,7 @@ public class AbilityHealthRegeneration extends Ability implements PassiveAbility
 	public void eventActivate() {
 		super.eventActivate();
 		disable();
+		myclass.getQuester().sendMessage("Health Regeneration Complete!");
 	}
 
 	@Override
