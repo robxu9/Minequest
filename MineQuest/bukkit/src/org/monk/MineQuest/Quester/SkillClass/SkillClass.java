@@ -344,7 +344,11 @@ public class SkillClass {
 	public void enableAbility(String abil_name) {
 		Ability abil = getAbility(abil_name);
 		if (abil != null) {
-			abil.enable(quester);
+			if (!abil.isEnabled()) {
+				abil.enable(quester);
+			} else {
+				quester.sendMessage(abil_name + " already enabled!");
+			}
 		}
 	}
 	
@@ -732,6 +736,10 @@ public class SkillClass {
 
 	public void rightClick(Block block) {
 		expAdd(5);
+	}
+
+	public Quester getQuester() {
+		return quester;
 	}
 	
 

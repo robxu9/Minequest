@@ -21,7 +21,6 @@ package org.monk.MineQuest.Quester.SkillClass;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
 
@@ -45,14 +44,6 @@ public class CombatClass extends SkillClass implements DefendingClass {
 	 * @return boolean true
 	 */
 	public boolean attack(LivingEntity defend, EntityDamageByEntityEvent event) {
-		for (Ability abil : ability_list) {
-			if (abil.isBound(quester.getPlayer().getItemInHand())) {
-				if (abil.parseAttack(quester, defend)) {
-					return true;
-				}
-			}
-		}
-
 		event.setDamage(getDamage(defend));
 
 		expAdd(getExpMob(defend) + MineQuest.getAdjustment());

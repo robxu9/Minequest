@@ -33,18 +33,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.entity.CreatureType;
-import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.MobType;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Spider;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -58,6 +50,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityBinder;
+import org.monk.MineQuest.Ability.PassiveAbility;
 import org.monk.MineQuest.Event.Absolute.EntityTeleportEvent;
 import org.monk.MineQuest.Event.Absolute.HealthEvent;
 import org.monk.MineQuest.Mob.MQMob;
@@ -258,7 +251,7 @@ public class Quester {
 			if (skill.isAbilityItem(player.getItemInHand())) {
 				if (entity instanceof LivingEntity) {
 					if (skill instanceof CombatClass) {
-						((CombatClass)skill).attack((LivingEntity)entity, event);
+						skill.callAbility(entity);
 						expGain(5);
 					} else {
 						skill.callAbility(entity);
@@ -307,9 +300,16 @@ public class Quester {
 
 		for (SkillClass skill : classes) {
 			if (skill.getAbility(name) != null) {
-				skill.getAbility(name).bind(this, player.getItemInHand());
+				if (skill.getAbility(name) instanceof PassiveAbility) {
+					sendMessage("Passive Abilities cannot be bound, must be enabled");
+				} else {
+					skill.getAbility(name).bind(this, player.getItemInHand());
+				}
+				return;
 			}
 		}
+		sendMessage(name + " is not a valid ability");
+		return;
 	}
 
 	public void bind(String ability, ItemStack itemStack) {
@@ -831,7 +831,11 @@ public class Quester {
 	public void enableabil(String string) {
 		for (SkillClass skill : classes) {
 			if (skill.getAbility(string) != null) {
-				skill.getAbility(string).enable(this);
+				if (!skill.getAbility(string).isEnabled()) {
+					skill.getAbility(string).enable(this);
+				} else {
+					sendMessage(string + " already enabled!");
+				}
 			}
 		}
 	}
@@ -1203,7 +1207,7 @@ public class Quester {
 		
 		Town last_town = MineQuest.getNearestTown(to);
 		if (last_town != null) {
-			if (!last.equals(last_town.getName())) {
+			if (!last_town.getName().equals(last)) {
 				last = last_town.getName();
 				MineQuest.getSQLServer().update("UPDATE questers SET last_town='" + last + "'");
 			}

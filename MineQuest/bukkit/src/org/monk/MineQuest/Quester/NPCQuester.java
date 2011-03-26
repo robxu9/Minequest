@@ -2,18 +2,12 @@ package org.monk.MineQuest.Quester;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.NPCEvent;
 import org.monk.MineQuest.Event.Absolute.SpawnNPCEvent;
 
 import redecouverte.npcspawner.BasicHumanNpc;
@@ -21,8 +15,10 @@ import redecouverte.npcspawner.NpcSpawner;
 
 public class NPCQuester extends Quester {
 	private BasicHumanNpc entity;
-	private HashMap<String, Integer> map = new HashMap<String, Integer>();
 	private NPCMode mode;
+	private double speed = .2;
+	private Quester follow;
+	private Location target = null;
 	
 	public NPCQuester(String name) {
 		super(name);
@@ -46,6 +42,17 @@ public class NPCQuester extends Quester {
 		}
 		distance = 0;
 		entity = null;
+	}
+	
+	public void setFollow(Quester quester) {
+		this.follow = quester;
+		target = null;
+		MineQuest.getEventParser().addEvent(new NPCEvent(10, this));
+	}
+	
+	public void setMode(NPCMode mode) {
+		this.mode = mode;
+		target = null;
 	}
 	
 	public void setEntity(BasicHumanNpc entity) {
@@ -82,7 +89,8 @@ public class NPCQuester extends Quester {
 		MineQuest.getSQLServer().update("UPDATE questers SET x='" + 
 				entity.getBukkitEntity().getLocation().getX() + "', y='" + 
 				entity.getBukkitEntity().getLocation().getY() + "', z='" + 
-				entity.getBukkitEntity().getLocation().getZ() + "', world='" + 
+				entity.getBukkitEntity().getLocation().getZ() + "', mode='" + 
+				mode + "', world='" + 
 				entity.getBukkitEntity().getWorld().getName() + "' WHERE name='"
 				+ name + "'");
 	}
@@ -92,35 +100,8 @@ public class NPCQuester extends Quester {
 		boolean ret = super.healthChange(change, event);
 		
 		if (mode == NPCMode.GOD) {
-			Player player = null;
-			if (event instanceof EntityDamageByEntityEvent) {
-				Entity entity = ((EntityDamageByEntityEvent)event).getDamager();
-				if (entity instanceof Player) {
-					player = (Player)entity;
-				}
-			} else if (event instanceof EntityDamageByProjectileEvent) {
-				Entity entity = ((EntityDamageByProjectileEvent)event).getDamager();
-				if (entity instanceof Player) {
-					player = (Player)entity;
-				}
-			}
-			if (player != null) {
-				if (map.get(player.getName()) == null) {
-					map.put(player.getName(), 1);
-				} else {
-					map.put(player.getName(), map.get(player.getName()) + 1);
-					if (map.get(player.getName()) == 2) {
-						player.sendMessage("<" + getName() + "> Owe!");
-					} else if (map.get(player.getName()) == 3) {
-						player.sendMessage("<" + getName() + "> Don't do that!");
-					} else if (map.get(player.getName()) == 5) {
-						player.sendMessage("<" + getName() + "> You won't like me when I'm angry!");
-					} else if (map.get(player.getName()) == 9) {
-						MineQuest.getQuester(player).damage(200);
-						map.put(player.getName(), 1);
-					}
-				}
-			}
+			health = max_health;
+			event.setDamage(0);
 		} else {
 			if (getHealth() <= 0) {
 				setPlayer(null);
@@ -187,5 +168,39 @@ public class NPCQuester extends Quester {
 			entity = null;
 		}
 		MineQuest.getEventParser().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
+	}
+
+	public void activate() {
+		if (mode == NPCMode.FOLLOW) {
+			if (follow == null) return;
+			if (target == null) {
+				if (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) < 4) {
+					return;
+				} else {
+					target = new Location(follow.getPlayer().getLocation().getWorld(),
+							follow.getPlayer().getLocation().getX(),
+							follow.getPlayer().getLocation().getY(),
+							follow.getPlayer().getLocation().getZ(),
+							follow.getPlayer().getLocation().getYaw(),
+							follow.getPlayer().getLocation().getPitch());
+				}
+			}
+			if (MineQuest.distance(player.getLocation(), target) < speed) {
+				entity.moveTo(target.getX(), target.getY(), target.getZ(), target.getYaw(), target.getPitch());
+				target = null;
+			} else {
+				double distance = MineQuest.distance(player.getLocation(), target);
+				entity.moveTo(
+						speed * (target.getX() - player.getLocation().getX()) / distance,
+						speed * (target.getY() - player.getLocation().getY()) / distance,
+						speed * (target.getZ() - player.getLocation().getZ()) / distance,
+						target.getYaw(),
+						target.getPitch());
+			}
+		}
+	}
+
+	public NPCMode getMode() {
+		return mode;
 	}
 }

@@ -40,7 +40,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.monk.MineQuest.Ability.Ability;
-import org.monk.MineQuest.Event.CheckMQMobs;
 import org.monk.MineQuest.Event.CheckMobEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
