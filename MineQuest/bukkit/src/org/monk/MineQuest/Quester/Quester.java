@@ -453,6 +453,10 @@ public class Quester {
 		if (inQuest()) {
 			return quest.canEdit(this, block);
 		}
+		
+		if (!MineQuest.isTownEnabled()) {
+			return true;
+		}
 
 		if (town != null) {
 			Property prop = town.getProperty(block.getLocation());
@@ -1205,14 +1209,16 @@ public class Quester {
 		
 		updateHealth();
 		
-		Town last_town = MineQuest.getNearestTown(to);
-		if (last_town != null) {
-			if (!last_town.getName().equals(last)) {
-				last = last_town.getName();
-				MineQuest.getSQLServer().update("UPDATE questers SET last_town='" + last + "'");
+		if (MineQuest.isTownEnabled()) {
+			Town last_town = MineQuest.getNearestTown(to);
+			if (last_town != null) {
+				if (!last_town.getName().equals(last)) {
+					last = last_town.getName();
+					MineQuest.getSQLServer().update("UPDATE questers SET last_town='" + last + "'");
+				}
+			} else {
+				last = null;
 			}
-		} else {
-			last = null;
 		}
 		
 		if (poison_timer > 0) {
@@ -1389,6 +1395,7 @@ public class Quester {
 	 * Called whenever a Quester is teleported to check for
 	 * respawning.
 	 * 
+	 * @deprecated
 	 * @param event Teleport Event
 	 */
 	public void teleport(PlayerMoveEvent event) {

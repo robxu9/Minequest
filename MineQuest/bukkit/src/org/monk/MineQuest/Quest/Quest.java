@@ -47,6 +47,7 @@ import org.monk.MineQuest.Event.Absolute.ArrowEvent;
 import org.monk.MineQuest.Event.Absolute.BlockCDEvent;
 import org.monk.MineQuest.Event.Absolute.BlockDCEvent;
 import org.monk.MineQuest.Event.Absolute.BlockEvent;
+import org.monk.MineQuest.Event.Absolute.CanEditPattern;
 import org.monk.MineQuest.Event.Absolute.EntitySpawnerCompleteEvent;
 import org.monk.MineQuest.Event.Absolute.EntitySpawnerCompleteNMEvent;
 import org.monk.MineQuest.Event.Absolute.EntitySpawnerEvent;
@@ -60,6 +61,7 @@ import org.monk.MineQuest.Event.Absolute.QuestEvent;
 import org.monk.MineQuest.Event.Absolute.SingleAreaEvent;
 import org.monk.MineQuest.Event.Relative.RelativeEvent;
 import org.monk.MineQuest.Event.Target.TargetedEvent;
+import org.monk.MineQuest.Quest.CanEdit.CanEdit;
 import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
@@ -184,6 +186,8 @@ public class Quest {
 			MineQuest.addQuester(npcs.get(npcs.size() - 1));
 		} else if (split[0].equals("Target")) {
 			targets.add(Target.newTarget(split, this));
+		} else if (split[0].equals("Edit")) {
+			addCanEdit(CanEdit.makeCanEdit(split, world));
 		}
 	}
 
@@ -531,22 +535,8 @@ public class Quest {
 			
 			new_event = new ArrowEvent(delay, start, vector);
 		} else if (type.equals("CanEdit")) {
-			Location new_loc = new Location(world,
-					Integer.parseInt(line[3]),
-					Integer.parseInt(line[4]),
-					Integer.parseInt(line[5])
-					);
-			int next_task = Integer.parseInt(line[6]);
+			addCanEdit(CanEdit.makeCanEdit(line, world));
 			
-			CanEdit new_edits[] = new CanEdit[edits.length + 1];
-			for (i = 0; i < edits.length; i++) {
-				new_edits[i] = edits[i];
-			}
-			new_edits[i] = new CanEditBlock(new_loc, next_task);
-			
-			edits = new_edits;
-
-//			MineQuest.log("Added CanEdit");
 			return;
 		} else if (type.equals("PartyHealthEvent")) {
 			long delay = Integer.parseInt(line[3]);
@@ -613,6 +603,23 @@ public class Quest {
 			}
 			
 			new_event = new PartyKill(this, delay, task, party, kill_names, kills);
+		} else if (type.equals("CanEditPattern")) {
+			int delay = Integer.parseInt(line[3]);
+			int index = Integer.parseInt(line[4]);
+			String edit_s[] = line[5].split(",");
+			String flag_s[] = line[6].split(",");
+			if (edit_s.length != flag_s.length) {
+				MineQuest.log("Lengths of parameters must be equal");
+				throw new Exception();
+			}
+			CanEdit[] editors = new CanEdit[edit_s.length];
+			boolean[] flags = new boolean[edit_s.length];
+			for (i = 0; i < edit_s.length; i++) {
+				editors[i] = getCanEdit(Integer.parseInt(edit_s[i]));
+				flags[i] = Boolean.parseBoolean(flag_s[i]);
+			}
+			
+			new_event = new CanEditPattern(this, delay, index, editors, flags);
 		} else {
 			MineQuest.log("Unknown Event Type: " + type);
 			throw new Exception();
@@ -624,6 +631,28 @@ public class Quest {
 		events.add(new_event);
 	}
 	
+	private void addCanEdit(CanEdit new_edit) {
+		int i;
+		CanEdit new_edits[] = new CanEdit[edits.length + 1];
+		for (i = 0; i < edits.length; i++) {
+			new_edits[i] = edits[i];
+		}
+		new_edits[i] = new_edit;
+		edits = new_edits;
+	}
+	
+	private CanEdit getCanEdit(int id) {
+		int i;
+		
+		for (i = 0; i < edits.length; i++) {
+			if (edits[i].getId() == id) {
+				return edits[i];
+			}
+		}
+		
+		return null;
+	}
+
 	Event getEvent(int id) {
 		for (Event event : events) {
 			if (event.getId() == id) {
