@@ -90,7 +90,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerTeleport(PlayerMoveEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
-		MineQuest.getQuester(event.getPlayer()).teleport(event);
 		super.onPlayerTeleport(event);
 	}
 	
@@ -117,14 +116,20 @@ public class MineQuestPlayerListener extends PlayerListener {
 		
 		processQuester(split, player, event);
 		if (event.isCancelled()) return;
-		processStore(split, player, event);
-		if (event.isCancelled()) return;
+		if (MineQuest.isCubonomyEnabled()) {
+			processStore(split, player, event);
+			if (event.isCancelled()) return;
+		}
 		processQuest(split, player, event);
 		if (event.isCancelled()) return;
-		processTown(split, player, event);
-		if (event.isCancelled()) return;
-		processDebug(split, player, event);
-		if (event.isCancelled()) return;
+		if (MineQuest.isTownEnabled()) {
+			processTown(split, player, event);
+			if (event.isCancelled()) return;
+		}
+		if (MineQuest.isDebugEnabled()) {
+			processDebug(split, player, event);
+			if (event.isCancelled()) return;
+		}
 		processHelp(split, player, event);
 		
 		super.onPlayerCommandPreprocess(event);

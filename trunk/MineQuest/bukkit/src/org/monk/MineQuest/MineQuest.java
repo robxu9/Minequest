@@ -76,6 +76,9 @@ public class MineQuest extends JavaPlugin {
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
 	private static String server_owner;
+	private static boolean town_enable = true;
+	private static boolean debug_enable = true;
+	private static boolean cubonomy_enable = true;
 	
 	/**
 	 * Adds a Quester to the MineQuest Server.
@@ -114,8 +117,17 @@ public class MineQuest extends JavaPlugin {
 		return maxClass;
 	}
 	
-
+	public static boolean isTownEnabled() {
+		return town_enable;
+	}
 	
+	public static boolean isDebugEnabled() {
+		return debug_enable;
+	}
+	
+	public static boolean isCubonomyEnabled() {
+		return cubonomy_enable;
+	}
 	
     /**
      * This is a utility for various parts of MineQuest to calculate
@@ -255,6 +267,7 @@ public class MineQuest extends JavaPlugin {
 	 */
 	static public Quester getQuester(LivingEntity player) {
 		if (!(player instanceof HumanEntity)) return null;
+		
 		return getQuester(((HumanEntity)player).getName());
 	}
 	
@@ -620,8 +633,8 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_RESPAWN, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_ANIMATION, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_ITEM, pl, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGED, el, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Highest, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGED, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGED, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACED, bl, Priority.Normal, this);
