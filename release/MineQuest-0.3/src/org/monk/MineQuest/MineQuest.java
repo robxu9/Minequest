@@ -616,7 +616,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGED, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACED, bl, Priority.Normal, this);
-        pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
+//		pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED, bl, Priority.Normal, this);
         
         PluginDescriptionFile pdfFile = this.getDescription();

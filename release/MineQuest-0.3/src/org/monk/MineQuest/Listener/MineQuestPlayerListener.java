@@ -312,6 +312,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			if (split.length < 2) {
 				player.sendMessage("Usage: /class <class_name>");
 				event.setCancelled(true);
+				return;
 			}
 			MineQuest.getQuester(player).getClass(split[1]).display();
 			event.setCancelled(true);

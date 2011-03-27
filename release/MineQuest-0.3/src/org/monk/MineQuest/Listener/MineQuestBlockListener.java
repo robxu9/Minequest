@@ -20,18 +20,11 @@ package org.monk.MineQuest.Listener;
 
 
 import org.bukkit.Material;
-import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 
 public class MineQuestBlockListener extends BlockListener {
-	
-	@Override
-	public void onBlockInteract(BlockInteractEvent event) {
-		MineQuest.log("Block Event " + event.getBlock().getType());
-		super.onBlockInteract(event);
-	}
 	
 	@Override
 	public void onBlockDamage(org.bukkit.event.block.BlockDamageEvent event) {
