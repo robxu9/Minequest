@@ -1,0 +1,14 @@
+Warrior
+Bash
+Whirlwind
+Health Regeneration
+
+Archer
+
+WarMage
+Cone of Cold
+Fireblast
+Encase
+
+PeaceMage
+Explode Creepers
