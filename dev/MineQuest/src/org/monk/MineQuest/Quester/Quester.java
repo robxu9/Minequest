@@ -30,8 +30,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -86,12 +84,11 @@ public class Quester {
 	protected int max_health;
 	protected String name;
 	protected Party party;
+	protected Party npcParty;
 	protected HumanEntity player;
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
-	protected ItemStack[] spare_inven;
-	protected ItemStack[] spare_inven_2;
 	protected List<Long> times = new ArrayList<Long>();
 	protected CreatureType[] kills;
 	
@@ -125,8 +122,7 @@ public class Quester {
 	public Quester(String name) {
 		this.name = name;
 		update();
-		spare_inven = null;
-		spare_inven_2 = null;
+		npcParty = new Party();
 	}
 
 	/**
@@ -140,8 +136,7 @@ public class Quester {
 		create();
 		update();
 		distance = 0;
-		spare_inven = null;
-		spare_inven_2 = null;
+		npcParty = new Party();
 	}
 
 	/**
@@ -246,6 +241,7 @@ public class Quester {
 	 */
 	public void attackEntity(Entity entity, EntityDamageByEntityEvent event) {
 		if (checkItemInHand()) return;
+		if (!(entity instanceof LivingEntity)) return;
 
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
@@ -259,6 +255,12 @@ public class Quester {
 					break;
 				}
 			}
+		}
+		
+		for (Quester quester : npcParty.getQuesterArray()) {
+			NPCQuester npc = (NPCQuester)quester;
+			
+			npc.questerAttack((LivingEntity)entity);
 		}
 
 		if (entity instanceof LivingEntity) {
@@ -735,6 +737,12 @@ public class Quester {
 			}
 		}
 		
+		for (Quester quester : npcParty.getQuesterArray()) {
+			NPCQuester npc = (NPCQuester)quester;
+			
+			npc.questerAttack((LivingEntity)entity);
+		}
+		
 		int sum = 0;
 		
 		if (classes != null) {
@@ -1023,33 +1031,6 @@ public class Quester {
 	 */
 	public Town getTown() {
 		return MineQuest.getTown(last);
-	}
-
-	public void giveSpareInventory() {
-		if (spare_inven != null) {
-			Location loc = player.getLocation();
-			World world = player.getWorld();
-			
-			Block block = world.getBlockAt((int)loc.getX() + 1,
-					(int)loc.getY(), (int)loc.getZ());
-			
-			block.setType(Material.CHEST);
-			
-			Chest chest = new CraftChest(block);
-			 
-			chest.getInventory().setContents(spare_inven);
-			
-			block = world.getBlockAt((int)loc.getX() + 2,
-					(int)loc.getY(), (int)loc.getZ());
-			
-			block.setType(Material.CHEST);
-			
-			chest = new CraftChest(block);
-			
-			chest.getInventory().setContents(spare_inven_2);
-			
-			spare_inven = null;
-		}
 	}
 
 	/**
@@ -1547,6 +1528,18 @@ public class Quester {
 		new_kills[i] = kill;
 		
 		kills = new_kills;
+	}
+	
+	public void addNPC(NPCQuester quester) {
+		npcParty.addQuester(quester);
+		quester.setMode(NPCMode.PARTY);
+		quester.setFollow(quester);
+	}
+	
+	public void remNPC(NPCQuester quester) {
+		npcParty.remQuester(quester);
+		quester.setMode(NPCMode.STATIONARY);
+		quester.setFollow(null);
 	}
 	
 	public void clearKills() {

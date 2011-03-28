@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.monk.MineQuest.MineQuest;
@@ -44,6 +45,7 @@ public class NPCQuester extends Quester {
 	public NPCQuester(String name) {
 		super(name);
 		this.entity = null;
+		mobTarget = null;
 	}
 	
 	public NPCQuester(String name, NPCMode mode, World world, Location location) {
@@ -63,6 +65,15 @@ public class NPCQuester extends Quester {
 		}
 		distance = 0;
 		entity = null;
+		mobTarget = null;
+	}
+	
+	public LivingEntity getTarget() {
+		return mobTarget;
+	}
+	
+	public void setTarget(LivingEntity entity) {
+		mobTarget = entity;
 	}
 	
 	public void setFollow(Quester quester) {
@@ -207,6 +218,18 @@ public class NPCQuester extends Quester {
 								follow.getPlayer().getLocation().getYaw(),
 								follow.getPlayer().getLocation().getPitch());
 					}
+				} else {
+					if (MineQuest.distance(follow.getPlayer().getLocation(), mobTarget.getLocation()) < 1.25) {
+						attack(mobTarget);
+						return;
+					} else {
+						target = new Location(follow.getPlayer().getLocation().getWorld(),
+								follow.getPlayer().getLocation().getX(),
+								follow.getPlayer().getLocation().getY(),
+								follow.getPlayer().getLocation().getZ(),
+								follow.getPlayer().getLocation().getYaw(),
+								follow.getPlayer().getLocation().getPitch());
+					}
 				}
 			}
 			if (MineQuest.distance(player.getLocation(), target) < speed) {
@@ -236,7 +259,17 @@ public class NPCQuester extends Quester {
 		}
 	}
 
+	private void attack(LivingEntity mobTarget) {
+		entity.attackLivingEntity(mobTarget);
+	}
+
 	public NPCMode getMode() {
 		return mode;
+	}
+
+	public void questerAttack(LivingEntity entity) {
+		if ((mobTarget == null) || (mobTarget.getHealth() <= 0)) {
+			mobTarget = entity;
+		}
 	}
 }
