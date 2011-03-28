@@ -774,6 +774,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		player.sendMessage("There are " + MineQuest.getMobSize() + " " + player.getWorld().getLivingEntities().size());
         	}
+        	event.setCancelled(true);
         } else if (split[0].equals("/follow")) {
         	if (split.length < 2) {
         		return;
@@ -782,6 +783,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         		((NPCQuester)MineQuest.getQuester(split[1])).setMode(NPCMode.FOLLOW);
         		((NPCQuester)MineQuest.getQuester(split[1])).setFollow(MineQuest.getQuester(player));
         	}
+        	event.setCancelled(true);
         }
 	}
 }
