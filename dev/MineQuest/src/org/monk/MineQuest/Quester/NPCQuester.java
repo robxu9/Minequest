@@ -191,8 +191,9 @@ public class NPCQuester extends Quester {
 	public void activate() {
 		if (mode == NPCMode.FOLLOW) {
 			if (follow == null) return;
+			if (follow.getPlayer() == null) return;
 			if (target == null) {
-				if (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) < 4) {
+				if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) < 4) {
 					return;
 				} else {
 					target = new Location(follow.getPlayer().getLocation().getWorld(),
@@ -204,19 +205,25 @@ public class NPCQuester extends Quester {
 				}
 			}
 			if (MineQuest.distance(player.getLocation(), target) < speed) {
-				entity.moveTo(target.getX(), target.getY(), target.getZ(), target.getYaw(), target.getPitch());
+				double move_x = (target.getX() - player.getLocation().getX());
+//				double move_y = (target.getY() - player.getLocation().getY());
+				double move_z = (target.getZ() - player.getLocation().getZ());
+				float yaw = 0;
+				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
+				entity.moveTo(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
 				target = null;
 			} else {
 				double distance = MineQuest.distance(player.getLocation(), target);
+				double move_x = (speed * (target.getX() - player.getLocation().getX()) / distance);
+				double move_y = (speed * (target.getY() - player.getLocation().getY()) / distance);
+				double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
+				float yaw = 0;
+				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
 				entity.moveTo(
-						player.getLocation().getX() + 
-						(speed * (target.getX() - player.getLocation().getX()) / distance),
-						player.getLocation().getY() + 
-						(speed * (target.getY() - player.getLocation().getY()) / distance),
-						player.getLocation().getZ() + 
-						(speed * (target.getZ() - player.getLocation().getZ()) / distance),
-						target.getYaw(),
-						target.getPitch());
+						player.getLocation().getX() + move_x,
+						player.getLocation().getY() + move_y,
+						player.getLocation().getZ() + move_z,
+						yaw, target.getPitch());
 			}
 		}
 	}
