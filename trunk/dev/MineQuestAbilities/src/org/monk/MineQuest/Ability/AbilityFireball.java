@@ -72,7 +72,6 @@ public class AbilityFireball extends Ability {
 				getNearestY(location.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ()), 
 				(int)location.getZ());
 		MineQuest.getEventParser().addEvent(new BlockCDEvent(10, 30000, nblock, Material.FIRE));
-		nblock.setTypeId(51);
 		
 		nblock = world.getBlockAt((int)location.getX() + x, 
 				getNearestY(location.getWorld(), (int)location.getX() + x, (int)location.getY(), (int)location.getZ()), 
@@ -129,7 +128,6 @@ public class AbilityFireball extends Ability {
 				getNearestY(location.getWorld(), (int)location.getX(), (int)location.getY(), (int)location.getZ()), 
 				(int)location.getZ());
 		MineQuest.getEventParser().addEvent(new BlockCDEvent(10, 30000, nblock, Material.FIRE));
-		nblock.setTypeId(51);
 		
 		nblock = world.getBlockAt((int)location.getX() + x, 
 				getNearestY(location.getWorld(), (int)location.getX() + x, (int)location.getY(), (int)location.getZ()), 

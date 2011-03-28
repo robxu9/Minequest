@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>MineQuest</name>
+	<name>MineQuest-dev</name>
 	<comment></comment>
 	<projects>
+		<project>bukkit</project>
+		<project>craftbukkit</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
