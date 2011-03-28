@@ -101,7 +101,9 @@ public class Town {
 	}
 	
 	public void checkMobs() {
-		List<LivingEntity> livingEntities = MineQuest.getSServer().getWorld("world").getLivingEntities();
+		World world = MineQuest.getSServer().getWorlds().get(0);
+		if (world == null) return;
+		List<LivingEntity> livingEntities = world.getLivingEntities();
 		
 		for (LivingEntity livingEntity : livingEntities) {
 			if (livingEntity instanceof Monster) {
