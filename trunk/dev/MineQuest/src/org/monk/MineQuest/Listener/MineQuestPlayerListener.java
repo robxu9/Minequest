@@ -784,6 +784,20 @@ public class MineQuestPlayerListener extends PlayerListener {
         		((NPCQuester)MineQuest.getQuester(split[1])).setFollow(MineQuest.getQuester(player));
         	}
         	event.setCancelled(true);
+        } else if (split[0].equals("/joinnpc")) {
+        	if (split.length < 2) {
+        		player.sendMessage("Fail!!");
+        		return;
+        	}
+        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
+        		MineQuest.getQuester(player).addNPC((NPCQuester)MineQuest.getQuester(split[1]));
+        	} else {
+        		player.sendMessage("Fail!");
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/regroup")) {
+        	MineQuest.getQuester(player).regroup();
+        	event.setCancelled(true);
         }
 	}
 }

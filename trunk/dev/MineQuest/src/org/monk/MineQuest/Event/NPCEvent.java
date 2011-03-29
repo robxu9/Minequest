@@ -16,7 +16,7 @@ public class NPCEvent extends PeriodicEvent {
 		quester.activate();
 		super.activate(eventParser);
 		
-		if (quester.getMode() != NPCMode.FOLLOW) {
+		if ((quester.getMode() != NPCMode.FOLLOW) && (quester.getMode() != NPCMode.PARTY)) {
 			eventParser.setComplete(true);
 		}
 	}

@@ -667,7 +667,6 @@ public class MineQuest extends JavaPlugin {
     	
     	for (i = 0; i < mobs.length; i++) {
     		if ((mobs[i] != null) && ((mobs[i].getHealth() <= 0) || (mobs[i].isDead()))) {
-    			MineQuest.log("Dead Mob");
     			mobs[i].dropLoot();
     			if (mobs[i].getLastAttacker() != null) {
     				mobs[i].getLastAttacker().addKill(mobs[i]);

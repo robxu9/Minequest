@@ -1509,9 +1509,10 @@ public class Quester {
 		LivingEntity monster = mqMob.getMonster();
 		
 		String name = monster.getClass().getName();
-		if (name.split(".").length > 0) {
-			String type = name.split(".")[name.split(".").length - 1];
-			MineQuest.log("Type is " + type);
+		name = name.replace('.', '/');
+		if (name.split("/").length > 0) {
+			String type = name.split("/")[name.split("/").length - 1];
+			type = type.replace("Craft", "");
 			if (CreatureType.fromName(type) != null) {
 				addKill(CreatureType.fromName(type));
 			}
@@ -1533,7 +1534,7 @@ public class Quester {
 	public void addNPC(NPCQuester quester) {
 		npcParty.addQuester(quester);
 		quester.setMode(NPCMode.PARTY);
-		quester.setFollow(quester);
+		quester.setFollow(this);
 	}
 	
 	public void remNPC(NPCQuester quester) {
@@ -1548,5 +1549,12 @@ public class Quester {
 	
 	public CreatureType[] getKills() {
 		return kills;
+	}
+
+	public void regroup() {
+		for (Quester quester : npcParty.getQuesterArray()) {
+			((NPCQuester)quester).setTarget(null);
+		}
+		sendMessage("Regrouping Mercenaries!");
 	}
 }
