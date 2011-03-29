@@ -1,7 +1,6 @@
 package org.monk.MineQuest.Event.Absolute;
 
 import org.bukkit.entity.CreatureType;
-import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
@@ -47,10 +46,6 @@ public class PartyKill extends QuestEvent {
 		}
 
 		if (flag) {
-			for (int tcount : count) {
-				MineQuest.log(tcount + "");
-			}
-			MineQuest.log("String... " + count.length);
 			super.activate(eventParser);
 		} else {
 			eventParser.setComplete(false);

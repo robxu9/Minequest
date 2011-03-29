@@ -23,11 +23,11 @@ import java.sql.SQLException;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.NPCEvent;
 import org.monk.MineQuest.Event.Absolute.SpawnNPCEvent;
 
@@ -203,7 +203,8 @@ public class NPCQuester extends Quester {
 	}
 
 	public void activate() {
-		if (mode == NPCMode.FOLLOW) {
+		if (health <= 0) return;
+		if ((mode == NPCMode.FOLLOW) || (mode == NPCMode.PARTY)) {
 			if (follow == null) return;
 			if (follow.getPlayer() == null) return;
 			if (target == null) {
@@ -211,27 +212,18 @@ public class NPCQuester extends Quester {
 					if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) < 4) {
 						return;
 					} else {
-						target = new Location(follow.getPlayer().getLocation().getWorld(),
-								follow.getPlayer().getLocation().getX(),
-								follow.getPlayer().getLocation().getY(),
-								follow.getPlayer().getLocation().getZ(),
-								follow.getPlayer().getLocation().getYaw(),
-								follow.getPlayer().getLocation().getPitch());
+						setTarget(follow.getPlayer().getLocation());
 					}
 				} else {
 					if (MineQuest.distance(follow.getPlayer().getLocation(), mobTarget.getLocation()) < 1.25) {
 						attack(mobTarget);
 						return;
 					} else {
-						target = new Location(follow.getPlayer().getLocation().getWorld(),
-								follow.getPlayer().getLocation().getX(),
-								follow.getPlayer().getLocation().getY(),
-								follow.getPlayer().getLocation().getZ(),
-								follow.getPlayer().getLocation().getYaw(),
-								follow.getPlayer().getLocation().getPitch());
+						setTarget(mobTarget.getLocation());
 					}
 				}
 			}
+
 			if (MineQuest.distance(player.getLocation(), target) < speed) {
 				double move_x = (target.getX() - player.getLocation().getX());
 //				double move_y = (target.getY() - player.getLocation().getY());
@@ -243,11 +235,11 @@ public class NPCQuester extends Quester {
 			} else {
 				double distance = MineQuest.distance(player.getLocation(), target);
 				double move_x = (speed * (target.getX() - player.getLocation().getX()) / distance);
-				double move_y;
+				double move_y = (speed * (target.getY() - player.getLocation().getY()) / distance);
 				double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
-				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
-						(int)player.getLocation().getBlockY(), 
-						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
+//				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
+//						(int)player.getLocation().getBlockY(), 
+//						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
 				float yaw = 0;
 				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
 				entity.moveTo(
@@ -259,8 +251,20 @@ public class NPCQuester extends Quester {
 		}
 	}
 
+	private void setTarget(Location location) {
+		Location self = entity.getBukkitEntity().getLocation();
+		double distance = MineQuest.distance(location, self);
+		target = new Location(self.getWorld(), 
+				location.getX() + ((self.getX() - location.getX()) / distance),
+				location.getY(),
+				location.getZ() + ((self.getZ() - location.getZ()) / distance),
+				location.getYaw(),
+				location.getPitch());
+	}
+
 	private void attack(LivingEntity mobTarget) {
 		entity.attackLivingEntity(mobTarget);
+		((CraftLivingEntity)mobTarget).getHandle().a(((CraftHumanEntity)player).getHandle(), 2);
 	}
 
 	public NPCMode getMode() {
