@@ -82,6 +82,9 @@ public class Quest {
 	private double end_z;
 	private List<NPCQuester> npcs;
 	private List<Target> targets;
+	private String name;
+	private String filename;
+	private boolean repeatable;
 	
 	public Quest(String filename, Party party) {
 		this.questers = party.getQuesterArray();
@@ -91,6 +94,9 @@ public class Quest {
 		edits = new CanEdit[0];
 		npcs = new ArrayList<NPCQuester>();
 		targets = new ArrayList<Target>();
+		this.name = filename;
+		this.filename = filename;
+		this.repeatable = false;
 
 		try {
 			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
@@ -145,6 +151,10 @@ public class Quest {
 		
 	}
 	
+	public QuestProspect getProspect() {
+		return new QuestProspect(name, filename, repeatable);
+	}
+	
 	private void parseLine(String[] split) throws Exception {
 		if (split[0].equals("Event")) {
 			if (split[2].equals("R")) {
@@ -188,6 +198,10 @@ public class Quest {
 			targets.add(Target.newTarget(split, this));
 		} else if (split[0].equals("Edit")) {
 			addCanEdit(CanEdit.makeCanEdit(split, world));
+		} else if (split[0].equals("Name")) {
+			name = split[1];
+		} else if (split[0].equals("Repeatable")) {
+			repeatable = Boolean.parseBoolean(split[1]);
 		}
 	}
 
