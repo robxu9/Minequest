@@ -54,6 +54,7 @@ import org.monk.MineQuest.Event.Absolute.HealthEvent;
 import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
+import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.DefendingClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
@@ -91,10 +92,12 @@ public class Quester {
 	protected int rep;
 	protected List<Long> times = new ArrayList<Long>();
 	protected CreatureType[] kills;
-	
+	protected List<QuestProspect> available;
+	protected List<QuestProspect> completed;
+
 	public Quester() {
 	}
-	
+
 	/**
 	 * Load player from MySQL Database.
 	 * @param player
@@ -103,7 +106,7 @@ public class Quester {
 		this(player.getName());
 		this.player = player;
 	}
-	
+
 	/**
 	 * Create a new Player in the MySQL Database.
 	 * 
@@ -114,7 +117,7 @@ public class Quester {
 		this(player.getName(), 0);
 		this.player = player;
 	}
-	
+
 	/**
 	 * Load player from MySQL Database.
 	 * @param name
@@ -182,7 +185,7 @@ public class Quester {
 		
 		abil.silentBind(this, item_hand);
 	}
-	
+
 	public void addClass(String name) {
 		if (getClass(name) != null) {
 			sendMessage("You already have the class " + name);
@@ -220,7 +223,7 @@ public class Quester {
 		}
 		update();
 	}
-	
+
 	/**
 	 * Adds to both health and maximum health of quester.
 	 * Should be used on level up of character of 
@@ -1549,6 +1552,41 @@ public class Quester {
 	
 	public CreatureType[] getKills() {
 		return kills;
+	}
+	
+	public void addQuestAvailable(QuestProspect quest) {
+		available.add(quest);
+	}
+	
+	public List<QuestProspect> getAvailableQuests() {
+		return available;
+	}
+	
+	public List<QuestProspect> getCompletedQuests() {
+		return completed;
+	}
+	
+	public boolean isAvailable(QuestProspect quest) {
+		return available.contains(quest);
+	}
+	
+	public boolean isCompleted(QuestProspect quest) {
+		return completed.contains(quest);
+	}
+	
+	public void remQuestAvailable(QuestProspect quest) {
+		available.remove(quest);
+	}
+	
+	public void remQuestComplete(QuestProspect quest) {
+		completed.remove(quest);
+	}
+	
+	public void completeQuest(QuestProspect quest) {
+		completed.add(quest);
+		if (!quest.isRepeatable()) {
+			available.remove(quest);
+		}
 	}
 
 	public void regroup() {
