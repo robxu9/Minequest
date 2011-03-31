@@ -167,7 +167,7 @@ Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
 === Single Area Event (QE) ===
 This event works the same way as the previous except that it waits for any single quester to be inside the area. 
 {{{
-Event:id:AreaEvent:delay ms:task:loc x:loc y:loc z:radius
+Event:id:SingleAreaEvent:delay ms:task:loc x:loc y:loc z:radius
 }}}
 
 == Can Edit Events (QE) ==
