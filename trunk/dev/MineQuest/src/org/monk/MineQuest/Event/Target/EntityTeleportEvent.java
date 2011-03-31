@@ -36,7 +36,7 @@ public class EntityTeleportEvent extends TargetedEvent {
 		super.activate(eventParser);
 		
 		for (Quester quester : target.getTargets()) {
-			quester.getPlayer().teleportTo(location);
+			quester.getPlayer().teleport(location);
 		}
 	}
 

@@ -479,7 +479,7 @@ public abstract class Ability {
 		x *= distance / unit_fix;
 		z *= distance / unit_fix;
 		
-		other.teleportTo(new Location(other.getWorld(), x + player.getLocation().getX(), 
+		other.teleport(new Location(other.getWorld(), x + player.getLocation().getX(), 
 				(double)getNearestY(player.getWorld(), (int)(x + player.getLocation().getX()), 
 				(int)other.getLocation().getY(), (int)(z + player.getLocation().getZ())), 
 				z + player.getLocation().getZ()));
