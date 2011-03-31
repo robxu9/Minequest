@@ -113,28 +113,28 @@ public class SpecialMob extends MQMob {
 
 				if ((rot < 45) || (rot > 315)) {
 					((Player)player).sendMessage("Zombie Dodged");
-					entity.teleportTo(new Location(entity.getWorld(),
+					entity.teleport(new Location(entity.getWorld(),
 							entity.getLocation().getX() - 1,
 							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 									entity.getLocation().getZ()));
 				} else if ((rot > 45) && (rot < 135)) {
 					((Player)player).sendMessage("Zombie Dodged");
-					entity.teleportTo(new Location(entity.getWorld(),
+					entity.teleport(new Location(entity.getWorld(),
 							entity.getLocation().getX(),
 							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 									entity.getLocation().getZ() - 1));
 				} else if ((rot > 135) && (rot < 225)) {
 					((Player)player).sendMessage("Zombie Dodged");
-					entity.teleportTo(new Location(entity.getWorld(),
+					entity.teleport(new Location(entity.getWorld(),
 							entity.getLocation().getX() + 1,
 							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),
 									entity.getLocation().getZ()));
 				} else {
 					((Player)player).sendMessage("Zombie Dodged");
-					entity.teleportTo(new Location(entity.getWorld(),
+					entity.teleport(new Location(entity.getWorld(),
 							entity.getLocation().getX(),
 							Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(),
 									(int) entity.getLocation().getY(), (int) entity.getLocation().getZ()),

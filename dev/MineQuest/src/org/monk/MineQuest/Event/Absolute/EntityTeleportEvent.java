@@ -46,9 +46,9 @@ public class EntityTeleportEvent extends NormalEvent {
 	@Override
 	public void activate(EventParser eventParser) {
 		if (quester != null) {
-			quester.getPlayer().teleportTo(location);
+			quester.getPlayer().teleport(location);
 		} else {
-			entity.teleportTo(location);
+			entity.teleport(location);
 		}
 	}
 

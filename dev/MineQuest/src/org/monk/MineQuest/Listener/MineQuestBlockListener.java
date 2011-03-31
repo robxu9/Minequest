@@ -19,19 +19,17 @@
 package org.monk.MineQuest.Listener;
 
 
-import org.bukkit.Material;
-import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 
 public class MineQuestBlockListener extends BlockListener {
 	
-	@Override
-	public void onBlockInteract(BlockInteractEvent event) {
-		MineQuest.log("Block Event " + event.getBlock().getType());
-		super.onBlockInteract(event);
-	}
+//	@Override
+//	public void onBlockInteract( event) {
+//		MineQuest.log("Block Event " + event.getBlock().getType());
+//		super.onBlockInteract(event);
+//	}
 	
 	@Override
 	public void onBlockDamage(org.bukkit.event.block.BlockDamageEvent event) {
@@ -61,35 +59,35 @@ public class MineQuestBlockListener extends BlockListener {
 		super.onBlockDamage(event);
 	}
 	
-	@Override
-	public void onBlockRightClick(org.bukkit.event.block.BlockRightClickEvent event) {
-		Quester quester = MineQuest.getQuester(event.getPlayer());
-		
-		if (quester.inQuest()) {
-			quester.getQuest().canEdit(quester, event.getBlock());
-		}
-		
-		if (quester.isDebug()) {
-			quester.sendMessage(event.getBlock().getX() + " " + 
-					event.getBlock().getY() + " " + event.getBlock().getZ()
-					 + " " + event.getBlock().getType() + " " + 
-					 event.getBlock().getData());
-		}
-		
-		quester.checkItemInHand();
-		if (quester.checkItemInHandAbil()) {
-			quester.callAbility(event.getBlock());
-			return;
-		}
-		
-		if (event.getBlock().getType() == Material.CHEST) {
-			quester.getChestSet().clicked(event.getPlayer(), event.getBlock());
-		}
-		
-		quester.rightClick(event.getBlock());
-		
-		super.onBlockRightClick(event);
-	}
+//	@Override
+//	public void onBlockRightClick(org.bukkit.event.block.BlockRightClickEvent event) {
+//		Quester quester = MineQuest.getQuester(event.getPlayer());
+//		
+//		if (quester.inQuest()) {
+//			quester.getQuest().canEdit(quester, event.getBlock());
+//		}
+//		
+//		if (quester.isDebug()) {
+//			quester.sendMessage(event.getBlock().getX() + " " + 
+//					event.getBlock().getY() + " " + event.getBlock().getZ()
+//					 + " " + event.getBlock().getType() + " " + 
+//					 event.getBlock().getData());
+//		}
+//		
+//		quester.checkItemInHand();
+//		if (quester.checkItemInHandAbil()) {
+//			quester.callAbility(event.getBlock());
+//			return;
+//		}
+//		
+//		if (event.getBlock().getType() == Material.CHEST) {
+//			quester.getChestSet().clicked(event.getPlayer(), event.getBlock());
+//		}
+//		
+//		quester.rightClick(event.getBlock());
+//		
+//		super.onBlockRightClick(event);
+//	}
 	
 	@Override
 	public void onBlockPlace(org.bukkit.event.block.BlockPlaceEvent event) {

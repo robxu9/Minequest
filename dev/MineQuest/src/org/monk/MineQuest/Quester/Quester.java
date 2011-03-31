@@ -40,7 +40,7 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.player.PlayerItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -1082,7 +1082,7 @@ public class Quester {
         return false;
     }
 
-	public boolean healthIncrease(PlayerItemEvent event) {
+	public boolean healthIncrease(PlayerInteractEvent event) {
 		Material type = event.getItem().getType();
 		
 		switch (type) {
@@ -1345,7 +1345,7 @@ public class Quester {
 		before_quest = player.getLocation();
 		
 		if (!world.getName().equals(player.getWorld().getName())) {
-			player.teleportTo(world.getSpawnLocation());
+			player.teleport(world.getSpawnLocation());
 		}
 	}
 

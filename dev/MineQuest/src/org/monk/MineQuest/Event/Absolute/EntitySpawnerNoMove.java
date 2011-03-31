@@ -37,7 +37,7 @@ public class EntitySpawnerNoMove extends EntitySpawnerEvent {
 			eventParser.setComplete(true);
 		}
 		
-		if (entity != null) entity.teleportTo(location);
+		if (entity != null) entity.teleport(location);
 	}
 
 	@Override
