@@ -359,7 +359,7 @@ public class Quest {
 		for (Quester quester : questers) {
 			Location location = quester.getPlayer().getLocation();
 			location.setWorld(world);
-			quester.getPlayer().teleportTo(location);
+			quester.getPlayer().teleport(location);
 		}
 	}
 

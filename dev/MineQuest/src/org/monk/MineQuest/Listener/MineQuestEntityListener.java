@@ -45,6 +45,7 @@ public class MineQuestEntityListener extends EntityListener {
 	
 	@Override
 	public void onEntityDamage(EntityDamageEvent event) {
+		if (event.isCancelled()) return;
 		if (event instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
             if (evente.getDamager() instanceof HumanEntity) {

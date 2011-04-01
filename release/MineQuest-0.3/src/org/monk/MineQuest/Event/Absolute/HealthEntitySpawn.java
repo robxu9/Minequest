@@ -57,7 +57,7 @@ public class HealthEntitySpawn extends QuestEvent {
 			return;
 		}
 		if (stay) {
-			entity.teleportTo(location);
+			entity.teleport(location);
 		}
 		
 		if (!(entity.getHealth() > 0)) {

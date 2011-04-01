@@ -22,6 +22,7 @@ package org.monk.MineQuest.Listener;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
@@ -31,11 +32,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerItemEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.NoMobs;
@@ -53,14 +57,20 @@ public class MineQuestPlayerListener extends PlayerListener {
 	private NoMobs event;
 	
 	@Override
-	public void onPlayerItem(PlayerItemEvent event) {
+	public void onPlayerInteract(PlayerInteractEvent event) {
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		if (!MineQuest.getQuester(event.getPlayer()).healthIncrease(event)) {
-			event.setCancelled(!quester.canEdit(event.getBlockClicked()));
+			event.setCancelled(!quester.canEdit(event.getClickedBlock()));
 		}
 		
-		super.onPlayerItem(event);
+		if (event.getClickedBlock() != null) {
+			if (event.getClickedBlock().getType() == Material.CHEST) {
+				quester.getChestSet().clicked(event.getPlayer(), event.getClickedBlock());
+			}
+		}
+		
+		super.onPlayerInteract(event);
 	}
 	
 	@Override
@@ -77,28 +87,29 @@ public class MineQuestPlayerListener extends PlayerListener {
 		super.onPlayerMove(event);
 	}
 
-	public void onPlayerJoin(PlayerEvent event) {
+	public void onPlayerLogin(PlayerLoginEvent event) {
 		if (MineQuest.getQuester(event.getPlayer()) == null) {
 			MineQuest.addQuester(new Quester(event.getPlayer(), 0));
 		}
 		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).update();
-		super.onPlayerJoin(event);
+		super.onPlayerLogin(event);
 	}
 	
 	@Override
-	public void onPlayerTeleport(PlayerMoveEvent event) {
+	public void onPlayerTeleport(PlayerTeleportEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).teleport(event);
 		super.onPlayerTeleport(event);
 	}
 	
-	public void onPlayerQuit(PlayerEvent event) {
+	public void onPlayerQuit(PlayerQuitEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		if (MineQuest.getQuester(event.getPlayer()) != null) {
 			MineQuest.getQuester(event.getPlayer()).save();
 			MineQuest.getQuester(event.getPlayer()).setPlayer(null);
 		}
+		
 		super.onPlayerQuit(event);
 	}
 	
@@ -109,7 +120,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	}
 	
 	@Override
-	public void onPlayerCommandPreprocess(PlayerChatEvent event) {
+	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		String split[] = event.getMessage().split(" ");
 		Player player = event.getPlayer();
@@ -554,7 +565,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 				}
 			}
 			player.sendMessage("Welcome to " + towns.get(index).getName());
-			player.teleportTo(towns.get(index).getLocation());
+			player.teleport(towns.get(index).getLocation());
 			event.setCancelled(true);
 		} else if (split[0].equals("/townloc")) {
 			player.sendMessage("You are at " + player.getLocation().getX() + " " + player.getLocation().getY() + " " + 
@@ -721,7 +732,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         				world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
         			}
         		}
-        		player.teleportTo(world.getSpawnLocation());
+        		player.teleport(world.getSpawnLocation());
         		event.setCancelled(true);
         	}
         } else if (split[0].equals("/setworldtime")) {

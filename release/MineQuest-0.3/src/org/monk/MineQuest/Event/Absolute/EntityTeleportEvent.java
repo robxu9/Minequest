@@ -35,7 +35,7 @@ public class EntityTeleportEvent extends NormalEvent {
 
 	@Override
 	public void activate(EventParser eventParser) {
-		entity.teleportTo(location);
+		entity.teleport(location);
 	}
 
 	@Override
