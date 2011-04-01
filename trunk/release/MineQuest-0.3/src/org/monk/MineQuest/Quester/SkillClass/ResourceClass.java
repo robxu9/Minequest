@@ -18,7 +18,6 @@
  */
 package org.monk.MineQuest.Quester.SkillClass;
 
-import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.Quester.Quester;
@@ -41,11 +40,11 @@ public class ResourceClass extends SkillClass {
 		// TODO: Deal with this
 		if (level > 5) {
 			if (isStoneWoodenTool(quester.getPlayer().getItemInHand())) {
-				if (event.getDamageLevel() == BlockDamageLevel.BROKEN) {
+//				if (event.getDamageLevel() == BlockDamageLevel.BROKEN) {
 					if (isBlockGiveType(event.getBlock().getTypeId())) {
 						quester.getPlayer().getInventory().addItem(getItemGive(event.getBlock().getTypeId()));
 					}
-				}
+//				}
 			}
 		}
 		
