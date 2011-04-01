@@ -603,7 +603,7 @@ public class MineQuest extends JavaPlugin {
 		
         PluginManager pm = getServer().getPluginManager();
         
-        pm.registerEvent(Event.Type.PLAYER_JOIN, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_LOGIN, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_QUIT, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
