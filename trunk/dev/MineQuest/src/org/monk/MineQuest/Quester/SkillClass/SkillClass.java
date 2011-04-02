@@ -524,9 +524,12 @@ public class SkillClass {
 	 * @return True if item is a class item.
 	 */
 	public boolean isClassItem(ItemStack item) {
+		if (item == null) return false;
 		for (Ability abil : ability_list) {
-			if (abil.isBound(item)) {
-				return true;
+			if (abil != null) {
+				if (abil.isBound(item)) {
+					return true;
+				}
 			}
 		}
 		

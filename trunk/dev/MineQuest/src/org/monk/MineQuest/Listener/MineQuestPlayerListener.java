@@ -22,6 +22,7 @@ package org.monk.MineQuest.Listener;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
@@ -42,7 +43,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.NoMobs;
-import org.monk.MineQuest.Quest.Quest;
+import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
@@ -52,15 +53,20 @@ import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
 public class MineQuestPlayerListener extends PlayerListener {
-	
 	private NoMobs event;
-	
+
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Quester quester = MineQuest.getQuester(event.getPlayer());
 		
 		if (!MineQuest.getQuester(event.getPlayer()).healthIncrease(event)) {
 			event.setCancelled(!quester.canEdit(event.getClickedBlock()));
+		}
+		
+		if (event.getClickedBlock() != null) {
+			if (event.getClickedBlock().getType() == Material.CHEST) {
+				quester.getChestSet().clicked(event.getPlayer(), event.getClickedBlock());
+			}
 		}
 		
 		super.onPlayerInteract(event);
@@ -201,14 +207,17 @@ public class MineQuestPlayerListener extends PlayerListener {
 	}
 	
 	private void processQuest(String[] split, Player player, PlayerChatEvent event) {
-		if (split[0].equals("/startquest")) {
+		if (split[0].equals("/startquest") || split[0].equals("/start_quest")) {
         	if (split.length < 2) {
         		player.sendMessage("Usage: /startquest filename");
         	} else {
         		if (MineQuest.getQuester(player).getParty() == null) {
         			MineQuest.getQuester(player).createParty();
         		}
-    			MineQuest.addQuest(new Quest(split[1], MineQuest.getQuester(player).getParty()));
+        		String qname = split[1];
+        		int i;
+        		for (i = 2; i < split.length; i++) qname = qname + " " + split[i];
+        		MineQuest.getQuester(player).startQuest(qname);
         	}
            	event.setCancelled(true);
         } else if (split[0].equals("/class_exp")) {
@@ -221,11 +230,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         		MineQuest.getQuester(player).spendClassExp(split[1], Integer.parseInt(split[2]));
         	}
         	event.setCancelled(true);
-        }  else if (split[0].equals("/createparty")) {
+        }  else if (split[0].equals("/create_party")) {
         	MineQuest.getQuester(player).createParty();
         	player.sendMessage("Party Created");
         	event.setCancelled(true);
-        } else if (split[0].equals("/joinparty")) {
+        } else if (split[0].equals("/join_party")) {
         	if (split.length < 2) {
         		player.sendMessage("Usage: /joinparty player_name");
         	} else {
@@ -241,13 +250,23 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/quit_quest")) {
         	MineQuest.getQuester(player).getQuest().removeQuester(MineQuest.getQuester(player));
         	event.setCancelled(true);
-        } else if (split[0].equals("/listparty")) {
+        } else if (split[0].equals("/list_party")) {
         	if (MineQuest.getQuester(player).getParty() != null) {
             	for (Quester quester : MineQuest.getQuester(player).getParty().getQuesters()) {
             		player.sendMessage(quester.getName());
             	}
         	} else {
         		player.sendMessage("You are not in a party");
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/list_quest")) {
+        	for (QuestProspect qp : MineQuest.getQuester(player).getAvailableQuests()) {
+        		player.sendMessage(qp.getName());
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/list_complete_quest")) {
+        	for (QuestProspect qp : MineQuest.getQuester(player).getCompletedQuests()) {
+        		player.sendMessage(qp.getName());
         	}
         	event.setCancelled(true);
         }
@@ -358,13 +377,32 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/replace")) {
         	if (split.length < 3) {
-        		player.sendMessage("Usage: /replace old_ability_name new_ability_name");
+        		player.sendMessage("Usage: /replace old_ability_name with new_ability_name");
         	} else {
-        		SkillClass skill = MineQuest.getQuester(player).getClassFromAbil(split[1]);
-        		if (skill == null) {
-        			player.sendMessage(split[1] + " is not a valid ability");
+        		int divider;
+        		for (divider = 1; divider < split.length; divider++) {
+        			if (split[divider].equals("with")) {
+        				break;
+        			}
+        		}
+        		if (divider < split.length) {
+            		int i;
+            		String first = split[1];
+            		for (i = 2; i < divider; i++) {
+            			first = first + " " + split[i];
+            		}
+            		String second = split[divider + 1];
+            		for (i = divider + 2; i < split.length; i++) {
+            			second = second + " " + split[i];
+            		}
+	        		SkillClass skill = MineQuest.getQuester(player).getClassFromAbil(first);
+	        		if (skill == null) {
+	        			player.sendMessage(split[1] + " is not a valid ability");
+	        		} else {
+	        			skill.replaceAbil(first, second);
+	        		}
         		} else {
-        			skill.replaceAbil(split[1], split[2]);
+            		player.sendMessage("Usage: /replace old_ability_name with new_ability_name");
         		}
         	}
         	event.setCancelled(true);
@@ -746,7 +784,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/mobs")) {
         	this.event.setComplete(true);
         	event.setCancelled(true);
-        } else if (split[0].equals("/spawnnpc")) {
+        } else if (split[0].equals("/spawn_npc")) {
         	Location location = player.getLocation();
         	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STATIONARY, player.getWorld(), location));
         	event.setCancelled(true);
@@ -800,6 +838,20 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/regroup")) {
         	MineQuest.getQuester(player).regroup();
+        	event.setCancelled(true);
+        } else if (split[0].equals("/spawn_quest_giver")) {
+        	Location location = player.getLocation();
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GQUEST_NPC, player.getWorld(), location));
+        	event.setCancelled(true);
+        } else if (split[0].equals("/npc_property")) {
+        	try {
+        		String value = split[3];
+        		int i;
+        		for (i = 4; i < split.length; i++) value = value + " " + split[i];
+        		((NPCQuester)MineQuest.getQuester(split[1])).setProperty(split[2], value);
+        	} catch (Exception e) {
+        		MineQuest.log("Problem stuff");
+        	}
         	event.setCancelled(true);
         }
 	}

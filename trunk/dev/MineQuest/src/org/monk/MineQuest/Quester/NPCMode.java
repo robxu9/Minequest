@@ -26,7 +26,8 @@ public enum NPCMode {
 	GOD,
 	QUEST_NPC,
 	FOLLOW, 
-	PARTY;
+	PARTY, 
+	GQUEST_NPC;
 	
     private static final Map<String, NPCMode> lookupName = new HashMap<String, NPCMode>();
 

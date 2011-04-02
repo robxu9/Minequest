@@ -167,6 +167,7 @@ public class MysqlInterface {
 		} catch (SQLException e) {
 			MineQuest.log("(MySQL) " + sql);
 			MineQuest.log("[ERROR] Failed to update database");
+			e.printStackTrace();
 			reconnect();
 			try {
 				ret = stmt.executeUpdate(sql);

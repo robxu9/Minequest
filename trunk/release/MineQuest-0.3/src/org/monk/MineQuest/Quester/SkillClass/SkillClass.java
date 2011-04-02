@@ -520,6 +520,7 @@ public class SkillClass {
 	 * @return True if item is a class item.
 	 */
 	public boolean isClassItem(ItemStack item) {
+		if (item == null) return false;
 		for (Ability abil : ability_list) {
 			if (abil.isBound(item)) {
 				return true;
@@ -537,6 +538,7 @@ public class SkillClass {
 	 * @return True if item is a class item.
 	 */
 	protected boolean isClassItem(Material type) {
+		if (type == null) return false;
 		return isClassItem(new ItemStack(type.getId()));
 	}
 

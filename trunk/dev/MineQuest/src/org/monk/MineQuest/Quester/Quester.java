@@ -69,10 +69,12 @@ import org.monk.MineQuest.World.Town;
  * @author jmonk
  */
 public class Quester {
+	protected List<QuestProspect> available;
 	protected Location before_quest;
 	protected ChestSet chests;
 	protected int class_exp;
 	protected List<SkillClass> classes;
+	protected List<QuestProspect> completed;
 	protected double cubes;
 	protected boolean debug;
 	protected double distance;
@@ -80,20 +82,18 @@ public class Quester {
 	protected int exp;
 	protected int health;
 	protected List<Integer> ids = new ArrayList<Integer>();
+	protected CreatureType[] kills;
 	protected String last;
 	protected int level;
 	protected int max_health;
 	protected String name;
-	protected Party party;
 	protected Party npcParty;
+	protected Party party;
 	protected HumanEntity player;
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
 	protected List<Long> times = new ArrayList<Long>();
-	protected CreatureType[] kills;
-	protected List<QuestProspect> available;
-	protected List<QuestProspect> completed;
 
 	public Quester() {
 	}
@@ -236,6 +236,57 @@ public class Quester {
 		max_health += addition;
 	}
 	
+	private void addKill(CreatureType kill) {
+		CreatureType[] new_kills = new CreatureType[kills.length + 1];
+		int i;
+		
+		for (i = 0; i < kills.length; i++) {
+			new_kills[i] = kills[i];
+		}
+		new_kills[i] = kill;
+		
+		kills = new_kills;
+	}
+	
+	public void addKill(MQMob mqMob) {
+		if (quest == null) return;
+		LivingEntity monster = mqMob.getMonster();
+		
+		String name = monster.getClass().getName();
+		name = name.replace('.', '/');
+		if (name.split("/").length > 0) {
+			String type = name.split("/")[name.split("/").length - 1];
+			type = type.replace("Craft", "");
+			if (CreatureType.fromName(type) != null) {
+				addKill(CreatureType.fromName(type));
+			}
+		}
+	}
+
+	public void addNPC(NPCQuester quester) {
+		npcParty.addQuester(quester);
+		quester.setMode(NPCMode.PARTY);
+		quester.setFollow(this);
+	}
+
+	public void addQuestAvailable(QuestProspect quest) {
+		if (isAvailable(quest)) return;
+		if (quest.equals("")) {
+			return;
+		}
+		available.add(quest);
+		MineQuest.getSQLServer().update("INSERT INTO " + name + "_quests (type, file) VALUES('A', '" 
+				+ quest.getFile() + "')");
+		sendMessage("You now have access to the quest " + quest.getName());
+	}
+
+	public void addQuestCompleted(QuestProspect quest) {
+		if (isCompleted(quest)) return;
+		completed.add(quest);
+		MineQuest.getSQLServer().update("INSERT INTO " + name + "_quests (type, file) VALUES('C', '" 
+				+ quest.getFile() + "')");
+	}
+
 	/**
 	 * Called whenever a Quester attacks any other entity.
 	 * 
@@ -260,10 +311,12 @@ public class Quester {
 			}
 		}
 		
-		for (Quester quester : npcParty.getQuesterArray()) {
-			NPCQuester npc = (NPCQuester)quester;
-			
-			npc.questerAttack((LivingEntity)entity);
+		if (npcParty != null) {
+			for (Quester quester : npcParty.getQuesterArray()) {
+				NPCQuester npc = (NPCQuester)quester;
+				
+				npc.questerAttack((LivingEntity)entity);
+			}
 		}
 
 		if (entity instanceof LivingEntity) {
@@ -290,7 +343,7 @@ public class Quester {
 			return;
 		}
 	}
-	
+
 	/**
 	 * Binds an Ability to click of the item
 	 * in the players hand.
@@ -316,7 +369,7 @@ public class Quester {
 		sendMessage(name + " is not a valid ability");
 		return;
 	}
-
+	
 	public void bind(String ability, ItemStack itemStack) {
 		for (SkillClass skill : classes) {
 			skill.silentUnBind(itemStack);
@@ -384,7 +437,7 @@ public class Quester {
 		}
 		return 4;
 	}
-
+	
 	public void callAbility() {
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())){
@@ -393,7 +446,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	/**
 	 * Casts a left click bound ability on the given block.
 	 * 
@@ -407,7 +460,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	/**
 	 * Casts a left click bound ability on the given entity
 	 * 
@@ -504,7 +557,7 @@ public class Quester {
         	return checkDamage(24045);
         }
 	}
-	
+
 	/**
      * This function will check if the damager in the event passed
      * has damaged the quester too recently to damage again.
@@ -557,7 +610,7 @@ public class Quester {
 			skill.checkEquip(inven);
 		}
 	}
-	
+
 	/**
 	 * Checks if a Quester is allowed to use the item
 	 * in hand. The item is checked with each class
@@ -607,6 +660,10 @@ public class Quester {
 		return false;
 	}
 	
+	public void clearKills() {
+		kills = new CreatureType[0];
+	}
+	
 	public void clearQuest() {
 		this.quest = null;
 		poison_timer = 0;
@@ -617,7 +674,14 @@ public class Quester {
 		kills = new CreatureType[0];
 	}
 
-	/**
+	public void completeQuest(QuestProspect quest) {
+		addQuestCompleted(quest);
+		if (!quest.isRepeatable()) {
+			remQuestAvailable(quest);
+		}
+	}
+
+    /**
 	 * Creates database entry for this quester with starting
 	 * classes and health.
 	 */
@@ -656,7 +720,7 @@ public class Quester {
 		
 		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (abil VARCHAR(30), bind int, bind_2 int)");
 	}
-	
+
 	public void createClass(String clazz, int abil_list_id) {
 		String update_string = "INSERT INTO classes (name, class, exp, level, abil_list_id) VALUES('"
 			+ name + "', '" + clazz + "', '0', '0', '" + abil_list_id + "')";
@@ -676,11 +740,11 @@ public class Quester {
 	public void curePoison() {
 		poison_timer = 0;
 	}
-	
+
 	public void damage(int i) {
 		setHealth(getHealth() - i);
 	}
-	
+
 	public void debug() {
 		debug = !debug;
 	}
@@ -695,7 +759,7 @@ public class Quester {
 		healthChange(event.getDamage(), event);
 	}
 
-    /**
+	/**
 	 * Called any time there is a damaged by block event
 	 * on the Quester.
 	 * @param event
@@ -703,7 +767,7 @@ public class Quester {
 	public void defendBlock(EntityDamageByBlockEvent event) {
 		healthChange(event.getDamage(), event);
 	}
-
+	
 	/**
 	 * Called any time the Quester is defending against an
 	 * attack from another entity.
@@ -740,10 +804,12 @@ public class Quester {
 			}
 		}
 		
-		for (Quester quester : npcParty.getQuesterArray()) {
-			NPCQuester npc = (NPCQuester)quester;
-			
-			npc.questerAttack((LivingEntity)entity);
+		if (npcParty != null) {
+			for (Quester quester : npcParty.getQuesterArray()) {
+				NPCQuester npc = (NPCQuester)quester;
+				
+				npc.questerAttack((LivingEntity)entity);
+			}
 		}
 		
 		int sum = 0;
@@ -854,7 +920,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Quester) {
@@ -894,6 +960,10 @@ public class Quester {
 		return null;
 	}
 
+    public List<QuestProspect> getAvailableQuests() {
+		return available;
+	}
+
 	/**
 	 * Gets the ChestSet for given player
 	 * 
@@ -928,22 +998,11 @@ public class Quester {
 	public List<SkillClass> getClasses() {
 		return classes;
 	}
-	
-	public List<SkillClass> getCombatClasses() {
-		List<SkillClass> ret = new ArrayList<SkillClass>();
-		for (SkillClass skill : classes) {
-			if (skill instanceof CombatClass) {
-				ret.add(skill);
-			}
-		}
-		
-		return ret;
-	}
 
 	public int getClassExp() {
 		return class_exp;
 	}
-	
+
 	public SkillClass getClassFromAbil(String ability) {
 		for (SkillClass skill : classes) {
 			if (skill != null) {
@@ -955,6 +1014,21 @@ public class Quester {
 		return null;
 	}
 
+	public List<SkillClass> getCombatClasses() {
+		List<SkillClass> ret = new ArrayList<SkillClass>();
+		for (SkillClass skill : classes) {
+			if (skill instanceof CombatClass) {
+				ret.add(skill);
+			}
+		}
+		
+		return ret;
+	}
+
+	public List<QuestProspect> getCompletedQuests() {
+		return completed;
+	}
+
 	/**
 	 * Returns amount of cubes the Quester has.
 	 * 
@@ -964,7 +1038,7 @@ public class Quester {
 		return cubes;
 	}
 
-    /**
+	/**
 	 * Returns amount of experience for Quester.
 	 * @return
 	 */
@@ -978,6 +1052,10 @@ public class Quester {
 	 */
 	public int getHealth() {
 		return health;
+	}
+
+	public CreatureType[] getKills() {
+		return kills;
 	}
 
 	/**
@@ -1026,7 +1104,22 @@ public class Quester {
 	public Quest getQuest() {
 		return quest;
 	}
-
+	
+	private QuestProspect getQuestProspect(String string) {
+		for (QuestProspect qp : available) {
+			if (qp.equals(string)) {
+				return qp;
+			}
+		}
+		for (QuestProspect qp : completed) {
+			if (qp.equals(string)) {
+				return qp;
+			}
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Returns last town player was near.
 	 * 
@@ -1035,7 +1128,7 @@ public class Quester {
 	public Town getTown() {
 		return MineQuest.getTown(last);
 	}
-
+	
 	/**
 	 * Called any time a Quester is taking damage of any time
 	 * it adjusts the Quester's health accordingly and sets
@@ -1083,6 +1176,7 @@ public class Quester {
     }
 
 	public boolean healthIncrease(PlayerInteractEvent event) {
+		if (event.getItem() == null) return false;
 		Material type = event.getItem().getType();
 		
 		switch (type) {
@@ -1116,8 +1210,14 @@ public class Quester {
 		default:
 			return false;
 		}
+		
 		event.setCancelled(true);
-		getPlayer().setItemInHand(null);
+		if (getPlayer().getItemInHand().getAmount() == 1) {
+			getPlayer().setItemInHand(null);
+		} else {
+			getPlayer().getItemInHand().setAmount(
+					getPlayer().getItemInHand().getAmount() - 1);
+		}
 		
 		if (health > max_health) health = max_health;
 		
@@ -1125,9 +1225,45 @@ public class Quester {
 		
 		return true;
 	}
-
+	
 	public boolean inQuest() {
 		return quest != null;
+	}
+	
+	public boolean isAvailable(QuestProspect quest) {
+		for (QuestProspect qp : available) {
+			if (qp.equals(quest)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isAvailable(String quest) {
+		for (QuestProspect qp : available) {
+			if (qp.equals(quest)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isCompleted(QuestProspect quest) {
+		for (QuestProspect qp : completed) {
+			if (qp.equals(quest)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isCompleted(String quest) {
+		for (QuestProspect qp : completed) {
+			if (qp.equals(quest)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean isDebug() {
@@ -1144,7 +1280,7 @@ public class Quester {
 	public boolean isEnabled() {
 		return enabled;
 	}
-
+	
 	/**
 	 * Returns true if Quester is poisoned currently.
 	 * 
@@ -1215,7 +1351,7 @@ public class Quester {
 			setHealth(getHealth() - 1);
 		}
 	}
-	
+
 	/**
 	 * Called each time the player is poisoned.
 	 * Updates the poison counter appropriately.
@@ -1223,6 +1359,31 @@ public class Quester {
 	public void poison() {
 		sendMessage("Poisoned!");
 		poison_timer += 10;
+	}
+
+	public void regroup() {
+		for (Quester quester : npcParty.getQuesterArray()) {
+			((NPCQuester)quester).setTarget(null);
+		}
+		sendMessage("Regrouping Mercenaries!");
+	}
+
+	public void remNPC(NPCQuester quester) {
+		npcParty.remQuester(quester);
+		quester.setMode(NPCMode.STATIONARY);
+		quester.setFollow(null);
+	}
+
+	public void remQuestAvailable(QuestProspect quest) {
+		available.remove(quest);
+		MineQuest.getSQLServer().update("DELETE FROM " + name + 
+				"_quests WHERE type='A' AND file='" + quest.getFile() + "'");
+	}
+
+	public void remQuestComplete(QuestProspect quest) {
+		completed.remove(quest);
+		MineQuest.getSQLServer().update("DELETE FROM " + name + 
+				"_quests WHERE type='C' AND file='" + quest.getFile() + "'");
 	}
 	
 	public void respawn(PlayerRespawnEvent event) {
@@ -1266,7 +1427,7 @@ public class Quester {
 		
 		return;
 	}
-
+	
 	/**
 	 * Saves any changes in the Quester to the MySQL
 	 * Database.
@@ -1308,7 +1469,7 @@ public class Quester {
 	public void setCubes(double d) {
 		cubes = d;
 	}
-
+	
 	/**
 	 * Sets the Health of the Quester.
 	 * 
@@ -1322,7 +1483,7 @@ public class Quester {
 		
 		updateHealth();
 	}
-
+	
 	public void setParty(Party party) {
 		this.party = party;
 	}
@@ -1338,7 +1499,7 @@ public class Quester {
 		}
 		this.player = player;
 	}
-
+	
 	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
 		
@@ -1348,7 +1509,7 @@ public class Quester {
 			player.teleport(world.getSpawnLocation());
 		}
 	}
-
+	
 	/**
 	 * Sets the last town that the Quester was near.
 	 * 
@@ -1374,7 +1535,26 @@ public class Quester {
 		getClass(type).expAdd(amount);
 		sendMessage(amount + " experience spent on " + type);
 	}
+	
+	public void startQuest(String string) {
+		if (!isAvailable(string)) {
+			sendMessage("You have no quest named " + string + " available");
+			return;
+		}
 
+		if (!getQuestProspect(string).isRepeatable()) {
+			for (Quester quester : party.getQuesterArray()) {
+				if (quester.isCompleted(string)) {
+					sendMessage(quester.getName() + " has already completed " + string);
+					quester.sendMessage("You have already completed " + string);
+					return;
+				}
+			}
+		}
+
+		MineQuest.addQuest(new Quest(string, party));
+	}
+	
 	/**
 	 * Called whenever a Quester is teleported to check for
 	 * respawning.
@@ -1388,7 +1568,7 @@ public class Quester {
 //			setRespawn(true);
 //		}
 	}
-
+	
 	/**
 	 * Unbinds the Item that the Quester is holding
 	 * from all abilities.
@@ -1400,7 +1580,7 @@ public class Quester {
 			skill.unBind(itemInHand);
 		}
 	}
-
+	
 	/**
 	 * Loads all of the Quester's status from the MySQL
 	 * database.
@@ -1441,6 +1621,31 @@ public class Quester {
 		}
 		
 		class_exp = 0;
+		
+		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + 
+				"_quests (type VARCHAR(1), file VARCHAR(30))");
+		
+		results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_quests WHERE type='C'");
+		completed = new ArrayList<QuestProspect>();
+		
+		try {
+			while (results.next()) {
+				completed.add(new QuestProspect(results.getString("file")));
+			}
+		} catch (SQLException e) {
+			MineQuest.log("Unable to load completed quests for " + name);
+		}
+		
+		results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_quests WHERE type='A'");
+		available = new ArrayList<QuestProspect>();
+		
+		try {
+			while (results.next()) {
+				available.add(new QuestProspect(results.getString("file")));
+			}
+		} catch (SQLException e) {
+			MineQuest.log("Unable to load completed quests for " + name);
+		}
 		
 		updateBinds();
 		kills = new CreatureType[0];
@@ -1505,94 +1710,5 @@ public class Quester {
 		}
 		
 		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
-	}
-
-	public void addKill(MQMob mqMob) {
-		if (quest == null) return;
-		LivingEntity monster = mqMob.getMonster();
-		
-		String name = monster.getClass().getName();
-		name = name.replace('.', '/');
-		if (name.split("/").length > 0) {
-			String type = name.split("/")[name.split("/").length - 1];
-			type = type.replace("Craft", "");
-			if (CreatureType.fromName(type) != null) {
-				addKill(CreatureType.fromName(type));
-			}
-		}
-	}
-
-	private void addKill(CreatureType kill) {
-		CreatureType[] new_kills = new CreatureType[kills.length + 1];
-		int i;
-		
-		for (i = 0; i < kills.length; i++) {
-			new_kills[i] = kills[i];
-		}
-		new_kills[i] = kill;
-		
-		kills = new_kills;
-	}
-	
-	public void addNPC(NPCQuester quester) {
-		npcParty.addQuester(quester);
-		quester.setMode(NPCMode.PARTY);
-		quester.setFollow(this);
-	}
-	
-	public void remNPC(NPCQuester quester) {
-		npcParty.remQuester(quester);
-		quester.setMode(NPCMode.STATIONARY);
-		quester.setFollow(null);
-	}
-	
-	public void clearKills() {
-		kills = new CreatureType[0];
-	}
-	
-	public CreatureType[] getKills() {
-		return kills;
-	}
-	
-	public void addQuestAvailable(QuestProspect quest) {
-		available.add(quest);
-	}
-	
-	public List<QuestProspect> getAvailableQuests() {
-		return available;
-	}
-	
-	public List<QuestProspect> getCompletedQuests() {
-		return completed;
-	}
-	
-	public boolean isAvailable(QuestProspect quest) {
-		return available.contains(quest);
-	}
-	
-	public boolean isCompleted(QuestProspect quest) {
-		return completed.contains(quest);
-	}
-	
-	public void remQuestAvailable(QuestProspect quest) {
-		available.remove(quest);
-	}
-	
-	public void remQuestComplete(QuestProspect quest) {
-		completed.remove(quest);
-	}
-	
-	public void completeQuest(QuestProspect quest) {
-		completed.add(quest);
-		if (!quest.isRepeatable()) {
-			available.remove(quest);
-		}
-	}
-
-	public void regroup() {
-		for (Quester quester : npcParty.getQuesterArray()) {
-			((NPCQuester)quester).setTarget(null);
-		}
-		sendMessage("Regrouping Mercenaries!");
 	}
 }
