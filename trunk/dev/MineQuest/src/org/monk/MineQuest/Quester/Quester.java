@@ -1552,7 +1552,7 @@ public class Quester {
 			}
 		}
 
-		MineQuest.addQuest(new Quest(string, party));
+		MineQuest.addQuest(new Quest(getQuestProspect(string).getFile(), party));
 	}
 	
 	/**

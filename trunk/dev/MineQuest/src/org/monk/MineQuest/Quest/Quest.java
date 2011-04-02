@@ -110,6 +110,7 @@ public class Quest {
 				while ((line = bis.readLine()) != null) {
 					number++;
 					String split[] = line.split(":");
+					if (split == null) split = new String[] {line};
 					parseLine(split);
 				}
 			} catch (Exception e) {
@@ -141,6 +142,7 @@ public class Quest {
 			MineQuest.getEventParser().addEvent(new QuestEvent(this, 100, 0));
 		} catch (Exception e) {
 			MineQuest.log("Unable to load Quest - Generic Error");
+			e.printStackTrace();
 			try {
 				issueNextEvents(-1);
 			} catch (Exception e1) {
