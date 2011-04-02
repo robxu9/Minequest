@@ -642,7 +642,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 				player.sendMessage("You are not in a town");
 			}
 			event.setCancelled(true);
-        } else if (split[0].equals("/setspawn")) {
+        } else if (split[0].equals("/townspawn")) {
 			if (MineQuest.getTown(player) != null) {
 				MineQuest.getTown(player).setSpawn(player.getLocation());
 				player.sendMessage("Spawn location set");
