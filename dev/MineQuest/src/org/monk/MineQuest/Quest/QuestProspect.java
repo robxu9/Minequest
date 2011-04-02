@@ -76,7 +76,12 @@ public class QuestProspect {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof QuestProspect) {
-			return ((QuestProspect)obj).getFile().equals(file);
+			return (((QuestProspect)obj).getFile().equals(file) || ((QuestProspect)obj).getName().equals(name));
+		} else if (obj instanceof String) {
+			if (file == null) {
+				return obj.equals("");
+			}
+			return (file.equals((String)obj) || name.equals((String)obj));
 		}
 		return super.equals(obj);
 	}

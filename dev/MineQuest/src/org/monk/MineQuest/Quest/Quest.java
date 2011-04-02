@@ -681,6 +681,10 @@ public class Quest {
 		if (index == -1) {
 			for (Quester quester : questers) {
 				quester.clearQuest();
+				quester.completeQuest(getProspect());
+				if (!repeatable) {
+					quester.remQuestAvailable(getProspect());
+				}
 			}
 			
 			for (QuestTask task : tasks) {

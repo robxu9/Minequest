@@ -484,7 +484,7 @@ public class MineQuest extends JavaPlugin {
 	static public void remQuester(String name) {
 		questers.remove(getQuester(name));
 	}
-
+	
 	/**
 	 * Removes a Town from the MineQuester Server.
 	 * Does not modify mysql database.
@@ -510,6 +510,7 @@ public class MineQuest extends JavaPlugin {
 	private MineQuestEntityListener el;
 
 	private MineQuestPlayerListener pl;
+	private String version;
 
 	public MineQuest() {
 	}
@@ -535,7 +536,10 @@ public class MineQuest extends JavaPlugin {
 	 * database location and login parameters.
 	 */
 	@Override
-	public void onEnable() {			
+	public void onEnable() {	
+        
+        PluginDescriptionFile pdfFile = this.getDescription();
+        version = pdfFile.getVersion();		
 		server = getServer();
         
 		mobs = new MQMob[1];
@@ -572,10 +576,22 @@ public class MineQuest extends JavaPlugin {
         }
         
 //        getEventParser().addEvent(new CheckMQMobs(10000));
+
+		ResultSet results = sql_server.query("SELECT * FROM version");
+		
+		try {
+			if ((results == null) || (!results.next())) {
+				upgradeDB();
+			} else {
+				MineQuest.log("DB Version: " + results.getString("version"));
+			}
+		} catch (SQLException e1) {
+			upgradeDB();
+		}
         
         checkAllMobs();
 
-		ResultSet results = sql_server.query("SELECT * FROM questers");
+		results = sql_server.query("SELECT * FROM questers");
 		List<String> names = new ArrayList<String>();
 		List<String> npcs = new ArrayList<String>();
 		
@@ -625,7 +641,7 @@ public class MineQuest extends JavaPlugin {
 		
         PluginManager pm = getServer().getPluginManager();
         
-        pm.registerEvent(Event.Type.PLAYER_JOIN, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_LOGIN, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_QUIT, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
@@ -640,8 +656,6 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
 //        pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
 //        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICK, bl, Priority.Normal, this);
-        
-        PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
         start = null;
 		
@@ -650,6 +664,47 @@ public class MineQuest extends JavaPlugin {
 		}
 	}
 	
+	private void upgradeDB() {
+		MineQuest.log("Your DB is too old to determine version");
+		MineQuest.log("Upgrading DB to 0.40");
+		
+		upgradeDB(0, 4);
+	}
+	
+	private void upgradeDB(int oldVersion, int newVersion) {
+		String cols[] = null;
+		String types[] = null;
+		if (newVersion == 4) {
+			cols = new String[] {
+					"world",
+					"x",
+					"y",
+					"z",
+					"mode",
+					"pitch",
+					"yaw"
+			};
+			types = new String[] {
+					"varchar(30) DEFAULT 'world'",
+					"double DEFAULT '0'",
+					"double DEFAULT '0'",
+					"double DEFAULT '0'",
+					"varchar(30) DEFAULT 'Quester'",
+					"double DEFAULT '0'",
+					"double DEFAULT '0'"
+			};
+		}
+		
+		int i;
+		for (i = 0; i < cols.length; i++) {
+			sql_server.update("ALTER TABLE questers ADD COLUMN " + cols[i] + " " + types[i]);
+		}
+		
+		sql_server.update("CREATE TABLE version (version VARCHAR(30))");
+		sql_server.update("DELETE FROM version");
+		sql_server.update("INSERT INTO version (version) VALUES('" + version + "')");
+		
+	}
 	public static void checkAllMobs() {
     	for (World world : getSServer().getWorlds()) {
     		for (LivingEntity entity : world.getLivingEntities()) {
