@@ -36,6 +36,7 @@ public class PartyKill extends QuestEvent {
 					}
 				}
 			}
+			quester.clearKills();
 		}
 		
 		boolean flag = true;
