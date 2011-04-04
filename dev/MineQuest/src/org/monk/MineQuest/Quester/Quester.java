@@ -1693,7 +1693,7 @@ public class Quester {
 	public void updateHealth() {
 		int newValue;
 		
-		newValue = 20 * health / max_health;
+		newValue = (int)((20 * (double)health) / max_health);
 		
 		if ((newValue == 0) && (health > 0)) {
 			newValue++;
@@ -1709,6 +1709,6 @@ public class Quester {
 			player.setHealth(newValue);
 		}
 		
-		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
+//		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
 	}
 }
