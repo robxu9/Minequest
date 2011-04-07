@@ -385,6 +385,7 @@ public abstract class Ability {
 	 * 
 	 * @param player
 	 */
+	@SuppressWarnings("deprecation")
 	protected void giveManaCost(Player player) {
 		List<ItemStack> cost = getRealManaCost();
 		int i;
@@ -392,6 +393,7 @@ public abstract class Ability {
 		for (i = 0; i < cost.size(); i++) {
 			player.getInventory().addItem(cost.get(i));
 		}
+		player.updateInventory();
 	}
 	
 	/**

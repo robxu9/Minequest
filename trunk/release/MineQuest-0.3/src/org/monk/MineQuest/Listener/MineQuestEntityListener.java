@@ -25,6 +25,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -44,7 +45,14 @@ public class MineQuestEntityListener extends EntityListener {
 	}
 	
 	@Override
+	public void onEntityCombust(EntityCombustEvent event) {
+		// TODO Implement Me
+	}
+	
+	@Override
 	public void onEntityDamage(EntityDamageEvent event) {
+		if (event.isCancelled()) return;
+		
 		if (event instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
             if (evente.getDamager() instanceof HumanEntity) {

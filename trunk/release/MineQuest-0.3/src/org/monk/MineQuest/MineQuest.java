@@ -603,7 +603,7 @@ public class MineQuest extends JavaPlugin {
 		
         PluginManager pm = getServer().getPluginManager();
         
-        pm.registerEvent(Event.Type.PLAYER_LOGIN, pl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_JOIN, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_QUIT, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
@@ -611,13 +611,13 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_RESPAWN, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_ANIMATION, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT, pl, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGE, el, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Highest, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGE, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
 //		pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
-//        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKE, bl, Priority.Normal, this);
+//		pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKE, bl, Priority.Normal, this);
         
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
