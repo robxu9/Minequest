@@ -19,7 +19,6 @@
 package org.monk.MineQuest.Listener;
 
 
-import org.bukkit.Material;
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;

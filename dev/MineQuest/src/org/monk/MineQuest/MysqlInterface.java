@@ -54,7 +54,7 @@ public class MysqlInterface {
 	 */
 	public MysqlInterface(String location, String port, String db, String user, String pass, int silent, boolean real_sql) throws Exception {
 		if (real_sql) {
-			url = "jdbc:mysql://" + location + ":" + port + "/" + db;
+			url = "jdbc:mysql://" + location + ":" + port + "/" + db + "?autoReconnect=true";
 			try {
 				Class.forName("com.mysql.jdbc.Driver", true, (new AbilityBinder()).getClass().getClassLoader());
 			} catch (ClassNotFoundException e) {

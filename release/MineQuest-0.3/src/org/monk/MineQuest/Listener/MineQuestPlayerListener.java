@@ -34,8 +34,8 @@ import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -86,21 +86,20 @@ public class MineQuestPlayerListener extends PlayerListener {
 		MineQuest.getQuester(event.getPlayer()).move(event.getFrom(), event.getTo());
 		super.onPlayerMove(event);
 	}
-
-	public void onPlayerLogin(PlayerLoginEvent event) {
+	
+	@Override
+	public void onPlayerJoin(PlayerJoinEvent event) {
 		if (MineQuest.getQuester(event.getPlayer()) == null) {
 			MineQuest.addQuester(new Quester(event.getPlayer(), 0));
 		}
 		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).update();
-		super.onPlayerLogin(event);
 	}
 	
 	@Override
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).teleport(event);
-		super.onPlayerTeleport(event);
 	}
 	
 	public void onPlayerQuit(PlayerQuitEvent event) {
@@ -109,8 +108,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 			MineQuest.getQuester(event.getPlayer()).save();
 			MineQuest.getQuester(event.getPlayer()).setPlayer(null);
 		}
-		
-		super.onPlayerQuit(event);
 	}
 	
 	@Override

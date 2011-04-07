@@ -53,6 +53,7 @@ import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
 public class MineQuestPlayerListener extends PlayerListener {
+	
 	private NoMobs event;
 
 	@Override
@@ -87,19 +88,19 @@ public class MineQuestPlayerListener extends PlayerListener {
 		super.onPlayerMove(event);
 	}
 
+	@Override
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		if (MineQuest.getQuester(event.getPlayer()) == null) {
 			MineQuest.addQuester(new Quester(event.getPlayer(), 0));
 		}
 		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).update();
-		super.onPlayerJoin(event);
 	}
 	
 	@Override
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
-		super.onPlayerTeleport(event);
+		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 	}
 	
 	public void onPlayerQuit(PlayerQuitEvent event) {
