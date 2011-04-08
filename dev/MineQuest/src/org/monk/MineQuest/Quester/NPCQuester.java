@@ -49,7 +49,7 @@ public class NPCQuester extends Quester {
 	private LivingEntity mobTarget;
 	private NPCMode mode;
 	private double rad;
-	private double speed = .25;
+	private double speed = .6;
 	private Location target = null;
 	private String walk_message;
 	private String hit_message;
@@ -61,7 +61,7 @@ public class NPCQuester extends Quester {
 		this.entity = null;
 		mobTarget = null;
 		if (mode == NPCMode.FOLLOW) {
-			MineQuest.getEventParser().addEvent(new NPCEvent(10, this));
+			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		} else {
 			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		}
@@ -86,7 +86,7 @@ public class NPCQuester extends Quester {
 		entity = null;
 		mobTarget = null;
 		if (mode == NPCMode.FOLLOW) {
-			MineQuest.getEventParser().addEvent(new NPCEvent(10, this));
+			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		} else {
 			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		}

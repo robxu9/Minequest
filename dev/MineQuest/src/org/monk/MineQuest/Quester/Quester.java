@@ -1602,10 +1602,8 @@ public class Quester {
 			split = results.getString("classes").split(", ");
 			exp = results.getInt("exp");
 			level = results.getInt("level");
-//			health = results.getInt("health");
-//			max_health = results.getInt("max_health");
-			health = 10000;
-			max_health = 10000;
+			health = results.getInt("health");
+			max_health = results.getInt("max_health");
 			enabled = results.getInt("enabled") > 0;
 			
 			cubes = results.getDouble("cubes");
