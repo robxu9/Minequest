@@ -20,6 +20,7 @@ package org.monk.MineQuest.Quester.SkillClass.Resource;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.DefendingClass;
@@ -41,10 +42,10 @@ public class Miner extends ResourceClass implements DefendingClass {
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
 		
-		if (item == 274) return (level > 4);			// Stone
-		else if (item == 278) return (level > 49);	// Diamond
-		else if (item == 285) return (level > 2);	// Gold
-		else if (item == 257) return (level > 19);	// Iron
+		if (item == 274) return (level >= MineQuest.getStoneReqLevel());			// Stone
+		else if (item == 278) return (level >= MineQuest.getDiamondReqLevel());	// Diamond
+		else if (item == 285) return (level >= MineQuest.getGoldReqLevel());	// Gold
+		else if (item == 257) return (level >= MineQuest.getIronReqLevel());	// Iron
 		
 		return super.canUse(itemStack);
 	}
@@ -133,7 +134,7 @@ public class Miner extends ResourceClass implements DefendingClass {
 	public boolean isClassItem(ItemStack item) {
 		int item_id = item.getTypeId();
 
-		if (item_id == 274) return true;			// Stone
+		if (item_id == 274) return true;		// Stone
 		else if (item_id == 278) return true;	// Diamond
 		else if (item_id == 285) return true;	// Gold
 		else if (item_id == 257) return true;	// Iron

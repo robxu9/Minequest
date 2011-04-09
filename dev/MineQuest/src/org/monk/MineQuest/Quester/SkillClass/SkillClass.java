@@ -59,6 +59,7 @@ public class SkillClass {
 	protected int level;
 	protected Quester quester;
 	protected String type;
+	private int req_level;
 	
 	public static SkillClass newClass(Quester quester, String type) {
 		
@@ -96,6 +97,7 @@ public class SkillClass {
 		generator = new Random();
 		this.quester = quester;
 		update();
+		req_level = MineQuest.getArmorReqLevel();
 	}
 	
 	public SkillClass() {
@@ -249,26 +251,27 @@ public class SkillClass {
 		int i;
 		Player player = quester.getPlayer();
 		
-		if (level >= 20) {
+		if (level >= req_level) {
 			return;
 		}
+
 		if (this instanceof WarMage) {
-			if (quester.getClass("PeaceMage").getLevel() >= 20) {
+			if (quester.getClass("PeaceMage").getLevel() >= req_level) {
 				return;
 			}
 		}
 		if (this instanceof PeaceMage) {
-			if (quester.getClass("WarMage").getLevel() >= 20) {
+			if (quester.getClass("WarMage").getLevel() >= req_level) {
 				return;
 			}
 		}
-		
+
 		item_ids = getClassArmorIds();
 		if (item_ids == null) {
 			return;
 		}
 		if (this instanceof ResourceClass) {
-			if (level > 1) return;
+			if (level >= MineQuest.getMinerArmorLevel()) return;
 		}
 		
 		for (i = 0; i < item_ids.length; i++) {

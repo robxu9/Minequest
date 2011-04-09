@@ -19,6 +19,7 @@
 package org.monk.MineQuest.Quester.SkillClass.Resource;
 
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
 
@@ -36,10 +37,10 @@ public class Farmer extends ResourceClass {
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
 		
-		if (item == 292) return (level > 4);			// Stone
-		else if (item == 293) return (level > 49);	// Diamond
-		else if (item == 294) return (level > 2);	// Gold
-		else if (item == 291) return (level > 19);	// Iron
+		if (item == 292) return (level >= MineQuest.getStoneReqLevel());			// Stone
+		else if (item == 293) return (level >= MineQuest.getDiamondReqLevel());	// Diamond
+		else if (item == 294) return (level >= MineQuest.getGoldReqLevel());	// Gold
+		else if (item == 291) return (level >= MineQuest.getIronReqLevel());	// Iron
 		
 		return super.canUse(itemStack);
 	}

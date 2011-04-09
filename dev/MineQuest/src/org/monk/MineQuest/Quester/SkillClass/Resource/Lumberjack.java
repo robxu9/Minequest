@@ -19,6 +19,7 @@
 package org.monk.MineQuest.Quester.SkillClass.Resource;
 
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
 
@@ -36,10 +37,10 @@ public class Lumberjack extends ResourceClass {
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
 		
-		if (item == 275) return (level > 4);			// Stone
-		else if (item == 279) return (level > 49);	// Diamond
-		else if (item == 286) return (level > 2);	// Gold
-		else if (item == 258) return (level > 19);	// Iron
+		if (item == 275) return (level >= MineQuest.getStoneReqLevel());			// Stone
+		else if (item == 279) return (level >= MineQuest.getDiamondReqLevel());	// Diamond
+		else if (item == 286) return (level >= MineQuest.getGoldReqLevel());	// Gold
+		else if (item == 258) return (level >= MineQuest.getIronReqLevel());	// Iron
 		
 		return super.canUse(itemStack);
 	}

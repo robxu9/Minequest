@@ -79,6 +79,7 @@ public class MineQuest extends JavaPlugin {
 	private static boolean town_enable = true;
 	private static boolean debug_enable = true;
 	private static boolean cubonomy_enable = true;
+	private static int armor_req_level;
 	
 	/**
 	 * Adds a Quester to the MineQuest Server.
@@ -511,6 +512,11 @@ public class MineQuest extends JavaPlugin {
 
 	private MineQuestPlayerListener pl;
 	private String version;
+	private static int gold_req_level;
+	private static int stone_req_level;
+	private static int iron_req_level;
+	private static int diamond_req_level;
+	private static int leather_armor_miner_level;
 
 	public MineQuest() {
 	}
@@ -559,6 +565,12 @@ public class MineQuest extends JavaPlugin {
 			maxClass = minequest.getInt("max_classes", 4);
 			boolean real = minequest.getBoolean("mysql", true);
 			server_owner = minequest.getString("mayor", "jmonk");
+			armor_req_level = minequest.getInt("armor_req_level", 20);
+			gold_req_level = minequest.getInt("gold_req_level", 2);
+			stone_req_level = minequest.getInt("stone_req_level", 5);
+			iron_req_level = minequest.getInt("iron_req_level", 20);
+			diamond_req_level = minequest.getInt("diamond_req_level", 50);
+			leather_armor_miner_level = minequest.getInt("leather_armor_miner_level", 2);
 			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
 			
 			sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
@@ -899,5 +911,27 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		return i;
+	}
+	public static int getArmorReqLevel() {
+		return armor_req_level;
+	}
+	
+	public static int getGoldReqLevel() {
+		return gold_req_level;
+	}
+	
+	public static int getStoneReqLevel() {
+		return stone_req_level;
+	}
+	
+	public static int getIronReqLevel() {
+		return iron_req_level;
+	}
+	
+	public static int getDiamondReqLevel() {
+		return diamond_req_level;
+	}
+	public static int getMinerArmorLevel() {
+		return leather_armor_miner_level;
 	}
 }
