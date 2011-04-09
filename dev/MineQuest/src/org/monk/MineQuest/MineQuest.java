@@ -218,7 +218,7 @@ public class MineQuest extends JavaPlugin {
         int avgLevel = 0;
         int size = 0;
         for (Quester quester : questers) {
-            if (quester.getPlayer() == null) {
+            if (quester.getPlayer() != null) {
 	            avgLevel += quester.getLevel();
 	            size++;
             }
@@ -517,6 +517,14 @@ public class MineQuest extends JavaPlugin {
 	private static int iron_req_level;
 	private static int diamond_req_level;
 	private static int leather_armor_miner_level;
+	private static int destroy_materials_level;
+	private static int destroy_class_exp;
+	private static int destroy_non_class_exp;
+	private static int destroy_block_exp;
+	private static int adjustment_multiplier;
+	private static int exp_damage;
+	private static int cast_ability_exp;
+	private static int exp_class_damage;
 
 	public MineQuest() {
 	}
@@ -574,6 +582,14 @@ public class MineQuest extends JavaPlugin {
 			town_enable = minequest.getBoolean("town_enable", true);
 			cubonomy_enable = minequest.getBoolean("cubonomy_enable", true);
 			debug_enable = minequest.getBoolean("debug_enable", true);
+			destroy_materials_level = minequest.getInt("destroy_materials_level", 5);
+			destroy_class_exp = minequest.getInt("destroy_class_exp", 5);
+			destroy_non_class_exp = minequest.getInt("destroy_non_class_exp", 2);
+			destroy_block_exp = minequest.getInt("destroy_block_exp", 2);
+			adjustment_multiplier = minequest.getInt("adjustment_multiplier", 1);
+			exp_damage = minequest.getInt("exp_damage", 3);
+			cast_ability_exp = minequest.getInt("cast_ability_exp", 5);
+			exp_class_damage = minequest.getInt("exp_class_damage", 5);
 			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
 			
 			sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
@@ -669,6 +685,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
 //        pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
 //        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICK, bl, Priority.Normal, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
@@ -934,7 +951,38 @@ public class MineQuest extends JavaPlugin {
 	public static int getDiamondReqLevel() {
 		return diamond_req_level;
 	}
+	
 	public static int getMinerArmorLevel() {
 		return leather_armor_miner_level;
+	}
+	
+	public static int getDestroyMaterialsLevel() {
+		return destroy_materials_level;
+	}
+	
+	public static int getDestroyClassExp() {
+		return destroy_class_exp;
+	}
+	
+	public static int getDestroyNonClassExp() {
+		return destroy_non_class_exp;
+	}
+	
+	public static int getDestroyBlockExp() {
+		return destroy_block_exp;
+	}
+	
+	public static int getAdjustmentMultiplier() {
+		return adjustment_multiplier;
+	}
+	
+	public static int getExpMob() {
+		return exp_damage;
+	}
+	public static int getCastAbilityExp() {
+		return cast_ability_exp;
+	}
+	public static int getExpClassDamage() {
+		return exp_class_damage;
 	}
 }

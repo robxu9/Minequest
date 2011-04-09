@@ -29,6 +29,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -52,15 +53,6 @@ import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
  * @author jmonk
  */
 public class SkillClass {
-	private int abil_list_id;
-	protected Ability ability_list[];
-	private int exp;
-	protected Random generator;
-	protected int level;
-	protected Quester quester;
-	protected String type;
-	private int req_level;
-	
 	public static SkillClass newClass(Quester quester, String type) {
 		
 		if (type.equals("Warrior")) {
@@ -85,6 +77,19 @@ public class SkillClass {
 		
 		return new SkillClass(quester, type);
 	}
+	private int abil_list_id;
+	protected Ability ability_list[];
+	private int exp;
+	protected Random generator;
+	protected int level;
+	protected Quester quester;
+	private int req_level;
+	
+	protected String type;
+	
+	public SkillClass() {
+		//Shell
+	}
 	
 	/**
 	 * Load Class information from MineQuest DB.
@@ -98,10 +103,6 @@ public class SkillClass {
 		this.quester = quester;
 		update();
 		req_level = MineQuest.getArmorReqLevel();
-	}
-	
-	public SkillClass() {
-		//Shell
 	}
 	
 	/**
@@ -146,20 +147,6 @@ public class SkillClass {
 		ability_list = new_abil_list;
 	}
 	
-	public void remAbility(Ability ability) {
-		Ability[] new_list = new Ability[ability_list.length - 1];
-		int i = 0;
-		for (Ability abil : ability_list) {
-			if (abil != null) {
-				if (!abil.getName().equals(ability.getName())) {
-					new_list[i++] = abil;
-				}
-			}
-		}
-		
-		ability_list = new_list;
-	}
-
 	/**
 	 * Adds an ability to the class in the DB. Then
 	 * reloads the ability list for the class.
@@ -184,6 +171,16 @@ public class SkillClass {
 		return;
 	}
 
+	public void blockBreak(BlockBreakEvent event) {
+		for (Ability abil : ability_list) {
+			if (abil.isBound(quester.getPlayer().getItemInHand())) {
+				abil.parseClick(quester, event.getBlock());
+				return;
+			}
+		}
+	}
+
+
 	/**
 	 * Called any time a player is destroying a block of this
 	 * classes type or if the block has no class type then when
@@ -192,13 +189,17 @@ public class SkillClass {
 	 * 
 	 * @param event.getBlock() Block being destroyed
 	 */
-	public void blockDestroy(BlockDamageEvent event) {
+	public void blockDamage(BlockDamageEvent event) {
 		for (Ability abil : ability_list) {
 			if (abil.isBound(quester.getPlayer().getItemInHand())) {
 				abil.parseClick(quester, event.getBlock());
 				return;
 			}
 		}
+	}
+
+	public void callAbility() {
+		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, quester.getPlayer().getLocation(), null);
 	}
 
 	/**
@@ -222,11 +223,7 @@ public class SkillClass {
 			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, entity.getLocation(), (LivingEntity)entity);
 		}
 	}
-
-	public void callAbility() {
-		getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, quester.getPlayer().getLocation(), null);
-	}
-
+	
 	/**
 	 * Determines if the Quester is high enough level in
 	 * this class to use a specific item. if the item
@@ -239,7 +236,7 @@ public class SkillClass {
 	public boolean canUse(ItemStack itemStack) {
 		return true;
 	}
-	
+
 	/**
 	 * Checks if the Quester is wearing any equipment that
 	 * they are not high enough level to use.
@@ -314,6 +311,41 @@ public class SkillClass {
 	}
 
 	/**
+	 * Called when a Quester left clicks on something.
+	 * 
+	 * @param itemInHand Item that the quester clicked with
+	 * @param block Block that was clicked
+	 * @return True if left clicked parsed and is complete
+	 */
+	public boolean click(Block block, int itemInHand) {
+		for (Ability ability : ability_list) {
+			if (ability.isBound(quester.getPlayer().getItemInHand())) {
+				ability.parseClick(quester, block);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Called when a Quester left clicks on something.
+	 * 
+	 * @param itemInHand Item that the quester clicked with
+	 * @return True if left clicked parsed and is complete
+	 */
+	public boolean click(ItemStack itemInHand) {
+		for (Ability ability : ability_list) {
+			if (ability.isBound(quester.getPlayer().getItemInHand())) {
+				ability.parseClick(quester, null);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * Disables a specific Ability.
 	 * 
 	 * @param abil_name Name of ability to disable
@@ -338,7 +370,7 @@ public class SkillClass {
 		
 		return;
 	}
-
+	
 	/**
 	 * Enables a specific Ability.
 	 * 
@@ -371,7 +403,30 @@ public class SkillClass {
 			levelUp();
 		}
 	}
-
+	
+	private void fillAbilities() {
+		try {
+			ability_list = abilListSQL(abil_list_id);
+			
+			List<Ability> available = Ability.newAbilities(this);
+			
+			for (Ability ability : available) {
+				if (ability_list.length < 10) {
+					if (getAbility(ability.getName()) == null) {
+						if (level >= ability.getReqLevel()) {
+							addAbility(ability.getName());
+							ability_list = abilListSQL(abil_list_id);
+						}
+					}
+				}
+			}
+			
+		} catch (SQLException e) {
+			
+		}
+		quester.updateBinds();
+	}
+	
 	/**
 	 * Gets an ability based on an item that it is
 	 * bound to.
@@ -410,7 +465,7 @@ public class SkillClass {
 		
 		return null;
 	}
-	
+
 	/**
 	 * Gets the effective caster level for Mage classes.
 	 * 
@@ -419,7 +474,7 @@ public class SkillClass {
 	public int getCasterLevel() {
 		return (level + 1) / 2;
 	}
-	
+
 	/**
 	 * Gets a List of Armor IDs that are related
 	 * to the current class.
@@ -429,18 +484,7 @@ public class SkillClass {
 	public int[] getClassArmorIds() {
 		return null;
 	}
-	
-	/**
-	 * Get the experience that should be added to a class
-	 * for damage to a given Entity.
-	 * 
-	 * @param defend Entity being damaged.
-	 * @return Amount of experience
-	 */
-	protected int getExpMob(LivingEntity defend) {
-		return 3;
-	}
-	
+
 	/**
 	 * Get the random number generator for this class.
 	 * 
@@ -467,6 +511,10 @@ public class SkillClass {
 	 */
 	public String getName() {
 		return quester.getPlayer().getName();
+	}
+
+	public Quester getQuester() {
+		return quester;
 	}
 
 	/**
@@ -569,41 +617,6 @@ public class SkillClass {
 	}
 
 	/**
-	 * Called when a Quester left clicks on something.
-	 * 
-	 * @param itemInHand Item that the quester clicked with
-	 * @return True if left clicked parsed and is complete
-	 */
-	public boolean click(ItemStack itemInHand) {
-		for (Ability ability : ability_list) {
-			if (ability.isBound(quester.getPlayer().getItemInHand())) {
-				ability.parseClick(quester, null);
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	/**
-	 * Called when a Quester left clicks on something.
-	 * 
-	 * @param itemInHand Item that the quester clicked with
-	 * @param block Block that was clicked
-	 * @return True if left clicked parsed and is complete
-	 */
-	public boolean click(Block block, int itemInHand) {
-		for (Ability ability : ability_list) {
-			if (ability.isBound(quester.getPlayer().getItemInHand())) {
-				ability.parseClick(quester, block);
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	/**
 	 * Called when a class gains enough experience to level up.
 	 * Handles adding abilities and modification of health.
 	 * 
@@ -621,29 +634,6 @@ public class SkillClass {
 		fillAbilities();
 	}
 
-	private void fillAbilities() {
-		try {
-			ability_list = abilListSQL(abil_list_id);
-			
-			List<Ability> available = Ability.newAbilities(this);
-			
-			for (Ability ability : available) {
-				if (ability_list.length < 10) {
-					if (getAbility(ability.getName()) == null) {
-						if (level >= ability.getReqLevel()) {
-							addAbility(ability.getName());
-							ability_list = abilListSQL(abil_list_id);
-						}
-					}
-				}
-			}
-			
-		} catch (SQLException e) {
-			
-		}
-		quester.updateBinds();
-	}
-
 	/**
 	 * Called to display a list of abilities that this class
 	 * holds to the player.
@@ -657,12 +647,66 @@ public class SkillClass {
 		}
 	}
 
+	public void remAbility(Ability ability) {
+		Ability[] new_list = new Ability[ability_list.length - 1];
+		int i = 0;
+		for (Ability abil : ability_list) {
+			if (abil != null) {
+				if (!abil.getName().equals(ability.getName())) {
+					new_list[i++] = abil;
+				}
+			}
+		}
+		
+		ability_list = new_list;
+	}
+
+	public void replaceAbil(String old, String new_abil) {
+		int i;
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i].getName().equals(old)) {
+				break;
+			}
+		}
+		
+		Ability new_ability = Ability.newAbility(new_abil, this);
+		
+		if (new_ability == null) {
+			quester.sendMessage(new_abil + " is not a valid ability");
+			return;
+		}
+		
+		if (level < new_ability.getReqLevel()) {
+			quester.sendMessage("You are not high enough level to cast " + new_abil);
+			return;
+		}
+		
+		ability_list[i] = new_ability;
+		MineQuest.getSQLServer().update("UPDATE abilities SET abil" + i + "='" + new_ability.getName()
+				+ "' WHERE abil_list_id='" + abil_list_id + "'");
+		quester.sendMessage(old + " Ability has been replaced with " + new_ability.getName() + " Ability in your spellbook");
+	}
+
+	public void rightClick(Block block) {
+		expAdd(5);
+	}
+
 	/**
 	 * Save any changes in this class to the MySQL Database.
 	 */
 	public void save() {
 		MineQuest.getSQLServer().update("UPDATE classes SET exp='" + exp + "', level='" + level + 
 								"' WHERE name='" + quester.getPlayer().getName() + "' AND class='" + type + "'");
+	}
+
+	public void silentUnBind(ItemStack itemStack) {
+		for (Ability ability : ability_list) {
+			if (ability != null) {
+				if (ability.isBound(itemStack)) {
+					ability.silentUnBind(quester);
+				}
+			}
+		}
 	}
 
 	/***
@@ -702,50 +746,6 @@ public class SkillClass {
 		}
 		
 		fillAbilities();
-	}
-
-	public void silentUnBind(ItemStack itemStack) {
-		for (Ability ability : ability_list) {
-			if (ability != null) {
-				if (ability.isBound(itemStack)) {
-					ability.silentUnBind(quester);
-				}
-			}
-		}
-	}
-
-	public void replaceAbil(String old, String new_abil) {
-		int i;
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].getName().equals(old)) {
-				break;
-			}
-		}
-		
-		Ability new_ability = Ability.newAbility(new_abil, this);
-		
-		if (new_ability == null) {
-			quester.sendMessage(new_abil + " is not a valid ability");
-			return;
-		}
-		
-		if (level < new_ability.getReqLevel()) {
-			quester.sendMessage("You are not high enough level to cast " + new_abil);
-			return;
-		}
-		
-		ability_list[i] = new_ability;
-		MineQuest.getSQLServer().update("UPDATE abilities SET abil" + i + "='" + new_ability.getName()
-				+ "' WHERE abil_list_id='" + abil_list_id + "'");
-		quester.sendMessage(old + " Ability has been replaced with " + new_ability.getName() + " Ability in your spellbook");
-	}
-
-	public void rightClick(Block block) {
-		expAdd(5);
-	}
-
-	public Quester getQuester() {
-		return quester;
 	}
 	
 
