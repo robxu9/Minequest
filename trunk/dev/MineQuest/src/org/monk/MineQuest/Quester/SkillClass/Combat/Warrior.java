@@ -21,6 +21,7 @@ package org.monk.MineQuest.Quester.SkillClass.Combat;
 import org.bukkit.craftbukkit.entity.CraftCreeper;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 
@@ -38,10 +39,10 @@ public class Warrior extends CombatClass {
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
 		
-		if (item == 272) return (level > 4);			// Stone
-		else if (item == 276) return (level > 49);	// Diamond
-		else if (item == 283) return (level > 2);	// Gold
-		else if (item == 267) return (level > 19);	// Iron
+		if (item == 272) return (level >= MineQuest.getStoneReqLevel());		// Stone
+		else if (item == 276) return (level >= MineQuest.getDiamondReqLevel());	// Diamond
+		else if (item == 283) return (level >= MineQuest.getGoldReqLevel());	// Gold
+		else if (item == 267) return (level >= MineQuest.getIronReqLevel());	// Iron
 		
 		return super.canUse(itemStack);
 	}

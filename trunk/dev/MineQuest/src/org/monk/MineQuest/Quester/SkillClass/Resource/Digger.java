@@ -21,6 +21,7 @@ package org.monk.MineQuest.Quester.SkillClass.Resource;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
 
@@ -58,10 +59,10 @@ public class Digger extends ResourceClass {
 	public boolean canUse(ItemStack itemStack) {
 		int item = itemStack.getTypeId();
 		
-		if (item == 273) return (level > 4);			// Stone
-		else if (item == 277) return (level > 49);	// Diamond
-		else if (item == 284) return (level > 2);	// Gold
-		else if (item == 284) return (level > 19);	// Iron
+		if (item == 273) return (level >= MineQuest.getStoneReqLevel());			// Stone
+		else if (item == 277) return (level >= MineQuest.getDiamondReqLevel());	// Diamond
+		else if (item == 284) return (level >= MineQuest.getGoldReqLevel());	// Gold
+		else if (item == 284) return (level >= MineQuest.getIronReqLevel());	// Iron
 		
 		return super.canUse(itemStack);
 	}
