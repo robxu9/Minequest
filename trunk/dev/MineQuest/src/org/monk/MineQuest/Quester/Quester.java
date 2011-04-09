@@ -35,6 +35,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -301,7 +302,7 @@ public class Quester {
 				if (entity instanceof LivingEntity) {
 					if (skill instanceof CombatClass) {
 						skill.callAbility(entity);
-						expGain(5);
+						expGain(MineQuest.getCastAbilityExp());
 					} else {
 						skill.callAbility(entity);
 					}
@@ -323,12 +324,12 @@ public class Quester {
 				if (skill.isClassItem(player.getItemInHand())) {
 					if (skill instanceof CombatClass) {
 						((CombatClass)skill).attack((LivingEntity)entity, event);
-						expGain(5);
+						expGain(MineQuest.getExpClassDamage());
 						return;
 					} else {
 						if (getClass("Warrior") != null) {
 							((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
-							expGain(3);
+							expGain(MineQuest.getExpClassDamage() / 2);
 						}
 						return;
 					}
@@ -337,7 +338,7 @@ public class Quester {
 			event.setDamage(event.getDamage() / 2);
 			if (getClass("Warrior") != null) {
 				((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
-				expGain(2);
+				expGain(MineQuest.getExpClassDamage() / 3);
 			}
 			return;
 		}
@@ -389,11 +390,7 @@ public class Quester {
 	 */
 	public int blockToClass(Block block) {
 		int miner[] = {
-			1,
-			4,
-			14,
-			15,
-			16,
+			1,4,14,15,16,
 			41,42,43,44,45,
 			56, 57,
 			73, 74, 48, 49
@@ -415,22 +412,22 @@ public class Quester {
 		int i;
 		
 		for (i = 0; i < miner.length; i++) {
-			if (block.getType().getId() == miner[i]) {
+			if (block.getTypeId() == miner[i]) {
 				return 0;
 			}
 		}
 		for (i = 0; i < lumber.length; i++) {
-			if (block.getType().getId() == lumber[i]) {
+			if (block.getTypeId() == lumber[i]) {
 				return 1;
 			}
 		}
 		for (i = 0; i < digger.length; i++) {
-			if (block.getType().getId() == digger[i]) {
+			if (block.getTypeId() == digger[i]) {
 				return 2;
 			}
 		}
 		for (i = 0; i < farmer.length; i++) {
-			if (block.getType().getId() == farmer[i]) {
+			if (block.getTypeId() == farmer[i]) {
 				return 3;
 			}
 		}
@@ -744,6 +741,27 @@ public class Quester {
 		setHealth(getHealth() - i);
 	}
 
+	/**
+	 * Called anytime a Player is destroying a block. Checks to
+	 * see if it is bound to any abilities then attributes experience
+	 * to given class if required.
+	 * 
+	 * @param event being destroyed
+	 * @return false
+	 */
+	public void damageBlock(BlockDamageEvent event) {
+		if (!enabled) return;
+
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())) {
+				skill.blockDamage(event);
+				return;
+			}
+		}
+		
+		return;
+	}
+
 	public void debug() {
 		debug = !debug;
 	}
@@ -757,7 +775,7 @@ public class Quester {
 	public void defend(EntityDamageEvent event) {
 		healthChange(event.getDamage(), event);
 	}
-
+	
 	/**
 	 * Called any time there is a damaged by block event
 	 * on the Quester.
@@ -766,7 +784,7 @@ public class Quester {
 	public void defendBlock(EntityDamageByBlockEvent event) {
 		healthChange(event.getDamage(), event);
 	}
-	
+
 	/**
 	 * Called any time the Quester is defending against an
 	 * attack from another entity.
@@ -834,51 +852,44 @@ public class Quester {
 		return;
 	}
 
-	/**
-	 * Called anytime a Player is destroying a block. Checks to
-	 * see if it is bound to any abilities then attributes experience
-	 * to given class if required.
-	 * 
-	 * @param event being destroyed
-	 * @return false
-	 */
-	public boolean destroyBlock(BlockDamageEvent event) {
-		if (!enabled) return false;
+	public void destroyBlock(BlockBreakEvent event) {
+		if (!enabled) return;
 
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
-				skill.blockDestroy(event);
-				expGain(5);
-				return false;
+				skill.blockBreak(event);
+				return;
 			}
 		}
 		
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
-				skill.blockDestroy(event);
-				expGain(1);
-				return false;
+				skill.blockBreak(event);
+				expGain(MineQuest.getDestroyBlockExp());
+				return;
 			}
 		}
 		
 		switch (blockToClass(event.getBlock())) {
 		case 0: // Miner
-			getClass("Miner").blockDestroy(event);
-			return false;
+			getClass("Miner").blockBreak(event);
+			expGain(MineQuest.getDestroyBlockExp());
+			return;
 		case 1: // Lumberjack
-			getClass("Lumberjack").blockDestroy(event);
-			return false;
+			getClass("Lumberjack").blockBreak(event);
+			expGain(MineQuest.getDestroyBlockExp());
+			return;
 		case 2: // Digger
-			getClass("Digger").blockDestroy(event);
-			return false;
+			getClass("Digger").blockBreak(event);
+			expGain(MineQuest.getDestroyBlockExp());
+			return;
 		case 3: // Farmer
-			getClass("Farmer").blockDestroy(event);
-			return false;
-		default:
-			break;
+			getClass("Farmer").blockBreak(event);
+			expGain(MineQuest.getDestroyBlockExp());
+			return;
 		}
 		
-		return false;
+		return;
 	}
 
 	/**
@@ -902,7 +913,7 @@ public class Quester {
 	public void dropRep(int i) {
 		rep -= i;
 	}
-
+	
 	/**
 	 * Enable an ability with the given name.
 	 * 
@@ -919,7 +930,7 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Quester) {
@@ -930,11 +941,11 @@ public class Quester {
 		}
 		return super.equals(obj);
 	}
-
+	
 	public void expClassGain(int class_exp) {
 		this.class_exp = class_exp;
 	}
-	
+
 	/**
 	 * Adds i experience to Quester and checks for level
 	 * up.
@@ -948,7 +959,7 @@ public class Quester {
 		}
 	}
 
-	public Ability getAbility(String ability) {
+    public Ability getAbility(String ability) {
 		for (SkillClass skill : classes) {
 			if (skill != null) {
 				if (skill.getAbility(ability) != null) {
@@ -959,7 +970,7 @@ public class Quester {
 		return null;
 	}
 
-    public List<QuestProspect> getAvailableQuests() {
+	public List<QuestProspect> getAvailableQuests() {
 		return available;
 	}
 
@@ -1099,7 +1110,7 @@ public class Quester {
 			return null;
 		}
 	}
-
+	
 	public Quest getQuest() {
 		return quest;
 	}
@@ -1127,7 +1138,7 @@ public class Quester {
 	public Town getTown() {
 		return MineQuest.getTown(last);
 	}
-	
+
 	/**
 	 * Called any time a Quester is taking damage of any time
 	 * it adjusts the Quester's health accordingly and sets
@@ -1173,7 +1184,7 @@ public class Quester {
 
         return false;
     }
-
+	
 	public boolean healthIncrease(PlayerInteractEvent event) {
 		if (event.getItem() == null) return false;
 		Material type = event.getItem().getType();
@@ -1228,7 +1239,7 @@ public class Quester {
 	public boolean inQuest() {
 		return quest != null;
 	}
-	
+
 	public boolean isAvailable(QuestProspect quest) {
 		for (QuestProspect qp : available) {
 			if (qp.equals(quest)) {
@@ -1246,7 +1257,7 @@ public class Quester {
 		}
 		return false;
 	}
-
+	
 	public boolean isCompleted(QuestProspect quest) {
 		for (QuestProspect qp : completed) {
 			if (qp.equals(quest)) {
@@ -1255,7 +1266,7 @@ public class Quester {
 		}
 		return false;
 	}
-	
+
 	public boolean isCompleted(String quest) {
 		for (QuestProspect qp : completed) {
 			if (qp.equals(quest)) {
@@ -1268,7 +1279,7 @@ public class Quester {
 	public boolean isDebug() {
 		return debug;
 	}
-
+	
 	/**
 	 * Returns true if MineQuest is enabled for this
 	 * Quester.
@@ -1279,7 +1290,7 @@ public class Quester {
 	public boolean isEnabled() {
 		return enabled;
 	}
-	
+
 	/**
 	 * Returns true if Quester is poisoned currently.
 	 * 
@@ -1378,7 +1389,7 @@ public class Quester {
 		MineQuest.getSQLServer().update("DELETE FROM " + name + 
 				"_quests WHERE type='A' AND file='" + quest.getFile() + "'");
 	}
-
+	
 	public void remQuestComplete(QuestProspect quest) {
 		completed.remove(quest);
 		MineQuest.getSQLServer().update("DELETE FROM " + name + 
@@ -1579,7 +1590,7 @@ public class Quester {
 			skill.unBind(itemInHand);
 		}
 	}
-	
+
 	/**
 	 * Loads all of the Quester's status from the MySQL
 	 * database.

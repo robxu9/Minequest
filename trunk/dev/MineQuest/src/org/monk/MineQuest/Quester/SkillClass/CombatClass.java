@@ -46,9 +46,20 @@ public class CombatClass extends SkillClass implements DefendingClass {
 	public boolean attack(LivingEntity defend, EntityDamageByEntityEvent event) {
 		event.setDamage(getDamage(defend));
 
-		expAdd(getExpMob(defend) + MineQuest.getAdjustment());
+		expAdd(getExpMob(defend) + MineQuest.getAdjustment() * MineQuest.getAdjustmentMultiplier());
 		
 		return true;
+	}
+
+	/**
+	 * Get the experience that should be added to a class
+	 * for damage to a given Entity.
+	 * 
+	 * @param defend Entity being damaged.
+	 * @return Amount of experience
+	 */
+	protected int getExpMob(LivingEntity defend) {
+		return MineQuest.getExpMob();
 	}
 	
 	/**
@@ -67,6 +78,7 @@ public class CombatClass extends SkillClass implements DefendingClass {
 			damage *= 2;
 			quester.sendMessage("Critical Hit!");
 		}
+		
 		if (!isClassItem(quester.getPlayer().getItemInHand())) {
 			damage /= 2;
 		}
