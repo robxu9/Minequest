@@ -571,6 +571,9 @@ public class MineQuest extends JavaPlugin {
 			iron_req_level = minequest.getInt("iron_req_level", 20);
 			diamond_req_level = minequest.getInt("diamond_req_level", 50);
 			leather_armor_miner_level = minequest.getInt("leather_armor_miner_level", 2);
+			town_enable = minequest.getBoolean("town_enable", true);
+			cubonomy_enable = minequest.getBoolean("cubonomy_enable", true);
+			debug_enable = minequest.getBoolean("debug_enable", true);
 			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
 			
 			sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +

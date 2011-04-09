@@ -76,7 +76,8 @@ public class NpcSpawner {
             ws.b.add(eh);
 
             //ws.b(eh);
-            Class params[] = new Class[1];
+            @SuppressWarnings("rawtypes")
+			Class params[] = new Class[1];
             params[0] = Entity.class;
 
             Method method;
