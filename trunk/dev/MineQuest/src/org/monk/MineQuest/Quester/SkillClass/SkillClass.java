@@ -413,7 +413,7 @@ public class SkillClass {
 			for (Ability ability : available) {
 				if (ability_list.length < 10) {
 					if (getAbility(ability.getName()) == null) {
-						if (level >= ability.getReqLevel()) {
+						if (level >= ability.getRealRequiredLevel()) {
 							addAbility(ability.getName());
 							ability_list = abilListSQL(abil_list_id);
 						}
@@ -676,7 +676,7 @@ public class SkillClass {
 			return;
 		}
 		
-		if (level < new_ability.getReqLevel()) {
+		if (level < new_ability.getRealRequiredLevel()) {
 			quester.sendMessage("You are not high enough level to cast " + new_abil);
 			return;
 		}

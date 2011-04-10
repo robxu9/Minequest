@@ -18,6 +18,7 @@
  */
 package org.monk.MineQuest;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Ability.AbilityConfigManager;
 import org.monk.MineQuest.Event.CheckMobEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
@@ -525,6 +527,9 @@ public class MineQuest extends JavaPlugin {
 	private static int exp_damage;
 	private static int cast_ability_exp;
 	private static int exp_class_damage;
+	private static AbilityConfigManager ability_config;
+	private static double sell_percent;
+	private static double price_change;
 
 	public MineQuest() {
 	}
@@ -562,46 +567,61 @@ public class MineQuest extends JavaPlugin {
         
         quests = new Quest[0];
         
+        (new File("MineQuest/")).mkdir();
+        
+        ability_config = new AbilityConfigManager();
+        
         try {
 			String url, port, db, user, pass;
-			PropertiesFile minequest = new PropertiesFile("minequest.properties");
+			PropertiesFile minequest = new PropertiesFile("MineQuest/main.properties");
+			PropertiesFile restrictions = new PropertiesFile("MineQuest/restrictions.properties");
+			PropertiesFile experience = new PropertiesFile("MineQuest/experience.properties");
 			url = minequest.getString("url", "localhost");
 			port = minequest.getString("port", "3306");
-			db = minequest.getString("db", "minequest");
+			db = minequest.getString("db", "MineQuest/minequest");
 			user = minequest.getString("user", "root");
 			pass = minequest.getString("pass", "1234");
 			maxClass = minequest.getInt("max_classes", 4);
-			boolean real = minequest.getBoolean("mysql", true);
-			server_owner = minequest.getString("mayor", "jmonk");
-			armor_req_level = minequest.getInt("armor_req_level", 20);
-			gold_req_level = minequest.getInt("gold_req_level", 2);
-			stone_req_level = minequest.getInt("stone_req_level", 5);
-			iron_req_level = minequest.getInt("iron_req_level", 20);
-			diamond_req_level = minequest.getInt("diamond_req_level", 50);
-			leather_armor_miner_level = minequest.getInt("leather_armor_miner_level", 2);
+			boolean real = minequest.getBoolean("mysql", false);
+			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
+			
+			armor_req_level = restrictions.getInt("armor_req_level", 20);
+			gold_req_level = restrictions.getInt("gold_req_level", 2);
+			stone_req_level = restrictions.getInt("stone_req_level", 5);
+			iron_req_level = restrictions.getInt("iron_req_level", 20);
+			diamond_req_level = restrictions.getInt("diamond_req_level", 50);
+			destroy_materials_level = restrictions.getInt("destroy_materials_level", 5);
+			leather_armor_miner_level = restrictions.getInt("leather_armor_miner_level", 2);
+			
 			town_enable = minequest.getBoolean("town_enable", true);
 			cubonomy_enable = minequest.getBoolean("cubonomy_enable", true);
 			debug_enable = minequest.getBoolean("debug_enable", true);
-			destroy_materials_level = minequest.getInt("destroy_materials_level", 5);
-			destroy_class_exp = minequest.getInt("destroy_class_exp", 5);
-			destroy_non_class_exp = minequest.getInt("destroy_non_class_exp", 2);
-			destroy_block_exp = minequest.getInt("destroy_block_exp", 2);
-			adjustment_multiplier = minequest.getInt("adjustment_multiplier", 1);
-			exp_damage = minequest.getInt("exp_damage", 3);
-			cast_ability_exp = minequest.getInt("cast_ability_exp", 5);
-			exp_class_damage = minequest.getInt("exp_class_damage", 5);
-			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
-			
-			sql_server.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, " +
-					"last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150), " +
-					"mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x DOUBLE DEFAULT '0', y DOUBLE DEFAULT '0', z DOUBLE DEFAULT '0', " +
-					"pitch DOUBLE DEFAULT '0', yaw DOUBLE DEFAULT '0')");
-			sql_server.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
-			sql_server.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0'," +
-					"abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
-        } catch (Exception e) {
-        	MineQuest.log("Unable to initialize database");
-        	MineQuest.log("Check minequest.properties");
+			server_owner = minequest.getString("mayor", "jmonk");
+			sell_percent = minequest.getDouble("sell_return", .92);
+			price_change = minequest.getDouble("price_change", .009);
+
+			destroy_class_exp = experience.getInt("destroy_class", 5);
+			destroy_non_class_exp = experience.getInt("destroy_non_class", 2);
+			destroy_block_exp = experience.getInt("destroy_block", 2);
+			adjustment_multiplier = experience.getInt("adjustment_multiplier",
+					1);
+			exp_damage = experience.getInt("damage", 3);
+			cast_ability_exp = experience.getInt("cast_ability", 5);
+			exp_class_damage = experience.getInt("class_damage", 5);
+
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, "
+							+ "last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150), "
+							+ "mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x DOUBLE DEFAULT '0', y DOUBLE DEFAULT '0', z DOUBLE DEFAULT '0', "
+							+ "pitch DOUBLE DEFAULT '0', yaw DOUBLE DEFAULT '0')");
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0',"
+							+ "abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
+		} catch (Exception e) {
+			MineQuest.log("Unable to initialize configuration");
+        	MineQuest.log("Check configuration in MineQuest directory");
         	setEnabled(false);
         	return;
         }
@@ -678,7 +698,6 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_MOVE, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_TELEPORT, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_RESPAWN, pl, Priority.Normal, this);
-        pm.registerEvent(Event.Type.PLAYER_ANIMATION, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE, el, Priority.Highest, this);
@@ -686,9 +705,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
-//        pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
-//        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICK, bl, Priority.Normal, this);
-        System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
+        System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
         start = null;
 		
 		for (Town town : towns) {
@@ -728,8 +745,14 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		int i;
+		ResultSet results;
 		for (i = 0; i < cols.length; i++) {
-			sql_server.update("ALTER TABLE questers ADD COLUMN " + cols[i] + " " + types[i]);
+			try {
+				results = sql_server.query("SELECT * FROM questers");
+				results.getObject(cols[i]);
+			} catch (Exception e) {
+				sql_server.update("ALTER TABLE questers ADD COLUMN " + cols[i] + " " + types[i]);
+			}
 		}
 		
 		sql_server.update("CREATE TABLE version (version VARCHAR(30))");
@@ -984,5 +1007,15 @@ public class MineQuest extends JavaPlugin {
 	}
 	public static int getExpClassDamage() {
 		return exp_class_damage;
+	}
+	
+	public static AbilityConfigManager getAbilityConfiguration() {
+		return ability_config;
+	}
+	public static double getSellPercent() {
+		return sell_percent;
+	}
+	public static double getPriceChange() {
+		return price_change;
 	}
 }

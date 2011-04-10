@@ -136,6 +136,7 @@ public class StoreBlock {
     		cubes_string = cubes + "C";
     	}
 
+		player.updateInventory();
 		player.sendMessage("You bought " + block_quantity + " " + type + " for " + cubes_string);
 		
 		return;
@@ -168,19 +169,18 @@ public class StoreBlock {
     		cubes_string = cubes + "C";
     	}
 		
+		player.updateInventory();
 		player.sendMessage("You sold " + block_quantity + " " + type + " for " + cubes_string);
 		
 		return;
 	}
 	
 	private boolean playerRemove(Player player, int quantity) {
-		// TODO: test this function - bukkit has inventory now
-		/* old way!!*/
 		PlayerInventory inventory = player.getInventory();
 		int mod = 1;
 		int multis = quantity / mod;
 		int lefts = 0;//quantity % mod;
-
+	
 		
 		while (multis-- > 0) {
 			if (inventory.contains(id)) {
@@ -206,7 +206,7 @@ public class StoreBlock {
 		
 		return true;
 	}
-	
+
 	private void update() {
 		MineQuest.getSQLServer().update("UPDATE " + my_store.getName() + " SET price='" + price + "', quantity='" + quantity + "' WHERE type='" + type + "'");
 	}
@@ -219,45 +219,22 @@ public class StoreBlock {
         while (change-- > 0) {
             if (buy) {
                 cost += (new_price);
-                new_price *= 1.00009;
+                new_price /= (1 + (MineQuest.getPriceChange() / 100));
+//                new_price *= 1.00009;
             } else {
                 cost += (new_price);
-                new_price /= 1.00009;
+                new_price /= (1 + (MineQuest.getPriceChange() / 100));
+//                new_price /= 1.00009;
             }
         }
 
         if (!buy) {
-             cost *= .92;
+             cost *= MineQuest.getSellPercent();
         }
 		
 		return ((int)cost);
 	}
-
-	@SuppressWarnings("unused")
-	private int cubesToBlocks(int cubes, boolean buy) {
-        int blocks = 0;
-        if (!buy) {
-        	cubes /= .92;
-        }
-        new_price = price;
-        while (cubes > 0) {
-            cubes -= new_price;
-            blocks++;
-            if ((blocks % 64) == 0) {
-                if (buy) {
-                	new_price *= 1.00009;
-                } else {
-                	new_price /= 1.00009;
-                }
-            }
-        }
-        if (cubes < 0) {
-            blocks--;
-        }
-        
-        return blocks;
-	}
-
+	
 	public void display(Player player, int i) {
 		int my_price = (int)price;
 		

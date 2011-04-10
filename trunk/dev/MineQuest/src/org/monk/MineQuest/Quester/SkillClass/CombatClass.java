@@ -187,7 +187,6 @@ public class CombatClass extends SkillClass implements DefendingClass {
 	}
 
 	private int getSize() {
-		//TODO: deal with this
 		if (type.equals("Warrior")) {
 			return 10;
 		} else if (type.equals("Archer") || type.equals("PeaceMage")) {

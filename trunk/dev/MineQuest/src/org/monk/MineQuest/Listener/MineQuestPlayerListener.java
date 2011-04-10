@@ -29,8 +29,6 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerAnimationEvent;
-import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -72,13 +70,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 		
 		super.onPlayerInteract(event);
 	}
-	
-	@Override
-	public void onPlayerAnimation(PlayerAnimationEvent event) {
-		if (event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
-			MineQuest.getQuester(event.getPlayer()).callAbility();
-		}
-	}
 
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
@@ -109,7 +100,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 			MineQuest.getQuester(event.getPlayer()).save();
 			MineQuest.getQuester(event.getPlayer()).setPlayer(null);
 		}
-		super.onPlayerQuit(event);
 	}
 	
 	@Override

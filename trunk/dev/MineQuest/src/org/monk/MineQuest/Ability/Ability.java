@@ -52,9 +52,15 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 public abstract class Ability {
 	// http://www.devx.com/tips/Tip/38975
 	public static Class<?> getClass(String the_class) throws Exception {
-		URL url = new URL("file:abilities.jar");
-		URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
-		return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
+		try {
+			URL url = new URL("file:MineQuest/abilities.jar");
+			URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+			return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
+		} catch (Exception e) {
+			URL url = new URL("file:abilities.jar");
+			URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+			return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
+		}
 	}
 	
 	//following code came from http://snippets.dzone.com/posts/show/4831
@@ -173,12 +179,15 @@ public abstract class Ability {
 	}
 	
 	protected int bind;
-	protected int cast_time;
 	protected int count;
 	protected boolean enabled;
 	protected long last_msg;
 	protected SkillClass myclass;
 	protected long time;
+	protected int casting_time;
+	protected int required_level;
+	protected int experience;
+	
 	/**
 	 * Creates an Ability
 	 * 
@@ -190,7 +199,6 @@ public abstract class Ability {
 		enabled = true;
 		if (this instanceof PassiveAbility) enabled = false;
 		count = 0;
-		cast_time = getCastTime();
 		bind = -1;
 		time = now.getTimeInMillis();
 		last_msg = 0;
@@ -219,7 +227,7 @@ public abstract class Ability {
 	 */
 	protected boolean canCast() {
 		Calendar now = Calendar.getInstance();
-		if ((now.getTimeInMillis() - time) > getCastTime()) {
+		if ((now.getTimeInMillis() - time) > getRealCastingTime()) {
 			time = now.getTimeInMillis();
 			return true;
 		}
@@ -255,7 +263,7 @@ public abstract class Ability {
 			enabled = true;
 			quester.sendMessage(getName() + " enabled");
 		} else {
-			quester.sendMessage("Not Enough Mana");
+			notify(quester, "You do not have the materials to enable that - try /spellcomp " + getName());
 		}
 	}
 	
@@ -337,7 +345,7 @@ public abstract class Ability {
 	 * 
 	 * @return
 	 */
-	private int getExp() {
+	int getExp() {
 		// TODO: Fix getExp in Ability.java
 		return 30;
 	}
@@ -376,11 +384,23 @@ public abstract class Ability {
 		List<ItemStack> cost = getManaCost();
 
 		int i;
-		for (i = 0; i < (getReqLevel() / 4); i++) {
+		for (i = 0; i < (getRealRequiredLevel() / 4); i++) {
 			cost.add(new ItemStack(Material.REDSTONE, 1));
 		}
 
 		return cost;
+	}
+	
+	public int getRealRequiredLevel() {
+		return required_level;
+	}
+	
+	public int getRealExperience() {
+		return experience;
+	}
+	
+	public int getRealCastingTime() {
+		return casting_time;
 	}
 	
 	public abstract int getReqLevel();
@@ -549,6 +569,11 @@ public abstract class Ability {
 
 	public void setSkillClass(SkillClass skillclass) {
 		this.myclass = skillclass;
+		if (skillclass != null) {
+			casting_time = MineQuest.getAbilityConfiguration().getCastingTime(getName());
+			experience = MineQuest.getAbilityConfiguration().getExperience(getName());
+			required_level = MineQuest.getAbilityConfiguration().getRequiredLevel(getName());
+		}
 	}
 
 	public void silentBind(Quester quester, ItemStack itemStack) {
@@ -602,7 +627,7 @@ public abstract class Ability {
 				notify(quester, "Casting " + getName());
 				castAbility(quester, location, entity);
 				if (myclass != null) {
-					myclass.expAdd(getExp());
+					myclass.expAdd(getRealExperience());
 				}
 			} else {
 				if (player != null) {
