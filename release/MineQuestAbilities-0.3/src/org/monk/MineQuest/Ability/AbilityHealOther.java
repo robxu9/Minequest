@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -59,8 +60,8 @@ public class AbilityHealOther extends Ability {
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
 		Player player = quester.getPlayer();
-		if (entity instanceof Player) {
-			Quester other = MineQuest.getQuester((Player)entity);
+		if (entity instanceof HumanEntity) {
+			Quester other = MineQuest.getQuester((HumanEntity)entity);
 			if (other != null) {
 				player.getInventory().addItem(new ItemStack(325, 1));
 				player.updateInventory();
@@ -76,6 +77,7 @@ public class AbilityHealOther extends Ability {
 				return;
 			}
 		} else {
+			giveManaCost(player);
 			player.sendMessage(getName() + " must be cast on another player");
 		}
 	}
