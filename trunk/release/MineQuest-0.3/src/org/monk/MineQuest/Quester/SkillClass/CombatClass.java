@@ -48,6 +48,7 @@ public class CombatClass extends SkillClass implements DefendingClass {
 		for (Ability abil : ability_list) {
 			if (abil.isBound(quester.getPlayer().getItemInHand())) {
 				if (abil.parseAttack(quester, defend)) {
+					event.setCancelled(true);
 					return true;
 				}
 			}

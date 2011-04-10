@@ -2,5 +2,5 @@ name: MineQuest
 
 main: org.monk.MineQuest.MineQuest
 
-version: 0.32
+version: 0.33
 author: Monk

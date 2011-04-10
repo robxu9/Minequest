@@ -72,13 +72,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 		
 		super.onPlayerInteract(event);
 	}
-	
-	@Override
-	public void onPlayerAnimation(PlayerAnimationEvent event) {
-		if (event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
-			MineQuest.getQuester(event.getPlayer()).callAbility();
-		}
-	}
 
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
