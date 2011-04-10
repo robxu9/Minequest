@@ -273,7 +273,7 @@ public abstract class Ability {
 			enabled = true;
 			quester.sendMessage(getName() + " enabled");
 		} else {
-			quester.sendMessage("Not Enough Mana");
+			notify(quester, "You do not have the materials to enable that - try /spellcomp " + getName());
 		}
 	}
 	

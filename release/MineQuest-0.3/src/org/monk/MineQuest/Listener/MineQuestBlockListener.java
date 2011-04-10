@@ -19,6 +19,7 @@
 package org.monk.MineQuest.Listener;
 
 
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
@@ -82,6 +83,33 @@ public class MineQuestBlockListener extends BlockListener {
 //		
 //		super.onBlockRightClick(event);
 //	}
+	
+	@Override
+	public void onBlockBreak(BlockBreakEvent event) {
+		Quester quester = MineQuest.getQuester(event.getPlayer());
+		
+		if (quester.isDebug()) {
+			quester.sendMessage(event.getBlock().getX() + " " + 
+					event.getBlock().getY() + " " + event.getBlock().getZ()
+					 + " " + event.getBlock().getType() + " " + 
+					 event.getBlock().getData());
+		}
+		
+		quester.checkItemInHand();
+		if (quester.checkItemInHandAbil()) {
+			quester.callAbility(event.getBlock());
+			event.setCancelled(true);
+			return;
+		}
+		
+		if (quester.canEdit(event.getBlock())) {
+			quester.destroyBlock(event);
+		} else {
+			event.setCancelled(true);
+		}
+		
+		super.onBlockBreak(event);
+	}
 	
 	@Override
 	public void onBlockPlace(org.bukkit.event.block.BlockPlaceEvent event) {

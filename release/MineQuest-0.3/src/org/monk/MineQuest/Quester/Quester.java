@@ -36,6 +36,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -746,7 +747,7 @@ public class Quester {
 	 * @param event being destroyed
 	 * @return false
 	 */
-	public boolean destroyBlock(BlockDamageEvent event) {
+	public boolean destroyBlock(BlockBreakEvent event) {
 		if (!enabled) return false;
 
 		for (SkillClass skill : classes) {
@@ -783,6 +784,45 @@ public class Quester {
 		}
 		
 		return false;
+	}
+
+	public void destroyBlock(BlockDamageEvent event) {
+		if (!enabled) return;
+
+		for (SkillClass skill : classes) {
+			if (skill.isAbilityItem(player.getItemInHand())) {
+				skill.blockDestroy(event);
+				expGain(5);
+				return;
+			}
+		}
+		
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(player.getItemInHand())) {
+				skill.blockDestroy(event);
+				expGain(1);
+				return;
+			}
+		}
+		
+		switch (blockToClass(event.getBlock())) {
+		case 0: // Miner
+			getClass("Miner").blockDestroy(event);
+			return;
+		case 1: // Lumberjack
+			getClass("Lumberjack").blockDestroy(event);
+			return;
+		case 2: // Digger
+			getClass("Digger").blockDestroy(event);
+			return;
+		case 3: // Farmer
+			getClass("Farmer").blockDestroy(event);
+			return;
+		default:
+			break;
+		}
+		
+		return;
 	}
 
 	/**
@@ -830,11 +870,11 @@ public class Quester {
 		}
 		return super.equals(obj);
 	}
-
+	
 	public void expClassGain(int class_exp) {
 		this.class_exp = class_exp;
 	}
-	
+
 	/**
 	 * Adds i experience to Quester and checks for level
 	 * up.
@@ -885,24 +925,13 @@ public class Quester {
 		
 		return null;
 	}
-
+	
 	/**
 	 * Gets a list of SkillClasses that this Quester has.
 	 * @return
 	 */
 	public List<SkillClass> getClasses() {
 		return classes;
-	}
-	
-	public List<SkillClass> getCombatClasses() {
-		List<SkillClass> ret = new ArrayList<SkillClass>();
-		for (SkillClass skill : classes) {
-			if (skill instanceof CombatClass) {
-				ret.add(skill);
-			}
-		}
-		
-		return ret;
 	}
 
 	public int getClassExp() {
@@ -920,7 +949,18 @@ public class Quester {
 		return null;
 	}
 
-	/**
+	public List<SkillClass> getCombatClasses() {
+		List<SkillClass> ret = new ArrayList<SkillClass>();
+		for (SkillClass skill : classes) {
+			if (skill instanceof CombatClass) {
+				ret.add(skill);
+			}
+		}
+		
+		return ret;
+	}
+
+    /**
 	 * Returns amount of cubes the Quester has.
 	 * 
 	 * @return
@@ -929,7 +969,7 @@ public class Quester {
 		return cubes;
 	}
 
-    /**
+	/**
 	 * Returns amount of experience for Quester.
 	 * @return
 	 */
@@ -1172,7 +1212,7 @@ public class Quester {
 			skill.listAbil();
 		}
 	}
-
+	
 	/**
 	 * Called every time a player moves. It makes sure that players
 	 * respawn in the proper town. Handles any poison damage required
@@ -1229,7 +1269,7 @@ public class Quester {
 		}
 		return;
 	}
-	
+
 	public void rightClick(Block block) {
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
@@ -1258,7 +1298,7 @@ public class Quester {
 		
 		return;
 	}
-
+	
 	/**
 	 * Saves any changes in the Quester to the MySQL
 	 * Database.
@@ -1291,7 +1331,7 @@ public class Quester {
 			MineQuest.log("[WARNING] Quester " + name + " doesn't have player, not logged in?");
 		}
 	}
-	
+
 	/**
 	 * Sets the Cubes of the Quester.
 	 * 
@@ -1314,11 +1354,11 @@ public class Quester {
 		
 		updateHealth();
 	}
-
+	
 	public void setParty(Party party) {
 		this.party = party;
 	}
-	
+
 	/**
 	 * Sets the reference to the Player.
 	 * 
@@ -1338,7 +1378,7 @@ public class Quester {
 		
 		player.teleport(world.getSpawnLocation());
 	}
-
+	
 	/**
 	 * Sets the last town that the Quester was near.
 	 * 
@@ -1348,7 +1388,7 @@ public class Quester {
 		last = town.getName();
 		MineQuest.getSQLServer().update("UPDATE players SET town='" + town.getName() + "' WHERE name='" + name + "'");
 	}
-	
+
 	public void spendClassExp(String type, int amount) {
 		if (amount > class_exp) {
 			sendMessage("You only have " + class_exp + " available");

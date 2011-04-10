@@ -26,6 +26,7 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -246,11 +247,11 @@ public class MineQuest extends JavaPlugin {
 	/**
 	 * Gets a Quester of a specific Player
 	 * 
-	 * @param player Player that is a Quester
+	 * @param entity Player that is a Quester
 	 * @return Quester or NULL if none found
 	 */
-	static public Quester getQuester(Player player) {
-		return getQuester(player.getName());
+	static public Quester getQuester(HumanEntity entity) {
+		return getQuester(entity.getName());
 	}
 	
 	/**
@@ -616,6 +617,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
 //		pm.registerEvent(Event.Type.BLOCK_INTERACT, bl, Priority.Normal, this);
 //		pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKE, bl, Priority.Normal, this);
         
