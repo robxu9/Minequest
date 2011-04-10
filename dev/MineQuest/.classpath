@@ -5,5 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/bukkit"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/craftbukkit"/>
 	<classpathentry kind="lib" path="C:/Users/jmonk/.m2/repository/org/bukkit/minecraft-server/1.4/minecraft-server-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jmonk/.m2/repository/org/avaje/ebean/2.7.3/ebean-2.7.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
