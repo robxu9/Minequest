@@ -18,8 +18,14 @@
  */
 package org.monk.MineQuest;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -569,6 +575,16 @@ public class MineQuest extends JavaPlugin {
         
         (new File("MineQuest/")).mkdir();
         
+        if (!((new File("MineQuest/abilities.jar")).exists())) {
+        	log("MineQuest/abilities.jar not found: Downloading...");
+        	try {
+				downloadAbilities();
+	        	log("MineQuest/abilities.jar download complete");
+			} catch (Exception e) {
+				log("Failed to download abilities.jar");
+			}
+        }
+        
         ability_config = new AbilityConfigManager();
         
         try {
@@ -713,6 +729,25 @@ public class MineQuest extends JavaPlugin {
 		}
 	}
 	
+	private void downloadAbilities() throws MalformedURLException, IOException {
+		BufferedInputStream in = new BufferedInputStream(
+				new
+
+				java.net.URL("http://minequest.googlecode.com/files/abilities.jar")
+						.openStream());
+		FileOutputStream fos = new FileOutputStream(
+				"MineQuest/abilities.jar");
+		BufferedOutputStream bout = new BufferedOutputStream(fos, 1024);
+		byte data[] = new byte[1024];
+		int size;
+		
+		while ((size = in.read(data, 0, 1024)) >= 0) {
+			bout.write(data,0,size);
+		}
+		
+		bout.close();
+		in.close();
+	}
 	private void upgradeDB() {
 		MineQuest.log("Your DB is too old to determine version");
 		MineQuest.log("Upgrading DB to 0.40");
@@ -742,23 +777,54 @@ public class MineQuest extends JavaPlugin {
 					"double DEFAULT '0'",
 					"double DEFAULT '0'"
 			};
-		}
-		
-		int i;
-		ResultSet results;
-		for (i = 0; i < cols.length; i++) {
-			try {
-				results = sql_server.query("SELECT * FROM questers");
-				results.getObject(cols[i]);
-			} catch (Exception e) {
-				sql_server.update("ALTER TABLE questers ADD COLUMN " + cols[i] + " " + types[i]);
-			}
+			
+			addColumns("questers", cols, types);
+			
+			cols = new String[] {
+					"merc_x",
+					"merc_y",
+					"merc_z"
+			};
+
+			types = new String[] {
+					"double DEFAULT '0'",
+					"double DEFAULT '0'",
+					"double DEFAULT '0'"
+			};
+			
+			addColumns("questers", cols, types);
 		}
 		
 		sql_server.update("CREATE TABLE version (version VARCHAR(30))");
 		sql_server.update("DELETE FROM version");
 		sql_server.update("INSERT INTO version (version) VALUES('" + version + "')");
 		
+	}
+	
+	private void addColumns(String db, String cols[], String types[]) {
+		int i;
+		for (i = 0; i < cols.length; i++) {
+			try {
+				if (!column_exists(db, cols[i])) {
+					sql_server.update("ALTER TABLE " + db + " ADD COLUMN " + cols[i] + " " + types[i], false);
+				}
+			} catch (SQLException e) {
+			}
+		}
+	}
+	
+	private boolean column_exists(String db, String column) throws SQLException {
+		ResultSet results = sql_server.query("SELECT * FROM " + db);
+		ResultSetMetaData meta = results.getMetaData();
+		
+		int i;
+		for (i = 0; i < meta.getColumnCount(); i++) {
+			if (meta.getColumnName(i).equals(column)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	public static void checkAllMobs() {
     	for (World world : getSServer().getWorlds()) {

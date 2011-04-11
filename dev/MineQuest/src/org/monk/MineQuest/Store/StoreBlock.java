@@ -76,6 +76,7 @@ public class StoreBlock {
 		return;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void buy(Quester quester, int block_quantity) {
 		int cubes;
 		int multis;
@@ -142,6 +143,7 @@ public class StoreBlock {
 		return;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void sell(Quester quester, int block_quantity) {
 		int cubes;
 		Player player = quester.getPlayer();
