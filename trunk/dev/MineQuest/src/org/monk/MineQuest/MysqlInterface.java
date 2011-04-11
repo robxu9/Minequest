@@ -177,4 +177,35 @@ public class MysqlInterface {
 			}
 		}
 	}
+
+	public int update(String sql, boolean extra_silent) {
+		int ret;
+		if (stmt == null) {
+			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+		}
+		if (!silent) {
+			MineQuest.log("(MySQL) " + sql);
+		}
+		try {
+			if (last != null) {
+				last.close();
+				last = null;
+			}
+			ret = stmt.executeUpdate(sql);
+			return ret;
+		} catch (SQLException e) {
+			if (!extra_silent) {
+				MineQuest.log("(MySQL) " + sql);
+				MineQuest.log("[ERROR] Failed to update database");
+				e.printStackTrace();
+			}
+			reconnect();
+			try {
+				ret = stmt.executeUpdate(sql);
+				return ret;
+			} catch (SQLException e1) {
+				return 1;
+			}
+		}
+	}
 }
