@@ -186,7 +186,7 @@ public class CombatClass extends SkillClass implements DefendingClass {
 		quester.addHealth(add_health);
 	}
 
-	private int getSize() {
+	public int getSize() {
 		if (type.equals("Warrior")) {
 			return 10;
 		} else if (type.equals("Archer") || type.equals("PeaceMage")) {

@@ -536,6 +536,7 @@ public class MineQuest extends JavaPlugin {
 	private static AbilityConfigManager ability_config;
 	private static double sell_percent;
 	private static double price_change;
+	private static int starting_health;
 
 	public MineQuest() {
 	}
@@ -615,6 +616,7 @@ public class MineQuest extends JavaPlugin {
 			server_owner = minequest.getString("mayor", "jmonk");
 			sell_percent = minequest.getDouble("sell_return", .92);
 			price_change = minequest.getDouble("price_change", .009);
+			starting_health = minequest.getInt("starting_health", 10);
 
 			destroy_class_exp = experience.getInt("destroy_class", 5);
 			destroy_non_class_exp = experience.getInt("destroy_non_class", 2);
@@ -1068,9 +1070,11 @@ public class MineQuest extends JavaPlugin {
 	public static int getExpMob() {
 		return exp_damage;
 	}
+	
 	public static int getCastAbilityExp() {
 		return cast_ability_exp;
 	}
+	
 	public static int getExpClassDamage() {
 		return exp_class_damage;
 	}
@@ -1078,10 +1082,16 @@ public class MineQuest extends JavaPlugin {
 	public static AbilityConfigManager getAbilityConfiguration() {
 		return ability_config;
 	}
+	
 	public static double getSellPercent() {
 		return sell_percent;
 	}
+	
 	public static double getPriceChange() {
 		return price_change;
+	}
+	
+	public static int getStartingHealth() {
+		return starting_health;
 	}
 }
