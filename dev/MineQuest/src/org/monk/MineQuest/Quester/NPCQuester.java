@@ -55,6 +55,7 @@ public class NPCQuester extends Quester {
 	private String hit_message;
 	private int radius;
 	private String quest_file;
+	private String town;
 	
 	public NPCQuester(String name) {
 		super(name);
@@ -167,6 +168,7 @@ public class NPCQuester extends Quester {
 			}
 		}
 	}
+	
     private boolean checkMessage(int id) {
 	    Calendar now = Calendar.getInstance();
 	    int i;
@@ -207,10 +209,10 @@ public class NPCQuester extends Quester {
 					mode + "', world='" + 
 					world.getName() + "' WHERE name='"
 					+ name + "'");
-			
+
+			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " +
+					name + "_npc (property VARCHAR(30), value VARCHAR(300))");
 			if (mode == NPCMode.GQUEST_NPC) {
-				MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " +
-						name + "_npc (property VARCHAR(30), value VARCHAR(300))");
 				MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
 						" (property, value) VALUES('walk_message', 'Set me Admin!!')");
 				MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
@@ -221,6 +223,13 @@ public class NPCQuester extends Quester {
 						" (property, value) VALUES('quest', '')");
 			}
 		}
+	}
+	
+	public void setTown(String town) {
+		this.town = town;
+		MineQuest.getSQLServer().update("DELETE FROM " + name + "_npc WHERE property='town'");
+		MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
+				" (property, value) VALUES('town', '" + town + "')");
 	}
 	
 	@Override
@@ -261,10 +270,19 @@ public class NPCQuester extends Quester {
 		} else {
 			if (getHealth() <= 0) {
 				setPlayer(null);
-				NpcSpawner.RemoveBasicHumanNpc(entity);
-				entity = null;
-				removeSql();
-				MineQuest.remQuester(this);
+				if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
+					removeSql();
+					MineQuest.remQuester(this);
+					NpcSpawner.RemoveBasicHumanNpc(entity);
+					entity = null;
+				} else {
+					Location location = MineQuest.getTown(town).getNPCSpawn();
+
+					makeNPC(location.getWorld().getName(), location.getX(),
+							location.getY(), location.getZ(), location
+									.getPitch(), location.getYaw());
+					mode = NPCMode.FOR_SALE;
+				}
 			}
 		}
 		
@@ -323,12 +341,22 @@ public class NPCQuester extends Quester {
 	@Override
 	public void setHealth(int i) {
 		super.setHealth(i);
-		
+
 		if (getHealth() <= 0) {
 			setPlayer(null);
-			NpcSpawner.RemoveBasicHumanNpc(entity);
-			entity = null;
-			removeSql();
+			if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
+				removeSql();
+				MineQuest.remQuester(this);
+				NpcSpawner.RemoveBasicHumanNpc(entity);
+				entity = null;
+			} else {
+				Location location = MineQuest.getTown(town).getNPCSpawn();
+
+				makeNPC(location.getWorld().getName(), location.getX(),
+						location.getY(), location.getZ(), location
+								.getPitch(), location.getYaw());
+				mode = NPCMode.FOR_SALE;
+			}
 		}
 	}
 
@@ -386,25 +414,25 @@ public class NPCQuester extends Quester {
 			MineQuest.log("Unable to add NPCQuester");
 		}
 		
-		if (mode == NPCMode.GQUEST_NPC) {
 			results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_npc");
 			
-			try {
-				while (results.next()) {
-					String property = results.getString("property");
-					if (property.equals("radius")) {
-						this.radius = Integer.parseInt(results.getString("value"));
-					} else if (property.equals("hit_message")) {
-						this.hit_message = results.getString("value");
-					} else if (property.equals("walk_message")) {
-						this.walk_message = results.getString("value");
-					} else if (property.equals("quest")) {
-						this.quest_file = results.getString("value");
-					}
+		try {
+			while (results.next()) {
+				String property = results.getString("property");
+				if (property.equals("radius")) {
+					this.radius = Integer.parseInt(results.getString("value"));
+				} else if (property.equals("hit_message")) {
+					this.hit_message = results.getString("value");
+				} else if (property.equals("walk_message")) {
+					this.walk_message = results.getString("value");
+				} else if (property.equals("quest")) {
+					this.quest_file = results.getString("value");
+				} else if (property.equals("town")) {
+					this.town = results.getString("value");
 				}
-			} catch (SQLException e) {
-				MineQuest.log("Problem getting NPC Properties");
 			}
+		} catch (SQLException e) {
+			MineQuest.log("Problem getting NPC Properties");
 		}
 	}
 
@@ -425,5 +453,24 @@ public class NPCQuester extends Quester {
 		MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
 				" (property, value) VALUES('" + property + "', '" + value + "')");
 		
+	}
+	
+	public int getCost() {
+		int cost = level * MineQuest.getNPCCostLevel();
+		
+		if (getClass("Warrior") != null) {
+			cost += getClass("Warrior").getLevel() * MineQuest.getNPCCostWarrior();
+		}
+		if (getClass("Archer") != null) {
+			cost += getClass("Archer").getLevel() * MineQuest.getNPCCostArcher();
+		}
+		if (getClass("WarMage") != null) {
+			cost += getClass("WarMage").getLevel() * MineQuest.getNPCCostWarMage();
+		}
+		if (getClass("PeaceMage") != null) {
+			cost += getClass("PeaceMage").getLevel() * MineQuest.getNPCCostPeaceMage();
+		}
+		
+		return cost;
 	}
 }

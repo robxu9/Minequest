@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -40,6 +41,7 @@ public class Town {
 	private Location start;
 	private List<Store> stores;
 	private Property town;
+	private Location npc_spawn;
 	
 	public Town(String name, World world) {
 		ResultSet results = MineQuest.getSQLServer().query("SELECT * from towns WHERE name='" + name + "'");
@@ -322,5 +324,13 @@ public class Town {
 		MineQuest.getSQLServer().update("UPDATE " + name + " SET name='" + quester.getName() 
 				+ "' WHERE x='" + prop.getX() + "' AND z='" + prop.getZ() + "' AND y='" + prop.getY() + "'");
 		quester.sendMessage("You now own this property");
+	}
+
+	public Location getNPCSpawn() {
+		return new Location(npc_spawn.getWorld(),
+				npc_spawn.getX() + (new Random()).nextDouble() * 5,
+				npc_spawn.getY(),
+				npc_spawn.getZ() + (new Random()).nextDouble() * 5,
+				0, 0);
 	}
 }
