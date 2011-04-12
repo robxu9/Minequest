@@ -688,7 +688,7 @@ public class Quester {
 		class_names.add("Lumberjack");
 		class_names.add("Digger");
 		class_names.add("Farmer");
-		if (MineQuest.getMaxClasses() == 4) {
+		if (MineQuest.getMaxClasses() >= 4) {
 			class_names.add("Warrior");
 			class_names.add("Archer");
 			class_names.add("WarMage");
@@ -704,7 +704,7 @@ public class Quester {
 				update_string = update_string + ", " + name;
 			}
 		}
-		update_string = update_string + "', '10', '10')";
+		update_string = update_string + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingHealth() + "')";
 
 		MineQuest.getSQLServer().update(update_string);
 		
@@ -1720,5 +1720,8 @@ public class Quester {
 		}
 		
 //		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
+	}
+	
+	public void recalculateHealth() {
 	}
 }
