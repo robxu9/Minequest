@@ -793,8 +793,8 @@ public class MineQuest extends JavaPlugin {
 					"double DEFAULT '0'",
 					"double DEFAULT '0'"
 			};
-			
-			addColumns("questers", cols, types);
+
+			addColumns("towns", cols, types);
 		}
 		
 		sql_server.update("CREATE TABLE version (version VARCHAR(30))");
@@ -1093,5 +1093,25 @@ public class MineQuest extends JavaPlugin {
 	
 	public static int getStartingHealth() {
 		return starting_health;
+	}
+	public static int getNPCCostLevel() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	public static int getNPCCostWarrior() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	public static int getNPCCostArcher() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	public static int getNPCCostWarMage() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	public static int getNPCCostPeaceMage() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

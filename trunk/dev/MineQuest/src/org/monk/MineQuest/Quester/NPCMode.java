@@ -27,7 +27,8 @@ public enum NPCMode {
 	QUEST_NPC,
 	FOLLOW, 
 	PARTY, 
-	GQUEST_NPC;
+	GQUEST_NPC,
+	FOR_SALE;
 	
     private static final Map<String, NPCMode> lookupName = new HashMap<String, NPCMode>();
 
