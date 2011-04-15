@@ -353,7 +353,7 @@ public class MineQuest extends JavaPlugin {
 	 * @param player Player within town
 	 * @return Town that player is in or NULL if none exists
 	 */
-	static public Town getTown(Player player) {
+	static public Town getTown(HumanEntity player) {
 		return getTown(player.getLocation());
 	}
 	
