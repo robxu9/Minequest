@@ -33,7 +33,7 @@ public class NPCSignShop extends Store {
 		selected = 0;
 	}
 	
-	public void setKeep(NPCQuester keeper) {
+	public void setKeeper(NPCQuester keeper) {
 		this.keeper = keeper;
 		keeper.setMode(NPCMode.STORE);
 	}
