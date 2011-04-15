@@ -37,9 +37,13 @@ public class MineQuestEntityListener extends EntityListener {
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
 		Entity entity = event.getEntity();
 		
-		if (entity instanceof Monster) {
-			MineQuest.addMob((Monster)entity);
-			MineQuest.checkMobs();
+		if (MineQuest.canCreate(entity)) {
+			if (entity instanceof Monster) {
+				MineQuest.addMob((Monster)entity);
+				MineQuest.checkMobs();
+			}
+		} else {
+			event.setCancelled(true);
 		}
 	}
 	

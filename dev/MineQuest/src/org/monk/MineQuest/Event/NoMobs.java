@@ -18,16 +18,14 @@
  */
 package org.monk.MineQuest.Event;
 
-import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
 
 public class NoMobs extends PeriodicEvent {
-	private boolean complete;
-	private World world;
+	private String world;
 
-	public NoMobs(long delay, World world) {
+	public NoMobs(long delay, String world) {
 		super(delay);
 		this.world = world;
 	}
@@ -36,7 +34,7 @@ public class NoMobs extends PeriodicEvent {
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		for (LivingEntity entity : world.getLivingEntities()) {
+		for (LivingEntity entity : MineQuest.getSServer().getWorld(world).getLivingEntities()) {
 			if (!(entity instanceof Player)) {
 				if (MineQuest.getMob(entity) != null) {
 					MineQuest.getMob(entity).setHealth(0);
@@ -46,13 +44,7 @@ public class NoMobs extends PeriodicEvent {
 			}
 		}
 		
-		if (complete) {
-			eventParser.setComplete(true);
-		}
-	}
-	
-	public void setComplete(boolean complete) {
-		this.complete = complete;
+		eventParser.setComplete(true);
 	}
 
 }

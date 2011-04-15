@@ -38,7 +38,7 @@ import org.monk.MineQuest.Quester.Quester;
  *
  */
 public class Store {
-	private List<StoreBlock> blocks;
+	protected List<StoreBlock> blocks;
 	private Location end;
 	private String name;
 	private int num_page;
