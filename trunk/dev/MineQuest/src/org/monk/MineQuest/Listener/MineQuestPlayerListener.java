@@ -40,7 +40,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
@@ -51,8 +50,6 @@ import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
 public class MineQuestPlayerListener extends PlayerListener {
-	
-	private NoMobs event;
 
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
@@ -769,11 +766,36 @@ public class MineQuestPlayerListener extends PlayerListener {
         	MineQuest.getQuester(player).debug();
         	event.setCancelled(true);
         } else if (split[0].equals("/nomobs")) {
-        	this.event = new NoMobs(100, MineQuest.getSServer().getWorld(split[1]));
-        	MineQuest.getEventParser().addEvent(this.event);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /nomobs <world_name>");
+            	event.setCancelled(true);
+            	return;
+        	}
+        	World world = MineQuest.getSServer().getWorld(split[1]);
+        	
+        	if (world != null) {
+        		MineQuest.noMobs(world);
+        		player.sendMessage("No mobs activated for world: " + world.getName());
+        	} else {
+        		player.sendMessage(split[1] + " is not a valid world");
+        	}
+        	
         	event.setCancelled(true);
         } else if (split[0].equals("/mobs")) {
-        	this.event.setComplete(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /mobs <world_name>");
+            	event.setCancelled(true);
+            	return;
+        	}
+        	World world = MineQuest.getSServer().getWorld(split[1]);
+        	
+        	if (world != null) {
+        		MineQuest.yesMobs(world);
+        		player.sendMessage("Yes mobs activated for world: " + world.getName());
+        	} else {
+        		player.sendMessage(split[1] + " is not a valid world");
+        	}
+        	
         	event.setCancelled(true);
         } else if (split[0].equals("/spawn_npc")) {
         	Location location = player.getLocation();

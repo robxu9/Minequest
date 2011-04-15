@@ -32,6 +32,7 @@ import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -348,31 +349,33 @@ public class NPCQuester extends Quester {
 				MineQuest.getQuester(player).addQuestAvailable(new QuestProspect(quest_file));
 			}
 		} else {
+			LivingEntity entity = null;
+			if (event instanceof EntityDamageByEntityEvent) {
+				entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
+			}
+			if (event instanceof EntityDamageByProjectileEvent) {
+				entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
+			}
+			if (follow != null) {
+				if (mobTarget == null) {
+					mobTarget = entity;
+				}
+			}
 			if (getHealth() <= 0) {
 				setPlayer(null);
 				if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
 					removeSql();
 					MineQuest.remQuester(this);
-					NpcSpawner.RemoveBasicHumanNpc(entity);
+					NpcSpawner.RemoveBasicHumanNpc(this.entity);
 					entity = null;
 				} else {
 					Location location = MineQuest.getTown(town).getNPCSpawn();
 
 					sendMessage("Died!");
-					ItemStack drop = player.getItemInHand();
-					player.setItemInHand(null);
-					Location loc = new Location(player.getWorld(),
-							player.getLocation().getX(),
-							player.getLocation().getY(),
-							player.getLocation().getZ());
 					makeNPC(location.getWorld().getName(), location.getX(),
 							location.getY(), location.getZ(), location
 									.getPitch(), location.getYaw());
 					mode = NPCMode.FOR_SALE;
-					
-					if ((drop != null) && (drop.getAmount() > 0) && (drop.getType() != Material.AIR)) {
-						loc.getWorld().dropItemNaturally(loc, drop);
-					}
 				}
 				health = max_health;
 			}
@@ -452,9 +455,7 @@ public class NPCQuester extends Quester {
 			} else {
 				Location location = MineQuest.getTown(town).getNPCSpawn();
 
-				if (player.getItemInHand() != null) {
-					player.getWorld().dropItemNaturally(player.getLocation(), player.getItemInHand());
-				}
+				sendMessage("Died!");
 				makeNPC(location.getWorld().getName(), location.getX(),
 						location.getY(), location.getZ(), location
 								.getPitch(), location.getYaw());

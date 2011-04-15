@@ -1721,10 +1721,12 @@ public class Quester {
 			newValue = 0;
 		}
 		
-		if (newValue < player.getHealth()) {
-			player.damage(player.getHealth() - newValue);
-		} else if (newValue != player.getHealth()) {
-			player.setHealth(newValue);
+		if (player != null) {
+			if (newValue < player.getHealth()) {
+				player.damage(player.getHealth() - newValue);
+			} else if (newValue != player.getHealth()) {
+				player.setHealth(newValue);
+			}
 		}
 		
 //		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));

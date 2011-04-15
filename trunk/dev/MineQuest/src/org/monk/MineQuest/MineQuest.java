@@ -34,6 +34,7 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -50,6 +51,7 @@ import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityConfigManager;
 import org.monk.MineQuest.Event.CheckMobEvent;
 import org.monk.MineQuest.Event.EventQueue;
+import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
@@ -539,6 +541,7 @@ public class MineQuest extends JavaPlugin {
 	private static int starting_health;
 	private static int npc_cost;
 	private static int npc_cost_class;
+	private static List<String> noMobs;
 
 	public MineQuest() {
 	}
@@ -590,6 +593,8 @@ public class MineQuest extends JavaPlugin {
         
         ability_config = new AbilityConfigManager();
         
+        noMobs = new ArrayList<String>();
+        
         try {
 			String url, port, db, user, pass;
 			PropertiesFile minequest = new PropertiesFile("MineQuest/main.properties");
@@ -604,6 +609,11 @@ public class MineQuest extends JavaPlugin {
 			pass = minequest.getString("pass", "1234");
 			maxClass = minequest.getInt("max_classes", 4);
 			boolean real = minequest.getBoolean("mysql", false);
+			boolean nomobs_main = minequest.getBoolean("no_mobs_main_world", false);
+			if (nomobs_main) {
+				eventQueue.addEvent(new NoMobs(5000, "world"));
+				noMobs.add("world");
+			}
 			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
 			
 			armor_req_level = restrictions.getInt("armor_req_level", 20);
@@ -1120,5 +1130,31 @@ public class MineQuest extends JavaPlugin {
 	
 	public static int getNPCCostPeaceMage() {
 		return npc_cost_class;
+	}
+	
+	public static boolean canCreate(Entity entity) {
+		String name = entity.getWorld().getName();
+		
+		if (noMobs.contains(name)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public static void noMobs(World world) {
+		for (LivingEntity entity : world.getLivingEntities()) {
+			if (!(entity instanceof HumanEntity)) {
+				entity.setHealth(0);
+			}
+		}
+		
+		noMobs.add(world.getName());
+	}
+	
+	public static void yesMobs(World world) {
+		noMobs.remove(world.getName());
+		
+		return;
 	}
 }

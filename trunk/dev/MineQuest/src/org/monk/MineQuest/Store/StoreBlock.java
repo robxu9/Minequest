@@ -256,4 +256,16 @@ public class StoreBlock {
 		}
 		return super.equals(obj);
 	}
+
+	public String getType() {
+		return type;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public int getPrice() {
+		return (int)(price + .5);
+	}
 }
