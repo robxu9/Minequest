@@ -941,7 +941,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/set_store_npc")) {
         	NPCSignShop nss = MineQuest.getTown(player).getStore(player);
         	
-        	nss.setKeep((NPCQuester)MineQuest.getQuester(split[1]));
+        	nss.setKeeper((NPCQuester)MineQuest.getQuester(split[1]));
 			event.setCancelled(true);
         }
 	}
