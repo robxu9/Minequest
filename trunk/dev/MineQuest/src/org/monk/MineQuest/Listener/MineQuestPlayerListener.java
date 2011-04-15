@@ -45,6 +45,7 @@ import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Store.NPCSignShop;
 import org.monk.MineQuest.Store.Store;
 import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
@@ -936,6 +937,11 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage(split[1] + " is a level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 
 			quester.getClass("Warrior").display();
+			event.setCancelled(true);
+        } else if (split[0].equals("/set_store_npc")) {
+        	NPCSignShop nss = MineQuest.getTown(player).getStore(player);
+        	
+        	nss.setKeep((NPCQuester)MineQuest.getQuester(split[1]));
 			event.setCancelled(true);
         }
 	}

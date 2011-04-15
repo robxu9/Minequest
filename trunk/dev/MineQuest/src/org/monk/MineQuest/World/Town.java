@@ -26,6 +26,7 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -33,6 +34,7 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Store.NPCSignShop;
 import org.monk.MineQuest.Store.Store;
 
 public class Town {
@@ -41,7 +43,7 @@ public class Town {
 	private List<Property> properties;
 	private Location spawn;
 	private Location start;
-	private List<Store> stores;
+	private List<NPCSignShop> stores;
 	private Property town;
 	private Location npc_spawn;
 	
@@ -75,7 +77,7 @@ public class Town {
 		}
 		
 		properties = new ArrayList<Property>();
-		stores = new ArrayList<Store>();
+		stores = new ArrayList<NPCSignShop>();
 		
 		results = MineQuest.getSQLServer().query("SELECT * FROM " + name);
 		try {
@@ -86,9 +88,8 @@ public class Town {
 				if (results.getBoolean("store_prop")) {
 					String store = results.getString("name");
 					
-					stores.add(new Store(store, start, end));
+					stores.add(new NPCSignShop(store, start, end));
 				} else {
-					
 					properties.add(new Property(results.getString("name"), start, end, height > 0, results.getLong("price")));
 				}
 			}
@@ -227,7 +228,7 @@ public class Town {
 					+ "', '" + max_x + "', '" + max_z + "', '" + height
 					+ "', '1', '10000000')");
 			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (item_id INT, price DOUBLE, quantity INT, type VARCHAR(30))");
-			stores.add(new Store(name, this.name));
+			stores.add(new NPCSignShop(name, this.name));
 			stores.get(stores.size() - 1).queryData();
 			player.sendMessage("Store " + name + " created");
 		} else {
@@ -268,7 +269,7 @@ public class Town {
 		return getProperty(player.getLocation());
 	}
 
-	public Store getStore(Location loc) {
+	public NPCSignShop getStore(Location loc) {
 		int i;
 		
 		for (i = 0; i < stores.size(); i++) {
@@ -280,7 +281,7 @@ public class Town {
 		return null;
 	}
 	
-	public Store getStore(Player player) {
+	public NPCSignShop getStore(HumanEntity player) {
 		return getStore(player.getLocation());
 	}
 

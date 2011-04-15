@@ -29,6 +29,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -337,6 +338,23 @@ public class NPCQuester extends Quester {
 		if (mode == NPCMode.GOD) {
 			health = max_health;
 			event.setDamage(0);
+		} else if (mode == NPCMode.STORE) {
+			health = max_health;
+			event.setDamage(0);
+			
+
+			LivingEntity entity = null;
+			if (event instanceof EntityDamageByEntityEvent) {
+				entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
+			}
+			if (event instanceof EntityDamageByProjectileEvent) {
+				entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
+			}
+			if (entity instanceof HumanEntity) {
+				HumanEntity human = (HumanEntity)entity;
+				ItemStack hand = human.getItemInHand();
+				MineQuest.getTown(player).getStore(player).sell(MineQuest.getQuester(human), hand.getTypeId(), hand.getAmount());
+			}
 		} else if (mode == NPCMode.GQUEST_NPC) {
 			health = max_health;
 			event.setDamage(0);
