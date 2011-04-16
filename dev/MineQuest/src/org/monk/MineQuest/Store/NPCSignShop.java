@@ -1,12 +1,14 @@
 package org.monk.MineQuest.Store;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.UpdateSignEvent;
-import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
@@ -21,7 +23,7 @@ public class NPCSignShop extends Store {
 	private Sign display_2;
 	private NPCQuester keeper;
 	private int selected;
-	private int initialization = 0;
+	private int initialization = -1;
 
 	public NPCSignShop(String storeName, Location start, Location end) {
 		super(storeName, start, end); 
@@ -33,46 +35,210 @@ public class NPCSignShop extends Store {
 		selected = 0;
 	}
 	
+	@Override
+	public void queryData() {
+		super.queryData();
+
+		MineQuest.getSQLServer().update(
+				"CREATE TABLE IF NOT EXISTS " + getName()
+						+ "_signs (name VARCHAR(30), x INT, y INT, z INT)");
+		
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + getName() + "_signs");
+		
+		try {
+			while (results.next()) {
+				String name = results.getString("name");
+				int x = results.getInt("x");
+				int y = results.getInt("y");
+				int z = results.getInt("z");
+				if (name.equals("next")) {
+					next = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} else if (name.equals("last")) {
+					last = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} else if (name.equals("buy_1")) {
+					buy_1 = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} else if (name.equals("buy_64")) {
+					buy_64 = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} else if (name.equals("sell_1")) {
+					sell_1 = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} else if (name.equals("sell_64")) {
+					sell_64 = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} else if (name.equals("display_1")) {
+					display_1 = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} else if (name.equals("display_2")) {
+					display_2 = (Sign)MineQuest.getSServer().getWorlds().get(0).getBlockAt(x, y, z).getState();
+				} 
+			}
+		} catch (SQLException e) {
+			MineQuest.log("Problem with database for shop " + getName());
+		}
+	}
+	
+	public void intialize(Quester quester) {
+		initialization = 0;
+		quester.sendMessage("Set next");
+	}
+	
+	public void skip(Quester quester) {
+		if (initialization >= 0) {
+			switch (initialization) {
+			case 0:
+				quester.sendMessage("Set last");
+				break;
+			case 1:
+				quester.sendMessage("Set buy_1");
+				break;
+			case 2:
+				quester.sendMessage("Set buy_64");
+				break;
+			case 3:
+				quester.sendMessage("Set sell_1");
+				break;
+			case 4:
+				quester.sendMessage("Set sell_64");
+				break;
+			case 5:
+				quester.sendMessage("Set display_1");
+				break;
+			case 6:
+				quester.sendMessage("Set display_2");
+				break;
+			case 7:
+				quester.sendMessage("Done!");
+				save();
+				initialization = -1;
+				return;
+			}
+			initialization++;
+		}
+	}
+	
+	private void save() {
+		if (next != null) {
+			MineQuest.log("Saving Next");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='next'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('next', '" + next.getX() + "', '"
+							+ next.getY() + "', '" + next.getZ() + "')");
+		}
+		if (last != null) {
+			MineQuest.log("Saving Last");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='last'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('last', '" + last.getX() + "', '"
+							+ last.getY() + "', '" + last.getZ() + "')");
+		}
+		if (buy_64 != null) {
+			MineQuest.log("Saving Buy 64");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='buy_64'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('buy_64', '" + buy_64.getX() + "', '"
+							+ buy_64.getY() + "', '" + buy_64.getZ() + "')");
+		}
+		if (buy_1 != null) {
+			MineQuest.log("Saving Buy 1");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='buy_1'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('buy_1', '" + buy_1.getX() + "', '"
+							+ buy_1.getY() + "', '" + buy_1.getZ() + "')");
+		}
+		if (sell_64 != null) {
+			MineQuest.log("Saving sell 64");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='sell_64'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('sell_64', '" + sell_64.getX() + "', '"
+							+ sell_64.getY() + "', '" + sell_64.getZ() + "')");
+		}
+		if (sell_1 != null) {
+			MineQuest.log("Saving Sell 1");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='sell_1'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('sell_1', '" + sell_1.getX() + "', '"
+							+ sell_1.getY() + "', '" + sell_1.getZ() + "')");
+		}
+		if (display_1 != null) {
+			MineQuest.log("Saving Display 1");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='display_1'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('display_1', '" + display_1.getX() + "', '"
+							+ display_1.getY() + "', '" + display_1.getZ() + "')");
+		}
+		if (display_2 != null) {
+			MineQuest.log("Saving Display 2");
+			MineQuest.getSQLServer().update("DELETE FROM " + getName() + "_signs WHERE name='display_2'");
+			MineQuest.getSQLServer().update(
+					"INSERT INTO " + getName() + "_signs (name, x, y, z) "
+							+ "VALUES('display_2', '" + display_2.getX() + "', '"
+							+ display_2.getY() + "', '" + display_2.getZ() + "')");
+		}
+	}
+
 	public void setKeeper(NPCQuester keeper) {
 		this.keeper = keeper;
-		keeper.setMode(NPCMode.STORE);
+	}
+
+	@Override
+	public void sell(Quester quester, int item_id, int quantity) {
+		if (sell(quester, getBlock(item_id), quantity)) {
+			quester.sendMessage("<" + keeper.getName() + "> I am not interested in your " + Material.getMaterial(item_id));
+		}
+	}
+
+	@Override
+	public void sell(Quester quester, String name, int quantity) {
+		if (sell(quester, getBlock(name), quantity)) {
+			quester.sendMessage("<" + keeper.getName() + "> I am not interested in your " + name);
+		}
 	}
 	
 	public boolean parseClick(Quester quester, Block clicked) {
 		if (initialization == -1) {
-			MineQuest.log("Parse Click");
-			if (equals(next.getBlock(), clicked)) {
-				next(quester, clicked);
-				return true;
+			if (next != null) {
+				if (equals(next.getBlock(), clicked)) {
+					next(quester, clicked);
+					return true;
+				}
 			}
-			if (equals(last.getBlock(), clicked)) {
-				last(quester, clicked);
-				return true;
+			if (last != null) {
+				if (equals(last.getBlock(), clicked)) {
+					last(quester, clicked);
+					return true;
+				}
 			}
-			if (equals(buy_64.getBlock(), clicked)) {
-				buy_64(quester, clicked);
-				updateDisplay();
-				return true;
+			if (buy_64 != null) {
+				if (equals(buy_64.getBlock(), clicked)) {
+					buy_64(quester, clicked);
+					updateDisplay();
+					return true;
+				}
 			}
-			if (equals(buy_1.getBlock(), clicked)) {
-				buy_1(quester, clicked);
-				updateDisplay();
-				return true;
+			if (buy_1 != null) {
+				if (equals(buy_1.getBlock(), clicked)) {
+					buy_1(quester, clicked);
+					updateDisplay();
+					return true;
+				}
 			}
-			if (equals(sell_64.getBlock(), clicked)) {
-				sell_64(quester, clicked);
-				updateDisplay();
-				return true;
+			if (sell_64 != null) {
+				if (equals(sell_64.getBlock(), clicked)) {
+					sell_64(quester, clicked);
+					updateDisplay();
+					return true;
+				}
 			}
-			if (equals(sell_1.getBlock(), clicked)) {
-				sell_1(quester, clicked);
-				updateDisplay();
-				return true;
-			}
-			if (equals(sell_1.getBlock(), clicked)) {
-				sell_1(quester, clicked);
-				updateDisplay();
-				return true;
+			if (sell_1 != null) {
+				if (equals(sell_1.getBlock(), clicked)) {
+					sell_1(quester, clicked);
+					updateDisplay();
+					return true;
+				}
 			}
 		} else {
 			if ((clicked.getType() != Material.SIGN) && (clicked.getType() != Material.WALL_SIGN)) {
@@ -81,35 +247,36 @@ public class NPCSignShop extends Store {
 			switch (initialization) {
 			case 0:
 				next = (Sign)clicked.getState();
-				MineQuest.log("last");
+				quester.sendMessage("Set last");
 				break;
 			case 1:
 				last = (Sign)clicked.getState();
-				MineQuest.log("buy_1");
+				quester.sendMessage("Set buy_1");
 				break;
 			case 2:
 				buy_1 = (Sign)clicked.getState();
-				MineQuest.log("buy_64");
+				quester.sendMessage("Set buy_64");
 				break;
 			case 3:
 				buy_64 = (Sign)clicked.getState();
-				MineQuest.log("sell_1");
+				quester.sendMessage("Set sell_1");
 				break;
 			case 4:
 				sell_1 = (Sign)clicked.getState();
-				MineQuest.log("sell_64");
+				quester.sendMessage("Set sell_64");
 				break;
 			case 5:
 				sell_64 = (Sign)clicked.getState();
-				MineQuest.log("display_1");
+				quester.sendMessage("Set display_1");
 				break;
 			case 6:
 				display_1 = (Sign)clicked.getState();
-				MineQuest.log("display_2");
+				quester.sendMessage("Set display_2");
 				break;
 			case 7:
 				display_2 = (Sign)clicked.getState();
-				MineQuest.log("done");
+				quester.sendMessage("Done!");
+				save();
 				initialization = -1;
 				updateDisplay();
 				return true;
@@ -131,9 +298,10 @@ public class NPCSignShop extends Store {
 				"Material Id:",
 				"" + block.getId()
 		};
-		
-		MineQuest.getEventParser().addEvent(new UpdateSignEvent(100, display_1, lines));
-		MineQuest.log(block.getType());
+
+		if (display_1 != null) {
+			MineQuest.getEventParser().addEvent(new UpdateSignEvent(100, display_1, lines));
+		}
 		
 		lines = new String [] {
 				"Quantity:",
@@ -142,7 +310,9 @@ public class NPCSignShop extends Store {
 				block.getPrice() + ""
 		};
 		
-		MineQuest.getEventParser().addEvent(new UpdateSignEvent(200, display_2, lines));
+		if (display_2 != null) {
+			MineQuest.getEventParser().addEvent(new UpdateSignEvent(200, display_2, lines));
+		}
 		
 //		if (!display_2.update()) {
 //			display_2.update(true);

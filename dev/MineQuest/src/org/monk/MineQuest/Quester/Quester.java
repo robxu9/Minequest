@@ -58,6 +58,7 @@ import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.DefendingClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Store.NPCSignShop;
 import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
@@ -81,7 +82,6 @@ public class Quester {
 	protected boolean enabled;
 	protected int exp;
 	protected int health;
-	protected List<Integer> ids = new ArrayList<Integer>();
 	protected CreatureType[] kills;
 	protected String last;
 	protected int level;
@@ -93,7 +93,8 @@ public class Quester {
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
-	protected List<Long> times = new ArrayList<Long>();
+	private List<Long> times = new ArrayList<Long>();
+	private List<Integer> ids = new ArrayList<Integer>();
 
 	public Quester() {
 	}
@@ -514,6 +515,12 @@ public class Quester {
 
 		if (town != null) {
 			Property prop = town.getProperty(block.getLocation());
+			
+			for (NPCSignShop shop : town.getStores()) {
+				if (shop.parseClick(this, block)) {
+					return false;
+				}
+			}
 			
 			if (prop != null) {
 				if (prop.canEdit(this)) {

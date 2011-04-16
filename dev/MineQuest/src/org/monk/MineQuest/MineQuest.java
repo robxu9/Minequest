@@ -60,6 +60,7 @@ import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
 
 /**
@@ -542,6 +543,7 @@ public class MineQuest extends JavaPlugin {
 	private static int npc_cost;
 	private static int npc_cost_class;
 	private static List<String> noMobs;
+	private static NPCStringConfig npc_strings = new NPCStringConfig();
 
 	public MineQuest() {
 	}
@@ -1156,5 +1158,9 @@ public class MineQuest extends JavaPlugin {
 		noMobs.remove(world.getName());
 		
 		return;
+	}
+	
+	public static NPCStringConfig getNPCStringConfiguration() {
+		return npc_strings;
 	}
 }

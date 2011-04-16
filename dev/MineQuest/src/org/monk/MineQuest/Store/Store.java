@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
@@ -193,7 +194,7 @@ public class Store {
 		return super.equals(obj);
 	}
 	
-	private StoreBlock getBlock(int item_id) {
+	public StoreBlock getBlock(int item_id) {
 		int i;
 		
 		for (i = 0; i < blocks.size(); i++) {
@@ -205,7 +206,7 @@ public class Store {
 		return null;
 	}
 	
-	private StoreBlock getBlock(String name) {
+	protected StoreBlock getBlock(String name) {
 		int i;
 		
 		for (i = 0; i < blocks.size(); i++) {
@@ -229,7 +230,7 @@ public class Store {
 		//return MineQuest.distance(loc, location) < radius;
 	}
 	
-	public boolean inStore(Player player) {
+	public boolean inStore(HumanEntity player) {
 		return inStore(player.getLocation());
 	}
 	
@@ -282,6 +283,21 @@ public class Store {
 		MineQuest.getSQLServer().update("INSERT INTO " + name + " (item_id, price, quantity, type) VALUES('" + 
 				Integer.parseInt(item_id) + "', '" + Integer.parseInt(price) + "', '0', '" + type + "')");
 		blocks.add(new StoreBlock(this, type, 0, Integer.parseInt(price), Integer.parseInt(item_id)));
+	}
+
+	public StoreBlock getBest() {
+		int i = 0;
+		int amount = blocks.get(0).getQuantity();
+		int index = 0;
+		
+		while (++i < blocks.size()) {
+			if (blocks.get(i).getQuantity() > amount) {
+				index = i;
+				amount = blocks.get(i).getQuantity();
+			}
+		}
+			
+		return blocks.get(index);
 	}
 
 }

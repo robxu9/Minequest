@@ -43,15 +43,9 @@ public class StoreBlock {
 	public int getId() {
 		return id;
 	}
-	
-	public void cost(Quester quester, int block_quantity, boolean b) {
+
+	public int cost(Quester quester, boolean b, int block_quantity) {
 		int cubes;
-		String buy;
-		if (b) {
-			buy = "buy ";
-		} else {
-			buy = "sell ";
-		}
 		
 		if (b && (quantity < block_quantity)) {
 			quantity = block_quantity;
@@ -61,6 +55,19 @@ public class StoreBlock {
 		}
 		
 		cubes = blocksToCubes(block_quantity, b);
+		
+		return cubes;
+	}
+	
+	public void cost(Quester quester, int block_quantity, boolean b) {
+		int cubes = cost(quester, b, block_quantity);
+		
+		String buy;
+		if (b) {
+			buy = "buy ";
+		} else {
+			buy = "sell ";
+		}
 		
     	String cubes_string;
 		if (cubes > 1000000) {

@@ -42,12 +42,6 @@ public class MineQuestBlockListener extends BlockListener {
 					 + " " + event.getBlock().getType() + " " + 
 					 event.getBlock().getData());
 		}
-		
-		if (MineQuest.getTown(event.getPlayer()) != null) {
-			if (MineQuest.getTown(event.getPlayer()).getStore(event.getPlayer()) != null) {
-				MineQuest.getTown(event.getPlayer()).getStore(event.getPlayer()).parseClick(MineQuest.getQuester(event.getPlayer()), event.getBlock());
-			}
-		}
 	
 		quester.checkItemInHand();
 		if (quester.checkItemInHandAbil()) {

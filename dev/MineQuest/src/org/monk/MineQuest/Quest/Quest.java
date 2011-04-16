@@ -116,10 +116,12 @@ public class Quest {
 			} catch (Exception e) {
 				MineQuest.log("Unable to load Quest Problem on Line " + number);
 				MineQuest.log("  " + line);
+				e.printStackTrace();
 				try {
 					issueNextEvents(-1);
 				} catch (Exception e1) {
 					MineQuest.log("Unable to unload events properly");
+					e1.printStackTrace();
 				}
 				return;
 			}
@@ -692,12 +694,13 @@ public class Quest {
 			for (QuestTask task : tasks) {
 				task.clearEvents();
 			}
-			MineQuest.remQuest(this);
 			
 			for (NPCQuester quester : npcs) {
 				MineQuest.remQuester(quester);
 				quester.damage(20000);
 			}
+			
+			MineQuest.remQuest(this);
 			
 			return;
 		} else if (index <= -2) {
