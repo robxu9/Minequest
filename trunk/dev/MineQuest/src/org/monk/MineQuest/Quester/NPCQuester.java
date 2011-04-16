@@ -20,6 +20,7 @@ package org.monk.MineQuest.Quester;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
@@ -43,6 +44,8 @@ import org.monk.MineQuest.Event.NPCEvent;
 import org.monk.MineQuest.Event.Absolute.SpawnNPCEvent;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Store.Store;
+import org.monk.MineQuest.Store.StoreBlock;
 import org.monk.MineQuest.World.Town;
 
 import redecouverte.npcspawner.BasicHumanNpc;
@@ -63,6 +66,12 @@ public class NPCQuester extends Quester {
 	private Location target = null;
 	private String town;
 	private String walk_message;
+    private int delay = 15000;
+	private List<Integer> idsStore;
+	private List<Integer> itemStore;
+	private List<Long> times1 = new ArrayList<Long>();
+	private List<Integer> ids1 = new ArrayList<Integer>();
+
 	
 	public NPCQuester(String name) {
 		super(name);
@@ -73,6 +82,11 @@ public class NPCQuester extends Quester {
 		} else {
 			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		}
+		if (mode == NPCMode.STORE) {
+			delay = 2000;
+		}
+		idsStore = new ArrayList<Integer>();
+		itemStore = new ArrayList<Integer>();
 	}
 	
 	public NPCQuester(String name, NPCMode mode, World world, Location location) {
@@ -98,11 +112,17 @@ public class NPCQuester extends Quester {
 		} else {
 			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		}
+		if (mode == NPCMode.STORE) {
+			delay = 2000;
+		}
+		idsStore = new ArrayList<Integer>();
+		itemStore = new ArrayList<Integer>();
 	}
 	
 	public void activate() {
 		if (health <= 0) return;
-		if ((mode == NPCMode.FOLLOW) || (mode == NPCMode.PARTY) || (mode == NPCMode.GQUEST_NPC)) {
+		if (player == null) return;
+		if ((mode == NPCMode.STORE) || (mode == NPCMode.FOLLOW) || (mode == NPCMode.PARTY) || (mode == NPCMode.GQUEST_NPC)) {
 			if (mobTarget == null) {
 				if ((follow != null) && (follow.getPlayer() != null)) {
 					if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
@@ -163,19 +183,41 @@ public class NPCQuester extends Quester {
 				}
 				
 				if (player != null) {
-					List<LivingEntity> entities = Ability.getEntities(player, radius);
-					for (LivingEntity lentity : entities) {
-						if (lentity instanceof Player) {
-							if (!checkMessage(lentity.getEntityId())) {
-								MineQuest.getQuester(lentity).sendMessage("<" + name + "> " + walk_message);
+					for (Player entity : MineQuest.getSServer().getOnlinePlayers()) {
+						if (MineQuest.distance(player.getLocation(), entity.getLocation()) < radius) {
+							if (!MineQuest.getQuester(entity).isCompleted(new QuestProspect(quest_file))) {
+								if (!checkMessage(entity.getEntityId())) {
+									MineQuest.getQuester(entity).sendMessage("<" + name + "> " + walk_message);
+								}
 							}
 						}
 					}
 				}
 			}
+			
+			if (mode == NPCMode.STORE) {
+				List<Integer> these_ids = new ArrayList<Integer>();
+				Store store = MineQuest.getTown(player).getStore(player);
+				
+				for (Player player : MineQuest.getSServer().getOnlinePlayers()) {
+					if ((MineQuest.getTown(player) != null) && store.equals(MineQuest.getTown(player).getStore(player))) {
+						if (!checkMessageStore(player.getEntityId(), player.getItemInHand().getTypeId())) {
+							MineQuest.getNPCStringConfiguration().sendRandomMessage(this, MineQuest.getQuester(player), store);
+						}
+						these_ids.add(player.getEntityId());
+					}
+				}
+				
+				int i;
+				for (i = 0; i < idsStore.size(); i++) {
+					if (!these_ids.contains(idsStore.get(i))) {
+						itemStore.set(i, -1);
+					}
+				}
+			}
 		}
 	}
-	
+
     private void attack(LivingEntity mobTarget) {
 		entity.attackLivingEntity(mobTarget);
 		((CraftHumanEntity)player).getHandle().d(((CraftLivingEntity)mobTarget).getHandle());
@@ -220,15 +262,13 @@ public class NPCQuester extends Quester {
 		return false;
 	}
 	
-	private boolean checkMessage(int id) {
-	    Calendar now = Calendar.getInstance();
+	private boolean checkMessageStore(int id, int item) {
 	    int i;
-	    int delay = 15000;
 	    
-		for (i = 0; i < ids.size(); i++) {
-			if (ids.get(i) == id) {
-				if ((now.getTimeInMillis() - times.get(i)) > delay) {
-					times.set(i, now.getTimeInMillis());
+		for (i = 0; i < idsStore.size(); i++) {
+			if (idsStore.get(i) == id) {
+				if (itemStore.get(i) != item) {
+					itemStore.set(i, item);
 					return false;
 				} else {
 					return true;
@@ -236,8 +276,32 @@ public class NPCQuester extends Quester {
 			}
 		}
 	    
-	    ids.add(id);
-	    times.add(now.getTimeInMillis());
+	    idsStore.add(id);
+	    itemStore.add(item);
+	    
+	    return false;
+    }
+	
+	private boolean checkMessage(int id) {
+	    Calendar now = Calendar.getInstance();
+	    int i;
+	    
+		for (i = 0; i < ids1.size(); i++) {
+			if (ids1.get(i) == id) {
+				if ((now.getTimeInMillis() - times1.get(i)) > delay) {
+					times1.set(i, now.getTimeInMillis());
+					MineQuest.log("No Message");
+					return false;
+				} else {
+					MineQuest.log("Message");
+					return true;
+				}
+			}
+		}
+	    
+	    ids1.add(id);
+	    times1.add(now.getTimeInMillis());
+		MineQuest.log("No Message");
 	    
 	    return false;
     }
@@ -333,7 +397,7 @@ public class NPCQuester extends Quester {
 	
 	@Override
 	public boolean healthChange(int change, EntityDamageEvent event) {
-		boolean ret = super.healthChange(change, event);
+		boolean ret = false;
 		
 		if (mode == NPCMode.GOD) {
 			health = max_health;
@@ -341,7 +405,6 @@ public class NPCQuester extends Quester {
 		} else if (mode == NPCMode.STORE) {
 			health = max_health;
 			event.setDamage(0);
-			
 
 			LivingEntity entity = null;
 			if (event instanceof EntityDamageByEntityEvent) {
@@ -353,7 +416,19 @@ public class NPCQuester extends Quester {
 			if (entity instanceof HumanEntity) {
 				HumanEntity human = (HumanEntity)entity;
 				ItemStack hand = human.getItemInHand();
-				MineQuest.getTown(player).getStore(player).sell(MineQuest.getQuester(human), hand.getTypeId(), hand.getAmount());
+				MineQuest.getTown(player).getStore(player).setKeeper(this);
+				if (checkMessage(entity.getEntityId())) {
+					MineQuest.getTown(player).getStore(player).sell(MineQuest.getQuester(human), hand.getTypeId(), hand.getAmount());
+				} else {
+					StoreBlock block = MineQuest.getTown(player).getStore(player).getBlock(hand.getTypeId());
+					if (block != null) {
+						long cost = block.cost(MineQuest.getQuester(human), false, hand.getAmount());
+						MineQuest.getQuester(human).sendMessage("<" + getName() + "> I will give you " + cost + " for your " + hand.getAmount() + " " + hand.getType());
+					} else {
+						MineQuest.getQuester(human).sendMessage("<" + getName() + "> I am not interested in your " + hand.getType());
+					}
+					
+				}
 			}
 		} else if (mode == NPCMode.GQUEST_NPC) {
 			health = max_health;
@@ -362,11 +437,14 @@ public class NPCQuester extends Quester {
 			if ((event instanceof EntityDamageByEntityEvent) && 
 					(((EntityDamageByEntityEvent)event).getDamager() instanceof Player)) {
 				Player player = (Player)((EntityDamageByEntityEvent)event).getDamager();
-				MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
-				MineQuest.log("Quest:" + quest_file);
-				MineQuest.getQuester(player).addQuestAvailable(new QuestProspect(quest_file));
+				if (!MineQuest.getQuester(player).isCompleted(new QuestProspect(quest_file))) {
+					MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
+					MineQuest.log("Quest:" + quest_file);
+					MineQuest.getQuester(player).addQuestAvailable(new QuestProspect(quest_file));
+				}
 			}
 		} else {
+			ret = super.healthChange(change, event);
 			LivingEntity entity = null;
 			if (event instanceof EntityDamageByEntityEvent) {
 				entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();

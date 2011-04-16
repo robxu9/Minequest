@@ -359,6 +359,7 @@ public class Town {
 	}
 
 	public void setMERCSpawn(Location spawn) {
+		// TODO Auto-generated method stub
 		this.npc_spawn = new Location(spawn.getWorld(),
 				spawn.getX(), spawn.getY(), spawn.getZ());
 		MineQuest.getSQLServer().update("UPDATE towns SET merc_x='" + (int)spawn.getX() + "', merc_y='" + 
@@ -384,6 +385,10 @@ public class Town {
 		World world = MineQuest.getSServer().getWorlds().get(0);
 		MineQuest.addQuester(new NPCQuester(name, NPCMode.FOR_SALE, world, getNPCSpawn()));
 		((NPCQuester)MineQuest.getQuester(name)).setTown(getName());
+	}
+
+	public List<NPCSignShop> getStores() {
+		return stores;
 	}
 
 }

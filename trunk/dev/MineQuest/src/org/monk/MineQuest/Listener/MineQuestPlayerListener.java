@@ -938,11 +938,46 @@ public class MineQuestPlayerListener extends PlayerListener {
 
 			quester.getClass("Warrior").display();
 			event.setCancelled(true);
-        } else if (split[0].equals("/set_store_npc")) {
-        	NPCSignShop nss = MineQuest.getTown(player).getStore(player);
+        } else if (split[0].equals("/init_store")) {
+        	if (MineQuest.getTown(player) == null) {
+        		player.sendMessage("You are not in a town");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (MineQuest.getTown(player).getStore(player) == null) {
+        		player.sendMessage("You are not in a store");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
+        		player.sendMessage("You do not have permission to edit town");
+    			event.setCancelled(true);
+    			return;
+        	}
         	
-        	nss.setKeeper((NPCQuester)MineQuest.getQuester(split[1]));
+        	NPCSignShop shop = MineQuest.getTown(player).getStore(player);
+        	shop.intialize(MineQuest.getQuester(player));
 			event.setCancelled(true);
+        } else if (split[0].equals("/spawn_store_npc")) {
+        	if (MineQuest.getTown(player) == null) {
+        		player.sendMessage("You are not in a town");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (MineQuest.getTown(player).getStore(player) == null) {
+        		player.sendMessage("You are not in a store");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
+        		player.sendMessage("You do not have permission to edit town");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	
+        	Location location = player.getLocation();
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
+        	event.setCancelled(true);
         }
 	}
 }
