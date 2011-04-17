@@ -1,0 +1,4 @@
+name: MineQuest
+main: org.monk.MineQuest.MineQuest
+version: dev
+author: Monk
