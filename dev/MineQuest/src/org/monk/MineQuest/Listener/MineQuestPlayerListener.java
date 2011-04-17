@@ -800,7 +800,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/spawn_npc")) {
         	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STATIONARY, player.getWorld(), location));
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
         	event.setCancelled(true);
         } else if (split[0].equals("/attack")) {
         	if ((MineQuest.getQuester(split[1]) instanceof NPCQuester) && (MineQuest.getQuester(split[2]) != null)) {
@@ -855,7 +855,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/spawn_quest_giver")) {
         	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GQUEST_NPC, player.getWorld(), location));
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
         	event.setCancelled(true);
         } else if (split[0].equals("/npc_property")) {
         	try {

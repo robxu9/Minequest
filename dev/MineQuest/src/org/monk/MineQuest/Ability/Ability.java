@@ -69,7 +69,7 @@ public abstract class Ability {
 	//following code came from http://snippets.dzone.com/posts/show/4831
 	public static List<String> getClasseNamesInPackage(String jarName,
 			String packageName) {
-		boolean debug = false;
+		boolean debug = true;
 		ArrayList<String> classes = new ArrayList<String>();
 
 		packageName = packageName.replaceAll("\\.", "/");
