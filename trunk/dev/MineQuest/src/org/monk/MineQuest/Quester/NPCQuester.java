@@ -122,97 +122,95 @@ public class NPCQuester extends Quester {
 	public void activate() {
 		if (health <= 0) return;
 		if (player == null) return;
-		if ((mode == NPCMode.STORE) || (mode == NPCMode.FOLLOW) || (mode == NPCMode.PARTY) || (mode == NPCMode.GQUEST_NPC)) {
-			if (mobTarget == null) {
-				if ((follow != null) && (follow.getPlayer() != null)) {
-					if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
-						setTarget(follow.getPlayer().getLocation(), 4);
-					}
-				}
-			} else {
-				if (MineQuest.distance(follow.getPlayer().getLocation(), mobTarget.getLocation()) > 1.3) {
-					if (mobTarget.getHealth() <= 0) {
-						mobTarget = null;
-						return;
-					}
-					setTarget(mobTarget.getLocation(), 1.25);
+		
+		if (mobTarget == null) {
+			if ((follow != null) && (follow.getPlayer() != null)) {
+				if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
+					setTarget(follow.getPlayer().getLocation(), 4);
 				}
 			}
+		} else {
+			if (MineQuest.distance(follow.getPlayer().getLocation(), mobTarget.getLocation()) > 1.3) {
+				if (mobTarget.getHealth() <= 0) {
+					mobTarget = null;
+					return;
+				}
+				setTarget(mobTarget.getLocation(), 1.25);
+			}
+		}
 
-			if (target != null) {
-				if (MineQuest.distance(player.getLocation(), target) < speed) {
-					double move_x = (target.getX() - player.getLocation().getX());
-	//				double move_y = (target.getY() - player.getLocation().getY());
-					double move_z = (target.getZ() - player.getLocation().getZ());
-					float yaw = 0;
-					yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-					entity.moveTo(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
-	
-					target = null;
-				} else {
-					double distance = MineQuest.distance(player.getLocation(), target);
-					double move_x = (speed * (target.getX() - player.getLocation().getX()) / distance);
-					double move_y = (speed * (target.getY() - player.getLocation().getY()) / distance);
-					double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
-					move_x += (new Random()).nextDouble() * .05;
-					move_z += (new Random()).nextDouble() * .05;
-	//				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
-	//						(int)player.getLocation().getBlockY(), 
-	//						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
-					float yaw = 0;
-					yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-					entity.moveTo(
-						player.getLocation().getX() + move_x,
-						player.getLocation().getY() + move_y,
-						player.getLocation().getZ() + move_z,
-						yaw, target.getPitch());
-				}
+		if (target != null) {
+			if (MineQuest.distance(player.getLocation(), target) < speed) {
+				double move_x = (target.getX() - player.getLocation().getX());
+//				double move_y = (target.getY() - player.getLocation().getY());
+				double move_z = (target.getZ() - player.getLocation().getZ());
+				float yaw = 0;
+				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
+				entity.moveTo(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
+
+				target = null;
+			} else {
+				double distance = MineQuest.distance(player.getLocation(), target);
+				double move_x = (speed * (target.getX() - player.getLocation().getX()) / distance);
+				double move_y = (speed * (target.getY() - player.getLocation().getY()) / distance);
+				double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
+				move_x += (new Random()).nextDouble() * .05;
+				move_z += (new Random()).nextDouble() * .05;
+//				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
+//						(int)player.getLocation().getBlockY(), 
+//						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
+				float yaw = 0;
+				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
+				entity.moveTo(
+					player.getLocation().getX() + move_x,
+					player.getLocation().getY() + move_y,
+					player.getLocation().getZ() + move_z,
+					yaw, target.getPitch());
 			}
-			
-			if (mode == NPCMode.PARTY) {
-				if ((mobTarget != null) && (MineQuest.distance(mobTarget.getLocation(), player.getLocation()) < 1.2)) {
-					attack(mobTarget);
-				}
+		}
+		
+		if ((mobTarget != null) && (MineQuest.distance(mobTarget.getLocation(), player.getLocation()) < 1.2)) {
+			attack(mobTarget);
+		}
+		
+		if (rad != 0) {
+			count++;
+			if (count == 30) {
+				setTarget(center, rad);
+				MineQuest.log("Setting Target");
+				count = 0;
 			}
-			
-			if (mode == NPCMode.GQUEST_NPC) {
-				count++;
-				if (count == 30) {
-					setTarget(center, rad);
-					count = 0;
-				}
-				
-				if (player != null) {
-					for (Player entity : MineQuest.getSServer().getOnlinePlayers()) {
-						if (MineQuest.distance(player.getLocation(), entity.getLocation()) < radius) {
-							if (!MineQuest.getQuester(entity).isCompleted(new QuestProspect(quest_file))) {
-								if (!checkMessage(entity.getEntityId())) {
-									MineQuest.getQuester(entity).sendMessage("<" + name + "> " + walk_message);
-								}
-							}
+		}
+		
+		if (walk_message != null) {
+			for (Player entity : MineQuest.getSServer().getOnlinePlayers()) {
+				if (MineQuest.distance(player.getLocation(), entity.getLocation()) < radius) {
+					if (!MineQuest.getQuester(entity).isCompleted(new QuestProspect(quest_file))) {
+						if (!checkMessage(entity.getEntityId())) {
+							MineQuest.getQuester(entity).sendMessage("<" + name + "> " + walk_message);
 						}
 					}
 				}
 			}
+		}
+		
+		if (mode == NPCMode.STORE) {
+			List<Integer> these_ids = new ArrayList<Integer>();
+			Store store = MineQuest.getTown(player).getStore(player);
 			
-			if (mode == NPCMode.STORE) {
-				List<Integer> these_ids = new ArrayList<Integer>();
-				Store store = MineQuest.getTown(player).getStore(player);
-				
-				for (Player player : MineQuest.getSServer().getOnlinePlayers()) {
-					if ((MineQuest.getTown(player) != null) && store.equals(MineQuest.getTown(player).getStore(player))) {
-						if (!checkMessageStore(player.getEntityId(), player.getItemInHand().getTypeId())) {
-							MineQuest.getNPCStringConfiguration().sendRandomMessage(this, MineQuest.getQuester(player), store);
-						}
-						these_ids.add(player.getEntityId());
+			for (Player player : MineQuest.getSServer().getOnlinePlayers()) {
+				if ((MineQuest.getTown(player) != null) && store.equals(MineQuest.getTown(player).getStore(player))) {
+					if (!checkMessageStore(player.getEntityId(), player.getItemInHand().getTypeId())) {
+						MineQuest.getNPCStringConfiguration().sendRandomMessage(this, MineQuest.getQuester(player), store);
 					}
+					these_ids.add(player.getEntityId());
 				}
-				
-				int i;
-				for (i = 0; i < idsStore.size(); i++) {
-					if (!these_ids.contains(idsStore.get(i))) {
-						itemStore.set(i, -1);
-					}
+			}
+			
+			int i;
+			for (i = 0; i < idsStore.size(); i++) {
+				if (!these_ids.contains(idsStore.get(i))) {
+					itemStore.set(i, -1);
 				}
 			}
 		}
@@ -322,16 +320,6 @@ public class NPCQuester extends Quester {
 
 			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " +
 					name + "_npc (property VARCHAR(30), value VARCHAR(300))");
-			if (mode == NPCMode.GQUEST_NPC) {
-				MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
-						" (property, value) VALUES('walk_message', 'Set me Admin!!')");
-				MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
-						" (property, value) VALUES('hit_message', 'Set me Admin!!')");
-				MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
-						" (property, value) VALUES('radius', '10')");
-				MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
-						" (property, value) VALUES('quest', '')");
-			}
 		}
 	}
 	
@@ -399,48 +387,47 @@ public class NPCQuester extends Quester {
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		boolean ret = false;
 		
-		if (mode == NPCMode.GOD) {
-			health = max_health;
-			event.setDamage(0);
-		} else if (mode == NPCMode.STORE) {
+		if ((mode != NPCMode.FOR_SALE) && (mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY)) {
 			health = max_health;
 			event.setDamage(0);
 
-			LivingEntity entity = null;
-			if (event instanceof EntityDamageByEntityEvent) {
-				entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
-			}
-			if (event instanceof EntityDamageByProjectileEvent) {
-				entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
-			}
-			if (entity instanceof HumanEntity) {
-				HumanEntity human = (HumanEntity)entity;
-				ItemStack hand = human.getItemInHand();
-				MineQuest.getTown(player).getStore(player).setKeeper(this);
-				if (checkMessage(entity.getEntityId())) {
-					MineQuest.getTown(player).getStore(player).sell(MineQuest.getQuester(human), hand.getTypeId(), hand.getAmount());
-				} else {
-					StoreBlock block = MineQuest.getTown(player).getStore(player).getBlock(hand.getTypeId());
-					if (block != null) {
-						long cost = block.cost(MineQuest.getQuester(human), false, hand.getAmount());
-						MineQuest.getQuester(human).sendMessage("<" + getName() + "> I will give you " + cost + " for your " + hand.getAmount() + " " + hand.getType());
+			if (mode == NPCMode.STORE) {
+				LivingEntity entity = null;
+				if (event instanceof EntityDamageByEntityEvent) {
+					entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
+				}
+				if (event instanceof EntityDamageByProjectileEvent) {
+					entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
+				}
+				if (entity instanceof HumanEntity) {
+					HumanEntity human = (HumanEntity)entity;
+					ItemStack hand = human.getItemInHand();
+					MineQuest.getTown(player).getStore(player).setKeeper(this);
+					if (checkMessage(entity.getEntityId())) {
+						MineQuest.getTown(player).getStore(player).sell(MineQuest.getQuester(human), hand.getTypeId(), hand.getAmount());
 					} else {
-						MineQuest.getQuester(human).sendMessage("<" + getName() + "> I am not interested in your " + hand.getType());
+						StoreBlock block = MineQuest.getTown(player).getStore(player).getBlock(hand.getTypeId());
+						if (block != null) {
+							long cost = block.cost(MineQuest.getQuester(human), false, hand.getAmount());
+							MineQuest.getQuester(human).sendMessage("<" + getName() + "> I will give you " + cost + " for your " + hand.getAmount() + " " + hand.getType());
+						} else {
+							MineQuest.getQuester(human).sendMessage("<" + getName() + "> I am not interested in your " + hand.getType());
+						}
+						
 					}
-					
 				}
 			}
-		} else if (mode == NPCMode.GQUEST_NPC) {
-			health = max_health;
-			event.setDamage(0);
 			
 			if ((event instanceof EntityDamageByEntityEvent) && 
 					(((EntityDamageByEntityEvent)event).getDamager() instanceof Player)) {
 				Player player = (Player)((EntityDamageByEntityEvent)event).getDamager();
 				if (!MineQuest.getQuester(player).isCompleted(new QuestProspect(quest_file))) {
-					MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
-					MineQuest.log("Quest:" + quest_file);
-					MineQuest.getQuester(player).addQuestAvailable(new QuestProspect(quest_file));
+					if (hit_message != null) {
+						MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
+					}
+					if (quest_file != null) {
+						MineQuest.getQuester(player).addQuestAvailable(new QuestProspect(quest_file));
+					}
 				}
 			}
 		} else {
@@ -505,12 +492,12 @@ public class NPCQuester extends Quester {
 	@Override
 	public void save() {
 		if (mode == NPCMode.QUEST_NPC) return;
-		if (mode == NPCMode.GQUEST_NPC) return;
 		super.save();
 		
 		if (entity == null) return;
 		entity.moveTo(center.getX(), center.getY(), center.getZ(), 
 				center.getYaw(), center.getPitch());
+		
 		MineQuest.getSQLServer().update("UPDATE questers SET x='" + 
 				entity.getBukkitEntity().getLocation().getX() + "', y='" + 
 				entity.getBukkitEntity().getLocation().getY() + "', z='" + 
@@ -644,6 +631,13 @@ public class NPCQuester extends Quester {
 				name + "_npc (property VARCHAR(30), value VARCHAR(300))");
 		
 		results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_npc");
+		
+		this.radius = 0;
+		this.hit_message = null;
+		this.walk_message = null;
+		this.quest_file = null;
+		this.town = null;
+		this.rad = 0;
 			
 		try {
 			while (results.next()) {
@@ -658,6 +652,8 @@ public class NPCQuester extends Quester {
 					this.quest_file = results.getString("value");
 				} else if (property.equals("town")) {
 					this.town = results.getString("value");
+				} else if (property.equals("wander_radius")) {
+					this.rad = Integer.parseInt(results.getString("value"));
 				}
 			}
 		} catch (Exception e) {

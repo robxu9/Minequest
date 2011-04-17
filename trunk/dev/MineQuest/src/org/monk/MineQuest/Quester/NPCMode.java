@@ -22,12 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum NPCMode {
-	STATIONARY, 
-	GOD,
+	GENERIC, 
 	QUEST_NPC,
 	FOLLOW, 
 	PARTY, 
-	GQUEST_NPC,
 	FOR_SALE, 
 	STORE;
 	
