@@ -324,24 +324,26 @@ public class NPCQuester extends Quester {
 	}
 	
 	@Override
-	public void damage(int i) {
-		super.damage(i);
+	public void expClassGain(int class_exp) {
+		if (getClass("Warrior") != null) {
+			getClass("Warrior").expAdd(class_exp);
+		}
 	}
 	
 	public int getCost() {
-		int cost = level * level * MineQuest.getNPCCostLevel();
+		int cost = (level * level + 1) * MineQuest.getNPCCostLevel();
 		
 		if (getClass("Warrior") != null) {
-			cost += getClass("Warrior").getLevel() * getClass("Warrior").getLevel() * MineQuest.getNPCCostWarrior();
+			cost += (getClass("Warrior").getLevel() * getClass("Warrior").getLevel() + 1) * MineQuest.getNPCCostWarrior();
 		}
 		if (getClass("Archer") != null) {
-			cost += getClass("Archer").getLevel() * getClass("Archer").getLevel() * MineQuest.getNPCCostArcher();
+			cost += (getClass("Archer").getLevel() * getClass("Archer").getLevel() + 1) * MineQuest.getNPCCostArcher();
 		}
 		if (getClass("WarMage") != null) {
-			cost += getClass("WarMage").getLevel() * getClass("WarMage").getLevel() * MineQuest.getNPCCostWarMage();
+			cost += (getClass("WarMage").getLevel() * getClass("WarMage").getLevel() + 1) * MineQuest.getNPCCostWarMage();
 		}
 		if (getClass("PeaceMage") != null) {
-			cost += getClass("PeaceMage").getLevel() * getClass("PeaceMage").getLevel() * MineQuest.getNPCCostPeaceMage();
+			cost += (getClass("PeaceMage").getLevel() * getClass("PeaceMage").getLevel() + 1) * MineQuest.getNPCCostPeaceMage();
 		}
 		
 		return cost;
@@ -542,7 +544,6 @@ public class NPCQuester extends Quester {
 				makeNPC(location.getWorld().getName(), location.getX(),
 						location.getY(), location.getZ(), location
 								.getPitch(), location.getYaw());
-				mode = NPCMode.FOR_SALE;
 			}
 			health = max_health;
 		}
