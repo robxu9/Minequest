@@ -44,6 +44,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -62,6 +63,9 @@ import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
+
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 
 /**
  * This is the main class of MineQuest. It holds static lists of players in the server,
@@ -91,6 +95,7 @@ public class MineQuest extends JavaPlugin {
 	private static boolean debug_enable = true;
 	private static boolean cubonomy_enable = true;
 	private static int armor_req_level;
+	public static PermissionHandler Permissions;
 	
 	/**
 	 * Adds a Quester to the MineQuest Server.
@@ -748,6 +753,21 @@ public class MineQuest extends JavaPlugin {
 		for (Town town : towns) {
 			eventQueue.addEvent(new CheckMobEvent(town));
 		}
+		
+		setupPermissions();
+	}
+	
+	private void setupPermissions() {
+		Plugin test = this.getServer().getPluginManager().getPlugin(
+				"Permissions");
+
+		if (this.Permissions == null) {
+			if (test != null) {
+				this.Permissions = ((Permissions) test).getHandler();
+			} else {
+				log("Permission system not detected, defaulting to OP");
+			}
+		}
 	}
 	
 	private void downloadAbilities() throws MalformedURLException, IOException {
@@ -1162,5 +1182,9 @@ public class MineQuest extends JavaPlugin {
 	
 	public static NPCStringConfig getNPCStringConfiguration() {
 		return npc_strings;
+	}
+	
+	public static boolean getIsConomyOn() {
+		return true;
 	}
 }

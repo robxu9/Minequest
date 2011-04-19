@@ -62,6 +62,8 @@ import org.monk.MineQuest.Store.NPCSignShop;
 import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
+import com.nijiko.coelho.iConomy.iConomy;
+
 /**
  * This is a wrapper around bukkit's player class.
  * It manages the health for the player as well as
@@ -1052,6 +1054,9 @@ public class Quester {
 	 * @return
 	 */
 	public double getCubes() {
+		if (MineQuest.getIsConomyOn()) {
+			return iConomy.getBank().getAccount(name).getBalance();
+		}
 		return cubes;
 	}
 
@@ -1486,6 +1491,9 @@ public class Quester {
 	 */
 	public void setCubes(double d) {
 		cubes = d;
+		if (MineQuest.getIsConomyOn()) {
+			iConomy.getBank().getAccount(name).setBalance(d);
+		}
 	}
 	
 	/**
