@@ -62,8 +62,6 @@ import org.monk.MineQuest.Store.NPCSignShop;
 import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
-import com.nijiko.coelho.iConomy.iConomy;
-
 /**
  * This is a wrapper around bukkit's player class.
  * It manages the health for the player as well as
@@ -269,7 +267,9 @@ public class Quester {
 	public void addNPC(NPCQuester quester) {
 		npcParty.addQuester(quester);
 		quester.setMode(NPCMode.PARTY);
-		quester.setFollow(this);
+		if (!equals(quester.getFollow())) {
+			quester.setFollow(this);
+		}
 	}
 
 	public void addQuestAvailable(QuestProspect quest) {
@@ -512,6 +512,10 @@ public class Quester {
 		}
 		
 		if (!MineQuest.isTownEnabled()) {
+			return true;
+		}
+		
+		if (!MineQuest.isTownProtect()) {
 			return true;
 		}
 
@@ -1053,9 +1057,10 @@ public class Quester {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("static-access")
 	public double getCubes() {
 		if (MineQuest.getIsConomyOn()) {
-			return iConomy.getBank().getAccount(name).getBalance();
+			return MineQuest.getIConomy().getBank().getAccount(name).getBalance();
 		}
 		return cubes;
 	}
@@ -1489,10 +1494,11 @@ public class Quester {
 	 * 
 	 * @param d New Cubes
 	 */
+	@SuppressWarnings("static-access")
 	public void setCubes(double d) {
 		cubes = d;
 		if (MineQuest.getIsConomyOn()) {
-			iConomy.getBank().getAccount(name).setBalance(d);
+			MineQuest.getIConomy().getBank().getAccount(name).setBalance(d);
 		}
 	}
 	
@@ -1743,8 +1749,6 @@ public class Quester {
 				player.setHealth(newValue);
 			}
 		}
-		
-//		MineQuest.getEventParser().addEvent(new HealthEvent(250, this, newValue));
 	}
 	
 	public void recalculateHealth() {

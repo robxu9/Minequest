@@ -64,7 +64,7 @@ public class MysqlInterface {
 				throw new Exception();
 			}
 		} else {
-			url = "jdbc:sqlite:" + db + ".db";
+			url = "jdbc:sqlite:" + db + ".sql";
 			try {
 				Class.forName("org.sqlite.JDBC", true, (new AbilityBinder()).getClass().getClassLoader());
 			} catch (ClassNotFoundException e) {

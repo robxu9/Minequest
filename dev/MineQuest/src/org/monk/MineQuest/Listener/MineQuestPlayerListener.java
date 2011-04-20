@@ -922,9 +922,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 			}
         	((NPCQuester)quester).giveItem(MineQuest.getQuester(player));
         	event.setCancelled(true);
-        } else if (split[0].equals("/npc_char")) {
+        } else if (split[0].equals("/npc_char") || split[0].equals("/merc_char")) {
         	if (split.length < 2) {
-        		player.sendMessage("Usage: /npc_char <npc_name>");
+        		player.sendMessage("Usage: /merc_char <merc_name>");
     			event.setCancelled(true);
     			return;
         	}
@@ -937,6 +937,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage(split[1] + " is a level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 
 			quester.getClass("Warrior").display();
+			player.sendMessage(" Health: " + quester.getHealth() + "/" + quester.getMaxHealth());
 			event.setCancelled(true);
         } else if (split[0].equals("/init_store")) {
         	if (MineQuest.getTown(player) == null) {
