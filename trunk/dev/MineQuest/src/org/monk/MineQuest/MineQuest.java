@@ -64,6 +64,7 @@ import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
 
+import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
@@ -77,6 +78,7 @@ import com.nijikokun.bukkit.Permissions.Permissions;
  *
  */
 public class MineQuest extends JavaPlugin {
+	private static iConomy IConomy = null;
 	private static EventQueue eventQueue;
 	private static String namer;
 	private static List<Quester> questers = new ArrayList<Quester>();
@@ -549,6 +551,7 @@ public class MineQuest extends JavaPlugin {
 	private static int npc_cost_class;
 	private static List<String> noMobs;
 	private static NPCStringConfig npc_strings = new NPCStringConfig();
+	private static boolean town_protect;
 
 	public MineQuest() {
 	}
@@ -632,6 +635,7 @@ public class MineQuest extends JavaPlugin {
 			leather_armor_miner_level = restrictions.getInt("leather_armor_miner_level", 2);
 			
 			town_enable = general.getBoolean("town_enable", true);
+			town_protect = general.getBoolean("town_protect", true);
 			cubonomy_enable = general.getBoolean("cubonomy_enable", true);
 			debug_enable = general.getBoolean("debug_enable", true);
 			server_owner = general.getString("mayor", "jmonk");
@@ -670,7 +674,7 @@ public class MineQuest extends JavaPlugin {
         
 //        getEventParser().addEvent(new CheckMQMobs(10000));
 		sql_server.update("CREATE TABLE IF NOT EXISTS towns (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, spawn_x INT, spawn_y INT, spawn_z INT, " +
-		"owner VARCHAR(30), height INT, y INT)");
+		"owner VARCHAR(30), height INT, y INT, merc_x DOUBLE, merc_y DOUBLE, merc_z DOUBLE)");
 
 		ResultSet results = sql_server.query("SELECT * FROM version");
 		
@@ -755,17 +759,31 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		setupPermissions();
+		setupIConomy();
 	}
 	
 	private void setupPermissions() {
 		Plugin test = this.getServer().getPluginManager().getPlugin(
 				"Permissions");
 
-		if (this.Permissions == null) {
+		if (MineQuest.Permissions == null) {
 			if (test != null) {
-				this.Permissions = ((Permissions) test).getHandler();
+				MineQuest.Permissions = ((Permissions) test).getHandler();
 			} else {
 				log("Permission system not detected, defaulting to OP");
+			}
+		}
+	}
+	
+	private void setupIConomy() {
+		Plugin test = this.getServer().getPluginManager().getPlugin(
+				"iConomy");
+
+		if (MineQuest.IConomy == null) {
+			if (test != null) {
+				MineQuest.IConomy = ((iConomy)test);
+			} else {
+				log("iConomy system not detected, defaulting to MineQuest Storage");
 			}
 		}
 	}
@@ -774,7 +792,7 @@ public class MineQuest extends JavaPlugin {
 		BufferedInputStream in = new BufferedInputStream(
 				new
 
-				java.net.URL("http://minequest.googlecode.com/files/abilities.jar")
+				java.net.URL("http://www.theminequest.com/download/abilities.jar")
 						.openStream());
 		FileOutputStream fos = new FileOutputStream(
 				"MineQuest/abilities.jar");
@@ -856,6 +874,7 @@ public class MineQuest extends JavaPlugin {
 	
 	private boolean column_exists(String db, String column) throws SQLException {
 		ResultSet results = sql_server.query("SELECT * FROM " + db);
+		if (results == null) return false;
 		ResultSetMetaData meta = results.getMetaData();
 		
 		int i;
@@ -1158,10 +1177,10 @@ public class MineQuest extends JavaPlugin {
 		String name = entity.getWorld().getName();
 		
 		if (noMobs.contains(name)) {
-			return true;
+			return false;
 		}
 		
-		return false;
+		return true;
 	}
 	
 	public static void noMobs(World world) {
@@ -1185,6 +1204,14 @@ public class MineQuest extends JavaPlugin {
 	}
 	
 	public static boolean getIsConomyOn() {
-		return true;
+		return IConomy != null;
+	}
+
+	public static iConomy getIConomy() {
+		return IConomy;
+	}
+	
+	public static boolean isTownProtect() {
+		return town_protect;
 	}
 }

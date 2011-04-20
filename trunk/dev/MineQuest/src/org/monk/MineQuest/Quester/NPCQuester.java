@@ -38,6 +38,7 @@ import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.material.MaterialData;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.NPCEvent;
@@ -71,6 +72,8 @@ public class NPCQuester extends Quester {
 	private List<Integer> itemStore;
 	private List<Long> times1 = new ArrayList<Long>();
 	private List<Integer> ids1 = new ArrayList<Integer>();
+	private String follow_name;
+	private ItemStack item;
 
 	
 	public NPCQuester(String name) {
@@ -123,6 +126,11 @@ public class NPCQuester extends Quester {
 		if (health <= 0) return;
 		if (player == null) return;
 		
+		if (item != null) {
+			player.setItemInHand(item);
+			item = null;
+		}
+		
 		if (mobTarget == null) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
 				if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
@@ -130,12 +138,18 @@ public class NPCQuester extends Quester {
 				}
 			}
 		} else {
-			if (MineQuest.distance(follow.getPlayer().getLocation(), mobTarget.getLocation()) > 1.3) {
+			if (MineQuest.distance(player.getLocation(), mobTarget.getLocation()) > 1.3) {
 				if (mobTarget.getHealth() <= 0) {
 					mobTarget = null;
 					return;
 				}
 				setTarget(mobTarget.getLocation(), 1.25);
+			}
+		}
+		if ((follow_name != null) && (!follow_name.equals("null"))) {
+			if ((follow == null) && (MineQuest.getQuester(follow_name) != null)) {
+				follow = MineQuest.getQuester(follow_name);	
+				follow.addNPC(this);
 			}
 		}
 
@@ -377,7 +391,12 @@ public class NPCQuester extends Quester {
 			}
 		}
 		
-		player.setItemInHand(quester.getPlayer().getItemInHand());
+		ItemStack item = quester.getPlayer().getItemInHand();
+		String value = item.getTypeId() + "," + item.getAmount() + "," + item.getDurability();
+		if (item.getData() != null) {
+			value = value + "," + item.getData().getData();
+		}
+		setProperty("item", value);
 		quester.getPlayer().setItemInHand(null);
 		
 		if (spare != null) {
@@ -457,6 +476,7 @@ public class NPCQuester extends Quester {
 					Location location = MineQuest.getTown(town).getNPCSpawn();
 
 					sendMessage("Died!");
+					setProperty("follow", null);
 					makeNPC(location.getWorld().getName(), location.getX(),
 							location.getY(), location.getZ(), location
 									.getPitch(), location.getYaw());
@@ -497,8 +517,10 @@ public class NPCQuester extends Quester {
 		super.save();
 		
 		if (entity == null) return;
-		entity.moveTo(center.getX(), center.getY(), center.getZ(), 
-				center.getYaw(), center.getPitch());
+		if ((mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY)) {
+			entity.moveTo(center.getX(), center.getY(), center.getZ(), 
+					center.getYaw(), center.getPitch());
+		}
 		
 		MineQuest.getSQLServer().update("UPDATE questers SET x='" + 
 				entity.getBukkitEntity().getLocation().getX() + "', y='" + 
@@ -512,7 +534,9 @@ public class NPCQuester extends Quester {
 	@Override
 	public void sendMessage(String string) {
 		if (NPCMode.PARTY == mode) {
-			follow.sendMessage(name + " : " + string);
+			if (follow != null) {
+				follow.sendMessage(name + " : " + string);
+			}
 		}
 	}
 
@@ -522,7 +546,7 @@ public class NPCQuester extends Quester {
 	}
 
 	public void setFollow(Quester quester) {
-		this.follow = quester;
+		setProperty("follow", quester == null?null:quester.getName());
 		target = null;
 	}
 
@@ -541,6 +565,8 @@ public class NPCQuester extends Quester {
 				Location location = MineQuest.getTown(town).getNPCSpawn();
 
 				sendMessage("Died!");
+				mode = NPCMode.FOR_SALE;
+				setProperty("follow", null);
 				makeNPC(location.getWorld().getName(), location.getX(),
 						location.getY(), location.getZ(), location
 								.getPitch(), location.getYaw());
@@ -554,7 +580,7 @@ public class NPCQuester extends Quester {
 		target = null;
 	}
 	
-	public void setProperty(String property, String value) {
+	public void handleProperty(String property, String value) {
 		if (property.equals("radius")) {
 			this.radius = Integer.parseInt(value);
 		} else if (property.equals("hit_message")) {
@@ -563,10 +589,33 @@ public class NPCQuester extends Quester {
 			this.walk_message = value;
 		} else if (property.equals("quest")) {
 			this.quest_file = value;
-		} else {
-			return;
+		} else if (property.equals("follow")) {
+			this.follow = MineQuest.getQuester(value);
+			this.follow_name = value;
+			if (follow != null) {
+				follow.addNPC(this);
+			}
+		} else if (property.equals("town")) {
+			this.town = value;
+		} else if (property.equals("wander_radius")) {
+			this.rad = Integer.parseInt(value);
+		} else if (property.equals("item")) {
+			String split[] = value.split(",");
+			item = new ItemStack(Integer.parseInt(split[0]), 
+					Integer.parseInt(split[1]));
+			
+			item.setDurability(Short.parseShort(split[2]));
+			if (split.length > 3) {
+				MaterialData md = new MaterialData(Integer.parseInt(split[0]));
+				md.setData(Byte.parseByte(split[3]));
+				item.setData(md);
+			}
 		}
-		
+	}
+	
+	public void setProperty(String property, String value) {
+		handleProperty(property, value);
+
 		MineQuest.getSQLServer().update("DELETE FROM " + name + "_npc WHERE property='" + property + "'");
 		MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
 				" (property, value) VALUES('" + property + "', '" + value + "')");
@@ -643,22 +692,33 @@ public class NPCQuester extends Quester {
 		try {
 			while (results.next()) {
 				String property = results.getString("property");
-				if (property.equals("radius")) {
-					this.radius = Integer.parseInt(results.getString("value"));
-				} else if (property.equals("hit_message")) {
-					this.hit_message = results.getString("value");
-				} else if (property.equals("walk_message")) {
-					this.walk_message = results.getString("value");
-				} else if (property.equals("quest")) {
-					this.quest_file = results.getString("value");
-				} else if (property.equals("town")) {
-					this.town = results.getString("value");
-				} else if (property.equals("wander_radius")) {
-					this.rad = Integer.parseInt(results.getString("value"));
-				}
+				String value = results.getString("value");
+				handleProperty(property, value);
 			}
 		} catch (Exception e) {
 			MineQuest.log("Problem getting NPC Properties");
 		}
+	}
+	
+	@Override
+	public void bind(String name) {
+		if ((getAbility(name) != null) && (getAbility(name).getClassType().getName().equals("Warrior"))) {
+			super.bind(name);
+		} else {
+			sendMessage("I can only cast warrior abilities");
+		}
+	}
+	
+	@Override
+	public boolean canCast(List<ItemStack> list) {
+		if (follow != null) {
+			return follow.canCast(list);
+		}
+		
+		return false;
+	}
+
+	public Quester getFollow() {
+		return follow;
 	}
 }

@@ -50,7 +50,7 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
  *
  */
 public abstract class Ability {
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
 	private static List<Class> abil_classes;
 
 	// http://www.devx.com/tips/Tip/38975
@@ -69,13 +69,12 @@ public abstract class Ability {
 	//following code came from http://snippets.dzone.com/posts/show/4831
 	public static List<String> getClasseNamesInPackage(String jarName,
 			String packageName) {
-		boolean debug = true;
+		boolean debug = false;
 		ArrayList<String> classes = new ArrayList<String>();
 
 		packageName = packageName.replaceAll("\\.", "/");
 		if (debug)
-			System.out
-					.println("Jar " + jarName + " looking for " + packageName);
+			System.out.println("Jar " + jarName + " looking for " + packageName);
 		try {
 			JarInputStream jarFile = new JarInputStream(new FileInputStream(
 					jarName));
@@ -134,7 +133,7 @@ public abstract class Ability {
 		return i;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	static public List<Ability> newAbilities(SkillClass myclass) {
 		List<String> classes = new ArrayList<String>();
 		List<Ability> abilities = new ArrayList<Ability>();
@@ -142,7 +141,14 @@ public abstract class Ability {
 		if (abil_classes == null) {
 			abil_classes = new ArrayList<Class>();
 			try {
-				classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
+				try {
+					MineQuest.log("Attempting to load MineQuest/abilities.jar");
+					classes = getClasseNamesInPackage("MineQuest/abilities.jar", "org.monk.MineQuest.Ability");
+				} catch (Exception e) {
+					MineQuest.log("Failed to load MineQuest/abilities.jar");
+					classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
+					MineQuest.log("Please move abilities.jar to MineQuest/abilities.jar");
+				}
 			} catch (Exception e) {
 				MineQuest.log("Unable to get Abilities");
 			}
@@ -435,6 +441,8 @@ public abstract class Ability {
 			player.getInventory().addItem(cost.get(i));
 		}
 		player.updateInventory();
+		
+		myclass.expAdd(-getRealExperience());
 	}
 	
 	/**
