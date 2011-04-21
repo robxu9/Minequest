@@ -302,10 +302,8 @@ public class NPCQuester extends Quester {
 			if (ids1.get(i) == id) {
 				if ((now.getTimeInMillis() - times1.get(i)) > delay) {
 					times1.set(i, now.getTimeInMillis());
-					MineQuest.log("No Message");
 					return false;
 				} else {
-					MineQuest.log("Message");
 					return true;
 				}
 			}
@@ -313,7 +311,6 @@ public class NPCQuester extends Quester {
 	    
 	    ids1.add(id);
 	    times1.add(now.getTimeInMillis());
-		MineQuest.log("No Message");
 	    
 	    return false;
     }
@@ -424,17 +421,18 @@ public class NPCQuester extends Quester {
 					HumanEntity human = (HumanEntity)entity;
 					ItemStack hand = human.getItemInHand();
 					MineQuest.getTown(player).getStore(player).setKeeper(this);
-					if (checkMessage(entity.getEntityId())) {
+					if (checkMessage(entity.getEntityId()) && checkMessageStore(human.getEntityId(), human.getItemInHand().getTypeId())) {
+						;
 						MineQuest.getTown(player).getStore(player).sell(MineQuest.getQuester(human), hand.getTypeId(), hand.getAmount());
 					} else {
 						StoreBlock block = MineQuest.getTown(player).getStore(player).getBlock(hand.getTypeId());
+						checkMessageStore(human.getEntityId(), hand.getTypeId());
 						if (block != null) {
 							long cost = block.cost(MineQuest.getQuester(human), false, hand.getAmount());
 							MineQuest.getQuester(human).sendMessage("<" + getName() + "> I will give you " + cost + " for your " + hand.getAmount() + " " + hand.getType());
 						} else {
 							MineQuest.getQuester(human).sendMessage("<" + getName() + "> I am not interested in your " + hand.getType());
 						}
-						
 					}
 				}
 			}
@@ -442,11 +440,11 @@ public class NPCQuester extends Quester {
 			if ((event instanceof EntityDamageByEntityEvent) && 
 					(((EntityDamageByEntityEvent)event).getDamager() instanceof Player)) {
 				Player player = (Player)((EntityDamageByEntityEvent)event).getDamager();
-				if (!MineQuest.getQuester(player).isCompleted(new QuestProspect(quest_file))) {
-					if (hit_message != null) {
-						MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
-					}
-					if (quest_file != null) {
+				if (hit_message != null) {
+					MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
+				}
+				if (quest_file != null) {
+					if (!MineQuest.getQuester(player).isCompleted(new QuestProspect(quest_file))) {
 						MineQuest.getQuester(player).addQuestAvailable(new QuestProspect(quest_file));
 					}
 				}
@@ -588,12 +586,20 @@ public class NPCQuester extends Quester {
 		} else if (property.equals("walk_message")) {
 			this.walk_message = value;
 		} else if (property.equals("quest")) {
+			if ((value == null) || (value.equals("null"))) {
+				this.quest_file = null;
+			}
 			this.quest_file = value;
 		} else if (property.equals("follow")) {
-			this.follow = MineQuest.getQuester(value);
 			this.follow_name = value;
-			if (follow != null) {
-				follow.addNPC(this);
+			if ((value == null) || (value.equals("null"))) {
+				this.follow_name = null;
+			}
+			if (follow_name != null) {
+				this.follow = MineQuest.getQuester(value);
+				if (follow != null) {
+					follow.addNPC(this);
+				}
 			}
 		} else if (property.equals("town")) {
 			this.town = value;
