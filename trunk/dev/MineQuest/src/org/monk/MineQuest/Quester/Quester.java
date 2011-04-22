@@ -23,7 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Location;
@@ -250,7 +252,6 @@ public class Quester {
 	}
 	
 	public void addKill(MQMob mqMob) {
-		if (quest == null) return;
 		LivingEntity monster = mqMob.getMonster();
 		
 		String name = monster.getClass().getName();
@@ -670,6 +671,37 @@ public class Quester {
 	}
 	
 	public void clearKills() {
+		Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
+		
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
+		
+		try {
+			while (results.next()) {
+				kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+			}
+		} catch (Exception e) {
+			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
+		}
+		
+		for (CreatureType creature : kills) {
+			if (kill_map.get(creature) == null) {
+				kill_map.put(creature, 1);
+			} else {
+				kill_map.put(creature, kill_map.get(creature) + 1);
+			}
+		}
+		
+		MineQuest.getSQLServer().update("DELETE FROM " + name + "_kills");
+		
+		for (CreatureType creature : kill_map.keySet()) {
+			MineQuest.getSQLServer()
+					.update(
+							"INSERT INTO " + name
+									+ "_kills (name, count) VALUES('"
+									+ creature + "', '"
+									+ kill_map.get(creature) + "')");
+		}
+		
 		kills = new CreatureType[0];
 	}
 	
@@ -1474,6 +1506,8 @@ public class Quester {
 			skill.save();
 		}
 		enabled = false;
+		
+		clearKills();
 	}
 	
 	/**
@@ -1540,6 +1574,7 @@ public class Quester {
 		if (!world.getName().equals(player.getWorld().getName())) {
 			player.teleport(world.getSpawnLocation());
 		}
+		clearKills();
 	}
 	
 	/**
@@ -1688,6 +1723,8 @@ public class Quester {
 				((NPCQuester)quester).setFollow(this);
 			}
 		}
+		
+		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
 	}
 
 	/**

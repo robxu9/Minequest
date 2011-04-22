@@ -65,8 +65,6 @@ import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
 
 import com.nijiko.coelho.iConomy.iConomy;
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
 
 /**
  * This is the main class of MineQuest. It holds static lists of players in the server,
@@ -97,7 +95,6 @@ public class MineQuest extends JavaPlugin {
 	private static boolean debug_enable = true;
 	private static boolean cubonomy_enable = true;
 	private static int armor_req_level;
-	public static PermissionHandler Permissions;
 	
 	/**
 	 * Adds a Quester to the MineQuest Server.
@@ -757,22 +754,8 @@ public class MineQuest extends JavaPlugin {
 		for (Town town : towns) {
 			eventQueue.addEvent(new CheckMobEvent(town));
 		}
-		
-		setupPermissions();
-		setupIConomy();
-	}
-	
-	private void setupPermissions() {
-		Plugin test = this.getServer().getPluginManager().getPlugin(
-				"Permissions");
 
-		if (MineQuest.Permissions == null) {
-			if (test != null) {
-				MineQuest.Permissions = ((Permissions) test).getHandler();
-			} else {
-				log("Permission system not detected, defaulting to OP");
-			}
-		}
+		setupIConomy();
 	}
 	
 	private void setupIConomy() {
