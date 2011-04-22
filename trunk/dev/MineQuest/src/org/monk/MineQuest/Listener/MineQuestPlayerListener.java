@@ -638,7 +638,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/finishstore")) {
-        	if (split.length <= 0) {
+        	if (split.length <= 1) {
         		player.sendMessage("Usage: /finishstore <unique name>");
         	} else {
 	        	if (MineQuest.getTown(player) != null) {
