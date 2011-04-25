@@ -1,10 +1,9 @@
-package redecouverte.npcspawner;
+package org.martin.bukkit.npclib;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityTargetEvent;
 
 
-@SuppressWarnings("serial")
 public class NpcEntityTargetEvent extends EntityTargetEvent {
 
     public static enum NpcTargetReason {

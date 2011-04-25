@@ -39,6 +39,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.MaterialData;
+import org.martin.bukkit.npclib.NPCEntity;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.NPCEvent;
@@ -49,13 +50,11 @@ import org.monk.MineQuest.Store.Store;
 import org.monk.MineQuest.Store.StoreBlock;
 import org.monk.MineQuest.World.Town;
 
-import redecouverte.npcspawner.BasicHumanNpc;
-import redecouverte.npcspawner.NpcSpawner;
 
 public class NPCQuester extends Quester {
 	private Location center;
 	private int count = 0;
-	private BasicHumanNpc entity;
+	private NPCEntity entity;
 	private Quester follow;
 	private String hit_message;
 	private LivingEntity mobTarget;
@@ -160,7 +159,8 @@ public class NPCQuester extends Quester {
 				double move_z = (target.getZ() - player.getLocation().getZ());
 				float yaw = 0;
 				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-				entity.moveTo(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
+				// TODO: FIX FIX FIX!!!!
+//				entity.getBukkitEntity()..moveTo(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
 
 				target = null;
 			} else {
@@ -175,11 +175,12 @@ public class NPCQuester extends Quester {
 //						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
 				float yaw = 0;
 				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-				entity.moveTo(
-					player.getLocation().getX() + move_x,
-					player.getLocation().getY() + move_y,
-					player.getLocation().getZ() + move_z,
-					yaw, target.getPitch());
+				// TODO: FIX FIX FIX!!!!
+//				entity.moveTo(
+//					player.getLocation().getX() + move_x,
+//					player.getLocation().getY() + move_y,
+//					player.getLocation().getZ() + move_z,
+//					yaw, target.getPitch());
 			}
 		}
 		
@@ -361,7 +362,7 @@ public class NPCQuester extends Quester {
 		return cost;
 	}
 	
-	public BasicHumanNpc getEntity() {
+	public NPCEntity getEntity() {
 		return entity;
 	}
 	
@@ -469,7 +470,8 @@ public class NPCQuester extends Quester {
 				if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
 					removeSql();
 					MineQuest.remQuester(this);
-					NpcSpawner.RemoveBasicHumanNpc(this.entity);
+					MineQuest.getNPCManager().despawn(name);
+//					NpcSpawner.RemoveBasicHumanNpc(this.entity);
 					entity = null;
 				} else {
 					Location location = MineQuest.getTown(town).getNPCSpawn();
@@ -491,8 +493,10 @@ public class NPCQuester extends Quester {
 	private void makeNPC(String world, double x, double y, double z,
 			float pitch, float yaw) {
 		if (entity != null) {
-			entity.getBukkitEntity().setHealth(0);
-			NpcSpawner.RemoveBasicHumanNpc(entity);
+			((Player)entity.getBukkitEntity()).setHealth(0);
+//			entity.getBukkitEntity().setHealth(0);
+			MineQuest.getNPCManager().despawn(name);
+//			NpcSpawner.RemoveBasicHumanNpc(this.entity);
 			entity = null;
 		}
 		MineQuest.getEventParser().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
@@ -517,8 +521,8 @@ public class NPCQuester extends Quester {
 		
 		if (entity == null) return;
 		if ((mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY)) {
-			entity.moveTo(center.getX(), center.getY(), center.getZ(), 
-					center.getYaw(), center.getPitch());
+//			entity.moveTo(center.getX(), center.getY(), center.getZ(), 
+//					center.getYaw(), center.getPitch());
 		}
 		
 		MineQuest.getSQLServer().update("UPDATE questers SET x='" + 
@@ -539,9 +543,9 @@ public class NPCQuester extends Quester {
 		}
 	}
 
-	public void setEntity(BasicHumanNpc entity) {
+	public void setEntity(NPCEntity entity) {
 		this.entity = entity;
-		setPlayer(entity.getBukkitEntity());
+		setPlayer((Player)entity.getBukkitEntity());
 	}
 
 	public void setFollow(Quester quester) {
@@ -558,7 +562,8 @@ public class NPCQuester extends Quester {
 			if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
 				removeSql();
 				MineQuest.remQuester(this);
-				NpcSpawner.RemoveBasicHumanNpc(entity);
+				MineQuest.getNPCManager().despawn(name);
+//				NpcSpawner.RemoveBasicHumanNpc(this.entity);
 				entity = null;
 			} else {
 				Location location = MineQuest.getTown(town).getNPCSpawn();
