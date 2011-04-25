@@ -231,7 +231,8 @@ public class NPCQuester extends Quester {
 	}
 
     private void attack(LivingEntity mobTarget) {
-		entity.attackLivingEntity(mobTarget);
+//		entity.attackLivingEntity(mobTarget);
+    	entity.animateArmSwing();
 		((CraftHumanEntity)player).getHandle().d(((CraftLivingEntity)mobTarget).getHandle());
 	}
 	
