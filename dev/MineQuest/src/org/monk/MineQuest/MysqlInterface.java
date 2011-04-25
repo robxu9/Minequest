@@ -173,6 +173,7 @@ public class MysqlInterface {
 				ret = stmt.executeUpdate(sql);
 				return ret;
 			} catch (SQLException e1) {
+				MineQuest.log("Retry Failed!!");
 				return 1;
 			}
 		}
@@ -204,6 +205,7 @@ public class MysqlInterface {
 				ret = stmt.executeUpdate(sql);
 				return ret;
 			} catch (SQLException e1) {
+				MineQuest.log("Retry Failed!!");
 				return 1;
 			}
 		}

@@ -24,6 +24,8 @@ public class NpcNetworkManager extends NetworkManager {
 
         }
     }
+    
+    
 
     @Override
     public void a(NetHandler paramNetHandler) {
@@ -39,11 +41,6 @@ public class NpcNetworkManager extends NetworkManager {
 
     @Override
     public void a() {
-    }
-
-    @Override
-    public SocketAddress b() {
-        return super.b();
     }
 
     @Override

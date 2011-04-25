@@ -1,6 +1,7 @@
 package redecouverte.npcspawner;
 
 import net.minecraft.server.*;
+
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class NpcNetHandler extends NetServerHandler 
@@ -20,9 +21,9 @@ public class NpcNetHandler extends NetServerHandler
     @Override
     public void a() {
     }
-
+    
     @Override
-    public void a(String s) {
+    public void sendMessage(String s) {
     }
 
     @Override
@@ -48,9 +49,9 @@ public class NpcNetHandler extends NetServerHandler
     @Override
     public void a(Packet packet) {
     }
-
+    
     @Override
-    public void b(Packet packet) {
+    public void sendPacket(Packet packet) {
     }
 
     @Override
@@ -79,15 +80,6 @@ public class NpcNetHandler extends NetServerHandler
     }
 
     @Override
-    public void b(String s) {
-    }
-
-    @Override
-    public String c() {
-        return "";
-    }
-
-    @Override
     public void a(Packet7UseEntity packet7useentity) {
     }
 
@@ -109,5 +101,10 @@ public class NpcNetHandler extends NetServerHandler
 
     @Override
     public void a(Packet130UpdateSign packet130updatesign) {
+    }
+    
+    @Override
+    public boolean c() {
+    	return false;
     }
 }

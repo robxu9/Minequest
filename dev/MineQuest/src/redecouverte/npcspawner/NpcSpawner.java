@@ -67,13 +67,15 @@ public class NpcSpawner {
             MinecraftServer ms = GetMinecraftServer(ws.getServer());
 
             CHumanNpc eh = new CHumanNpc(ms, ws, name, new ItemInWorldManager(ws));
-            eh.c(x, y, z, yaw, pitch);
+            eh.setLocation(x, y, z, yaw, pitch);
 
-            int m = MathHelper.b(eh.locX / 16.0D);
-            int n = MathHelper.b(eh.locZ / 16.0D);
+            int m = MathHelper.floor(eh.locX / 16.0D);
+            int n = MathHelper.floor(eh.locZ / 16.0D);
 
-            ws.c(m, n).a(eh);
-            ws.b.add(eh);
+            ws.getChunkAt(m, n).a(eh);
+//            ws.c(m, n).a(eh);
+            ws.entityList.add(eh);
+//            ws.b.add(eh);
 
             //ws.b(eh);
             @SuppressWarnings("rawtypes")
@@ -81,7 +83,7 @@ public class NpcSpawner {
             params[0] = Entity.class;
 
             Method method;
-            method = net.minecraft.server.World.class.getDeclaredMethod("b", params);
+            method = net.minecraft.server.World.class.getDeclaredMethod("a", params);
             method.setAccessible(true);
             Object margs[] = new Object[1];
             margs[0] = eh;
@@ -99,7 +101,8 @@ public class NpcSpawner {
 
     public static void RemoveBasicHumanNpc(BasicHumanNpc npc) {
         try {
-            npc.getMCEntity().world.e(npc.getMCEntity());
+//            npc.getMCEntity().world.e(npc.getMCEntity());
+            npc.getMCEntity().world.removeEntity(npc.getMCEntity());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,7 +116,8 @@ public class NpcSpawner {
             WorldServer ws = GetWorldServer(world);
 
             Entity eh = EntityTypes.a(type.getName(), ws);
-            eh.c(x, y, z, 0, 0);
+            eh.setLocation(x, y, z, 0, 0);
+//            eh.c(x, y, z, 0, 0);
             ws.a(eh);
 
             return (LivingEntity)eh.getBukkitEntity();

@@ -30,7 +30,7 @@ public class BasicHumanNpc extends BasicNpc {
     }
 
     public void moveTo(double x, double y, double z, float yaw, float pitch) {
-        this.mcEntity.c(x, y, z, yaw, pitch);
+        this.mcEntity.setLocation(x, y, z, yaw, pitch);
     }
 
     public void attackLivingEntity(LivingEntity ent) {
@@ -38,8 +38,8 @@ public class BasicHumanNpc extends BasicNpc {
             this.mcEntity.animateArmSwing();
             Field f = CraftEntity.class.getDeclaredField("entity");
             f.setAccessible(true);
-            EntityLiving lEntity = (EntityLiving) f.get(ent);
-            this.mcEntity.h(lEntity);
+//            EntityLiving lEntity = (EntityLiving) f.get(ent);
+//            this.mcEntity.h(lEntity);
         } catch (Exception e) {
             e.printStackTrace();
         }

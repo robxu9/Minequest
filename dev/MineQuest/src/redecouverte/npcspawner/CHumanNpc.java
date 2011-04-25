@@ -27,7 +27,7 @@ public class CHumanNpc extends EntityPlayer {
         super(minecraftserver, world, s, iteminworldmanager);
 
         NetworkManager netMgr = new NpcNetworkManager(new NpcSocket(), "npc mgr", null);
-        this.a = new NpcNetHandler(minecraftserver, this, netMgr);
+        this.netServerHandler = new NpcNetHandler(minecraftserver, this, netMgr);
 
         this.lastTargetId = -1;
         this.lastBounceId = -1;
@@ -35,7 +35,7 @@ public class CHumanNpc extends EntityPlayer {
     }
 
     public void animateArmSwing() {
-        this.b.k.a(this, new Packet18ArmAnimation(this, 1));
+        this.b.tracker.a(this, new Packet18ArmAnimation(this, 1));
     }
 
     @Override
