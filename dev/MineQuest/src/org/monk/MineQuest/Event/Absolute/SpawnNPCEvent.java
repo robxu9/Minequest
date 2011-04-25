@@ -18,12 +18,11 @@
  */
 package org.monk.MineQuest.Event.Absolute;
 
+import org.bukkit.Location;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Quester.NPCQuester;
-
-import redecouverte.npcspawner.NpcSpawner;
 
 public class SpawnNPCEvent extends NormalEvent {
 
@@ -54,9 +53,12 @@ public class SpawnNPCEvent extends NormalEvent {
 		if (MineQuest.getSServer().getWorld(world) == null) {
 			eventParser.setComplete(false);
 		} else {
-			npcQuester.setEntity(NpcSpawner.SpawnBasicHumanNpc(npcQuester.getName(), 
-					npcQuester.getName(), MineQuest.getSServer().getWorld(world), 
-					x, y, z, yaw, pitch));
+			Location l = new Location(MineQuest.getSServer().getWorld(world), 
+					x, y, z, yaw, pitch);
+			npcQuester.setEntity(MineQuest.getNPCManager().spawnNPC(npcQuester.getName(), l));
+//			npcQuester.setEntity(NpcSpawner.SpawnBasicHumanNpc(npcQuester.getName(), 
+//					npcQuester.getName(), MineQuest.getSServer().getWorld(world), 
+//					x, y, z, yaw, pitch));
 		}
 	}
 

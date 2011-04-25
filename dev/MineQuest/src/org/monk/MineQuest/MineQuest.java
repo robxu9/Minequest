@@ -48,6 +48,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.martin.bukkit.npclib.NPCManager;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityConfigManager;
 import org.monk.MineQuest.Event.CheckMobEvent;
@@ -95,6 +96,7 @@ public class MineQuest extends JavaPlugin {
 	private static boolean debug_enable = true;
 	private static boolean cubonomy_enable = true;
 	private static int armor_req_level;
+	private static NPCManager npc_m;
 	
 	/**
 	 * Adds a Quester to the MineQuest Server.
@@ -585,6 +587,8 @@ public class MineQuest extends JavaPlugin {
         eventQueue = new EventQueue(this);
         
         quests = new Quest[0];
+        
+        npc_m = new NPCManager(this);
         
         (new File("MineQuest/")).mkdir();
         
@@ -1196,5 +1200,9 @@ public class MineQuest extends JavaPlugin {
 	
 	public static boolean isTownProtect() {
 		return town_protect;
+	}
+	
+	public static NPCManager getNPCManager() {
+		return npc_m;
 	}
 }
