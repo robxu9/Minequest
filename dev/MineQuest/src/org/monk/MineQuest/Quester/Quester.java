@@ -316,10 +316,21 @@ public class Quester {
 		}
 		
 		if (npcParty != null) {
-			for (Quester quester : npcParty.getQuesterArray()) {
-				NPCQuester npc = (NPCQuester)quester;
-				
-				npc.questerAttack((LivingEntity)entity);
+			boolean flag = true;
+			if (entity instanceof Player) {
+				for (Quester quester : npcParty.getQuesters()) {
+					if (quester.getName().equals(((Player)entity).getName())) {
+						flag = false;
+						break;
+					}
+				}
+			}
+			if (flag) {
+				for (Quester quester : npcParty.getQuesterArray()) {
+					NPCQuester npc = (NPCQuester)quester;
+					
+					npc.questerAttack((LivingEntity)entity);
+				}
 			}
 		}
 
@@ -981,6 +992,9 @@ public class Quester {
 		if (obj instanceof Quester) {
 			return name.equals(((Quester)obj).getName());
 		}
+		if (obj instanceof HumanEntity) {
+			return name.equals(((HumanEntity)obj).getName());
+		}
 		if (obj instanceof String) {
 			return name.equals(obj);
 		}
@@ -1198,6 +1212,7 @@ public class Quester {
 	 * @return false
 	 */
 	public boolean healthChange(int change, EntityDamageEvent event) {
+		if (event.isCancelled()) return false;
 		if (player == null) return false;
 		int newHealth;
                 
@@ -1272,11 +1287,13 @@ public class Quester {
 		}
 		
 		event.setCancelled(true);
-		if (getPlayer().getItemInHand().getAmount() == 1) {
-			getPlayer().setItemInHand(null);
-		} else {
-			getPlayer().getItemInHand().setAmount(
-					getPlayer().getItemInHand().getAmount() - 1);
+		if (!(this instanceof NPCQuester)) {
+			if (getPlayer().getItemInHand().getAmount() == 1) {
+				getPlayer().setItemInHand(null);
+			} else {
+				getPlayer().getItemInHand().setAmount(
+						getPlayer().getItemInHand().getAmount() - 1);
+			}
 		}
 		
 		if (health > max_health) health = max_health;

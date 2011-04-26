@@ -683,6 +683,9 @@ public class MineQuest extends JavaPlugin {
 			if ((results == null) || (!results.next())) {
 				upgradeDB();
 			} else {
+				if (!results.getString("version").equals(version)) {
+					upgradeDB();
+				}
 				MineQuest.log("DB Version: " + results.getString("version"));
 			}
 		} catch (SQLException e1) {
