@@ -32,6 +32,7 @@ public class EventParser implements java.lang.Runnable {
 		this.event = event;
 		complete = false;
 		event.reset(getTime());
+		event.setParser(this);
 	}
 	
 	public void setId(int id) {

@@ -57,4 +57,8 @@ public interface Event {
 	 */
 	void setId(int id);
 	public int getId();
+
+	public void setParser(EventParser eventParser);
+	
+	public void cancelEvent();
 }

@@ -682,35 +682,37 @@ public class Quester {
 	}
 	
 	public void clearKills() {
-		Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
-		
-		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
-		
-		try {
-			while (results.next()) {
-				kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+		if (MineQuest.isTrackingKills()) {
+			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
+			
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
+			
+			try {
+				while (results.next()) {
+					kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+				}
+			} catch (Exception e) {
+				MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
 			}
-		} catch (Exception e) {
-			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
-		}
-		
-		for (CreatureType creature : kills) {
-			if (kill_map.get(creature) == null) {
-				kill_map.put(creature, 1);
-			} else {
-				kill_map.put(creature, kill_map.get(creature) + 1);
+			
+			for (CreatureType creature : kills) {
+				if (kill_map.get(creature) == null) {
+					kill_map.put(creature, 1);
+				} else {
+					kill_map.put(creature, kill_map.get(creature) + 1);
+				}
 			}
-		}
-		
-		MineQuest.getSQLServer().update("DELETE FROM " + name + "_kills");
-		
-		for (CreatureType creature : kill_map.keySet()) {
-			MineQuest.getSQLServer()
-					.update(
-							"INSERT INTO " + name
-									+ "_kills (name, count) VALUES('"
-									+ creature + "', '"
-									+ kill_map.get(creature) + "')");
+			
+			MineQuest.getSQLServer().update("DELETE FROM " + name + "_kills");
+			
+			for (CreatureType creature : kill_map.keySet()) {
+				MineQuest.getSQLServer()
+						.update(
+								"INSERT INTO " + name
+										+ "_kills (name, count) VALUES('"
+										+ creature + "', '"
+										+ kill_map.get(creature) + "')");
+			}
 		}
 		
 		kills = new CreatureType[0];
