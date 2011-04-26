@@ -284,6 +284,11 @@ public class Store {
 				Integer.parseInt(item_id) + "', '" + Integer.parseInt(price) + "', '0', '" + type + "')");
 		blocks.add(new StoreBlock(this, type, 0, Integer.parseInt(price), Integer.parseInt(item_id)));
 	}
+	
+	public void remBlock(String type) {
+		MineQuest.getSQLServer().update("DELETE FROM " + name + " WHERE type='" + type + "'");
+		blocks.remove(getBlock(type));
+	}
 
 	public StoreBlock getBest() {
 		int i = 0;
