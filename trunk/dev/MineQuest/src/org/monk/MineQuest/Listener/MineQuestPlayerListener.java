@@ -567,6 +567,25 @@ public class MineQuestPlayerListener extends PlayerListener {
     			}
     		}
 			event.setCancelled(true);
+        } else if (split[0].equals("/remblock")) {
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /remblock type");
+        		return;
+        	}
+        	
+    		Town town = MineQuest.getTown(player);
+    		if (town != null) {
+    			Store store = town.getStore(player);
+
+    			if (store != null) {
+    				Block block = player.getWorld().getBlockAt(player.getLocation());
+    				if (MineQuest.getQuester(player).canEdit(block)) {
+        				store.remBlock(split[1]);
+        				player.sendMessage(split[1] + " removed from store");
+    				}
+    			}
+    		}
+			event.setCancelled(true);
         }
 	}
 	
