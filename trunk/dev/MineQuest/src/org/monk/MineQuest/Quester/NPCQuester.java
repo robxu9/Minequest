@@ -36,6 +36,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.MaterialData;
@@ -129,11 +130,17 @@ public class NPCQuester extends Quester {
 			player.setItemInHand(item);
 			item = null;
 		}
+		if (MineQuest.getQuester(mobTarget) instanceof NPCQuester) {
+			mobTarget = null;
+			sendMessage("Its not good for business to attack other mercenaries");
+		}
 		
 		if (mobTarget == null) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
-				if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
-					setTarget(follow.getPlayer().getLocation(), 4);
+				if (mode != NPCMode.PARTY_STAND) {
+					if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
+						setTarget(follow.getPlayer().getLocation(), 4);
+					}
 				}
 			}
 		} else {
@@ -159,8 +166,7 @@ public class NPCQuester extends Quester {
 				double move_z = (target.getZ() - player.getLocation().getZ());
 				float yaw = 0;
 				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-				// TODO: FIX FIX FIX!!!!
-//				entity.getBukkitEntity()..moveTo(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
+				entity.setLocation(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
 
 				target = null;
 			} else {
@@ -170,17 +176,16 @@ public class NPCQuester extends Quester {
 				double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
 				move_x += (new Random()).nextDouble() * .05;
 				move_z += (new Random()).nextDouble() * .05;
-//				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
-//						(int)player.getLocation().getBlockY(), 
-//						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
+				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
+						(int)player.getLocation().getBlockY(), 
+						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
 				float yaw = 0;
 				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-				// TODO: FIX FIX FIX!!!!
-//				entity.moveTo(
-//					player.getLocation().getX() + move_x,
-//					player.getLocation().getY() + move_y,
-//					player.getLocation().getZ() + move_z,
-//					yaw, target.getPitch());
+				entity.setLocation(
+					player.getLocation().getX() + move_x,
+					player.getLocation().getY() + move_y,
+					player.getLocation().getZ() + move_z,
+					yaw, target.getPitch());
 			}
 		}
 		
@@ -250,7 +255,7 @@ public class NPCQuester extends Quester {
 	@Override
 	public boolean checkItemInHand() {
 		PlayerInventory inven = null;
-		if (follow != null) {
+		if ((follow != null) && (follow.getPlayer() != null)) {
 			inven = follow.getPlayer().getInventory();
 		}
 		ItemStack item = player.getItemInHand();
@@ -407,7 +412,7 @@ public class NPCQuester extends Quester {
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		boolean ret = false;
 		
-		if ((mode != NPCMode.FOR_SALE) && (mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY)) {
+		if ((mode != NPCMode.FOR_SALE) && (mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY) && (mode != NPCMode.PARTY_STAND)) {
 			health = max_health;
 			event.setDamage(0);
 
@@ -452,7 +457,6 @@ public class NPCQuester extends Quester {
 				}
 			}
 		} else {
-			ret = super.healthChange(change, event);
 			LivingEntity entity = null;
 			if (event instanceof EntityDamageByEntityEvent) {
 				entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
@@ -461,17 +465,50 @@ public class NPCQuester extends Quester {
 				entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
 			}
 			if (follow != null) {
-				if (mobTarget == null) {
-					mobTarget = entity;
+				if ((entity instanceof Player) && ((Player)entity).getName().equals(follow.getName())) {
+					PlayerInteractEvent pie = new PlayerInteractEvent(getPlayer(), null, ((Player)entity).getItemInHand(), null, null);
+
+					if (!healthIncrease(pie)) {
+						if (mobTarget != null) {
+							mobTarget = null;
+							sendMessage("Regrouping!");
+						} else {
+							if ((mode == NPCMode.PARTY_STAND)) {
+								mode = NPCMode.PARTY;
+								sendMessage("I'll follow your lead");
+							} else {
+								mode = NPCMode.PARTY_STAND;
+								sendMessage("I'll stay here");
+							}
+						}
+					} else {
+						Player player = (Player)entity;
+						if ((player.getItemInHand() != null) &&
+								(player.getItemInHand().getAmount() > 1)) {
+							player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+						} else {
+							player.setItemInHand(null);
+						}
+						sendMessage("Health: " + health + "/" + max_health);
+					}
+					event.setCancelled(true);
+				} else {
+					if (mobTarget == null) {
+						if (!(entity instanceof Player)
+								|| (!((Player) entity).getName().equals(name))) {
+							mobTarget = entity;
+						}
+					}
 				}
 			}
+			ret = super.healthChange(change, event);
+
 			if (getHealth() <= 0) {
 				setPlayer(null);
-				if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
+				if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE) && (mode != NPCMode.PARTY_STAND)) {
 					removeSql();
 					MineQuest.remQuester(this);
 					MineQuest.getNPCManager().despawn(name);
-//					NpcSpawner.RemoveBasicHumanNpc(this.entity);
 					entity = null;
 				} else {
 					Location location = MineQuest.getTown(town).getNPCSpawn();
@@ -520,9 +557,9 @@ public class NPCQuester extends Quester {
 		super.save();
 		
 		if (entity == null) return;
-		if ((mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY)) {
-//			entity.moveTo(center.getX(), center.getY(), center.getZ(), 
-//					center.getYaw(), center.getPitch());
+		if ((mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY) && (mode != NPCMode.PARTY_STAND)) {
+			entity.setLocation(center.getX(), center.getY(), center.getZ(), 
+					center.getYaw(), center.getPitch());
 		}
 		
 		MineQuest.getSQLServer().update("UPDATE questers SET x='" + 
@@ -536,7 +573,7 @@ public class NPCQuester extends Quester {
 
 	@Override
 	public void sendMessage(String string) {
-		if (NPCMode.PARTY == mode) {
+		if ((NPCMode.PARTY == mode) || (mode == NPCMode.PARTY_STAND)) {
 			if (follow != null) {
 				follow.sendMessage(name + " : " + string);
 			}
@@ -636,6 +673,15 @@ public class NPCQuester extends Quester {
 
 	public void setTarget(LivingEntity entity) {
 		mobTarget = entity;
+		if (entity == null) {
+			if ((follow != null) && (follow.getPlayer() != null)) {
+				if (mode == NPCMode.PARTY_STAND) {
+					if (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) > 100) {
+						player.teleport(follow.getPlayer());
+					}
+				}
+			}
+		}
 	}
 	
 	private void setTarget(Location location, double rad) {
