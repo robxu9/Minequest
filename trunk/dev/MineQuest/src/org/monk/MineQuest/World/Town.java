@@ -359,7 +359,6 @@ public class Town {
 	}
 
 	public void setMERCSpawn(Location spawn) {
-		// TODO Auto-generated method stub
 		this.npc_spawn = new Location(spawn.getWorld(),
 				spawn.getX(), spawn.getY(), spawn.getZ());
 		MineQuest.getSQLServer().update("UPDATE towns SET merc_x='" + (int)spawn.getX() + "', merc_y='" + 

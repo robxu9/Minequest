@@ -28,6 +28,9 @@ public class BlockEvent extends RelativeEvent {
 	protected Material newType;
 	protected Block block;
 	protected Entity entity;
+	protected int type;
+	protected byte data;
+	protected boolean passed;
 	
 	public BlockEvent(long delay, World world, Entity entity, int x, int y,
 			int z, Material newType) {
@@ -39,16 +42,30 @@ public class BlockEvent extends RelativeEvent {
 		this.block = block;
 		this.newType = newType;
 		this.entity = entity;
+		passed = false;
 	}
 	
 	@Override
 	public void activate(EventParser eventParser) {
+		type = block.getTypeId();
+		data = block.getData();
 		block.setType(newType);
+		passed = true;
 	}
 
 	@Override
 	public String getName() {
 		return "Generic Block Type Event";
+	}
+
+	@Override
+	public void cancelEvent() {
+		super.cancelEvent();
+		
+		if (passed) {
+			block.setTypeId(type);
+			block.setData(data);
+		}
 	}
 
 }

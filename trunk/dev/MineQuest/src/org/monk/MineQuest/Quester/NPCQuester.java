@@ -139,7 +139,7 @@ public class NPCQuester extends Quester {
 			if ((follow != null) && (follow.getPlayer() != null)) {
 				if (mode != NPCMode.PARTY_STAND) {
 					if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
-						setTarget(follow.getPlayer().getLocation(), 4);
+						setTarget(follow.getPlayer().getLocation(), 4, 0);
 					}
 				}
 			}
@@ -149,7 +149,7 @@ public class NPCQuester extends Quester {
 					mobTarget = null;
 					return;
 				}
-				setTarget(mobTarget.getLocation(), 1.25);
+				setTarget(mobTarget.getLocation(), 1.25, 0);
 			}
 		}
 		if ((follow_name != null) && (!follow_name.equals("null"))) {
@@ -179,13 +179,33 @@ public class NPCQuester extends Quester {
 				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
 						(int)player.getLocation().getBlockY(), 
 						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
+//				move_y = 0;
+				if (move_y > 3) {
+					move_y = 0;
+				}
 				float yaw = 0;
 				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-				entity.setLocation(
-					player.getLocation().getX() + move_x,
-					player.getLocation().getY() + move_y,
-					player.getLocation().getZ() + move_z,
-					yaw, target.getPitch());
+//				Location location = new Location(player.getWorld(),
+//						player.getLocation().getX() + move_x,
+//						player.getLocation().getY() + move_y,
+//						player.getLocation().getZ() + move_z,
+//						yaw, target.getPitch());
+//				if ((location.getWorld().getBlockAt(location).getType() == Material.AIR) ||
+//					(location.getWorld().getBlockAt(location).getType() == Material.FIRE) ||
+//					(location.getWorld().getBlockAt(location).getType() == Material.SNOW)) { 
+					entity.setLocation(
+						player.getLocation().getX() + move_x,
+						player.getLocation().getY() + move_y,
+						player.getLocation().getZ() + move_z,
+						yaw, target.getPitch());
+//				} else {
+//					target = null;
+//				}
+			}
+		}
+		if (player.getLocation().getY() > 126) {
+			if ((follow != null) && (follow.getPlayer() != null)) {
+				player.teleport(follow.getPlayer().getLocation());
 			}
 		}
 		
@@ -196,7 +216,7 @@ public class NPCQuester extends Quester {
 		if (rad != 0) {
 			count++;
 			if (count == 30) {
-				setTarget(center, rad);
+				setTarget(center, rad, 0);
 				MineQuest.log("Setting Target");
 				count = 0;
 			}
@@ -246,6 +266,7 @@ public class NPCQuester extends Quester {
 		if (quester.getCubes() > getCost()) {
 			quester.setCubes(quester.getCubes() - getCost());
 			quester.addNPC(this);
+			setMode(NPCMode.PARTY);
 			quester.sendMessage(name + " joined your party!");
 		} else {
 			quester.sendMessage("You don't have enough cubes");
@@ -535,6 +556,7 @@ public class NPCQuester extends Quester {
 			MineQuest.getNPCManager().despawn(name);
 //			NpcSpawner.RemoveBasicHumanNpc(this.entity);
 			entity = null;
+			player = null;
 		}
 		MineQuest.getEventParser().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
 	}
@@ -675,16 +697,23 @@ public class NPCQuester extends Quester {
 		mobTarget = entity;
 		if (entity == null) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
-				if (mode == NPCMode.PARTY_STAND) {
+				if ((mode == NPCMode.PARTY_STAND) || (mode == NPCMode.PARTY)) {
 					if (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) > 100) {
-						player.teleport(follow.getPlayer());
+						if (player != null) {
+							Player player = follow.getPlayer();
+							makeNPC(player.getWorld().getName(), player.getLocation()
+									.getX(), player.getLocation().getY(),
+									player.getLocation().getZ(), player
+											.getLocation().getPitch(), player
+											.getLocation().getYaw());
+						}
 					}
 				}
 			}
 		}
 	}
 	
-	private void setTarget(Location location, double rad) {
+	private void setTarget(Location location, double rad, int call) {
 //		Location self = entity.getBukkitEntity().getLocation();
 //		double distance = MineQuest.distance(location, self);
 		double angle = (new Random()).nextDouble() * Math.PI * 2;
@@ -699,8 +728,22 @@ public class NPCQuester extends Quester {
 				location.getZ() + z,
 				location.getYaw(),
 				location.getPitch());
-		if (MineQuest.distance(target, location) > 20) {
+		if (MineQuest.distance(target, location) > 10) {
 			target = null;
+		}
+
+		if (target != null) {
+			if (Math.abs(target.getY() - location.getY()) > 5) {
+				target.setY(location.getY());
+			}
+			if ((target.getWorld().getBlockAt(target).getType() != Material.AIR) && 
+					(target.getWorld().getBlockAt(target).getType() != Material.FIRE) &&
+					(target.getWorld().getBlockAt(target).getType() != Material.SNOW)) {
+				target = null;
+				if (call < 20) {
+					setTarget(location, rad, call + 1);
+				}
+			}
 		}
 	}
 	

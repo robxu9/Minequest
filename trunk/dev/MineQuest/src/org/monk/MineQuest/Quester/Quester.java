@@ -267,7 +267,6 @@ public class Quester {
 
 	public void addNPC(NPCQuester quester) {
 		npcParty.addQuester(quester);
-		quester.setMode(NPCMode.PARTY);
 		if (!equals(quester.getFollow())) {
 			quester.setFollow(this);
 		}
@@ -689,17 +688,21 @@ public class Quester {
 			
 			try {
 				while (results.next()) {
-					kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+					if (CreatureType.fromName(results.getString("name")) != null) {
+						kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+					}
 				}
 			} catch (Exception e) {
 				MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
 			}
 			
 			for (CreatureType creature : kills) {
-				if (kill_map.get(creature) == null) {
-					kill_map.put(creature, 1);
-				} else {
-					kill_map.put(creature, kill_map.get(creature) + 1);
+				if (creature != null) {
+					if (kill_map.get(creature) == null) {
+						kill_map.put(creature, 1);
+					} else {
+						kill_map.put(creature, kill_map.get(creature) + 1);
+					}
 				}
 			}
 			
@@ -1526,6 +1529,12 @@ public class Quester {
 		}
 		enabled = false;
 		
+		if (npcParty != null) {
+			for (Quester quester : npcParty.getQuesters()) {
+				((NPCQuester)quester).setMode(NPCMode.PARTY_STAND);
+			}
+		}
+		
 		clearKills();
 	}
 	
@@ -1738,8 +1747,6 @@ public class Quester {
 		
 		if (npcParty != null) {
 			for (Quester quester : npcParty.getQuesterArray()) {
-				((NPCQuester)quester).setMode(NPCMode.PARTY);
-				((NPCQuester)quester).setFollow(this);
 			}
 		}
 		
@@ -1812,5 +1819,16 @@ public class Quester {
 
 	public boolean hasQuester(Quester quester) {
 		return npcParty.getQuesters().contains(quester);
+	}
+
+	public void listMercs() {
+		if (npcParty.getQuesters().size() == 0) {
+			sendMessage("You have no mercenaries");
+		} else {
+			sendMessage("Your mercenaries are:");
+			for (Quester quester : npcParty.getQuesters()) {
+				sendMessage(quester.getName());
+			}
+		}
 	}
 }
