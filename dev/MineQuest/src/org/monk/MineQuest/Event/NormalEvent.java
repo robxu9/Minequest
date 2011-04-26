@@ -18,10 +18,13 @@
  */
 package org.monk.MineQuest.Event;
 
+import org.monk.MineQuest.MineQuest;
+
 public class NormalEvent implements Event {
 	protected long delay;
 	protected long reset_time;
 	protected int id;
+	protected EventParser myParser;
 	
 	public NormalEvent(long delay) {
 		this.delay = delay;
@@ -56,5 +59,19 @@ public class NormalEvent implements Event {
 	@Override
 	public int getId() {
 		return id;
+	}
+
+	@Override
+	public void setParser(EventParser eventParser) {
+		myParser = eventParser;
+	}
+
+	@Override
+	public void cancelEvent() {
+		if (myParser != null) {
+			myParser.setComplete(true);
+		} else {
+			MineQuest.log(getName() + " with null parser was cancelled!");
+		}
 	}
 }

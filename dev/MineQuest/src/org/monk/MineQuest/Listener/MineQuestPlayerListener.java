@@ -124,6 +124,10 @@ public class MineQuestPlayerListener extends PlayerListener {
 			processTown(split, player, event);
 			if (event.isCancelled()) return;
 		}
+		if (MineQuest.isMercEnabled()) {
+			processMerc(split, player, event);
+			if (event.isCancelled()) return;
+		}
 		if (MineQuest.isDebugEnabled()) {
 			processDebug(split, player, event);
 			if (event.isCancelled()) return;
@@ -586,6 +590,46 @@ public class MineQuestPlayerListener extends PlayerListener {
     			}
     		}
 			event.setCancelled(true);
+        } else if (split[0].equals("/init_store")) {
+        	if (MineQuest.getTown(player) == null) {
+        		player.sendMessage("You are not in a town");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (MineQuest.getTown(player).getStore(player) == null) {
+        		player.sendMessage("You are not in a store");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
+        		player.sendMessage("You do not have permission to edit town");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	
+        	NPCSignShop shop = MineQuest.getTown(player).getStore(player);
+        	shop.intialize(MineQuest.getQuester(player));
+			event.setCancelled(true);
+        } else if (split[0].equals("/spawn_store_npc")) {
+        	if (MineQuest.getTown(player) == null) {
+        		player.sendMessage("You are not in a town");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (MineQuest.getTown(player).getStore(player) == null) {
+        		player.sendMessage("You are not in a store");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
+        		player.sendMessage("You do not have permission to edit town");
+    			event.setCancelled(true);
+    			return;
+        	}
+        	
+        	Location location = player.getLocation();
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
+        	event.setCancelled(true);
         }
 	}
 	
@@ -762,6 +806,107 @@ public class MineQuestPlayerListener extends PlayerListener {
         }
 	}
 	
+	private void processMerc(String[] split, Player player, PlayerChatEvent event) {
+	    if (split[0].equals("/regroup")) {
+	    	MineQuest.getQuester(player).regroup();
+	    	event.setCancelled(true);
+	    } else if (split[0].equals("/npc_property")) {
+	    	if (split.length < 4) {
+	    		player.sendMessage("Usage: /npc_property <npc_name> <property_name> <property_value>");
+	    		event.setCancelled(true);
+	    		return;
+	    	}
+    		String value = split[3];
+    		int i;
+    		for (i = 4; i < split.length; i++) value = value + " " + split[i];
+    		if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
+    			((NPCQuester)MineQuest.getQuester(split[1])).setProperty(split[2], value);
+    		} else {
+    			player.sendMessage(split[1] + " is not a valid NPC");
+    		}
+	    	event.setCancelled(true);
+	    } else if (split[0].equals("/list_mercs")) {
+	    	if (MineQuest.getTown(player) != null) {
+	    		player.sendMessage("Available in " + MineQuest.getTown(player).getName() + ":");
+	    		for (NPCQuester quester : MineQuest.getTown(player).getAvailableNPCs()) {
+	    			player.sendMessage(quester.getName() + " : " + quester.getCost());
+	    		}
+	    	} else {
+	    		player.sendMessage("You are not in a town");
+	    	}
+	    	event.setCancelled(true);
+	    } else if (split[0].equals("/set_merc_spawn")) {
+	    	if (MineQuest.getTown(player) != null) {
+	    		if (MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
+	        		MineQuest.getTown(player).setMERCSpawn(player.getLocation());
+	        		player.sendMessage("Mercenary Spawn Set");
+	    		} else {
+	    			player.sendMessage("You do not have permission to edit town");
+	    		}
+	    	} else {
+	    		player.sendMessage("You are not in a town");
+	    	}
+	    	event.setCancelled(true);
+	    } else if (split[0].equals("/spawn_merc")) {
+	    	if (split.length > 1) {
+	        	if (MineQuest.getTown(player) != null) {
+	        		MineQuest.getTown(player).addMerc(split[1], MineQuest.getQuester(player));
+	        	} else {
+	        		player.sendMessage("You are not in a town");
+	        	}
+	    	} else {
+	    		player.sendMessage("Usage: /spawn_merc name");
+	    	}
+	    	event.setCancelled(true);
+	    } else if (split[0].equals("/buy_merc")) {
+	    	if (split.length < 2) {
+	    		player.sendMessage("Usage: /buy_merc <npc_name>");
+				event.setCancelled(true);
+				return;
+			}
+			if ((MineQuest.getQuester(split[1]) instanceof NPCQuester)
+					&& (NPCMode.FOR_SALE == ((NPCQuester) MineQuest
+							.getQuester(split[1])).getMode())) {
+				((NPCQuester) MineQuest.getQuester(split[1])).buyNPC(MineQuest
+						.getQuester(player));
+			} else {
+    			player.sendMessage(split[1] + " is not a mercenary for hire");
+    		}
+	    	event.setCancelled(true);
+	    } else if (split[0].equals("/set_merc_item")) {
+	    	if (split.length < 2) {
+	    		player.sendMessage("Usage: /set_merc_item <npc_name>");
+				event.setCancelled(true);
+				return;
+	    	}
+			Quester quester = MineQuest.getQuester(split[1]);
+			if (!(quester instanceof NPCQuester) || !(MineQuest.getQuester(player).hasQuester(quester))) {
+	    		player.sendMessage(split[1] + " is not one of your mercenaries");
+				event.setCancelled(true);
+				return;
+			}
+	    	((NPCQuester)quester).giveItem(MineQuest.getQuester(player));
+	    	event.setCancelled(true);
+	    } else if (split[0].equals("/npc_char") || split[0].equals("/merc_char")) {
+	    	if (split.length < 2) {
+	    		player.sendMessage("Usage: /merc_char <merc_name>");
+				event.setCancelled(true);
+				return;
+	    	}
+			Quester quester = MineQuest.getQuester(split[1]);
+			if (!(quester instanceof NPCQuester) || !(MineQuest.getQuester(player).hasQuester(quester))) {
+	    		player.sendMessage(split[1] + " is not one of your mercenaries");
+				event.setCancelled(true);
+				return;
+			}
+			player.sendMessage(split[1] + " is a level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
+	
+			quester.getClass("Warrior").display();
+			quester.sendMessage(" Health: " + quester.getHealth() + "/" + quester.getMaxHealth());
+			event.setCancelled(true);
+	    }
+	}
+	
 	private void processDebug(String[] split, Player player, PlayerChatEvent event) {
 		if (split[0].equals("/goto")) {
         	if (split.length < 2) {
@@ -821,175 +966,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	Location location = player.getLocation();
         	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
         	event.setCancelled(true);
-        } else if (split[0].equals("/movetome")) {
-        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
-//        		((NPCQuester)MineQuest.getQuester(split[1])).getEntity().moveTo(
-//        				player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), 
-//        				(float)player.getLocation().getYaw(), (float)player.getLocation().getPitch());
-        	} else {
-        		player.sendMessage("Invalid Quester names");
-        	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/explode")) {
-        	CraftWorld world = (CraftWorld)player.getWorld();
-        	Location l = player.getLocation();
-        	world.getHandle().a(((CraftEntity)player).getHandle(), l.getX(), l.getY(), l.getZ() + 5, (float)Double.parseDouble(split[1]));
-        	event.setCancelled(true);
         } else if (split[0].equals("/mobss")) {
         	if (player.getWorld().getLivingEntities() == null) {
         		player.sendMessage("No Living Entities List");
         	} else {
         		player.sendMessage("There are " + MineQuest.getMobSize() + " " + player.getWorld().getLivingEntities().size());
         	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/follow")) {
-        	if (split.length < 2) {
-        		return;
-        	}
-        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
-        		((NPCQuester)MineQuest.getQuester(split[1])).setMode(NPCMode.FOLLOW);
-        		((NPCQuester)MineQuest.getQuester(split[1])).setFollow(MineQuest.getQuester(player));
-        	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/joinnpc")) {
-        	if (split.length < 2) {
-        		player.sendMessage("Fail!!");
-        		return;
-        	}
-        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
-        		MineQuest.getQuester(player).addNPC((NPCQuester)MineQuest.getQuester(split[1]));
-        	} else {
-        		player.sendMessage("Fail!");
-        	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/regroup")) {
-        	MineQuest.getQuester(player).regroup();
-        	event.setCancelled(true);
-        } else if (split[0].equals("/spawn_quest_giver")) {
-        	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
-        	event.setCancelled(true);
-        } else if (split[0].equals("/npc_property")) {
-        	try {
-        		String value = split[3];
-        		int i;
-        		for (i = 4; i < split.length; i++) value = value + " " + split[i];
-        		((NPCQuester)MineQuest.getQuester(split[1])).setProperty(split[2], value);
-        	} catch (Exception e) {
-        		MineQuest.log("Problem stuff");
-        	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/list_mercs")) {
-        	if (MineQuest.getTown(player) != null) {
-        		player.sendMessage("Available in " + MineQuest.getTown(player).getName() + ":");
-        		for (NPCQuester quester : MineQuest.getTown(player).getAvailableNPCs()) {
-        			player.sendMessage(quester.getName() + " : " + quester.getCost());
-        		}
-        	} else {
-        		player.sendMessage("You are not in a town");
-        	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/set_merc_spawn")) {
-        	if (MineQuest.getTown(player) != null) {
-        		if (MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
-            		MineQuest.getTown(player).setMERCSpawn(player.getLocation());
-            		player.sendMessage("Mercenary Spawn Set");
-        		} else {
-        			player.sendMessage("You do not have permission to edit town");
-        		}
-        	} else {
-        		player.sendMessage("You are not in a town");
-        	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/spawn_merc")) {
-        	if (split.length > 1) {
-	        	if (MineQuest.getTown(player) != null) {
-	        		MineQuest.getTown(player).addMerc(split[1], MineQuest.getQuester(player));
-	        	} else {
-	        		player.sendMessage("You are not in a town");
-	        	}
-        	} else {
-        		player.sendMessage("Usage: /spawn_merc name");
-        	}
-        	event.setCancelled(true);
-        } else if (split[0].equals("/buy_merc")) {
-        	if (split.length < 2) {
-        		player.sendMessage("Usage: /buy_merc <npc_name>");
-    			event.setCancelled(true);
-    			return;
-        	}
-        	((NPCQuester)MineQuest.getQuester(split[1])).buyNPC(MineQuest.getQuester(player));
-        	event.setCancelled(true);
-        } else if (split[0].equals("/set_merc_item")) {
-        	if (split.length < 2) {
-        		player.sendMessage("Usage: /set_merc_item <npc_name>");
-    			event.setCancelled(true);
-    			return;
-        	}
-			Quester quester = MineQuest.getQuester(split[1]);
-			if (!(quester instanceof NPCQuester) || !(MineQuest.getQuester(player).hasQuester(quester))) {
-        		player.sendMessage(split[1] + " is not one of your mercenaries");
-    			event.setCancelled(true);
-    			return;
-			}
-        	((NPCQuester)quester).giveItem(MineQuest.getQuester(player));
-        	event.setCancelled(true);
-        } else if (split[0].equals("/npc_char") || split[0].equals("/merc_char")) {
-        	if (split.length < 2) {
-        		player.sendMessage("Usage: /merc_char <merc_name>");
-    			event.setCancelled(true);
-    			return;
-        	}
-			Quester quester = MineQuest.getQuester(split[1]);
-			if (!(quester instanceof NPCQuester) || !(MineQuest.getQuester(player).hasQuester(quester))) {
-        		player.sendMessage(split[1] + " is not one of your mercenaries");
-    			event.setCancelled(true);
-    			return;
-			}
-			player.sendMessage(split[1] + " is a level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
-
-			quester.getClass("Warrior").display();
-			player.sendMessage(" Health: " + quester.getHealth() + "/" + quester.getMaxHealth());
-			event.setCancelled(true);
-        } else if (split[0].equals("/init_store")) {
-        	if (MineQuest.getTown(player) == null) {
-        		player.sendMessage("You are not in a town");
-    			event.setCancelled(true);
-    			return;
-        	}
-        	if (MineQuest.getTown(player).getStore(player) == null) {
-        		player.sendMessage("You are not in a store");
-    			event.setCancelled(true);
-    			return;
-        	}
-        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
-        		player.sendMessage("You do not have permission to edit town");
-    			event.setCancelled(true);
-    			return;
-        	}
-        	
-        	NPCSignShop shop = MineQuest.getTown(player).getStore(player);
-        	shop.intialize(MineQuest.getQuester(player));
-			event.setCancelled(true);
-        } else if (split[0].equals("/spawn_store_npc")) {
-        	if (MineQuest.getTown(player) == null) {
-        		player.sendMessage("You are not in a town");
-    			event.setCancelled(true);
-    			return;
-        	}
-        	if (MineQuest.getTown(player).getStore(player) == null) {
-        		player.sendMessage("You are not in a store");
-    			event.setCancelled(true);
-    			return;
-        	}
-        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
-        		player.sendMessage("You do not have permission to edit town");
-    			event.setCancelled(true);
-    			return;
-        	}
-        	
-        	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
         	event.setCancelled(true);
         }
 	}

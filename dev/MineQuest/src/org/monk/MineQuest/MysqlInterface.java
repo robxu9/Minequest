@@ -166,14 +166,15 @@ public class MysqlInterface {
 			return ret;
 		} catch (SQLException e) {
 			MineQuest.log("(MySQL) " + sql);
-			MineQuest.log("[ERROR] Failed to update database");
-			e.printStackTrace();
+			MineQuest.log("[ERROR] Failed to update database (retrying...)");
 			reconnect();
 			try {
 				ret = stmt.executeUpdate(sql);
+				MineQuest.log("Retry Successful!!");
 				return ret;
 			} catch (SQLException e1) {
 				MineQuest.log("Retry Failed!!");
+				e1.printStackTrace();
 				return 1;
 			}
 		}
@@ -197,15 +198,16 @@ public class MysqlInterface {
 		} catch (SQLException e) {
 			if (!extra_silent) {
 				MineQuest.log("(MySQL) " + sql);
-				MineQuest.log("[ERROR] Failed to update database");
-				e.printStackTrace();
+				MineQuest.log("[ERROR] Failed to update database (retrying...)");
 			}
 			reconnect();
 			try {
 				ret = stmt.executeUpdate(sql);
+				MineQuest.log("Retry Successful!!");
 				return ret;
 			} catch (SQLException e1) {
 				MineQuest.log("Retry Failed!!");
+				e1.printStackTrace();
 				return 1;
 			}
 		}

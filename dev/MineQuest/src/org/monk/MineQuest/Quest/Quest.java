@@ -671,7 +671,7 @@ public class Quest {
 		return null;
 	}
 
-	Event getEvent(int id) {
+	public Event getEvent(int id) {
 		for (Event event : events) {
 			if (event.getId() == id) {
 				return event;

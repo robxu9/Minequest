@@ -551,6 +551,8 @@ public class MineQuest extends JavaPlugin {
 	private static List<String> noMobs;
 	private static NPCStringConfig npc_strings = new NPCStringConfig();
 	private static boolean town_protect;
+	private static boolean merc_enabled;
+	private static boolean track_kills;
 
 	public MineQuest() {
 	}
@@ -636,6 +638,8 @@ public class MineQuest extends JavaPlugin {
 			leather_armor_miner_level = restrictions.getInt("leather_armor_miner_level", 2);
 			
 			town_enable = general.getBoolean("town_enable", true);
+			merc_enabled = general.getBoolean("merc_enable", true);
+			track_kills = general.getBoolean("track_kills", true);
 			town_protect = general.getBoolean("town_protect", true);
 			cubonomy_enable = general.getBoolean("cubonomy_enable", true);
 			debug_enable = general.getBoolean("debug_enable", true);
@@ -703,7 +707,9 @@ public class MineQuest extends JavaPlugin {
 				if (results.getString("mode").equals("Quester")) {
 					names.add(results.getString("name"));
 				} else {
-					npcs.add(results.getString("name"));
+					if (merc_enabled) {
+						npcs.add(results.getString("name"));
+					}
 				}
 			}
 		} catch (SQLException e) {
@@ -1207,5 +1213,12 @@ public class MineQuest extends JavaPlugin {
 	
 	public static NPCManager getNPCManager() {
 		return npc_m;
+	}
+	
+	public static boolean isMercEnabled() {
+		return merc_enabled;
+	}
+	public static boolean isTrackingKills() {
+		return track_kills;
 	}
 }
