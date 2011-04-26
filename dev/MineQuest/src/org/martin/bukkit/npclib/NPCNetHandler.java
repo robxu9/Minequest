@@ -23,6 +23,8 @@ import net.minecraft.server.Packet255KickDisconnect;
 import net.minecraft.server.Packet3Chat;
 import net.minecraft.server.Packet7UseEntity;
 import net.minecraft.server.Packet9Respawn;
+
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 /**
@@ -123,5 +125,10 @@ public class NPCNetHandler extends NetServerHandler {
 
     @Override
     public void a(Packet130UpdateSign packet130updatesign) {
+    }
+    
+    @Override
+    public boolean teleport(Location dest) {
+		return false;
     }
 }

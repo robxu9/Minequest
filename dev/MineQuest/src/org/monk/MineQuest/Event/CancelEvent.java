@@ -6,19 +6,21 @@ public class CancelEvent extends NormalEvent
 {
 
 	private Quest quest;
-	private int cancel_id;
+	private int[] cancel_ids;
 
-	public CancelEvent(long delay, Quest quest, int id) {
+	public CancelEvent(long delay, Quest quest, int id[]) {
 		super(delay);
 		this.quest = quest;
-		this.cancel_id = id;
+		this.cancel_ids = id;
 	}
 	
 	@Override
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		quest.getEvent(cancel_id).cancelEvent();
+		for (int cancel : cancel_ids) {
+			quest.getEvent(cancel).cancelEvent();
+		}
 	}
 
 }

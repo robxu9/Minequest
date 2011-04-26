@@ -27,6 +27,9 @@ import org.monk.MineQuest.Event.NormalEvent;
 public class BlockEvent extends NormalEvent {
 	protected Material newType;
 	protected Block block;
+	protected int type;
+	protected byte data;
+	protected boolean passed;
 	
 	public BlockEvent(long delay, World world, int x, int y,
 			int z, Material newType) {
@@ -37,11 +40,15 @@ public class BlockEvent extends NormalEvent {
 		super(delay);
 		this.block = block;
 		this.newType = newType;
+		passed = false;
 	}
 	
 	@Override
 	public void activate(EventParser eventParser) {
+		type = block.getTypeId();
+		data = block.getData();
 		block.setType(newType);
+		passed = true;
 	}
 
 	@Override
@@ -49,4 +56,13 @@ public class BlockEvent extends NormalEvent {
 		return "Generic Block Type Event";
 	}
 
+	@Override
+	public void cancelEvent() {
+		super.cancelEvent();
+		
+		if (passed) {
+			block.setTypeId(type);
+			block.setData(data);
+		}
+	}
 }

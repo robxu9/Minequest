@@ -634,7 +634,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	}
 	
 	private void processTown(String[] split, Player player, PlayerChatEvent event) {
-		if (split[0].equals("/spawn")) {
+		if (split[0].equals("/town_spawn")) {
 			int index, i;
 			double distance;
 			List<Town> towns = MineQuest.getTowns();
@@ -904,6 +904,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 			quester.getClass("Warrior").display();
 			quester.sendMessage(" Health: " + quester.getHealth() + "/" + quester.getMaxHealth());
 			event.setCancelled(true);
+	    } else if (split[0].equals("/my_mercs")) {
+	    	MineQuest.getQuester(player).listMercs();
+	    	event.setCancelled(true);
 	    }
 	}
 	

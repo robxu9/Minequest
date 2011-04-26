@@ -79,4 +79,13 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 	public String getName() {
 		return "Repeating Entity Spawner Event";
 	}
+	
+	@Override
+	public void cancelEvent() {
+		super.cancelEvent();
+		
+		if (entity != null) {
+			MineQuest.getMob(entity).setHealth(0);
+		}
+	}
 }
