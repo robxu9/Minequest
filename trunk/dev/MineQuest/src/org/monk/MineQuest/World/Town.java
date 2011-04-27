@@ -31,6 +31,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.CheckMobEvent;
 import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
@@ -99,6 +100,10 @@ public class Town {
 		
 		for (Store s : stores) {
 			s.queryData();
+		}
+		
+		if (MineQuest.isTownNoMobs()) {
+			MineQuest.getEventParser().addEvent(new CheckMobEvent(this));
 		}
 	}
 
@@ -398,5 +403,59 @@ public class Town {
 		MineQuest.getSQLServer().update(
 				"DELETE FROM towns WHERE name='" + name + "'");
 	}
-
+	
+	public void expand(Quester quester) {
+		if (!town.canEdit(quester)) {
+			quester.sendMessage("You cannot edit " + name);
+		}
+		
+		Location loc = quester.getPlayer().getLocation();
+		
+		if (loc.getBlockX() < town.getX()) {
+			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
+				quester.sendMessage("Can only expand in one direction at a time!");
+			}
+			town.setX(loc.getBlockX());
+			quester.sendMessage("Town expanded to min x of " + loc.getBlockX());
+		}
+		
+		if (loc.getBlockX() > town.getMaxX()) {
+			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
+				quester.sendMessage("Can only expand in one direction at a time!");
+			}
+			town.setMaxX(loc.getBlockX());
+			quester.sendMessage("Town expanded to max x of " + loc.getBlockX());
+		}
+		
+		if (loc.getBlockZ() < town.getZ()) {
+			town.setZ(loc.getBlockZ());
+			quester.sendMessage("Town expanded to min z of " + loc.getBlockZ());
+		}
+		
+		if (loc.getBlockZ() > town.getMaxZ()) {
+			town.setMaxZ(loc.getBlockZ());
+			quester.sendMessage("Town expanded to max z of " + loc.getBlockZ());
+		}
+		
+		quester.sendMessage("You are within the x-z area of the town");
+		quester.sendMessage("/expand_town can only be used to expand horizontally");
+	}
+	
+	public void setMinY(Quester quester, int y) {
+		if (!town.canEdit(quester)) {
+			quester.sendMessage("You cannot edit " + name);
+		}
+		
+		town.setY(y);
+		quester.sendMessage("Town set to min y of " + y);
+	}
+	
+	public void setHeight(Quester quester, int height) {
+		if (!town.canEdit(quester)) {
+			quester.sendMessage("You cannot edit " + name);
+		}
+		
+		town.setHeight(height);
+		quester.sendMessage("Town set to height of " + height);
+	}
 }

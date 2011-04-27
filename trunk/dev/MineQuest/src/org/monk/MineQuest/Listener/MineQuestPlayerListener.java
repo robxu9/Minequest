@@ -111,27 +111,33 @@ public class MineQuestPlayerListener extends PlayerListener {
 		String split[] = event.getMessage().split(" ");
 		Player player = event.getPlayer();
 		
-		processQuester(split, player, event);
-		if (event.isCancelled()) return;
-		if (MineQuest.isCubonomyEnabled()) {
-			processStore(split, player, event);
+		try {
+			processQuester(split, player, event);
 			if (event.isCancelled()) return;
-		}
-		processQuest(split, player, event);
-		if (event.isCancelled()) return;
-		if (MineQuest.isTownEnabled()) {
-			processTown(split, player, event);
+			if (MineQuest.isCubonomyEnabled()) {
+				processStore(split, player, event);
+				if (event.isCancelled()) return;
+			}
+			processQuest(split, player, event);
 			if (event.isCancelled()) return;
+			if (MineQuest.isTownEnabled()) {
+				processTown(split, player, event);
+				if (event.isCancelled()) return;
+			}
+			if (MineQuest.isMercEnabled()) {
+				processMerc(split, player, event);
+				if (event.isCancelled()) return;
+			}
+			if (MineQuest.isDebugEnabled()) {
+				processDebug(split, player, event);
+				if (event.isCancelled()) return;
+			}
+			processHelp(split, player, event);
+		} catch (Exception e) {
+			player.sendMessage("Congratulations! You found a bug!");
+			player.sendMessage("Please contact help@theminequest.com");
+			e.printStackTrace();
 		}
-		if (MineQuest.isMercEnabled()) {
-			processMerc(split, player, event);
-			if (event.isCancelled()) return;
-		}
-		if (MineQuest.isDebugEnabled()) {
-			processDebug(split, player, event);
-			if (event.isCancelled()) return;
-		}
-		processHelp(split, player, event);
 		
 		super.onPlayerCommandPreprocess(event);
 	}
@@ -827,6 +833,45 @@ public class MineQuestPlayerListener extends PlayerListener {
 	        		player.sendMessage("You are not in a town");
 	        	}
 	    	}
+        } else if (split[0].equals("/expand_town")) {
+        	event.setCancelled(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /expand_town <town_name>");
+        		return;
+        	}
+        	Town town = MineQuest.getTown(split[1]);
+        	
+        	if (town == null) {
+        		player.sendMessage(split[1] + " is not a valid town");
+        	} else {
+        		town.expand(MineQuest.getQuester(player));
+        	}
+        } else if (split[0].equals("/set_town_y")) {
+        	event.setCancelled(true);
+        	if (split.length < 3) {
+        		player.sendMessage("Usage: /set_town_y <town_name> <y>");
+        		return;
+        	}
+        	Town town = MineQuest.getTown(split[1]);
+        	
+        	if (town == null) {
+        		player.sendMessage(split[1] + " is not a valid town");
+        	} else {
+        		town.setMinY(MineQuest.getQuester(player), Integer.parseInt(split[2]));
+        	}
+        } else if (split[0].equals("/set_town_height")) {
+        	event.setCancelled(true);
+        	if (split.length < 3) {
+        		player.sendMessage("Usage: /set_town_height <town_name> <height>");
+        		return;
+        	}
+        	Town town = MineQuest.getTown(split[1]);
+        	
+        	if (town == null) {
+        		player.sendMessage(split[1] + " is not a valid town");
+        	} else {
+        		town.setHeight(MineQuest.getQuester(player), Integer.parseInt(split[2]));
+        	}
         }
 	}
 	

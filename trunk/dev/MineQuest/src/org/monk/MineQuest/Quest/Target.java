@@ -44,6 +44,10 @@ public abstract class Target {
 			target = new AreaTargetQuester(t, radius);
 		} else if (split[2].equals("PartyTarget")) {
 			target = new PartyTarget(quest.getParty());
+		} else if (split[2].equals("NPCTarget")) {
+			String[] names = split[3].split(",");
+			
+			target = new NPCTarget(names);
 		} else if (split[2].equals("Targetter")) {
 			String[] event_ids = split[3].split(",");
 			TargetEvent[] events = new TargetEvent[event_ids.length];

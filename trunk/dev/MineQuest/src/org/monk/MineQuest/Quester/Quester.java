@@ -32,6 +32,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -689,6 +690,7 @@ public class Quester {
 	public void clearKills() {
 		if (MineQuest.isTrackingKills()) {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
+			Map<Material, Integer> destroyed = new HashMap<Material, Integer>();
 			
 			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
 			
@@ -739,10 +741,54 @@ public class Quester {
 		kills = new CreatureType[0];
 	}
 	
-	public void clearQuest() {
+	public void clearDestroyed() {
+		if (MineQuest.isTrackingDestroy()) {
+			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
+			Map<Material, Integer> destroyed = new HashMap<Material, Integer>();
+			
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
+			
+			try {
+				while (results.next()) {
+					if (CreatureType.fromName(results.getString("name")) != null) {
+						kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+					}
+					if (Material.getMaterial(results.getString("name")) != null) {
+						if (destroyed.get(results.getString("name")) == null) {
+							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count"));
+						} else {
+							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count") + destroyed.get(results.getString("name")));
+						}
+					}
+				}
+			} catch (Exception e) {
+				MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
+			}
+			
+			MineQuest.getSQLServer().update("DELETE FROM " + name + "_kills");
+			
+			for (CreatureType creature : kill_map.keySet()) {
+				MineQuest.getSQLServer().update(
+						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+								+ creature.getName() + "', '"
+								+ kill_map.get(creature) + "')");
+			}
+			
+			for (Material material : destroyed.keySet()) {
+				MineQuest.getSQLServer().update(
+						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+								+ material.name() + "', '"
+								+ destroyed.get(material) + "')");
+			}
+		}
+		
+		destroyed.clear();
+	}
+	
+	public void clearQuest(boolean reset) {
 		this.quest = null;
 		poison_timer = 0;
-		if (!before_quest.getWorld().getName().equals(player.getWorld().getName())) {
+		if (reset) {
 			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(5000, this, before_quest.getWorld().getSpawnLocation()));
 			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(6000, this, before_quest));
 		}
@@ -885,9 +931,11 @@ public class Quester {
 			amount *= levelAdj * 1;
 		}
 		
-		amount /= 4;
+		amount /= 2;
 		
-		if ((event.getDamager() != null) && checkDamage(event.getDamager().getEntityId())) {
+		if ((event.getDamager() != null) && 
+				((event.getDamager() instanceof Player) || 
+				 checkDamage(event.getDamager().getEntityId()))) {
             event.setCancelled(true);
             return;
         }
@@ -1268,6 +1316,12 @@ public class Quester {
         	if (player.getHealth() < 20) {
         		player.setHealth(health + 1);
         		event.setDamage(1);
+        		if (MineQuest.everyHitSignal()) {
+	        		Random random = new Random();
+	        		((CraftPlayer)player).getHandle().world.makeSound(
+	        				((CraftPlayer)player).getHandle(), "random.hurt", 1.0F, 
+	        				(random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
+        		}
         	} else {
         		event.setDamage(0);
         	}
@@ -1468,8 +1522,9 @@ public class Quester {
 
 	public void regroup() {
 		for (Quester quester : npcParty.getQuesterArray()) {
-			((NPCQuester)quester).setTarget(null);
+			((NPCQuester)quester).setTarget((LivingEntity)null);
 		}
+
 		sendMessage("Regrouping Mercenaries!");
 	}
 
@@ -1559,6 +1614,7 @@ public class Quester {
 		}
 		
 		clearKills();
+		clearDestroyed();
 	}
 	
 	/**
@@ -1593,6 +1649,14 @@ public class Quester {
 	 * @param i New Health
 	 */
 	public void setHealth(int i) {
+		if (i < health) {
+    		if (MineQuest.everyHitSignal()) {
+        		Random random = new Random();
+        		((CraftPlayer)player).getHandle().world.makeSound(
+        				((CraftPlayer)player).getHandle(), "random.hurt", 1.0F, 
+        				(random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
+    		}
+		}
 		if (i > max_health) {
 			i = max_health;
 		}

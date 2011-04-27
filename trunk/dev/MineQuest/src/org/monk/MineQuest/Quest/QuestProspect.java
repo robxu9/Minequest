@@ -81,7 +81,7 @@ public class QuestProspect {
 			if (file == null) {
 				return obj.equals("");
 			}
-			return (file.equals((String)obj) || name.equals((String)obj));
+			return (file.equalsIgnoreCase((String)obj) || name.equalsIgnoreCase((String)obj));
 		}
 		return super.equals(obj);
 	}

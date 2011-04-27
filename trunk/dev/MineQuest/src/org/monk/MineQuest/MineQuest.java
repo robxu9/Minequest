@@ -51,7 +51,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.martin.bukkit.npclib.NPCManager;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityConfigManager;
-import org.monk.MineQuest.Event.CheckMobEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
@@ -551,8 +550,11 @@ public class MineQuest extends JavaPlugin {
 	private static List<String> noMobs;
 	private static NPCStringConfig npc_strings = new NPCStringConfig();
 	private static boolean town_protect;
-	private static boolean merc_enabled;
+	private static boolean npc_enabled;
 	private static boolean track_kills;
+	private static boolean track_destroy;
+	private static boolean town_no_mobs;
+	private static boolean every_hit_signal;
 
 	public MineQuest() {
 	}
@@ -638,9 +640,12 @@ public class MineQuest extends JavaPlugin {
 			leather_armor_miner_level = restrictions.getInt("leather_armor_miner_level", 2);
 			
 			town_enable = general.getBoolean("town_enable", true);
-			merc_enabled = general.getBoolean("merc_enable", true);
+			npc_enabled = general.getBoolean("npc_enable", true);
 			track_kills = general.getBoolean("track_kills", true);
+			track_destroy = general.getBoolean("track_destroy", true);
 			town_protect = general.getBoolean("town_protect", true);
+			town_no_mobs = general.getBoolean("town_no_mobs", true);
+			every_hit_signal = general.getBoolean("every_hit_signal", true);
 			cubonomy_enable = general.getBoolean("cubonomy_enable", true);
 			debug_enable = general.getBoolean("debug_enable", true);
 			server_owner = general.getString("mayor", "jmonk");
@@ -707,7 +712,7 @@ public class MineQuest extends JavaPlugin {
 				if (results.getString("mode").equals("Quester")) {
 					names.add(results.getString("name"));
 				} else {
-					if (merc_enabled) {
+					if (npc_enabled) {
 						npcs.add(results.getString("name"));
 					}
 				}
@@ -763,10 +768,6 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
         start = null;
-		
-		for (Town town : towns) {
-			eventQueue.addEvent(new CheckMobEvent(town));
-		}
 
 		setupIConomy();
 	}
@@ -1185,20 +1186,20 @@ public class MineQuest extends JavaPlugin {
 				entity.setHealth(0);
 			}
 		}
-		
+
 		noMobs.add(world.getName());
 	}
-	
+
 	public static void yesMobs(World world) {
 		noMobs.remove(world.getName());
 		
 		return;
 	}
-	
+
 	public static NPCStringConfig getNPCStringConfiguration() {
 		return npc_strings;
 	}
-	
+
 	public static boolean getIsConomyOn() {
 		return IConomy != null;
 	}
@@ -1206,19 +1207,32 @@ public class MineQuest extends JavaPlugin {
 	public static iConomy getIConomy() {
 		return IConomy;
 	}
-	
+
 	public static boolean isTownProtect() {
 		return town_protect;
 	}
-	
+
 	public static NPCManager getNPCManager() {
 		return npc_m;
 	}
-	
+
 	public static boolean isMercEnabled() {
-		return merc_enabled;
+		return npc_enabled;
 	}
+
 	public static boolean isTrackingKills() {
 		return track_kills;
+	}
+
+	public static boolean isTrackingDestroy() {
+		return track_destroy;
+	}
+
+	public static boolean isTownNoMobs() {
+		return town_no_mobs;
+	}
+
+	public static boolean everyHitSignal() {
+		return every_hit_signal;
 	}
 }
