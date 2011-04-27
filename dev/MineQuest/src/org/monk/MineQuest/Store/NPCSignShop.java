@@ -378,5 +378,12 @@ public class NPCSignShop extends Store {
 		}
 		return true;
 	}
+	
+	@Override
+	public void delete() {
+		super.delete();
+		
+		MineQuest.getSQLServer().update("DROP TABLE " + getName() + "_signs");
+	}
 
 }

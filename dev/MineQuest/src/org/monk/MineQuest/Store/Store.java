@@ -289,6 +289,13 @@ public class Store {
 		MineQuest.getSQLServer().update("DELETE FROM " + name + " WHERE type='" + type + "'");
 		blocks.remove(getBlock(type));
 	}
+	
+	public void delete() {
+		MineQuest.getSQLServer().update("DROP TABLE " + name);
+		MineQuest.getSQLServer().update(
+				"DELETE FROM " + MineQuest.getTown(start).getName()
+						+ " WHERE name='" + name + "'");
+	}
 
 	public StoreBlock getBest() {
 		int i = 0;
@@ -303,6 +310,41 @@ public class Store {
 		}
 			
 		return blocks.get(index);
+	}
+	
+	public StoreBlock getSecondBest() {
+		int i = 1;
+		int amount = blocks.get(0).getQuantity();
+		int index = 0;
+		
+		if (blocks.size() < 2) {
+			return blocks.get(0);
+		}
+		int second_amount = blocks.get(1).getQuantity();
+		int second_index = 0;
+		
+		if (second_amount > amount) {
+			second_amount = blocks.get(0).getQuantity();
+			amount = blocks.get(1).getQuantity();
+			index = 1;
+			second_index = 0;
+		}
+		
+		while (++i < blocks.size()) {
+			if (blocks.get(i).getQuantity() > amount) {
+				second_index = index;
+				second_amount = amount;
+				index = i;
+				amount = blocks.get(i).getQuantity();
+			} else {
+				if (blocks.get(i).getQuantity() > second_amount) {
+					second_index = i;
+					second_amount = blocks.get(i).getQuantity();
+				}
+			}
+		}
+		
+		return blocks.get(second_index);
 	}
 
 }

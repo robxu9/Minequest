@@ -389,5 +389,14 @@ public class Town {
 	public List<NPCSignShop> getStores() {
 		return stores;
 	}
+	
+	public void delete() {
+		for (Store store : stores) {
+			store.delete();
+		}
+		MineQuest.getSQLServer().update("DROP TABLE " + name);
+		MineQuest.getSQLServer().update(
+				"DELETE FROM towns WHERE name='" + name + "'");
+	}
 
 }

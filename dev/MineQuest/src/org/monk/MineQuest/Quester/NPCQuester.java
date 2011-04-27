@@ -55,25 +55,25 @@ import org.monk.MineQuest.World.Town;
 public class NPCQuester extends Quester {
 	private Location center;
 	private int count = 0;
+	private int delay = 15000;
 	private NPCEntity entity;
 	private Quester follow;
+	private String follow_name;
 	private String hit_message;
+	private List<Integer> ids1 = new ArrayList<Integer>();
+	private List<Integer> idsStore;
+	private ItemStack item;
+	private List<Integer> itemStore;
 	private LivingEntity mobTarget;
 	private NPCMode mode;
 	private String quest_file;
-	private double rad;
+    private double rad;
 	private int radius;
 	private double speed = .6;
 	private Location target = null;
+	private List<Long> times1 = new ArrayList<Long>();
 	private String town;
 	private String walk_message;
-    private int delay = 15000;
-	private List<Integer> idsStore;
-	private List<Integer> itemStore;
-	private List<Long> times1 = new ArrayList<Long>();
-	private List<Integer> ids1 = new ArrayList<Integer>();
-	private String follow_name;
-	private ItemStack item;
 
 	
 	public NPCQuester(String name) {
@@ -203,7 +203,7 @@ public class NPCQuester extends Quester {
 //				}
 			}
 		}
-		if (player.getLocation().getY() > 126) {
+		if (player.getLocation().getY() > 128) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
 				player.teleport(follow.getPlayer().getLocation());
 			}
@@ -227,7 +227,11 @@ public class NPCQuester extends Quester {
 				if (MineQuest.distance(player.getLocation(), entity.getLocation()) < radius) {
 					if (!MineQuest.getQuester(entity).isCompleted(new QuestProspect(quest_file))) {
 						if (!checkMessage(entity.getEntityId())) {
-							MineQuest.getQuester(entity).sendMessage("<" + name + "> " + walk_message);
+							if (walk_message.equals("random")) {
+								MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, MineQuest.getQuester(entity));
+							} else {
+								MineQuest.getQuester(entity).sendMessage("<" + name + "> " + walk_message);
+							}
 						}
 					}
 				}
@@ -262,6 +266,15 @@ public class NPCQuester extends Quester {
 		((CraftHumanEntity)player).getHandle().d(((CraftLivingEntity)mobTarget).getHandle());
 	}
 	
+	@Override
+	public void bind(String name) {
+		if ((getAbility(name) != null) && (getAbility(name).getClassType().getName().equals("Warrior"))) {
+			super.bind(name);
+		} else {
+			sendMessage("I can only cast warrior abilities");
+		}
+	}
+	
 	public void buyNPC(Quester quester) {
 		if (quester.getCubes() > getCost()) {
 			quester.setCubes(quester.getCubes() - getCost());
@@ -271,6 +284,15 @@ public class NPCQuester extends Quester {
 		} else {
 			quester.sendMessage("You don't have enough cubes");
 		}
+	}
+	
+	@Override
+	public boolean canCast(List<ItemStack> list) {
+		if (follow != null) {
+			return follow.canCast(list);
+		}
+		
+		return false;
 	}
 	
 	@Override
@@ -302,26 +324,6 @@ public class NPCQuester extends Quester {
 		return false;
 	}
 	
-	private boolean checkMessageStore(int id, int item) {
-	    int i;
-	    
-		for (i = 0; i < idsStore.size(); i++) {
-			if (idsStore.get(i) == id) {
-				if (itemStore.get(i) != item) {
-					itemStore.set(i, item);
-					return false;
-				} else {
-					return true;
-				}
-			}
-		}
-	    
-	    idsStore.add(id);
-	    itemStore.add(item);
-	    
-	    return false;
-    }
-	
 	private boolean checkMessage(int id) {
 	    Calendar now = Calendar.getInstance();
 	    int i;
@@ -339,6 +341,26 @@ public class NPCQuester extends Quester {
 	    
 	    ids1.add(id);
 	    times1.add(now.getTimeInMillis());
+	    
+	    return false;
+    }
+	
+	private boolean checkMessageStore(int id, int item) {
+	    int i;
+	    
+		for (i = 0; i < idsStore.size(); i++) {
+			if (idsStore.get(i) == id) {
+				if (itemStore.get(i) != item) {
+					itemStore.set(i, item);
+					return false;
+				} else {
+					return true;
+				}
+			}
+		}
+	    
+	    idsStore.add(id);
+	    itemStore.add(item);
 	    
 	    return false;
     }
@@ -392,6 +414,10 @@ public class NPCQuester extends Quester {
 		return entity;
 	}
 	
+	public Quester getFollow() {
+		return follow;
+	}
+
 	public NPCMode getMode() {
 		return mode;
 	}
@@ -399,7 +425,7 @@ public class NPCQuester extends Quester {
 	public Town getNPCTown() {
 		return MineQuest.getTown(town);
 	}
-	
+
 	public LivingEntity getTarget() {
 		return mobTarget;
 	}
@@ -428,7 +454,48 @@ public class NPCQuester extends Quester {
 			quester.getPlayer().getInventory().addItem(spare);
 		}
 	}
-	
+
+	public void handleProperty(String property, String value) {
+		if (property.equals("radius")) {
+			this.radius = Integer.parseInt(value);
+		} else if (property.equals("hit_message")) {
+			this.hit_message = value;
+		} else if (property.equals("walk_message")) {
+			this.walk_message = value;
+		} else if (property.equals("quest")) {
+			if ((value == null) || (value.equals("null"))) {
+				this.quest_file = null;
+			}
+			this.quest_file = value;
+		} else if (property.equals("follow")) {
+			this.follow_name = value;
+			if ((value == null) || (value.equals("null"))) {
+				this.follow_name = null;
+			}
+			if (follow_name != null) {
+				this.follow = MineQuest.getQuester(value);
+				if (follow != null) {
+					follow.addNPC(this);
+				}
+			}
+		} else if (property.equals("town")) {
+			this.town = value;
+		} else if (property.equals("wander_radius")) {
+			this.rad = Integer.parseInt(value);
+		} else if (property.equals("item")) {
+			String split[] = value.split(",");
+			item = new ItemStack(Integer.parseInt(split[0]), 
+					Integer.parseInt(split[1]));
+			
+			item.setDurability(Short.parseShort(split[2]));
+			if (split.length > 3) {
+				MaterialData md = new MaterialData(Integer.parseInt(split[0]));
+				md.setData(Byte.parseByte(split[3]));
+				item.setData(md);
+			}
+		}
+	}
+
 	@Override
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		boolean ret = false;
@@ -450,16 +517,14 @@ public class NPCQuester extends Quester {
 					ItemStack hand = human.getItemInHand();
 					MineQuest.getTown(player).getStore(player).setKeeper(this);
 					if (checkMessage(entity.getEntityId()) && checkMessageStore(human.getEntityId(), human.getItemInHand().getTypeId())) {
-						;
 						MineQuest.getTown(player).getStore(player).sell(MineQuest.getQuester(human), hand.getTypeId(), hand.getAmount());
 					} else {
 						StoreBlock block = MineQuest.getTown(player).getStore(player).getBlock(hand.getTypeId());
 						checkMessageStore(human.getEntityId(), hand.getTypeId());
 						if (block != null) {
-							long cost = block.cost(MineQuest.getQuester(human), false, hand.getAmount());
-							MineQuest.getQuester(human).sendMessage("<" + getName() + "> I will give you " + cost + " for your " + hand.getAmount() + " " + hand.getType());
+							MineQuest.getNPCStringConfiguration().sendWantMessage(this, MineQuest.getQuester(human));
 						} else {
-							MineQuest.getQuester(human).sendMessage("<" + getName() + "> I am not interested in your " + hand.getType());
+							MineQuest.getNPCStringConfiguration().sendNotWantMessage(this, MineQuest.getQuester(human));
 						}
 					}
 				}
@@ -469,7 +534,11 @@ public class NPCQuester extends Quester {
 					(((EntityDamageByEntityEvent)event).getDamager() instanceof Player)) {
 				Player player = (Player)((EntityDamageByEntityEvent)event).getDamager();
 				if (hit_message != null) {
-					MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
+					if (hit_message.equals("random")) {
+						MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, MineQuest.getQuester(player));
+					} else {
+						MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
+					}
 				}
 				if (quest_file != null) {
 					if (!MineQuest.getQuester(player).isCompleted(new QuestProspect(quest_file))) {
@@ -592,7 +661,7 @@ public class NPCQuester extends Quester {
 				entity.getBukkitEntity().getWorld().getName() + "' WHERE name='"
 				+ name + "'");
 	}
-
+	
 	@Override
 	public void sendMessage(String string) {
 		if ((NPCMode.PARTY == mode) || (mode == NPCMode.PARTY_STAND)) {
@@ -601,12 +670,12 @@ public class NPCQuester extends Quester {
 			}
 		}
 	}
-
+	
 	public void setEntity(NPCEntity entity) {
 		this.entity = entity;
 		setPlayer((Player)entity.getBukkitEntity());
 	}
-
+	
 	public void setFollow(Quester quester) {
 		setProperty("follow", quester == null?null:quester.getName());
 		target = null;
@@ -643,47 +712,6 @@ public class NPCQuester extends Quester {
 		target = null;
 	}
 	
-	public void handleProperty(String property, String value) {
-		if (property.equals("radius")) {
-			this.radius = Integer.parseInt(value);
-		} else if (property.equals("hit_message")) {
-			this.hit_message = value;
-		} else if (property.equals("walk_message")) {
-			this.walk_message = value;
-		} else if (property.equals("quest")) {
-			if ((value == null) || (value.equals("null"))) {
-				this.quest_file = null;
-			}
-			this.quest_file = value;
-		} else if (property.equals("follow")) {
-			this.follow_name = value;
-			if ((value == null) || (value.equals("null"))) {
-				this.follow_name = null;
-			}
-			if (follow_name != null) {
-				this.follow = MineQuest.getQuester(value);
-				if (follow != null) {
-					follow.addNPC(this);
-				}
-			}
-		} else if (property.equals("town")) {
-			this.town = value;
-		} else if (property.equals("wander_radius")) {
-			this.rad = Integer.parseInt(value);
-		} else if (property.equals("item")) {
-			String split[] = value.split(",");
-			item = new ItemStack(Integer.parseInt(split[0]), 
-					Integer.parseInt(split[1]));
-			
-			item.setDurability(Short.parseShort(split[2]));
-			if (split.length > 3) {
-				MaterialData md = new MaterialData(Integer.parseInt(split[0]));
-				md.setData(Byte.parseByte(split[3]));
-				item.setData(md);
-			}
-		}
-	}
-	
 	public void setProperty(String property, String value) {
 		handleProperty(property, value);
 
@@ -692,7 +720,7 @@ public class NPCQuester extends Quester {
 				" (property, value) VALUES('" + property + "', '" + value + "')");
 		
 	}
-
+	
 	public void setTarget(LivingEntity entity) {
 		mobTarget = entity;
 		if (entity == null) {
@@ -753,7 +781,7 @@ public class NPCQuester extends Quester {
 		MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
 				" (property, value) VALUES('town', '" + town + "')");
 	}
-	
+
 	public void update() {
 		if (mode == NPCMode.QUEST_NPC) {
 			return;
@@ -799,27 +827,5 @@ public class NPCQuester extends Quester {
 		} catch (Exception e) {
 			MineQuest.log("Problem getting NPC Properties");
 		}
-	}
-	
-	@Override
-	public void bind(String name) {
-		if ((getAbility(name) != null) && (getAbility(name).getClassType().getName().equals("Warrior"))) {
-			super.bind(name);
-		} else {
-			sendMessage("I can only cast warrior abilities");
-		}
-	}
-	
-	@Override
-	public boolean canCast(List<ItemStack> list) {
-		if (follow != null) {
-			return follow.canCast(list);
-		}
-		
-		return false;
-	}
-
-	public Quester getFollow() {
-		return follow;
 	}
 }
