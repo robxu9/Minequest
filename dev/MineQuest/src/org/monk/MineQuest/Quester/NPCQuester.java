@@ -228,7 +228,7 @@ public class NPCQuester extends Quester {
 		if (walk_message != null) {
 			for (Player entity : MineQuest.getSServer().getOnlinePlayers()) {
 				if (MineQuest.distance(player.getLocation(), entity.getLocation()) < radius) {
-					if (!MineQuest.getQuester(entity).isCompleted(new QuestProspect(quest_file))) {
+					if ((quest_file == null) || (!MineQuest.getQuester(entity).isCompleted(new QuestProspect(quest_file)))) {
 						if (!checkMessage(entity.getEntityId())) {
 							if (walk_message.equals("random")) {
 								MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, MineQuest.getQuester(entity));
@@ -507,6 +507,7 @@ public class NPCQuester extends Quester {
 	@Override
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		boolean ret = false;
+		MineQuest.log("Hit!");
 		
 		if ((mode != NPCMode.FOR_SALE) && (mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY) && (mode != NPCMode.PARTY_STAND)) {
 			health = max_health;
@@ -650,6 +651,9 @@ public class NPCQuester extends Quester {
 		MineQuest.getSQLServer().update("DELETE FROM questers WHERE name='" + name + "'");
 		MineQuest.getSQLServer().update("DROP TABLE " + name);
 		MineQuest.getSQLServer().update("DROP TABLE " + name + "_chests");
+		MineQuest.getSQLServer().update("DROP TABLE " + name + "_kills");
+		MineQuest.getSQLServer().update("DROP TABLE " + name + "_npc");
+		MineQuest.getSQLServer().update("DROP TABLE " + name + "_quests");
 	}
 
 	@Override
@@ -698,7 +702,9 @@ public class NPCQuester extends Quester {
 		if (getHealth() <= 0) {
 			setPlayer(null);
 			if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
-				removeSql();
+				if (mode != NPCMode.QUEST_NPC) {
+					removeSql();
+				}
 				MineQuest.remQuester(this);
 				MineQuest.getNPCManager().despawn(name);
 //				NpcSpawner.RemoveBasicHumanNpc(this.entity);

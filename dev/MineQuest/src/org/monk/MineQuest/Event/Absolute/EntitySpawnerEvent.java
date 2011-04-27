@@ -59,6 +59,9 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 	public void activate(EventParser eventParser) {
 		
 		if ((entity == null) || (entity.getHealth() <= 0)) {
+			if (creatureType == null) {
+				MineQuest.log("Null CreatureType!!");
+			}
 			entity = world.spawnCreature(location, creatureType);
 			if (entity != null) {
 				if (superm) {
@@ -85,7 +88,11 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 		super.cancelEvent();
 		
 		if (entity != null) {
-			MineQuest.getMob(entity).setHealth(0);
+			if (MineQuest.getMob(entity) != null) {
+				MineQuest.getMob(entity).setHealth(0);
+			} else {
+				entity.setHealth(0);
+			}
 		}
 	}
 }
