@@ -95,6 +95,7 @@ public class Quester {
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
+	protected Map<Material, Integer> destroyed;
 	private List<Long> times = new ArrayList<Long>();
 	private List<Integer> ids = new ArrayList<Integer>();
 
@@ -519,7 +520,12 @@ public class Quester {
 		}
 
 		if (inQuest()) {
-			return quest.canEdit(this, block);
+			if (!quest.canEdit(this, block)) {
+				return false;
+			}
+			if (!player.getWorld().getName().equals(MineQuest.getSServer().getWorlds().get(0).getName())) {
+				return true;
+			}
 		}
 		
 		if (!MineQuest.isTownEnabled()) {
@@ -691,6 +697,13 @@ public class Quester {
 					if (CreatureType.fromName(results.getString("name")) != null) {
 						kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
 					}
+					if (Material.getMaterial(results.getString("name")) != null) {
+						if (destroyed.get(results.getString("name")) == null) {
+							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count"));
+						} else {
+							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count") + destroyed.get(results.getString("name")));
+						}
+					}
 				}
 			} catch (Exception e) {
 				MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
@@ -709,12 +722,17 @@ public class Quester {
 			MineQuest.getSQLServer().update("DELETE FROM " + name + "_kills");
 			
 			for (CreatureType creature : kill_map.keySet()) {
-				MineQuest.getSQLServer()
-						.update(
-								"INSERT INTO " + name
-										+ "_kills (name, count) VALUES('"
-										+ creature + "', '"
-										+ kill_map.get(creature) + "')");
+				MineQuest.getSQLServer().update(
+						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+								+ creature.getName() + "', '"
+								+ kill_map.get(creature) + "')");
+			}
+			
+			for (Material material : destroyed.keySet()) {
+				MineQuest.getSQLServer().update(
+						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+								+ material.name() + "', '"
+								+ destroyed.get(material) + "')");
 			}
 		}
 		
@@ -929,6 +947,11 @@ public class Quester {
 				expGain(MineQuest.getDestroyBlockExp());
 				return;
 			}
+		}
+		if (destroyed.get(event.getBlock().getType()) == null) {
+			destroyed.put(event.getBlock().getType(), 1);
+		} else {
+			destroyed.put(event.getBlock().getType(), destroyed.get(event.getBlock().getType()) + 1);
 		}
 		
 		switch (blockToClass(event.getBlock())) {
@@ -1744,11 +1767,12 @@ public class Quester {
 		
 		updateBinds();
 		kills = new CreatureType[0];
+		destroyed = new HashMap<Material, Integer>();
 		
-		if (npcParty != null) {
-			for (Quester quester : npcParty.getQuesterArray()) {
-			}
-		}
+//		if (npcParty != null) {
+//			for (Quester quester : npcParty.getQuesterArray()) {
+//			}
+//		}
 		
 		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
 	}
@@ -1814,7 +1838,30 @@ public class Quester {
 		}
 	}
 	
-	public void recalculateHealth() {
+	public int recalculateHealth() {
+		health = MineQuest.getStartingHealth();
+		Random generator = new Random();
+		
+		for (int i = 0; i < level; i++) {
+			int add_health = generator.nextInt(3) + 1;
+			health += add_health;
+		}
+		
+		for (SkillClass skill : classes) {
+			if (skill instanceof CombatClass) {
+				CombatClass cclass = (CombatClass)skill;
+				for (int i = 0; i < cclass.getLevel(); i++) {
+					int size = cclass.getSize();
+					int add_health = generator.nextInt(size) + 1;
+	
+					health += add_health;
+				}
+			}
+		}
+		
+		max_health = health;
+		
+		return health;
 	}
 
 	public boolean hasQuester(Quester quester) {

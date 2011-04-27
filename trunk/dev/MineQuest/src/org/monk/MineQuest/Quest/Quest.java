@@ -42,6 +42,7 @@ import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.ExperienceAdd;
 import org.monk.MineQuest.Event.MessageEvent;
 import org.monk.MineQuest.Event.NormalEvent;
+import org.monk.MineQuest.Event.Absolute.AdvancedBlockEvent;
 import org.monk.MineQuest.Event.Absolute.AreaEvent;
 import org.monk.MineQuest.Event.Absolute.ArrowEvent;
 import org.monk.MineQuest.Event.Absolute.BlockCDEvent;
@@ -451,6 +452,14 @@ public class Quest {
 			int mat = Integer.parseInt(line[7]);
 			
 			new_event = new BlockEvent(delay, block, Material.getMaterial(mat));
+		} else if (type.equals("AdvancedBlockEvent")) {
+			int delay = Integer.parseInt(line[3]);
+
+			Block block = world.getBlockAt(Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6]));
+			
+			int mat = Integer.parseInt(line[7]);
+			
+			new_event = new AdvancedBlockEvent(delay, block, Material.getMaterial(mat), Byte.parseByte(line[8]));
 		} else if (type.equals("QuestEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);

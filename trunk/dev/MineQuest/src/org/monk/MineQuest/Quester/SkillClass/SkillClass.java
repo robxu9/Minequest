@@ -697,7 +697,7 @@ public class SkillClass {
 	 */
 	public void save() {
 		MineQuest.getSQLServer().update("UPDATE classes SET exp='" + exp + "', level='" + level + 
-								"' WHERE name='" + quester.getPlayer().getName() + "' AND class='" + type + "'");
+								"' WHERE name='" + quester.getName() + "' AND class='" + type + "'");
 	}
 
 	public void silentUnBind(ItemStack itemStack) {

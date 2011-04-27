@@ -135,14 +135,7 @@ public class StoreBlock {
 		update();
 		
 
-    	String cubes_string;
-		if (cubes > 1000000) {
-    		cubes_string = (((int)((double)cubes) / 1000.0)/1000) + "MC";
-    	} else if (cubes > 1000) {
-    		cubes_string = ((double)cubes / 1000.0) + "KC";
-    	} else {
-    		cubes_string = cubes + "C";
-    	}
+    	String cubes_string = convert(cubes);
 
 		player.updateInventory();
 		player.sendMessage("You bought " + block_quantity + " " + type + " for " + cubes_string);
@@ -169,14 +162,7 @@ public class StoreBlock {
 		quester.setCubes(quester.getCubes() + cubes);
 		update();
 		
-    	String cubes_string;
-		if (cubes > 1000000) {
-    		cubes_string = (((int)((double)cubes) / 1000.0)/1000) + "MC";
-    	} else if (cubes > 1000) {
-    		cubes_string = ((double)cubes / 1000.0) + "KC";
-    	} else {
-    		cubes_string = cubes + "C";
-    	}
+    	String cubes_string = convert(cubes);
 		
 		player.updateInventory();
 		player.sendMessage("You sold " + block_quantity + " " + type + " for " + cubes_string);
@@ -220,7 +206,7 @@ public class StoreBlock {
 		MineQuest.getSQLServer().update("UPDATE " + my_store.getName() + " SET price='" + price + "', quantity='" + quantity + "' WHERE type='" + type + "'");
 	}
 	
-	private int blocksToCubes(int blocks, boolean buy) {
+	public int blocksToCubes(int blocks, boolean buy) {
         int change = blocks;
         double cost = 0;
         new_price = price;
@@ -274,5 +260,21 @@ public class StoreBlock {
 
 	public int getPrice() {
 		return (int)(price + .5);
+	}
+
+	public static String convert(long cubes) {
+		String cubes_string;
+		
+		if (cubes > 1000000000) {
+    		cubes_string = (((int)((double)cubes) / 10000000.0)/100.0) + "GC";
+    	} else if (cubes > 1000000) {
+    		cubes_string = (((int)((double)cubes) / 10000.0)/100.0) + "MC";
+    	} else if (cubes > 1000) {
+    		cubes_string = (((int)((double)cubes) / 10.0)/ 100.0) + "KC";
+    	} else {
+    		cubes_string = cubes + "C";
+    	}
+		
+		return cubes_string;
 	}
 }

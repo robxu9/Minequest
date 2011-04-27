@@ -26,8 +26,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -47,6 +45,7 @@ import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.NPCSignShop;
 import org.monk.MineQuest.Store.Store;
+import org.monk.MineQuest.Store.StoreBlock;
 import org.monk.MineQuest.World.Property;
 import org.monk.MineQuest.World.Town;
 
@@ -539,16 +538,8 @@ public class MineQuestPlayerListener extends PlayerListener {
 			event.setCancelled(true);
         	return;
         } else if (split[0].equals("/cubes")) {
-        	String cubes_string;
-        	double cubes = MineQuest.getQuester(player).getCubes();
-        	
-	    	if (cubes > 1000000) {
-	    		cubes_string = ((double)cubes / 1000000.0) + "MC";
-	    	} else if (cubes > 1000) {
-	    		cubes_string = ((double)cubes / 1000.0) + "KC";
-	    	} else {
-	    		cubes_string = cubes + "C";
-	    	}
+        	String cubes_string = StoreBlock.convert((long)MineQuest.getQuester(player).getCubes());
+	    	
 			player.sendMessage("You have " + cubes_string);
 			event.setCancelled(true);
         	return;
@@ -568,7 +559,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         				store.addBlock(split[1], split[2], split[3]);
         				player.sendMessage(split[1] + " added to store");
     				}
+    			} else {
+    				player.sendMessage("You are not in a store");
     			}
+    		} else {
+    			player.sendMessage("You are not in a town");
     		}
 			event.setCancelled(true);
         } else if (split[0].equals("/remblock")) {
@@ -587,7 +582,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         				store.remBlock(split[1]);
         				player.sendMessage(split[1] + " removed from store");
     				}
+    			} else {
+    				player.sendMessage("You are not in a store");
     			}
+    		} else {
+    			player.sendMessage("You are not in a town");
     		}
 			event.setCancelled(true);
         } else if (split[0].equals("/init_store")) {
@@ -630,6 +629,24 @@ public class MineQuestPlayerListener extends PlayerListener {
         	Location location = player.getLocation();
         	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
         	event.setCancelled(true);
+        } else if (split[0].equals("/delete_store")) {
+    		Town town = MineQuest.getTown(player);
+    		if (town != null) {
+    			Store store = town.getStore(player);
+
+    			if (store != null) {
+    				Block block = player.getWorld().getBlockAt(player.getLocation());
+    				if (MineQuest.getQuester(player).canEdit(block)) {
+	    				store.delete();
+	    				player.sendMessage("Store deleted");
+    				}
+    			} else {
+    				player.sendMessage("You are not in a store");
+    			}
+    		} else {
+    			player.sendMessage("You are not in a town");
+    		}
+			event.setCancelled(true);
         }
 	}
 	
@@ -765,44 +782,51 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/addedit")) {
         	event.setCancelled(true);
-        	if (!MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
-        		player.sendMessage("You cannot edit this area");
-        		return;
-        	}
-        	Town town = MineQuest.getTown(player);
-        	if (town != null) {
-        		Property prop = town.getProperty(player);
-        		if (prop == null) prop = town.getTownProperty();
-        		
-        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
-        			player.sendMessage("Usage: /addedit <username>");
-        		} else {
-        			prop.addEdit(MineQuest.getQuester(split[1]));
-        			player.sendMessage("Editor " + split[1] + " added");
-        		}
-        	} else {
-        		player.sendMessage("You are not in a town");
-        	}
+	    	if (MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+	        	Town town = MineQuest.getTown(player);
+	        	if (town != null) {
+	        		Property prop = town.getProperty(player);
+	        		if (prop == null) prop = town.getTownProperty();
+	        		
+	        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
+	        			player.sendMessage("Usage: /addedit <username>");
+	        		} else {
+	        			prop.addEdit(MineQuest.getQuester(split[1]));
+	        			player.sendMessage("Editor " + split[1] + " added");
+	        		}
+	        	} else {
+	        		player.sendMessage("You are not in a town");
+	        	}
+	    	}
         } else if (split[0].equals("/remedit")) {
         	event.setCancelled(true);
-        	if (!MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
-        		player.sendMessage("You cannot edit this area");
-        		return;
-        	}
-        	Town town = MineQuest.getTown(player);
-        	if (town != null) {
-        		Property prop = town.getProperty(player);
-        		if (prop == null) prop = town.getTownProperty();
-        		
-        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
-        			player.sendMessage("Usage: /addedit <username>");
-        		} else {
-        			prop.remEdit(MineQuest.getQuester(split[1]));
-        			player.sendMessage("Editor " + split[1] + " removed");
-        		}
-        	} else {
-        		player.sendMessage("You are not in a town");
-        	}
+	    	if (MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+	        	Town town = MineQuest.getTown(player);
+	        	if (town != null) {
+	        		Property prop = town.getProperty(player);
+	        		if (prop == null) prop = town.getTownProperty();
+	        		
+	        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
+	        			player.sendMessage("Usage: /addedit <username>");
+	        		} else {
+	        			prop.remEdit(MineQuest.getQuester(split[1]));
+	        			player.sendMessage("Editor " + split[1] + " removed");
+	        		}
+	        	} else {
+	        		player.sendMessage("You are not in a town");
+	        	}
+	    	}
+        } else if (split[0].equals("/delete_town")) {
+        	event.setCancelled(true);
+	    	if (MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+	        	Town town = MineQuest.getTown(player);
+	        	if (town != null) {
+	        		town.delete();
+	        		player.sendMessage("Town deleted");
+	        	} else {
+	        		player.sendMessage("You are not in a town");
+	        	}
+	    	}
         }
 	}
 	
@@ -974,6 +998,18 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("No Living Entities List");
         	} else {
         		player.sendMessage("There are " + MineQuest.getMobSize() + " " + player.getWorld().getLivingEntities().size());
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/recalculate_health")) {
+        	if (player.isOp()) {
+        		player.sendMessage("Recalculating all Health");
+        		for (Quester quester : MineQuest.getQuesters()) {
+        			player.sendMessage(quester.getName() + " - " + quester.recalculateHealth());
+        			quester.save();
+        		}
+        		player.sendMessage("Recalculated!");
+        	} else {
+        		player.sendMessage("Only an op can do that");
         	}
         	event.setCancelled(true);
         }
