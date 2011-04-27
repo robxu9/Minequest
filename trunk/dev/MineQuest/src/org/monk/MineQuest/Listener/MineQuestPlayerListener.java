@@ -246,7 +246,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/quit_quest")) {
-        	MineQuest.getQuester(player).getQuest().removeQuester(MineQuest.getQuester(player));
+        	if (MineQuest.getQuester(player).getQuest() != null) {
+        		MineQuest.getQuester(player).getQuest().removeQuester(MineQuest.getQuester(player));
+        	} else {
+        		player.sendMessage("You are not in a quest...");
+        	}
         	event.setCancelled(true);
         } else if (split[0].equals("/list_party")) {
         	if (MineQuest.getQuester(player).getParty() != null) {
@@ -774,16 +778,25 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/buyprop")) {
         	Town town = MineQuest.getTown(player);
+        	if (town == null) {
+        		player.sendMessage("You are not in a town");
+            	event.setCancelled(true);
+            	return;
+        	}
         	Property prop = town.getProperty(player);
         	Quester quester = MineQuest.getQuester(player);
-        	if (prop.getOwner() == null) {
-        		if (quester.getCubes() > prop.getPrice()) {
-        			town.buy(quester, prop);
-        		} else {
-        			player.sendMessage("You cannot afford this property");
-        		}
+        	if (prop != null) {
+	        	if (prop.getOwner() == null) {
+	        		if (quester.getCubes() > prop.getPrice()) {
+	        			town.buy(quester, prop);
+	        		} else {
+	        			player.sendMessage("You cannot afford this property");
+	        		}
+	        	} else {
+	        		player.sendMessage("This Property is not for sale");
+	        	}
         	} else {
-        		player.sendMessage("This Property is not for sale");
+        		player.sendMessage("You are not on a property");
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/addedit")) {

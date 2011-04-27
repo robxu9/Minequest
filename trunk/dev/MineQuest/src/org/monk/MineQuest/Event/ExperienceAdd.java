@@ -20,17 +20,20 @@ package org.monk.MineQuest.Event;
 
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Store.StoreBlock;
 
 public class ExperienceAdd extends NormalEvent {
 	private int exp;
 	private int class_exp;
 	private Party party;
+	private int cubes;
 
-	public ExperienceAdd(long delay, Party party, int exp, int class_exp) {
+	public ExperienceAdd(long delay, Party party, int exp, int class_exp, int cubes) {
 		super(delay);
 		this.party = party;
 		this.exp = exp;
 		this.class_exp = class_exp;
+		this.cubes = cubes;
 	}
 	
 	@Override
@@ -42,6 +45,8 @@ public class ExperienceAdd extends NormalEvent {
 			quester.expGain(exp / party.getQuesters().size());
 			quester.sendMessage("You gained " + class_exp + " unassigned exp from a quest");
 			quester.expClassGain(class_exp / party.getQuesters().size());
+			quester.setCubes(quester.getCubes() + (cubes / party.getQuesters().size()));
+			quester.sendMessage("You gained " + StoreBlock.convert(cubes / party.getQuesters().size()) + " from a quest");
 		}
 	}
 

@@ -43,6 +43,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.CancelEvent;
+import org.monk.MineQuest.Event.CompleteQuestEvent;
 import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.ExperienceAdd;
 import org.monk.MineQuest.Event.MessageEvent;
@@ -92,6 +94,8 @@ public class Quest {
 	private String filename;
 	private boolean repeatable;
 	private boolean reset;
+	private String edit_message;
+	private AreaPreserver areaPreserver;
 	
 	public Quest(String filename, Party party) {
 		this.questers = party.getQuesterArray();
@@ -105,6 +109,7 @@ public class Quest {
 		this.filename = filename;
 		this.repeatable = false;
 		this.reset = true;
+		edit_message = "A Mystical Force is keeping you from Modifying the world!";
 
 		try {
 			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
@@ -114,6 +119,7 @@ public class Quest {
 			world = questers[0].getPlayer().getWorld();
 			spawn = null;
 			start_x = 0;
+			areaPreserver = null;
 			try {
 				while ((line = bis.readLine()) != null) {
 					number++;
@@ -124,12 +130,10 @@ public class Quest {
 			} catch (Exception e) {
 				MineQuest.log("Unable to load Quest Problem on Line " + number);
 				MineQuest.log("  " + line);
-				e.printStackTrace();
 				try {
 					issueNextEvents(-1);
 				} catch (Exception e1) {
 					MineQuest.log("Unable to unload events properly");
-					e1.printStackTrace();
 				}
 				return;
 			}
@@ -159,8 +163,6 @@ public class Quest {
 				MineQuest.log("Unable to unload events properly");
 			}
 		}
-		
-		
 	}
 	
 	public QuestProspect getProspect() {
@@ -216,6 +218,18 @@ public class Quest {
 			repeatable = Boolean.parseBoolean(split[1]);
 		} else if (split[0].equals("Reset")) {
 			reset = Boolean.parseBoolean(split[1]);
+		} else if (split[0].equals("EditMessage")) {
+			edit_message = split[1];
+		} else if (split[0].equals("AreaPreserve")) {
+			start_x = Double.parseDouble(split[1]);
+			start_y = Double.parseDouble(split[2]);
+			start_z = Double.parseDouble(split[3]);
+			end_x = Double.parseDouble(split[4]);
+			end_y = Double.parseDouble(split[5]);
+			end_z = Double.parseDouble(split[6]);
+			Location start = new Location(world, start_x, start_y, start_z);
+			Location end = new Location(world, end_x, end_y, end_z);
+			areaPreserver = new AreaPreserver(world, start, end);
 		}
 	}
 
@@ -560,15 +574,19 @@ public class Quest {
 			}
 
 			new_event = new EntitySpawnerCompleteEvent(delay, eventss);
-		} else if (type.equals("ExperienceAdd")) {
+		} else if (type.equals("ExperienceAdd") || type.equals("ExperienceEvent")) {
 			long delay = Integer.parseInt(line[3]);
 			int exp = Integer.parseInt(line[5]);
 			int class_exp = Integer.parseInt(line[6]);
+			int cubes = 0;
+			if (line.length >= 8) {
+				cubes = Integer.parseInt(line[7]);
+			}
 			if (!line[4].equals("all")) {
 				MineQuest.log("Warning: Options other than all are not supported for ExperienceAdd");
 			}
 			
-			new_event = new ExperienceAdd(delay, party, exp, class_exp);
+			new_event = new ExperienceAdd(delay, party, exp, class_exp, cubes);
 		} else if (type.equals("LockWorldTime")) {
 			long delay = Integer.parseInt(line[3]);
 			long time = Integer.parseInt(line[5]);
@@ -616,6 +634,23 @@ public class Quest {
 			double percent = Double.parseDouble(line[4]);
 			
 			new_event = new PartyHealthEvent(delay, party, percent);
+		} else if (type.equals("CancelEvent")) {
+			long delay = Integer.parseInt(line[3]);
+			String[] split_nums = new String[] {line[4]};
+			if (line[4].contains(",")) {
+				split_nums = line[4].split(",");
+			}
+			int[] nums = new int[split_nums.length];
+			
+			for (i = 0; i < split_nums.length; i++) {
+				nums[i] = Integer.parseInt(split_nums[i]);
+			}
+			
+			new_event = new CancelEvent(delay, this, nums);
+		} else if (type.equals("CompleteQuestEvent")) {
+			long delay = Integer.parseInt(line[3]);
+			
+			new_event = new CompleteQuestEvent(delay, this, party);
 		} else if (type.equals("HealthEntitySpawn")) {
 			long delay;
 			int task;
@@ -739,23 +774,35 @@ public class Quest {
 	public void issueNextEvents(int index) {
 		if (index == -1) {
 			for (Quester quester : questers) {
-				quester.clearQuest(reset);
-				quester.completeQuest(getProspect());
-				if (!repeatable) {
-					quester.remQuestAvailable(getProspect());
+				if (quester != null) {
+					quester.clearQuest(reset);
 				}
 			}
 			
 			for (QuestTask task : tasks) {
-				task.clearEvents();
+				if (task != null) {
+					task.clearEvents();
+				}
+			}
+			
+			for (Event event : events) {
+				if (event != null) {
+					event.cancelEvent();
+				}
 			}
 			
 			for (NPCQuester quester : npcs) {
-				MineQuest.remQuester(quester);
-				quester.damage(20000);
+				if (quester != null) {
+					MineQuest.remQuester(quester);
+					quester.damage(20000);
+				}
 			}
 			
 			MineQuest.remQuest(this);
+			
+			if (areaPreserver != null) {
+				areaPreserver.resetArea();
+			}
 			
 			return;
 		} else if (index <= -2) {
@@ -780,12 +827,17 @@ public class Quest {
 			}
 		}
 
-		quester.sendMessage("A Mystical Force is keeping you from Modifying the world!");
+		quester.sendMessage(edit_message);
 		
 		return false;
 	}
 
-	public Target getTarget(int parseInt) {
+	public Target getTarget(int id) {
+		for (Target target : targets) {
+			if (target.getId() == id) {
+				return target;
+			}
+		}
 		return null;
 	}
 

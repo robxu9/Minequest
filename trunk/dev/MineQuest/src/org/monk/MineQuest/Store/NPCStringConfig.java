@@ -154,8 +154,10 @@ public class NPCStringConfig {
 						.getAmount() + "");
 				if (store != null) {
 					StoreBlock block = store.getBlock(quester.getPlayer().getItemInHand().getTypeId());
-					int cubes = block.blocksToCubes(quester.getPlayer().getItemInHand().getAmount(), false);
-					ret = ret.replaceAll("%c", StoreBlock.convert(cubes));
+					if (block != null) {
+						int cubes = block.blocksToCubes(quester.getPlayer().getItemInHand().getAmount(), false);
+						ret = ret.replaceAll("%c", StoreBlock.convert(cubes));
+					}
 				}
 			}
 		}

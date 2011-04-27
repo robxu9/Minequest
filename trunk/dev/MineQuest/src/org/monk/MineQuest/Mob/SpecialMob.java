@@ -90,7 +90,9 @@ public class SpecialMob extends MQMob {
 			List<Ability> abilities = Ability.newAbilities(warmage);
 			int index = (int)(num * abilities.size());
 			
-			abilities.get(index).castAbility(null, player.getLocation(), player);
+			if (!abilities.get(index).getName().equals("Trap")) {
+				abilities.get(index).castAbility(null, player.getLocation(), player);
+			}
 		} else if (entity instanceof Creeper) {
 			Location location = new Location(entity.getWorld(), (int) entity.getLocation().getX(), 
 					Ability.getNearestY(entity.getWorld(), (int) entity.getLocation().getX(), (int) entity.getLocation().getY(),

@@ -934,7 +934,7 @@ public class Quester {
 		amount /= 2;
 		
 		if ((event.getDamager() != null) && 
-				((event.getDamager() instanceof Player) || 
+				(!(event.getDamager() instanceof Player) && 
 				 checkDamage(event.getDamager().getEntityId()))) {
             event.setCancelled(true);
             return;
@@ -1323,6 +1323,12 @@ public class Quester {
 	        				(random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
         		}
         	} else {
+        		if (MineQuest.everyHitSignal()) {
+	        		Random random = new Random();
+	        		((CraftPlayer)player).getHandle().world.makeSound(
+	        				((CraftPlayer)player).getHandle(), "random.hurt", 1.0F, 
+	        				(random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
+        		}
         		event.setDamage(0);
         	}
         }
