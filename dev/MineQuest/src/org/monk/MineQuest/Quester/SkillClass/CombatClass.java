@@ -122,7 +122,7 @@ public class CombatClass extends SkillClass implements DefendingClass {
 		
 		for (i = 0; i < armor.length; i++) {
 			if (isWearing(armor[i])) {
-				if (generator.nextDouble() < (.05 * i)) {
+				if (generator.nextDouble() < (.05 * (i + 1))) {
 					sum++;
 				}
 			} else {

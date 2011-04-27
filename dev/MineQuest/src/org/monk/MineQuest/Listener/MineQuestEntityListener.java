@@ -90,5 +90,4 @@ public class MineQuestEntityListener extends EntityListener {
 			MineQuest.getMob((LivingEntity)event.getEntity()).damage(event.getDamage());
         }
 	}
-
 }

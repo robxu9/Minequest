@@ -50,6 +50,15 @@ public class TargetedEvent extends NormalEvent {
 			int amount = Integer.parseInt(split[6]);
 			
 			targetEvent = new PoisonEvent(delay, target, amount);
+		} else if (split[3].equals("NPCSetTargetEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Location location = new Location(quest.getWorld(),
+					Double.parseDouble(split[6]),
+					Double.parseDouble(split[7]),
+					Double.parseDouble(split[8]));
+			
+			targetEvent = new NPCSetTargetEvent(delay, target, location);
 		} else {
 			MineQuest.log("Error: Unknown Targeted Event: " + split[3]);
 			throw new Exception();

@@ -217,4 +217,88 @@ public class Property {
 	public long getPrice() {
 		return price;
 	}
+	
+	/**
+	 * FOR USE WITH TOWN PROPERTY ONLY!!
+	 */
+	public void setX(int x) {
+		this.x = x;
+		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		if (town == null) {
+			MineQuest.log("[ERROR] Property outside of town...");
+			return;
+		}
+		
+		MineQuest.getSQLServer().update("UPDATE towns SET x='" + x + " WHERE name='" + town.getName() + "'");
+	}
+	
+	/**
+	 * FOR USE WITH TOWN PROPERTY ONLY!!
+	 */
+	public void setMaxX(int x) {
+		this.max_x = x;
+		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		if (town == null) {
+			MineQuest.log("[ERROR] Property outside of town...");
+			return;
+		}
+		
+		MineQuest.getSQLServer().update("UPDATE towns SET max_x='" + max_x + " WHERE name='" + town.getName() + "'");
+	}
+	
+	/**
+	 * FOR USE WITH TOWN PROPERTY ONLY!!
+	 */
+	public void setZ(int z) {
+		this.z = z;
+		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		if (town == null) {
+			MineQuest.log("[ERROR] Property outside of town...");
+			return;
+		}
+		
+		MineQuest.getSQLServer().update("UPDATE towns SET z='" + z + " WHERE name='" + town.getName() + "'");
+	}
+	
+	/**
+	 * FOR USE WITH TOWN PROPERTY ONLY!!
+	 */
+	public void setMaxZ(int z) {
+		this.max_z = z;
+		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		if (town == null) {
+			MineQuest.log("[ERROR] Property outside of town...");
+			return;
+		}
+		
+		MineQuest.getSQLServer().update("UPDATE towns SET max_z='" + max_z + " WHERE name='" + town.getName() + "'");
+	}
+	
+	/**
+	 * FOR USE WITH TOWN PROPERTY ONLY!!
+	 */
+	public void setY(int y) {
+		this.y = y;
+		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		if (town == null) {
+			MineQuest.log("[ERROR] Property outside of town...");
+			return;
+		}
+		
+		MineQuest.getSQLServer().update("UPDATE towns SET y='" + y + " WHERE name='" + town.getName() + "'");
+	}
+	
+	/**
+	 * FOR USE WITH TOWN PROPERTY ONLY!!
+	 */
+	public void setHeight(int h) {
+		this.height = h;
+		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		if (town == null) {
+			MineQuest.log("[ERROR] Property outside of town...");
+			return;
+		}
+		
+		MineQuest.getSQLServer().update("UPDATE towns SET height='" + h + " WHERE name='" + town.getName() + "'");
+	}
 }

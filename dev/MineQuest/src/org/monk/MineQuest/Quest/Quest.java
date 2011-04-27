@@ -34,8 +34,13 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.Event;
@@ -86,6 +91,7 @@ public class Quest {
 	private String name;
 	private String filename;
 	private boolean repeatable;
+	private boolean reset;
 	
 	public Quest(String filename, Party party) {
 		this.questers = party.getQuesterArray();
@@ -98,6 +104,7 @@ public class Quest {
 		this.name = filename;
 		this.filename = filename;
 		this.repeatable = false;
+		this.reset = true;
 
 		try {
 			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
@@ -207,6 +214,8 @@ public class Quest {
 			name = split[1];
 		} else if (split[0].equals("Repeatable")) {
 			repeatable = Boolean.parseBoolean(split[1]);
+		} else if (split[0].equals("Reset")) {
+			reset = Boolean.parseBoolean(split[1]);
 		}
 	}
 
@@ -289,29 +298,66 @@ public class Quest {
 			}
 		}
 		World copy = MineQuest.getSServer().getWorld(cp);
-		
+
 		if (start_x == 0) {
 			MineQuest.log("Instanced world without quest area defined - missing QuestArea?");
-			throw new Exception();
 		}
 		for (LivingEntity entity : copy.getLivingEntities()) {
 			entity.remove();
 		}
-		
+
 		int x,y,z;
-		for (x = (int)start_x; x < (int)end_x; x++) {
-			for (z = (int)start_z; z < (int)end_z; z++) {
-				for (y = (int)end_y; y > (int)start_y; y--) {
+		for (x = (int)start_x; x <= (int)end_x; x++) {
+			for (z = (int)start_z; z <= (int)end_z; z++) {
+				for (y = (int)end_y; y >= (int)start_y; y--) {
 					Block original = world.getBlockAt(x, y, z);
 					Block new_block = copy.getBlockAt(x, y, z);
 					
 					new_block.setType(original.getType());
 					new_block.setData(original.getData());
+					
+					if (original.getType() == Material.CHEST) {
+						copyChest(original, new_block);
+					}
 				}
 			}
 		}
-		
+
 		this.world = copy;
+	}
+	
+	private void copyChest(Block original, Block new_block) {
+		moveContents(getChest(new_block.getLocation()).getInventory(), 
+				getChest(original.getLocation()).getInventory());
+	}
+
+	private Chest getChest(Location location) {
+		Block block = location.getWorld().getBlockAt(location);
+		if (block.getType() == Material.CHEST) {
+			Chest chest = new CraftChest(block);
+
+			return chest;
+		} else {
+			return null;
+		}
+	}
+
+	private void moveContents(Inventory to, Inventory from) {
+		int i;
+		ItemStack[] new_contents = new ItemStack[from.getContents().length];
+		
+		for (i = 0; i < new_contents.length; i++) {
+			ItemStack original = from.getContents()[i];
+			ItemStack item = new ItemStack(original.getType(), 
+					original.getAmount());
+			item.setDurability(original.getDurability());
+			if (item.getData() != null) {
+				item.setData(new MaterialData(original.getType(), 
+						original.getData().getData()));
+			}
+			new_contents[i] = item;
+		}
+		to.setContents(new_contents);
 	}
 
 	public World getWorld() {
@@ -321,7 +367,7 @@ public class Quest {
 	public void removeQuester(Quester quester) {
 		party.remQuester(quester);
 		
-		quester.clearQuest();
+		quester.clearQuest(reset);
 		
 		if (party.getQuesters().size() == 0) {
 			issueNextEvents(-1);
@@ -693,7 +739,7 @@ public class Quest {
 	public void issueNextEvents(int index) {
 		if (index == -1) {
 			for (Quester quester : questers) {
-				quester.clearQuest();
+				quester.clearQuest(reset);
 				quester.completeQuest(getProspect());
 				if (!repeatable) {
 					quester.remQuestAvailable(getProspect());

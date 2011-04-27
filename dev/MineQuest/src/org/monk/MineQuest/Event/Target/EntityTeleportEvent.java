@@ -21,6 +21,7 @@ package org.monk.MineQuest.Event.Target;
 import org.bukkit.Location;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Quest.Target;
+import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
 public class EntityTeleportEvent extends TargetedEvent {
@@ -36,7 +37,11 @@ public class EntityTeleportEvent extends TargetedEvent {
 		super.activate(eventParser);
 		
 		for (Quester quester : target.getTargets()) {
-			quester.getPlayer().teleport(location);
+			if (quester instanceof NPCQuester) {
+				((NPCQuester)quester).teleport(location);
+			} else {
+				quester.getPlayer().teleport(location);
+			}
 		}
 	}
 
