@@ -18,6 +18,8 @@
  */
 package org.monk.MineQuest.Quest.CanEdit;
 
+import java.util.Calendar;
+
 import org.bukkit.Location;
 import org.monk.MineQuest.Quester.Quester;
 
@@ -27,11 +29,13 @@ public class CanEditBlock extends CanEdit {
 	private int index;
 	private boolean active;
 	private int id;
+	private long last;
 	
 	public CanEditBlock(Location location, int index) {
 		this.location = location;
 		this.index = index;
 		this.active = false;
+		last = 0;
 	}
 
 	private boolean equals(Location location, Location location2) {
@@ -57,7 +61,11 @@ public class CanEditBlock extends CanEdit {
 	public boolean canEdit(Quester quester, Location loc) {
 		if (equals(location, loc)) {
 			this.quester = quester;
-			this.active = !active;
+			Calendar now = Calendar.getInstance();
+			if (now.getTimeInMillis() - last > 100) {
+				this.active = !active;
+			}
+			last = now.getTimeInMillis();
 			return true;
 		}
 		return false;

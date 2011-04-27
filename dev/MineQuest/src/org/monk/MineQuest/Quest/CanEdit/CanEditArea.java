@@ -1,5 +1,7 @@
 package org.monk.MineQuest.Quest.CanEdit;
 
+import java.util.Calendar;
+
 import org.bukkit.Location;
 import org.monk.MineQuest.Quester.Quester;
 
@@ -14,6 +16,7 @@ public class CanEditArea extends CanEdit {
 	protected int max_x;
 	protected int max_y;
 	protected int max_z;
+	private long last;
 	
 	public CanEditArea(int index, int x, int y, int z, int max_x, int max_y, int max_z) {
 		this.x = x;
@@ -31,7 +34,11 @@ public class CanEditArea extends CanEdit {
 	public boolean canEdit(Quester quester, Location loc) {
 		if (within(loc)) {
 			this.quester = quester;
-			this.active = !active;
+			Calendar now = Calendar.getInstance();
+			if (now.getTimeInMillis() - last > 100) {
+				this.active = !active;
+			}
+			last = now.getTimeInMillis();
 			return true;
 		}
 		

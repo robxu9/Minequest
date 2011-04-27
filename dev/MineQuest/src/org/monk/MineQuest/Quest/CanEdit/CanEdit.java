@@ -55,6 +55,32 @@ public abstract class CanEdit implements TargetEvent {
 			int next_task = Integer.parseInt(line[9]);
 
 			can_edit = new CanEditOutsideArea(next_task, x, y, z, max_x, max_y, max_z);
+		} else if (line[2].equals("CanEditTypesInHand")) {
+			int index = Integer.parseInt(line[3]);
+			String[] split_nums = new String[] {line[4]};
+			if (line[4].contains(",")) {
+				split_nums = line[4].split(",");
+			}
+			int[] nums = new int[split_nums.length];
+			
+			for (int i = 0; i < split_nums.length; i++) {
+				nums[i] = Integer.parseInt(split_nums[i]);
+			}
+			
+			can_edit = new CanEditTypesInHand(index, nums);
+		} else if (line[2].equals("CanEditTypes")) {
+			int index = Integer.parseInt(line[3]);
+			String[] split_nums = new String[] {line[4]};
+			if (line[4].contains(",")) {
+				split_nums = line[4].split(",");
+			}
+			int[] nums = new int[split_nums.length];
+			
+			for (int i = 0; i < split_nums.length; i++) {
+				nums[i] = Integer.parseInt(split_nums[i]);
+			}
+			
+			can_edit = new CanEditTypes(index, nums);
 		} else {
 			return null;
 		}

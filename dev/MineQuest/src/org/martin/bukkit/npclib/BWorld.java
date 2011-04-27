@@ -10,14 +10,15 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import net.minecraft.server.AxisAlignedBB;
 import net.minecraft.server.Entity;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EnumSkyBlock;
 import net.minecraft.server.PlayerManager;
-import net.minecraft.server.WorldManager;
 import net.minecraft.server.WorldProvider;
 import net.minecraft.server.WorldServer;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -38,7 +39,6 @@ public class BWorld {
     private net.minecraft.server.World mcWorld;
     private WorldServer wServer;
     private WorldProvider wProvider;
-    private WorldManager wManager;
     public BWorld(BServer server, String worldName){
         this.server = server;
         world = server.getServer().getWorld(worldName);
@@ -94,7 +94,8 @@ public class BWorld {
         wServer.b(EnumSkyBlock.BLOCK, block.getX(), block.getY(), block.getZ(), level);
     }
 
-    public void removeEntity(String name,final Player player,JavaPlugin plugin){
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public void removeEntity(String name,final Player player,JavaPlugin plugin){
         server.getServer().getScheduler().callSyncMethod(plugin, new Callable() {
 
             public Object call() throws Exception {
