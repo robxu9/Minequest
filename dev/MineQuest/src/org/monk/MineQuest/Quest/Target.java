@@ -18,6 +18,8 @@
  */
 package org.monk.MineQuest.Quest;
 
+import java.util.List;
+
 import org.bukkit.Location;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.TargetEvent;
@@ -58,6 +60,20 @@ public abstract class Target {
 			}
 			
 			target = new Targetter(events);
+		} else if (split[2].equals("NPCTarget")) {
+			String[] names = split[3].split(",");
+			
+			target = new NPCTarget(names);
+		} else if (split[2].equals("TargetterEdit")) {
+			String[] event_ids = split[3].split(",");
+			TargetEvent[] events = new TargetEvent[event_ids.length];
+			int i = 0;
+			
+			for (String eid : event_ids) {
+				events[i++] = (TargetEvent)quest.getEdit(Integer.parseInt(eid));
+			}
+			
+			target = new Targetter(events);
 		} else {
 			MineQuest.log("Error: Unknown Target Type " + split[2]);
 			throw new Exception();
@@ -68,7 +84,7 @@ public abstract class Target {
 		return target;
 	}
 
-	public abstract Quester[] getTargets();
+	public abstract List<Quester> getTargets();
 	
 	public int getId() {
 		return id;

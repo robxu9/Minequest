@@ -188,8 +188,8 @@ public class NPCStringConfig {
 		return ret;
 	}
 
-	public void sendWantMessage(NPCQuester npcQuester, Quester quester) {
-		String message = getRandomWantMessage(quester);
+	public void sendWantMessage(NPCQuester npcQuester, Quester quester, Store store) {
+		String message = getRandomWantMessage(quester, store);
 		if (message != null) {
 			quester.sendMessage("<" + npcQuester.getName() + "> " + message);
 		} else {
@@ -197,7 +197,7 @@ public class NPCStringConfig {
 		}
 	}
 
-	private String getRandomWantMessage(Quester quester) {
+	private String getRandomWantMessage(Quester quester, Store store) {
 		if (want.size() == 0) {
 			return null;
 		}
@@ -206,13 +206,13 @@ public class NPCStringConfig {
 		
 		String ret = new String(want.get(index));
 
-		ret = processModifiers(ret, quester, null);
+		ret = processModifiers(ret, quester, store);
 		
 		return ret;
 	}
 
-	public void sendNotWantMessage(NPCQuester npcQuester, Quester quester) {
-		String message = getRandomNotWantMessage(quester);
+	public void sendNotWantMessage(NPCQuester npcQuester, Quester quester, Store store) {
+		String message = getRandomNotWantMessage(quester, store);
 		if (message != null) {
 			quester.sendMessage("<" + npcQuester.getName() + "> " + message);
 		} else {
@@ -220,7 +220,7 @@ public class NPCStringConfig {
 		}
 	}
 
-	private String getRandomNotWantMessage(Quester quester) {
+	private String getRandomNotWantMessage(Quester quester, Store store) {
 		if (notwant.size() == 0) {
 			return null;
 		}
@@ -229,7 +229,7 @@ public class NPCStringConfig {
 		
 		String ret = new String(notwant.get(index));
 
-		ret = processModifiers(ret, quester, null);
+		ret = processModifiers(ret, quester, store);
 		
 		return ret;
 	}

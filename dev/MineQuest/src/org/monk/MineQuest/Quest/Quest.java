@@ -49,6 +49,7 @@ import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.ExperienceAdd;
 import org.monk.MineQuest.Event.MessageEvent;
 import org.monk.MineQuest.Event.NormalEvent;
+import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Event.Absolute.AdvancedBlockEvent;
 import org.monk.MineQuest.Event.Absolute.AreaEvent;
 import org.monk.MineQuest.Event.Absolute.ArrowEvent;
@@ -62,11 +63,14 @@ import org.monk.MineQuest.Event.Absolute.EntitySpawnerEvent;
 import org.monk.MineQuest.Event.Absolute.EntitySpawnerNoMove;
 import org.monk.MineQuest.Event.Absolute.ExplosionEvent;
 import org.monk.MineQuest.Event.Absolute.HealthEntitySpawn;
+import org.monk.MineQuest.Event.Absolute.LightningEvent;
 import org.monk.MineQuest.Event.Absolute.LockWorldTime;
+import org.monk.MineQuest.Event.Absolute.PartyDestroy;
 import org.monk.MineQuest.Event.Absolute.PartyHealthEvent;
 import org.monk.MineQuest.Event.Absolute.PartyKill;
 import org.monk.MineQuest.Event.Absolute.QuestEvent;
 import org.monk.MineQuest.Event.Absolute.SingleAreaEvent;
+import org.monk.MineQuest.Event.Absolute.WeatherEvent;
 import org.monk.MineQuest.Event.Relative.RelativeEvent;
 import org.monk.MineQuest.Event.Target.TargetedEvent;
 import org.monk.MineQuest.Quest.CanEdit.CanEdit;
@@ -686,6 +690,20 @@ public class Quest {
 			int damage = Integer.parseInt(line[8]);
 			
 			new_event = new ExplosionEvent(delay, world, x, y, z, (float)radius, damage);
+		} else if (type.equals("WeatherEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			boolean hasStorm = Boolean.parseBoolean(line[4]);
+			int duration = Integer.parseInt(line[5]);
+			
+			new_event = new WeatherEvent(delay, world, hasStorm, duration);
+		} else if (type.equals("LightningEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			double x = Double.parseDouble(line[4]);
+			double y = Double.parseDouble(line[5]);
+			double z = Double.parseDouble(line[6]);
+			Location location = new Location(world, x, y, z);
+			
+			new_event = new LightningEvent(delay, location);
 		} else if (type.equals("KillEvent")) {
 			int delay = Integer.parseInt(line[3]);
 			int task = Integer.parseInt(line[4]);
@@ -711,6 +729,34 @@ public class Quest {
 			}
 			
 			new_event = new PartyKill(this, delay, task, party, kill_names, kills);
+		} else if (type.equals("DestroyEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			int task = Integer.parseInt(line[4]);
+			String[] destroy_names = line[5].split(",");
+			int[] destroys = new int[line[6].split(",").length];
+			if (destroy_names.length != destroys.length) {
+				MineQuest.log("Error: Unmatched Length of Names and Quantities");
+				throw new Exception();
+			}
+
+			for (String destroy_name : destroy_names) {
+				if (CreatureType.fromName(destroy_name) == null) {
+					MineQuest.log("Error: Invalid Creature Name " + destroy_name);
+					throw new Exception();
+				}
+			}
+
+			i = 0;
+			for (String count : line[6].split(",")) {
+				destroys[i++] = Integer.parseInt(count);
+			}
+
+			if (destroy_names.length == 0) {
+				MineQuest.log("Error: Cannot Have 0 Targets");
+				throw new Exception();
+			}
+
+			new_event = new PartyDestroy(this, delay, task, party, destroy_names, destroys);
 		} else if (type.equals("CanEditPattern")) {
 			int delay = Integer.parseInt(line[3]);
 			int index = Integer.parseInt(line[4]);
@@ -843,5 +889,15 @@ public class Quest {
 
 	public Party getParty() {
 		return party;
+	}
+
+	public TargetEvent getEdit(int id) {
+		for (CanEdit edit : edits) {
+			if (edit.getId() == id) {
+				return edit;
+			}
+		}
+		
+		return null;
 	}
 }

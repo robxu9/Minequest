@@ -34,9 +34,9 @@ public class AreaTargetQuester extends Target {
 	}
 
 	@Override
-	public Quester[] getTargets() {
+	public List<Quester> getTargets() {
 		List<Quester> questers = new ArrayList<Quester>();
-		Quester quester = target.getTargets()[0];
+		Quester quester = target.getTargets().get(0);
 		
 		for (Quester q : MineQuest.getQuesters()) {
 			if (MineQuest.distance(q.getPlayer().getLocation(), quester.getPlayer().getLocation()) < radius) {
@@ -44,6 +44,6 @@ public class AreaTargetQuester extends Target {
 			}
 		}
 		
-		return (Quester[])questers.toArray();
+		return questers;
 	}
 }
