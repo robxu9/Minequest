@@ -1529,8 +1529,6 @@ public class Quester {
 
 	public void remNPC(NPCQuester quester) {
 		npcParty.remQuester(quester);
-		quester.setMode(NPCMode.GENERIC);
-		quester.setFollow(null);
 	}
 
 	public void remQuestAvailable(QuestProspect quest) {

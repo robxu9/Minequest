@@ -3,6 +3,7 @@ package org.monk.MineQuest.Ability;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.PropertiesFile;
 
 public class AbilityConfigManager {

@@ -437,8 +437,10 @@ public class SkillClass {
 		int i;
 		
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].isBound(itemInHand)) {
-				return ability_list[i];
+			if (ability_list[i] != null) {
+				if (ability_list[i].isBound(itemInHand)) {
+					return ability_list[i];
+				}
 			}
 		}
 		
@@ -665,8 +667,10 @@ public class SkillClass {
 	public void replaceAbil(String old, String new_abil) {
 		int i;
 		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i].getName().equals(old)) {
-				break;
+			if (ability_list[i] != null) {
+				if (ability_list[i].getName().equals(old)) {
+					break;
+				}
 			}
 		}
 		

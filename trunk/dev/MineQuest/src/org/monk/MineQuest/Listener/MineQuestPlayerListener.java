@@ -401,7 +401,11 @@ public class MineQuestPlayerListener extends PlayerListener {
 	        		if (skill == null) {
 	        			player.sendMessage(split[1] + " is not a valid ability");
 	        		} else {
-	        			skill.replaceAbil(first, second);
+	        			if (MineQuest.isTownEnabled() && (MineQuest.getTown(player) == null)) {
+	        				player.sendMessage("Must be in a town to modify spellbook");
+	        			} else {
+	        				skill.replaceAbil(first, second);
+	        			}
 	        		}
         		} else {
             		player.sendMessage("Usage: /replace old_ability_name with new_ability_name");
