@@ -483,6 +483,10 @@ public class NPCQuester extends Quester {
 			if ((value == null) || (value.equals("null"))) {
 				this.follow_name = null;
 			}
+			if (follow != null) {
+				follow.remNPC(this);
+				follow = null;
+			}
 			if (follow_name != null) {
 				this.follow = MineQuest.getQuester(value);
 				if (follow != null) {
@@ -603,7 +607,9 @@ public class NPCQuester extends Quester {
 					if (mobTarget == null) {
 						if (!(entity instanceof Player)
 								|| (!((Player) entity).getName().equals(name))) {
-							mobTarget = entity;
+							if (NPCMode.FOR_SALE != mode) {
+								mobTarget = entity;
+							}
 						}
 					}
 				}
@@ -622,10 +628,12 @@ public class NPCQuester extends Quester {
 
 					sendMessage("Died!");
 					setProperty("follow", null);
+					mode = NPCMode.FOR_SALE;
+					mobTarget = null;
+					target = null;
 					makeNPC(location.getWorld().getName(), location.getX(),
 							location.getY(), location.getZ(), location
 									.getPitch(), location.getYaw());
-					mode = NPCMode.FOR_SALE;
 				}
 				health = max_health;
 			}
@@ -709,7 +717,7 @@ public class NPCQuester extends Quester {
 
 		if (getHealth() <= 0) {
 			setPlayer(null);
-			if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
+			if ((mode != NPCMode.PARTY_STAND) && (mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
 				if (mode != NPCMode.QUEST_NPC) {
 					removeSql();
 				}
@@ -724,6 +732,8 @@ public class NPCQuester extends Quester {
 				sendMessage("Died!");
 				mode = NPCMode.FOR_SALE;
 				setProperty("follow", null);
+				mobTarget = null;
+				target = null;
 				makeNPC(location.getWorld().getName(), location.getX(),
 						location.getY(), location.getZ(), location
 								.getPitch(), location.getYaw());
@@ -751,11 +761,9 @@ public class NPCQuester extends Quester {
 		if (entity == null) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
 				if ((mode == NPCMode.PARTY_STAND) || (mode == NPCMode.PARTY)) {
-					if (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) > 100) {
-						if (player != null) {
+					if ((player != null) || (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) > 100)) {
 							Player player = follow.getPlayer();
 							teleport(player.getLocation());
-						}
 					}
 				}
 			}

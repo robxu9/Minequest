@@ -61,6 +61,7 @@ import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
 
@@ -445,6 +446,7 @@ public class MineQuest extends JavaPlugin {
 		Ability ability = Ability.newAbility(string, null);
 		String ret = new String();
 		
+		ability.setSkillClass(new SkillClass());
 		for (ItemStack item : reduce(ability.getRealManaCost())) {
 			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
 		}
