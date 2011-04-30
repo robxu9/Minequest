@@ -35,7 +35,7 @@ public class AreaTarget extends Target {
 	}
 
 	@Override
-	public Quester[] getTargets() {
+	public List<Quester> getTargets() {
 		List<Quester> questers = new ArrayList<Quester>();
 		
 		for (Quester q : MineQuest.getQuesters()) {
@@ -44,7 +44,7 @@ public class AreaTarget extends Target {
 			}
 		}
 		
-		return (Quester[])questers.toArray();
+		return questers;
 	}
 
 }

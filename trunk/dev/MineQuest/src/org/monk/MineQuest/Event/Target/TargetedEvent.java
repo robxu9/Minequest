@@ -29,6 +29,11 @@ public class TargetedEvent extends NormalEvent {
 			int damage = Integer.parseInt(split[7]);
 			
 			targetEvent = new ExplosionEvent(delay, target, radius, damage);
+		} else if (split[3].equals("LightningEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			
+			targetEvent = new LightningEvent(delay, target);
 		} else if (split[3].equals("HealthEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));

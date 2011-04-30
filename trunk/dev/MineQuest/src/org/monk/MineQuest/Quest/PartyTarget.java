@@ -18,6 +18,8 @@
  */
 package org.monk.MineQuest.Quest;
 
+import java.util.List;
+
 import org.monk.MineQuest.Quester.Quester;
 
 public class PartyTarget extends Target {
@@ -28,7 +30,7 @@ public class PartyTarget extends Target {
 	}
 
 	@Override
-	public Quester[] getTargets() {
-		return party.getQuesterArray();
+	public List<Quester> getTargets() {
+		return party.getQuesters();
 	}
 }

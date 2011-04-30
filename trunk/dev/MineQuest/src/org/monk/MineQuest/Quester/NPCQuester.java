@@ -75,6 +75,7 @@ public class NPCQuester extends Quester {
 	private String town;
 	private String walk_message;
 	private long last_attack;
+	private long last_hit;
 
 	
 	public NPCQuester(String name) {
@@ -92,6 +93,7 @@ public class NPCQuester extends Quester {
 		idsStore = new ArrayList<Integer>();
 		itemStore = new ArrayList<Integer>();
 		last_attack = 0;
+		last_hit = 0;
 	}
 	
 	public NPCQuester(String name, NPCMode mode, World world, Location location) {
@@ -123,6 +125,7 @@ public class NPCQuester extends Quester {
 		idsStore = new ArrayList<Integer>();
 		itemStore = new ArrayList<Integer>();
 		last_attack = 0;
+		last_hit = 0;
 	}
 	
 	public void activate() {
@@ -507,7 +510,12 @@ public class NPCQuester extends Quester {
 	@Override
 	public boolean healthChange(int change, EntityDamageEvent event) {
 		boolean ret = false;
-		MineQuest.log("Hit!");
+		Calendar now = Calendar.getInstance();
+		
+		if (now.getTimeInMillis() - last_hit <= 10) {
+			return false;
+		}
+		last_hit = now.getTimeInMillis();
 		
 		if ((mode != NPCMode.FOR_SALE) && (mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY) && (mode != NPCMode.PARTY_STAND)) {
 			health = max_health;
@@ -531,9 +539,9 @@ public class NPCQuester extends Quester {
 						StoreBlock block = MineQuest.getTown(player).getStore(player).getBlock(hand.getTypeId());
 						checkMessageStore(human.getEntityId(), hand.getTypeId());
 						if (block != null) {
-							MineQuest.getNPCStringConfiguration().sendWantMessage(this, MineQuest.getQuester(human));
+							MineQuest.getNPCStringConfiguration().sendWantMessage(this, MineQuest.getQuester(human), MineQuest.getTown(player).getStore(player));
 						} else {
-							MineQuest.getNPCStringConfiguration().sendNotWantMessage(this, MineQuest.getQuester(human));
+							MineQuest.getNPCStringConfiguration().sendNotWantMessage(this, MineQuest.getQuester(human), MineQuest.getTown(player).getStore(player));
 						}
 					}
 				}
@@ -708,6 +716,7 @@ public class NPCQuester extends Quester {
 				MineQuest.remQuester(this);
 				MineQuest.getNPCManager().despawn(name);
 //				NpcSpawner.RemoveBasicHumanNpc(this.entity);
+				MineQuest.log("NPC Died");
 				entity = null;
 			} else {
 				Location location = MineQuest.getTown(town).getNPCSpawn();

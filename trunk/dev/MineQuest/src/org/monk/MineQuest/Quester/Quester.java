@@ -32,7 +32,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -744,7 +743,6 @@ public class Quester {
 	public void clearDestroyed() {
 		if (MineQuest.isTrackingDestroy()) {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
-			Map<Material, Integer> destroyed = new HashMap<Material, Integer>();
 			
 			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
 			
@@ -982,6 +980,12 @@ public class Quester {
 	public void destroyBlock(BlockBreakEvent event) {
 		if (!enabled) return;
 
+		if (destroyed.get(event.getBlock().getType()) == null) {
+			destroyed.put(event.getBlock().getType(), 1);
+		} else {
+			destroyed.put(event.getBlock().getType(), destroyed.get(event.getBlock().getType()) + 1);
+		}
+
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
 				skill.blockBreak(event);
@@ -995,11 +999,6 @@ public class Quester {
 				expGain(MineQuest.getDestroyBlockExp());
 				return;
 			}
-		}
-		if (destroyed.get(event.getBlock().getType()) == null) {
-			destroyed.put(event.getBlock().getType(), 1);
-		} else {
-			destroyed.put(event.getBlock().getType(), destroyed.get(event.getBlock().getType()) + 1);
 		}
 		
 		switch (blockToClass(event.getBlock())) {
@@ -1207,6 +1206,10 @@ public class Quester {
 		return kills;
 	}
 
+	public Map<Material, Integer> getDestroyed() {
+		return destroyed;
+	}
+
 	/**
 	 * Returns level of Quester.
 	 * 
@@ -1314,26 +1317,16 @@ public class Quester {
         	event.setDamage(player.getHealth() - newHealth);
         } else {
         	if (player.getHealth() < 20) {
-        		player.setHealth(health + 1);
+        		player.setHealth(player.getHealth() + 1);
         		event.setDamage(1);
-        		if (MineQuest.everyHitSignal()) {
-	        		Random random = new Random();
-	        		((CraftPlayer)player).getHandle().world.makeSound(
-	        				((CraftPlayer)player).getHandle(), "random.hurt", 1.0F, 
-	        				(random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-        		}
         	} else {
-        		if (MineQuest.everyHitSignal()) {
-	        		Random random = new Random();
-	        		((CraftPlayer)player).getHandle().world.makeSound(
-	        				((CraftPlayer)player).getHandle(), "random.hurt", 1.0F, 
-	        				(random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-        		}
         		event.setDamage(0);
         	}
         }
 
-        MineQuest.log("[INFO] " + name + " - " + health + "/" + max_health);
+        if (MineQuest.logHealthChange()) {
+        	MineQuest.log("[INFO] " + name + " - " + health + "/" + max_health);
+        }
 
         return false;
     }
@@ -1655,14 +1648,6 @@ public class Quester {
 	 * @param i New Health
 	 */
 	public void setHealth(int i) {
-		if (i < health) {
-    		if (MineQuest.everyHitSignal()) {
-        		Random random = new Random();
-        		((CraftPlayer)player).getHandle().world.makeSound(
-        				((CraftPlayer)player).getHandle(), "random.hurt", 1.0F, 
-        				(random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-    		}
-		}
 		if (i > max_health) {
 			i = max_health;
 		}

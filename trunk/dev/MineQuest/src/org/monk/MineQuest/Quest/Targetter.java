@@ -32,7 +32,7 @@ public class Targetter extends Target {
 	}
 	
 	@Override
-	public Quester[] getTargets() {
+	public List<Quester> getTargets() {
 		List<Quester> questers = new ArrayList<Quester>();
 		
 		for (TargetEvent event : events) {
@@ -40,6 +40,6 @@ public class Targetter extends Target {
 				questers.add(event.getTarget());
 			}
 		}
-		return (Quester[])questers.toArray();
+		return questers;
 	}
 }

@@ -554,7 +554,7 @@ public class MineQuest extends JavaPlugin {
 	private static boolean track_kills;
 	private static boolean track_destroy;
 	private static boolean town_no_mobs;
-	private static boolean every_hit_signal;
+	private static boolean log_health_change;
 
 	public MineQuest() {
 	}
@@ -645,7 +645,7 @@ public class MineQuest extends JavaPlugin {
 			track_destroy = general.getBoolean("track_destroy", true);
 			town_protect = general.getBoolean("town_protect", true);
 			town_no_mobs = general.getBoolean("town_no_mobs", true);
-			every_hit_signal = general.getBoolean("every_hit_signal", true);
+			log_health_change = general.getBoolean("log_health_change", true);
 			cubonomy_enable = general.getBoolean("cubonomy_enable", true);
 			debug_enable = general.getBoolean("debug_enable", true);
 			server_owner = general.getString("mayor", "jmonk");
@@ -1232,7 +1232,7 @@ public class MineQuest extends JavaPlugin {
 		return town_no_mobs;
 	}
 
-	public static boolean everyHitSignal() {
-		return every_hit_signal;
+	public static boolean logHealthChange() {
+		return log_health_change;
 	}
 }

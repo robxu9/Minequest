@@ -1,5 +1,8 @@
 package org.monk.MineQuest.Quest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 
@@ -11,12 +14,12 @@ public class NPCTarget extends Target{
 	}
 
 	@Override
-	public Quester[] getTargets() {
-		Quester[] questers = new Quester[names.length];
+	public List<Quester> getTargets() {
+		List<Quester> questers = new ArrayList<Quester>();
 		
 		int i;
 		for (i = 0; i < names.length; i++) {
-			questers[i] = MineQuest.getQuester(names[i]);
+			questers.add(MineQuest.getQuester(names[i]));
 		}
 		
 		return questers;
