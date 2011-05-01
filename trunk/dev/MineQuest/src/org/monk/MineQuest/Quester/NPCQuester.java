@@ -137,8 +137,11 @@ public class NPCQuester extends Quester {
 			item = null;
 		}
 		if (MineQuest.getQuester(mobTarget) instanceof NPCQuester) {
+			NPCQuester npc = (NPCQuester)MineQuest.getQuester(mobTarget);
+			if (npc.isMerc()) {
+				sendMessage("Its not good for business to attack other mercenaries");
+			}
 			mobTarget = null;
-			sendMessage("Its not good for business to attack other mercenaries");
 		}
 		
 		if (mobTarget == null) {
@@ -266,7 +269,14 @@ public class NPCQuester extends Quester {
 		}
 	}
 
-    private void attack(LivingEntity mobTarget) {
+    private boolean isMerc() {
+		if ((mode == NPCMode.FOR_SALE) || (mode == NPCMode.PARTY) || (mode == NPCMode.PARTY_STAND)) {
+			return true;
+		}
+		return false;
+	}
+
+	private void attack(LivingEntity mobTarget) {
 //		entity.attackLivingEntity(mobTarget);
     	long now = Calendar.getInstance().getTimeInMillis();
 

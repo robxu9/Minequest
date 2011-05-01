@@ -144,6 +144,7 @@ public abstract class Ability {
 				try {
 					MineQuest.log("Attempting to load MineQuest/abilities.jar");
 					classes = getClasseNamesInPackage("MineQuest/abilities.jar", "org.monk.MineQuest.Ability");
+					MineQuest.log("Success!!");
 				} catch (Exception e) {
 					MineQuest.log("Failed to load MineQuest/abilities.jar");
 					classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
