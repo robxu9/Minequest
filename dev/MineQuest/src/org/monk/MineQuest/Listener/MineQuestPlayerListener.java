@@ -673,6 +673,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			if (towns.size() == 0) {
 				player.sendMessage("There are no spawns - Contact your administrator");
 				event.setCancelled(true);
+				return;
 			}
 			index = 0;
 			distance = towns.get(0).calcDistance(player);
@@ -684,6 +685,10 @@ public class MineQuestPlayerListener extends PlayerListener {
 			}
 			player.sendMessage("Welcome to " + towns.get(index).getName());
 			player.teleport(towns.get(index).getLocation());
+			if (MineQuest.healSpawnEnable()) {
+				Quester quester = MineQuest.getQuester(player);
+				quester.setHealth(quester.getMaxHealth());
+			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/townloc")) {
 			player.sendMessage("You are at " + player.getLocation().getX() + " " + player.getLocation().getY() + " " + 

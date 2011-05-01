@@ -53,6 +53,7 @@ import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityConfigManager;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Event.NoMobs;
+import org.monk.MineQuest.Event.Absolute.HealEvent;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
@@ -557,6 +558,7 @@ public class MineQuest extends JavaPlugin {
 	private static boolean track_destroy;
 	private static boolean town_no_mobs;
 	private static boolean log_health_change;
+	private static boolean health_spawn_enable;
 
 	public MineQuest() {
 	}
@@ -650,6 +652,13 @@ public class MineQuest extends JavaPlugin {
 			log_health_change = general.getBoolean("log_health_change", true);
 			cubonomy_enable = general.getBoolean("cubonomy_enable", true);
 			debug_enable = general.getBoolean("debug_enable", true);
+			health_spawn_enable = general.getBoolean("health_spawn_enable", false);
+			boolean slow_heal = general.getBoolean("slow_heal", false);
+			if (slow_heal) {
+				int amount = general.getInt("slow_heal_amount", 1);
+				int delay = general.getInt("slow_heal_delay_ms", 1500);
+				getEventParser().addEvent(new HealEvent(delay, amount));
+			}
 			server_owner = general.getString("mayor", "jmonk");
 			sell_percent = general.getDouble("sell_return", .92);
 			price_change = general.getDouble("price_change", .009);
@@ -1236,5 +1245,9 @@ public class MineQuest extends JavaPlugin {
 
 	public static boolean logHealthChange() {
 		return log_health_change;
+	}
+
+	public static boolean healSpawnEnable() {
+		return health_spawn_enable;
 	}
 }

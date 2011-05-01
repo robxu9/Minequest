@@ -49,6 +49,7 @@ import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.ExperienceAdd;
 import org.monk.MineQuest.Event.MessageEvent;
 import org.monk.MineQuest.Event.NormalEvent;
+import org.monk.MineQuest.Event.QuestAvailableEvent;
 import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Event.Absolute.AdvancedBlockEvent;
 import org.monk.MineQuest.Event.Absolute.AreaEvent;
@@ -366,14 +367,16 @@ public class Quest {
 		
 		for (i = 0; i < new_contents.length; i++) {
 			ItemStack original = from.getContents()[i];
-			ItemStack item = new ItemStack(original.getType(), 
-					original.getAmount());
-			item.setDurability(original.getDurability());
-			if (item.getData() != null) {
-				item.setData(new MaterialData(original.getType(), 
-						original.getData().getData()));
+			if (original != null) {
+				ItemStack item = new ItemStack(original.getType(), 
+						original.getAmount());
+				item.setDurability(original.getDurability());
+				if (item.getData() != null) {
+					item.setData(new MaterialData(original.getType(), 
+							original.getData().getData()));
+				}
+				new_contents[i] = item;
 			}
-			new_contents[i] = item;
 		}
 		to.setContents(new_contents);
 	}
@@ -740,7 +743,7 @@ public class Quest {
 			}
 
 			for (String destroy_name : destroy_names) {
-				if (CreatureType.fromName(destroy_name) == null) {
+				if (Material.getMaterial(destroy_name) == null) {
 					MineQuest.log("Error: Invalid Creature Name " + destroy_name);
 					throw new Exception();
 				}
@@ -774,6 +777,11 @@ public class Quest {
 			}
 			
 			new_event = new CanEditPattern(this, delay, index, editors, flags);
+		} else if (type.equals("QuestAvailableEvent")) {
+			int delay = Integer.parseInt(line[3]);
+			String quest = line[4];
+			
+			new_event = new QuestAvailableEvent(delay, quest, party);
 		} else {
 			MineQuest.log("Unknown Event Type: " + type);
 			throw new Exception();
