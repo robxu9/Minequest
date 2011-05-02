@@ -1,0 +1,26 @@
+package org.monk.MineQuest.Event;
+
+import org.monk.MineQuest.Quest.Quest;
+
+public class CancelEvent extends NormalEvent
+{
+
+	private Quest quest;
+	private int[] cancel_ids;
+
+	public CancelEvent(long delay, Quest quest, int id[]) {
+		super(delay);
+		this.quest = quest;
+		this.cancel_ids = id;
+	}
+	
+	@Override
+	public void activate(EventParser eventParser) {
+		super.activate(eventParser);
+		
+		for (int cancel : cancel_ids) {
+			quest.getEvent(cancel).cancelEvent();
+		}
+	}
+
+}
