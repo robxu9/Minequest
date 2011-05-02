@@ -377,6 +377,14 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("You are not holding anything");
         	}
         	event.setCancelled(true);
+        } else if (split[0].equals("/spawn_npc")) {
+        	event.setCancelled(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /spawn_npc <npc_name>");
+        		return;
+        	}
+        	Location location = player.getLocation();
+        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
         } else if (split[0].equals("/replace")) {
         	if (split.length < 3) {
         		player.sendMessage("Usage: /replace old_ability_name with new_ability_name");
@@ -1055,10 +1063,6 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage(split[1] + " is not a valid world");
         	}
         	
-        	event.setCancelled(true);
-        } else if (split[0].equals("/spawn_npc")) {
-        	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
         	event.setCancelled(true);
         } else if (split[0].equals("/mobss")) {
         	if (player.getWorld().getLivingEntities() == null) {
