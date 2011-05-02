@@ -191,14 +191,25 @@ public class Quester {
 	}
 
 	public void addClass(String name) {
+		if (name.equalsIgnoreCase("list")) {
+			sendMessage("Available combat classes are:");
+			sendMessage("   Warrior");
+			sendMessage("   Archer");
+			sendMessage("   WarMage");
+			sendMessage("   PeaceMage");
+			return;
+		}
+
 		if (getClass(name) != null) {
 			sendMessage("You already have the class " + name);
 			return;
 		}
+
 		if (getCombatClasses().size() == MineQuest.getMaxClasses()) {
 			sendMessage("You do not have space for any more combat classes");
 			return;
 		}
+
 		String names[] = new String[] {"WarMage", "PeaceMage", "Archer", "Warrior"};
 		boolean flag = false;
 		for (String clazz : names) {
@@ -206,10 +217,12 @@ public class Quester {
 				flag = true;
 			}
 		}
+
 		if (!flag) {
 			sendMessage(name + " is not a valid class currently");
+			return;
 		}
-		
+
 		save();
 		try {
 			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + this.name + "'");

@@ -795,7 +795,7 @@ public class MineQuest extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	private void downloadAbilities() throws MalformedURLException, IOException {
 		BufferedInputStream in = new BufferedInputStream(
 				new
@@ -815,6 +815,7 @@ public class MineQuest extends JavaPlugin {
 		bout.close();
 		in.close();
 	}
+
 	private void upgradeDB() {
 		MineQuest.log("Your DB is too old to determine version");
 		MineQuest.log("Upgrading DB to 0.40");
