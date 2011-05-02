@@ -191,6 +191,11 @@ public class MineQuest extends JavaPlugin {
 		if (!isMayor(getQuester(player))) {
 			player.sendMessage("Only mayors are allowed to create towns");
 		} else {
+			if (namer == null) {
+				player.sendMessage("You have to use /createtown first...");
+				return;
+			}
+
 			if (namer.equals(player.getName())) {
 				Location end = player.getLocation();
 				int x, z, max_x, max_z;

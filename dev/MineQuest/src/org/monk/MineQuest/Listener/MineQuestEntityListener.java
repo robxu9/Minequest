@@ -19,6 +19,7 @@
 package org.monk.MineQuest.Listener;
 
 
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -28,8 +29,10 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Mob.MQMob;
 
 public class MineQuestEntityListener extends EntityListener {
 	
@@ -96,5 +99,15 @@ public class MineQuestEntityListener extends EntityListener {
 		} else if ((event.getEntity() instanceof LivingEntity) && MineQuest.getMob((LivingEntity)event.getEntity()) != null) {
 			MineQuest.getMob((LivingEntity)event.getEntity()).damage(event.getDamage());
         }
+	}
+	
+	@Override
+	public void onEntityExplode(EntityExplodeEvent event) {
+		if (event.getEntity() instanceof Creeper) {
+			MQMob mob = MineQuest.getMob((LivingEntity)event.getEntity());
+			if (mob != null) {
+				mob.setHealth(0);
+			}
+		}
 	}
 }

@@ -383,8 +383,30 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /spawn_npc <npc_name>");
         		return;
         	}
-        	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
+        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
+            	Location location = player.getLocation();
+            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
+        	} else {
+        		player.sendMessage("You don't have permission to edit this area");
+        	}
+        } else if (split[0].equals("/remove_npc")) {
+        	event.setCancelled(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /remove_npc <npc_name>");
+        		return;
+        	}
+        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
+        		NPCQuester quester = (NPCQuester)MineQuest.getQuester(split[1]);
+	        	if (MineQuest.getQuester(player).canEdit(quester.getPlayer().getLocation().getBlock())) {
+	        		quester.removeSql();
+	        		quester.setHealth(0);
+	        		MineQuest.remQuester(quester);
+	        	} else {
+	        		player.sendMessage("You don't have permission to edit their area");
+	        	}
+        	} else {
+        		player.sendMessage(split[1] + " is not a valid NPC to remove");
+        	}
         } else if (split[0].equals("/replace")) {
         	if (split.length < 3) {
         		player.sendMessage("Usage: /replace old_ability_name with new_ability_name");

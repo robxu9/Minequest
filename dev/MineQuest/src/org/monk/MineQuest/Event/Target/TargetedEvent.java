@@ -55,6 +55,11 @@ public class TargetedEvent extends NormalEvent {
 			int amount = Integer.parseInt(split[6]);
 			
 			targetEvent = new PoisonEvent(delay, target, amount);
+		} else if (split[3].equals("AbilityEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			
+			targetEvent = new AbilityEvent(delay, target, split[6], split[7]);
 		} else if (split[3].equals("NPCSetTargetEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));

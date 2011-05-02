@@ -57,9 +57,10 @@ public class SpecialMobHandler extends PeriodicEvent {
 		}
 
 		super.activate(eventParser);
-		
 		if (mob.getMonster().getHealth() <= 0) {
-			mob.dropLoot();
+			if (mob.isDead()) {
+				mob.dropLoot();
+			}
 			eventParser.setComplete(true);
 		}
 	}

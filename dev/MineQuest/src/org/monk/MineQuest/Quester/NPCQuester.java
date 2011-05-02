@@ -76,6 +76,9 @@ public class NPCQuester extends Quester {
 	private String walk_message;
 	private long last_attack;
 	private long last_hit;
+	private boolean removed;
+	private long respawn;
+	private int reach_count;
 
 	
 	public NPCQuester(String name) {
@@ -94,6 +97,9 @@ public class NPCQuester extends Quester {
 		itemStore = new ArrayList<Integer>();
 		last_attack = 0;
 		last_hit = 0;
+		removed = false;
+		respawn = 0;
+		reach_count = 0;
 	}
 	
 	public NPCQuester(String name, NPCMode mode, World world, Location location) {
@@ -126,6 +132,9 @@ public class NPCQuester extends Quester {
 		itemStore = new ArrayList<Integer>();
 		last_attack = 0;
 		last_hit = 0;
+		removed = false;
+		respawn = 0;
+		reach_count = 0;
 	}
 	
 	public void activate() {
@@ -144,6 +153,12 @@ public class NPCQuester extends Quester {
 			mobTarget = null;
 		}
 		
+		if (respawn - Calendar.getInstance().getTimeInMillis() > 300000) {
+			respawn = Calendar.getInstance().getTimeInMillis();
+			Location location = player.getLocation();
+			teleport(location);
+		}
+		
 		if (mobTarget == null) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
 				if (mode != NPCMode.PARTY_STAND) {
@@ -154,9 +169,16 @@ public class NPCQuester extends Quester {
 			}
 		} else {
 			if (MineQuest.distance(player.getLocation(), mobTarget.getLocation()) > 1.3) {
-				if (mobTarget.getHealth() <= 0) {
-					mobTarget = null;
-					return;
+				if (MineQuest.getMob(mobTarget) != null) {
+					if (MineQuest.getMob(mobTarget).getHealth() <= 0) {
+						mobTarget = null;
+						return;
+					}
+				} else {
+					if (mobTarget.getHealth() <= 0) {
+						mobTarget = null;
+						return;
+					}
 				}
 				setTarget(mobTarget.getLocation(), 1.25, 0);
 			}
@@ -169,47 +191,43 @@ public class NPCQuester extends Quester {
 		}
 
 		if (target != null) {
-			if (MineQuest.distance(player.getLocation(), target) < speed) {
-				double move_x = (target.getX() - player.getLocation().getX());
-//				double move_y = (target.getY() - player.getLocation().getY());
-				double move_z = (target.getZ() - player.getLocation().getZ());
-				float yaw = 0;
-				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-				entity.setLocation(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
-
-				target = null;
+			if (reach_count > 4) {
+				teleport(target);
+				reach_count = 0;
 			} else {
-				double distance = MineQuest.distance(player.getLocation(), target);
-				double move_x = (speed * (target.getX() - player.getLocation().getX()) / distance);
-				double move_y = (speed * (target.getY() - player.getLocation().getY()) / distance);
-				double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
-				move_x += (new Random()).nextDouble() * .05;
-				move_z += (new Random()).nextDouble() * .05;
-				move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
-						(int)player.getLocation().getBlockY(), 
-						(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
-//				move_y = 0;
-				if (move_y > 3) {
-					move_y = 0;
-				}
-				float yaw = 0;
-				yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
-//				Location location = new Location(player.getWorld(),
-//						player.getLocation().getX() + move_x,
-//						player.getLocation().getY() + move_y,
-//						player.getLocation().getZ() + move_z,
-//						yaw, target.getPitch());
-//				if ((location.getWorld().getBlockAt(location).getType() == Material.AIR) ||
-//					(location.getWorld().getBlockAt(location).getType() == Material.FIRE) ||
-//					(location.getWorld().getBlockAt(location).getType() == Material.SNOW)) { 
+				if (MineQuest.distance(player.getLocation(), target) < speed) {
+					double move_x = (target.getX() - player.getLocation().getX());
+					double move_z = (target.getZ() - player.getLocation().getZ());
+					float yaw = 0;
+					yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
+					entity.setLocation(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
+					reach_count = 0;
+	
+					target = null;
+				} else {
+					double distance = MineQuest.distance(player.getLocation(), target);
+					double move_x = (speed * (target.getX() - player.getLocation().getX()) / distance);
+					double move_y = (speed * (target.getY() - player.getLocation().getY()) / distance);
+					double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
+					move_x += (new Random()).nextDouble() * .05;
+					move_z += (new Random()).nextDouble() * .05;
+					move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
+							(int)player.getLocation().getBlockY(), 
+							(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
+					if ((move_x < .1) && (move_z < .1)) {
+						reach_count++;
+					}
+					if (move_y > 3) {
+						move_y = 0;
+					}
+					float yaw = 0;
+					yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
 					entity.setLocation(
 						player.getLocation().getX() + move_x,
 						player.getLocation().getY() + move_y,
 						player.getLocation().getZ() + move_z,
 						yaw, target.getPitch());
-//				} else {
-//					target = null;
-//				}
+				}
 			}
 		}
 		if (player.getLocation().getY() > 128) {
@@ -673,7 +691,8 @@ public class NPCQuester extends Quester {
 		}
 	}
 
-	private void removeSql() {
+	public void removeSql() {
+		removed = true;
 		MineQuest.getSQLServer().update("DELETE FROM questers WHERE name='" + name + "'");
 		MineQuest.getSQLServer().update("DROP TABLE " + name);
 		MineQuest.getSQLServer().update("DROP TABLE " + name + "_chests");
@@ -712,6 +731,7 @@ public class NPCQuester extends Quester {
 	}
 	
 	public void setEntity(NPCEntity entity) {
+		if (removed) return;
 		this.entity = entity;
 		setPlayer((Player)entity.getBukkitEntity());
 	}
@@ -809,10 +829,15 @@ public class NPCQuester extends Quester {
 			}
 			if ((target.getWorld().getBlockAt(target).getType() != Material.AIR) && 
 					(target.getWorld().getBlockAt(target).getType() != Material.FIRE) &&
+					(target.getWorld().getBlockAt(target).getType() != Material.TORCH) &&
+					(target.getWorld().getBlockAt(target).getType() != Material.SIGN) &&
+					(target.getWorld().getBlockAt(target).getType() != Material.WALL_SIGN) &&
 					(target.getWorld().getBlockAt(target).getType() != Material.SNOW)) {
 				target = null;
 				if (call < 20) {
 					setTarget(location, rad, call + 1);
+				} else {
+					reach_count++;
 				}
 			}
 		}
