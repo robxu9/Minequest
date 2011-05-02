@@ -101,7 +101,11 @@ public class SkillClass {
 		this.type = type;
 		generator = new Random();
 		this.quester = quester;
-		update();
+		if (quester != null) {
+			update();
+		} else {
+			level = MineQuest.getAdjustmentMultiplier() * MineQuest.getAdjustment() * 10;
+		}
 		req_level = MineQuest.getArmorReqLevel();
 	}
 	

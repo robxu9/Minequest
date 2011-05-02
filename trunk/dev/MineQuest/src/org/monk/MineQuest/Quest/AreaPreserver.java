@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -17,6 +18,7 @@ public class AreaPreserver {
 	private Material type[][][];
 	private byte data[][][];
 	private List<ItemStack[]> contents;
+	private List<String> strings;
 	private Location start;
 	private Location end;
 	private World world;
@@ -32,6 +34,7 @@ public class AreaPreserver {
 		this.end = end;
 		this.world = world;
 		contents = new ArrayList<ItemStack[]>();
+		strings = new ArrayList<String>();
 		
 		int x,y,z;
 		for (x = start.getBlockX(); x < end.getBlockX(); x++) {
@@ -50,6 +53,13 @@ public class AreaPreserver {
 								world.getBlockAt(x, y, z).getLocation())
 								.getInventory()));
 					}
+					if ((world.getBlockAt(x, y, z).getType() == Material.SIGN) || 
+						(world.getBlockAt(x, y, z).getType() == Material.WALL_SIGN)) {
+						Sign sign = (Sign)world.getBlockAt(x, y, z).getState();
+						for (int i = 0; i < 4; i++) {
+							strings.add(sign.getLine(i));
+						}
+					}
 				}
 			}
 		}
@@ -58,6 +68,7 @@ public class AreaPreserver {
 	public void resetArea() {
 		int x,y,z;
 		int i = 0;
+		int line = 0;
 		for (x = start.getBlockX(); x < end.getBlockX(); x++) {
 			for (y = start.getBlockY(); y < end.getBlockY(); y++) {
 				for (z = start.getBlockZ(); z < end.getBlockZ(); z++) {
@@ -70,6 +81,13 @@ public class AreaPreserver {
 					if (world.getBlockAt(x, y, z).getType() == Material.CHEST) {
 						getChest(world.getBlockAt(x, y, z).getLocation())
 								.getInventory().setContents(contents.get(i++));
+					}
+					if ((world.getBlockAt(x, y, z).getType() == Material.SIGN) || 
+						(world.getBlockAt(x, y, z).getType() == Material.WALL_SIGN)) {
+						Sign sign = (Sign)world.getBlockAt(x, y, z).getState();
+						for (int in = 0; in < 4; in++) {
+							sign.setLine(in, strings.get(line++));
+						}
 					}
 				}
 			}

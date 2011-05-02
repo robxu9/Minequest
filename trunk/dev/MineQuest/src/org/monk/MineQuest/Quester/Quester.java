@@ -313,6 +313,18 @@ public class Quester {
 	public void attackEntity(Entity entity, EntityDamageByEntityEvent event) {
 		if (checkItemInHand()) return;
 		if (!(entity instanceof LivingEntity)) return;
+		
+		if (MineQuest.getQuester((LivingEntity)entity) instanceof NPCQuester) {
+			NPCQuester quester = (NPCQuester)MineQuest.getQuester((LivingEntity)entity);
+			if (hasQuester(quester)) {
+				return;
+			}
+			NPCMode mode = quester.getMode();
+			if ((mode != NPCMode.PARTY) &&
+					(mode != NPCMode.PARTY_STAND)) {
+				return;
+			}
+		}
 
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {

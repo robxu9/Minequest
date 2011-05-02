@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jline.ConsoleReader;
+
 import net.minecraft.server.EntityTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.NetworkListenThread;
 import net.minecraft.server.PropertyManager;
 import net.minecraft.server.ServerConfigurationManager;
 import net.minecraft.server.WorldServer;
+
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftServer;
@@ -62,9 +63,9 @@ public class BServer {
         return cServer.getHandle();
     }
 
-    public ConsoleReader getReader() {
-        return cServer.getReader();
-    }
+//    public ConsoleReader getReader() {
+//        return cServer.getReader();
+//    }
 
     public void loadPlugins() {
         cServer.loadPlugins();
