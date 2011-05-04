@@ -79,6 +79,8 @@ public class NPCQuester extends Quester {
 	private boolean removed;
 	private long respawn;
 	private int reach_count;
+	private Location last_loc;
+	private Random generator;
 
 	
 	public NPCQuester(String name) {
@@ -100,6 +102,7 @@ public class NPCQuester extends Quester {
 		removed = false;
 		respawn = 0;
 		reach_count = 0;
+		generator = new Random();
 	}
 	
 	public NPCQuester(String name, NPCMode mode, World world, Location location) {
@@ -135,6 +138,7 @@ public class NPCQuester extends Quester {
 		removed = false;
 		respawn = 0;
 		reach_count = 0;
+		generator = new Random();
 	}
 	
 	public void activate() {
@@ -191,9 +195,11 @@ public class NPCQuester extends Quester {
 		}
 
 		if (target != null) {
-			if (reach_count > 4) {
+			if (reach_count > 10) {
 				teleport(target);
+				target = null;
 				reach_count = 0;
+				return;
 			} else {
 				if (MineQuest.distance(player.getLocation(), target) < speed) {
 					double move_x = (target.getX() - player.getLocation().getX());
@@ -201,6 +207,7 @@ public class NPCQuester extends Quester {
 					float yaw = 0;
 					yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
 					entity.setLocation(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
+					last_loc = newLocation(player.getLocation());
 					reach_count = 0;
 	
 					target = null;
@@ -217,7 +224,7 @@ public class NPCQuester extends Quester {
 					if ((move_x < .1) && (move_z < .1)) {
 						reach_count++;
 					}
-					if (move_y > 3) {
+					if (move_y > 4) {
 						move_y = 0;
 					}
 					float yaw = 0;
@@ -229,6 +236,12 @@ public class NPCQuester extends Quester {
 						yaw, target.getPitch());
 				}
 			}
+		}
+		if (player.getLocation() == null) {
+			if (last_loc != null) {
+				teleport(last_loc);
+			}
+			return;
 		}
 		if (player.getLocation().getY() > 128) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
@@ -734,8 +747,16 @@ public class NPCQuester extends Quester {
 		if (removed) return;
 		this.entity = entity;
 		setPlayer((Player)entity.getBukkitEntity());
+		last_loc = newLocation(player.getLocation());
 	}
-	
+
+	private Location newLocation(Location location) {
+		Location loc = new Location(location.getWorld(), location.getX(),
+				location.getX(), location.getZ(), location.getYaw(), location
+						.getPitch());
+		return loc;
+	}
+
 	public void setFollow(Quester quester) {
 		setProperty("follow", quester == null?null:quester.getName());
 		target = null;
@@ -807,8 +828,8 @@ public class NPCQuester extends Quester {
 	private void setTarget(Location location, double rad, int call) {
 //		Location self = entity.getBukkitEntity().getLocation();
 //		double distance = MineQuest.distance(location, self);
-		double angle = (new Random()).nextDouble() * Math.PI * 2;
-		double length = (new Random()).nextDouble() * rad;
+		double angle = generator.nextDouble() * Math.PI * 2;
+		double length = generator.nextDouble() * rad;
 		double x = length * Math.cos(angle);
 		double z = length * Math.sin(angle);
 		target = new Location(location.getWorld(), 
@@ -821,9 +842,7 @@ public class NPCQuester extends Quester {
 				location.getPitch());
 		if (MineQuest.distance(target, location) > 10) {
 			target = null;
-		}
-
-		if (target != null) {
+		} else {
 			if (Math.abs(target.getY() - location.getY()) > 5) {
 				target.setY(location.getY());
 			}
@@ -853,6 +872,10 @@ public class NPCQuester extends Quester {
 	public void teleport(Location location) {
 		makeNPC(location.getWorld().getName(), location.getX(), location.getY(), 
 				location.getZ(), location.getPitch(), location.getYaw());
+	}
+	
+	public void redo() {
+		teleport(player.getLocation());
 	}
 
 	public void update() {

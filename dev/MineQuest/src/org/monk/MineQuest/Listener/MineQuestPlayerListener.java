@@ -83,6 +83,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 		}
 		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).update();
+		if (MineQuest.getSServer().getOnlinePlayers().length == 1) {
+			MineQuest.respawnNPCs();
+		}
 	}
 	
 	@Override
@@ -207,7 +210,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	private void processQuest(String[] split, Player player, PlayerChatEvent event) {
 		if (split[0].equals("/startquest") || split[0].equals("/start_quest")) {
         	if (split.length < 2) {
-        		player.sendMessage("Usage: /startquest filename");
+        		player.sendMessage("Usage: /start_quest filename");
         	} else {
         		if (MineQuest.getQuester(player).getParty() == null) {
         			MineQuest.getQuester(player).createParty();
@@ -234,7 +237,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/join_party")) {
         	if (split.length < 2) {
-        		player.sendMessage("Usage: /joinparty player_name");
+        		player.sendMessage("Usage: /join_party player_name");
         	} else {
         		if (MineQuest.getQuester(split[1]) == null) {
         			player.sendMessage(split[1] + " is not a valid quester");
@@ -1104,6 +1107,9 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		player.sendMessage("Only an op can do that");
         	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/how_many")) {
+        	player.sendMessage("There are " + MineQuest.getSServer().getOnlinePlayers().length + " online players");
         	event.setCancelled(true);
         }
 	}
