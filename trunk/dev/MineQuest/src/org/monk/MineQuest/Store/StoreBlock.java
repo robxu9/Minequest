@@ -214,7 +214,7 @@ public class StoreBlock {
         while (change-- > 0) {
             if (buy) {
                 cost += (new_price);
-                new_price /= (1 + (MineQuest.getPriceChange() / 100));
+                new_price *= (1 + (MineQuest.getPriceChange() / 100));
 //                new_price *= 1.00009;
             } else {
                 cost += (new_price);

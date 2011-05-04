@@ -26,6 +26,8 @@ import net.minecraft.server.Packet9Respawn;
 
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Player;
+import org.monk.MineQuest.MineQuest;
 
 /**
  *
@@ -125,6 +127,11 @@ public class NPCNetHandler extends NetServerHandler {
 
     @Override
     public void a(Packet130UpdateSign packet130updatesign) {
+    }
+    
+    @Override
+    public void disconnect(String s) {
+    	MineQuest.disconnect(((Player)this.player.getBukkitEntity()).getName());
     }
     
     @Override

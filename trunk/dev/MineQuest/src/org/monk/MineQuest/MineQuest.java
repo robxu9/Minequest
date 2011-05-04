@@ -222,7 +222,7 @@ public class MineQuest extends JavaPlugin {
 						+ spawn_y + "', '" + spawn_z + "', '" + player.getName() + "', '0', '0')");
 				sql_server.update("CREATE TABLE IF NOT EXISTS " + name + 
 						"(height INT, x INT, y INT, z INT, max_x INT, max_z INT, price INT, name VARCHAR(30), store_prop BOOLEAN)");
-				towns.add(new Town(name, getSServer().getWorld("world")));
+				towns.add(new Town(name, getSServer().getWorlds().get(0)));
 				player.sendMessage("Town " + name + " created");
 			} else {
 				player.sendMessage(namer + " is in the process of creating a town - use /createtown to start a new creation");
@@ -713,7 +713,7 @@ public class MineQuest extends JavaPlugin {
 				}
 				MineQuest.log("DB Version: " + results.getString("version"));
 			}
-		} catch (SQLException e1) {
+		} catch (Exception e1) {
 			upgradeDB();
 		}
         
@@ -778,6 +778,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_INTERACT, pl, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE, el, Priority.Highest, this);
+        pm.registerEvent(Event.Type.ENTITY_EXPLODE, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
@@ -1255,5 +1256,15 @@ public class MineQuest extends JavaPlugin {
 
 	public static boolean healSpawnEnable() {
 		return health_spawn_enable;
+	}
+	public static void disconnect(String name) {
+		log(name + " disconnected");
+	}
+	public static void respawnNPCs() {
+		for (Quester quester : questers) {
+			if (quester instanceof NPCQuester) {
+				((NPCQuester)quester).redo();
+			}
+		}
 	}
 }
