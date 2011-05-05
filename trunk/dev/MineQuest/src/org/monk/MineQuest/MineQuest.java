@@ -452,6 +452,11 @@ public class MineQuest extends JavaPlugin {
 		Ability ability = Ability.newAbility(string, null);
 		String ret = new String();
 		
+		if (ability == null) {
+			ret = string + " is not a valid ability";
+			return ret;
+		}
+		
 		ability.setSkillClass(new SkillClass());
 		for (ItemStack item : reduce(ability.getRealManaCost())) {
 			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";

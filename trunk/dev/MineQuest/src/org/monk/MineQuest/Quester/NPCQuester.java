@@ -810,7 +810,7 @@ public class NPCQuester extends Quester {
 	public void setTarget(LivingEntity entity) {
 		mobTarget = entity;
 		if (entity == null) {
-			if ((follow != null) && (follow.getPlayer() != null)) {
+			if ((follow != null) && (follow.getPlayer() != null) && (follow.getPlayer().getLocation() != null)) {
 				if ((mode == NPCMode.PARTY_STAND) || (mode == NPCMode.PARTY)) {
 					if ((player != null) || (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) > 100)) {
 							Player player = follow.getPlayer();

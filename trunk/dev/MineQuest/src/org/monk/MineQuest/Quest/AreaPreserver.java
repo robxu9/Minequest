@@ -13,6 +13,8 @@ import org.bukkit.craftbukkit.block.CraftChest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.UpdateSignEvent;
 
 public class AreaPreserver {
 	private Material type[][][];
@@ -88,6 +90,10 @@ public class AreaPreserver {
 						for (int in = 0; in < 4; in++) {
 							sign.setLine(in, strings.get(line++));
 						}
+						MineQuest.getEventParser().addEvent(new UpdateSignEvent(100, sign, sign.getLines()));
+					}
+					if (world.getBlockAt(x, y, z).getState() != null) {
+						world.getBlockAt(x, y, z).getState().update(true);
 					}
 				}
 			}
