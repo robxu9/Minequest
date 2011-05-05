@@ -17,5 +17,8 @@ public class AdvancedBlockEvent extends BlockEvent {
 		super.activate(eventParser);
 		
 		block.setData(new_data, false);
+		if (block.getState() != null) {
+			block.getState().update(true);
+		}
 	}
 }
