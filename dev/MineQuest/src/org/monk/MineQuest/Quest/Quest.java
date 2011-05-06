@@ -596,8 +596,8 @@ public class Quest {
 			new_event = new ExperienceAdd(delay, party, exp, class_exp, cubes);
 		} else if (type.equals("LockWorldTime")) {
 			long delay = Integer.parseInt(line[3]);
-			long time = Integer.parseInt(line[5]);
-			long time_2 = Integer.parseInt(line[6]);
+			long time = Integer.parseInt(line[4]);
+			long time_2 = Integer.parseInt(line[5]);
 			
 			new_event = new LockWorldTime(delay, world, time, time_2);
 		} else if (type.equals("BlockCDEvent")) {
