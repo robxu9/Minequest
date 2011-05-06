@@ -685,6 +685,7 @@ public class MineQuestPlayerListener extends PlayerListener {
     				Block block = player.getWorld().getBlockAt(player.getLocation());
     				if (MineQuest.getQuester(player).canEdit(block)) {
 	    				store.delete();
+	    				town.remove(store);
 	    				player.sendMessage("Store deleted");
     				}
     			} else {
@@ -883,6 +884,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	        	Town town = MineQuest.getTown(player);
 	        	if (town != null) {
 	        		town.delete();
+	        		MineQuest.remTown(town);
 	        		player.sendMessage("Town deleted");
 	        	} else {
 	        		player.sendMessage("You are not in a town");

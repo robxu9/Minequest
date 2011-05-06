@@ -706,12 +706,15 @@ public class NPCQuester extends Quester {
 
 	public void removeSql() {
 		removed = true;
-		MineQuest.getSQLServer().update("DELETE FROM questers WHERE name='" + name + "'");
-		MineQuest.getSQLServer().update("DROP TABLE " + name);
-		MineQuest.getSQLServer().update("DROP TABLE " + name + "_chests");
-		MineQuest.getSQLServer().update("DROP TABLE " + name + "_kills");
-		MineQuest.getSQLServer().update("DROP TABLE " + name + "_npc");
-		MineQuest.getSQLServer().update("DROP TABLE " + name + "_quests");
+		try {
+			MineQuest.getSQLServer().update("DELETE FROM questers WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DROP TABLE " + name);
+			MineQuest.getSQLServer().update("DROP TABLE " + name + "_chests");
+			MineQuest.getSQLServer().update("DROP TABLE " + name + "_kills");
+			MineQuest.getSQLServer().update("DROP TABLE " + name + "_npc");
+			MineQuest.getSQLServer().update("DROP TABLE " + name + "_quests");
+		} catch (Exception e) {
+		}
 	}
 
 	@Override
