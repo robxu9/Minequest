@@ -458,4 +458,8 @@ public class Town {
 		town.setHeight(height);
 		quester.sendMessage("Town set to height of " + height);
 	}
+
+	public void remove(Store store) {
+		stores.remove(store);
+	}
 }

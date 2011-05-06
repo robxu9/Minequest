@@ -291,6 +291,7 @@ public class NPCSignShop extends Store {
 	}
 	
 	public void updateDisplay() {
+		if (blocks.size() == 0) return;
 		StoreBlock block = blocks.get(selected);
 		String lines[] = new String [] {
 				"Material Type:",

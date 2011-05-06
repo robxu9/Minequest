@@ -19,8 +19,36 @@
 package org.monk.MineQuest.Listener;
 
 
+import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerListener;
+import org.bukkit.plugin.Plugin;
+import org.monk.MineQuest.MineQuest;
 
 public class MineQuestServerListener extends ServerListener {
+
+    @Override
+    public void onPluginDisable(PluginDisableEvent event) {
+        if (MineQuest.getIsConomyOn()) {
+            if (event.getPlugin().getDescription().getName().equals("iConomy")) {
+                MineQuest.setIConomy(null);
+                MineQuest.log("un-hooked from iConomy.");
+            }
+        }
+    }
+
+    @Override
+    public void onPluginEnable(PluginEnableEvent event) {
+        if (!MineQuest.getIsConomyOn()) {
+            Plugin iConomy = MineQuest.getSServer().getPluginManager().getPlugin("iConomy");
+
+            if (iConomy != null) {
+                if (iConomy.isEnabled()) {
+                	MineQuest.setIConomy(iConomy);
+                    MineQuest.log("hooked into iConomy.");
+                }
+            }
+        }
+    }
 
 } 

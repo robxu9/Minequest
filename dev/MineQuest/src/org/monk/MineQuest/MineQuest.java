@@ -57,6 +57,7 @@ import org.monk.MineQuest.Event.Absolute.HealEvent;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
+import org.monk.MineQuest.Listener.MineQuestServerListener;
 import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.Quest;
@@ -66,7 +67,7 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
 
-import com.nijiko.coelho.iConomy.iConomy;
+import com.iConomy.iConomy;
 
 /**
  * This is the main class of MineQuest. It holds static lists of players in the server,
@@ -89,7 +90,7 @@ public class MineQuest extends JavaPlugin {
 	private static MQMob mobs[];
 	private static Quest[] quests;
 	private static int maxClass;
-//	private MineQuestServerListener sl;
+	private MineQuestServerListener sl;
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
 	private static String server_owner;
@@ -569,6 +570,7 @@ public class MineQuest extends JavaPlugin {
 	private static boolean town_no_mobs;
 	private static boolean log_health_change;
 	private static boolean health_spawn_enable;
+	private static int[] town_exceptions;
 
 	public MineQuest() {
 	}
@@ -673,6 +675,21 @@ public class MineQuest extends JavaPlugin {
 			sell_percent = general.getDouble("sell_return", .92);
 			price_change = general.getDouble("price_change", .009);
 			starting_health = general.getInt("starting_health", 10);
+			String exceptions = general.getString("town_edit_exception", "64,77");
+			if (exceptions.contains(",")) {
+				String[] split = exceptions.split(",");
+				town_exceptions = new int[split.length];
+				int i;
+				for (i = 0; i < split.length; i++) {
+					town_exceptions[i] = Integer.parseInt(split[i]);
+				}
+			} else {
+				try {
+					town_exceptions = new int[] {Integer.parseInt(exceptions)};
+				} catch (Exception e) {
+					town_exceptions = new int[0];
+				}
+			}
 			
 			npc_cost = npc.getInt("npc_cost_level", 1000);
 			npc_cost_class = npc.getInt("npc_cost_class", 1000);
@@ -762,13 +779,13 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		for (String name : names) {
-			towns.add(new Town(name, getServer().getWorld("world")));
+			towns.add(new Town(name, getServer().getWorlds().get(0)));
 		}
 		
 		bl = new MineQuestBlockListener();
 		el = new MineQuestEntityListener();
 		pl = new MineQuestPlayerListener();
-//		sl = new MineQuestServerListener();
+		sl = new MineQuestServerListener();
 //		wl = new MineQuestWorldListener();
 //		vl = new MineQuestVehicleListener();
 		
@@ -788,6 +805,8 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLUGIN_DISABLE, sl, Priority.Monitor, this);
+        pm.registerEvent(Event.Type.PLUGIN_ENABLE, sl, Priority.Monitor, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
         start = null;
 
@@ -800,7 +819,6 @@ public class MineQuest extends JavaPlugin {
 
 		if (MineQuest.IConomy == null) {
 			if (test != null) {
-				MineQuest.IConomy = ((iConomy)test);
 			} else {
 				log("iConomy system not detected, defaulting to MineQuest Storage");
 			}
@@ -1262,14 +1280,23 @@ public class MineQuest extends JavaPlugin {
 	public static boolean healSpawnEnable() {
 		return health_spawn_enable;
 	}
+
 	public static void disconnect(String name) {
 		log(name + " disconnected");
 	}
+
 	public static void respawnNPCs() {
 		for (Quester quester : questers) {
 			if (quester instanceof NPCQuester) {
 				((NPCQuester)quester).redo();
 			}
 		}
+	}
+	public static void setIConomy(Plugin object) {
+		MineQuest.IConomy = ((iConomy)object);
+	}
+
+	public static int[] getTownExceptions() {
+		return town_exceptions;
 	}
 }
