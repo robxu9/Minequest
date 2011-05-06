@@ -1,12 +1,2 @@
-= Known Issues for MineQuest =
-
-== Instanced Dungeons (Should be Fixed) ==
-
-Re-spawning of doors does not work properly. If a door has been used in a previous instance then it will keep the state of whether or not it was open. Also if a door is removed, such a steel door, it will not re-spawn correctly currently.
-
-== Re-spawn Glitch ==
-
-On rare occasion people report to me that they have died, dropped all of their stuff, then they click re-spawn and stay where they are standing, and then when they really die all of their stuff is gone. I think this was an issue related to pvp not being fully implemented, so it should be fixed now. If it happens to you please feel free to let me know.
-
-== Ability Disabling ==
-Leveling up will cause all of your passive abilities to be disabled.
+Page has moved
+http://www.theminequest.com/node/5
