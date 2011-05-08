@@ -39,8 +39,10 @@ public class AreaTarget extends Target {
 		List<Quester> questers = new ArrayList<Quester>();
 		
 		for (Quester q : MineQuest.getQuesters()) {
-			if (MineQuest.distance(q.getPlayer().getLocation(), location) < radius) {
-				questers.add(q);
+			if (q.getPlayer() != null) {
+				if (MineQuest.distance(q.getPlayer().getLocation(), location) < radius) {
+					questers.add(q);
+				}
 			}
 		}
 		
