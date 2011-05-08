@@ -37,7 +37,7 @@ public class PartyDestroy extends QuestEvent {
 				}
 			}
 
-			quester.clearKills();
+			quester.clearDestroyed();
 		}
 		
 		boolean flag = true;

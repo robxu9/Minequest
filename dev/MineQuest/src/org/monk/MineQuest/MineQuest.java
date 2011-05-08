@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -1298,5 +1299,33 @@ public class MineQuest extends JavaPlugin {
 
 	public static int[] getTownExceptions() {
 		return town_exceptions;
+	}
+	public static boolean isOpen(Material type) {
+		if (type == Material.AIR) {
+			return true;
+		}
+		if (type == Material.TORCH) {
+			return true;
+		}
+		if (type == Material.SNOW) {
+			return true;
+		}
+		if (type == Material.FIRE) {
+			return true;
+		}
+		if (type == Material.SIGN) {
+			return true;
+		}
+		if (type == Material.WALL_SIGN) {
+			return true;
+		}
+		if (type == Material.SIGN_POST) {
+			return true;
+		}
+		if (type == Material.FENCE) {
+			return true;
+		}
+		
+		return false;
 	}
 }

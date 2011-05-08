@@ -47,7 +47,7 @@ public class EntityTeleportEvent extends TargetedEvent {
 
 	@Override
 	public String getName() {
-		return "Generic Teleport Event";
+		return "Targeted Generic Teleport Event";
 	}
 
 }

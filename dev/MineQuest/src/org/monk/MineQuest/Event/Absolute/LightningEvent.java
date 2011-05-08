@@ -20,4 +20,9 @@ public class LightningEvent extends NormalEvent {
 		location.getWorld().strikeLightning(location);
 	}
 
+	@Override
+	public String getName() {
+		return "Lightning Event";
+	}
+
 }

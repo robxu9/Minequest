@@ -23,4 +23,9 @@ public class CancelEvent extends NormalEvent
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Cancel Event";
+	}
+
 }

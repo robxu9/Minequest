@@ -46,9 +46,8 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.CancelEvent;
 import org.monk.MineQuest.Event.CompleteQuestEvent;
 import org.monk.MineQuest.Event.Event;
-import org.monk.MineQuest.Event.ExperienceAdd;
+import org.monk.MineQuest.Event.ExperienceEvent;
 import org.monk.MineQuest.Event.MessageEvent;
-import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Event.QuestAvailableEvent;
 import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Event.Absolute.AdvancedBlockEvent;
@@ -210,7 +209,8 @@ public class Quest {
 					Float.parseFloat(split[5]),
 					Float.parseFloat(split[6]));
 			MineQuest.log("Adding NPC " + name);
-			npcs.add(new NPCQuester(name, NPCMode.QUEST_NPC, world, location));
+			npcs.add(new NPCQuester(name, NPCMode.QUEST_INVULNERABLE, world, location));
+			MineQuest.getQuester(name).setQuest(this, world);
 			MineQuest.log("Added " + name);
 			MineQuest.addQuester(npcs.get(npcs.size() - 1));
 		} else if (split[0].equals("Target")) {
@@ -471,9 +471,7 @@ public class Quest {
 				events[i++] = getEvent(Integer.parseInt(event));
 			}
 		} else {
-			events = new Event[1];
-			
-			events[0] = new NormalEvent(0);
+			events = new Event[0];
 		}
 		
 		if (repeating) {
@@ -572,7 +570,7 @@ public class Quest {
 			int delay = Integer.parseInt(line[3]);
 			i = 0;
 			EntitySpawnerEvent[] eventss = new EntitySpawnerEvent[line[4].split(",").length];
-			for (String s : line[5].split(",")) {
+			for (String s : line[4].split(",")) {
 				if (getEvent(Integer.parseInt(s)) == null) {
 					MineQuest.log("Cannot Find Event: " + Integer.parseInt(s));
 					throw new Exception();
@@ -593,7 +591,7 @@ public class Quest {
 				MineQuest.log("Warning: Options other than all are not supported for ExperienceAdd");
 			}
 			
-			new_event = new ExperienceAdd(delay, party, exp, class_exp, cubes);
+			new_event = new ExperienceEvent(delay, party, exp, class_exp, cubes);
 		} else if (type.equals("LockWorldTime")) {
 			long delay = Integer.parseInt(line[3]);
 			long time = Integer.parseInt(line[4]);

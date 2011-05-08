@@ -62,4 +62,9 @@ public class ExplosionEvent extends NormalEvent {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Explosion Event";
+	}
+
 }

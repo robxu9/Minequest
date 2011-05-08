@@ -22,4 +22,9 @@ public class UpdateSignEvent extends NormalEvent {
 		sign.setLine(3, lines[3]);
 		sign.update(true);
 	}
+
+	@Override
+	public String getName() {
+		return "Update Sign Event";
+	}
 }

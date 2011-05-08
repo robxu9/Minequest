@@ -22,13 +22,13 @@ import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Store.StoreBlock;
 
-public class ExperienceAdd extends NormalEvent {
+public class ExperienceEvent extends NormalEvent {
 	private int exp;
 	private int class_exp;
 	private Party party;
 	private int cubes;
 
-	public ExperienceAdd(long delay, Party party, int exp, int class_exp, int cubes) {
+	public ExperienceEvent(long delay, Party party, int exp, int class_exp, int cubes) {
 		super(delay);
 		this.party = party;
 		this.exp = exp;
@@ -48,6 +48,11 @@ public class ExperienceAdd extends NormalEvent {
 			quester.setCubes(quester.getCubes() + (cubes / party.getQuesters().size()));
 			quester.sendMessage("You gained " + StoreBlock.convert(cubes / party.getQuesters().size()) + " from a quest");
 		}
+	}
+
+	@Override
+	public String getName() {
+		return "Experience Event";
 	}
 
 }

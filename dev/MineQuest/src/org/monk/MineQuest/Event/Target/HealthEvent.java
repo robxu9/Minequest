@@ -43,7 +43,7 @@ public class HealthEvent extends TargetedEvent {
 
 	@Override
 	public String getName() {
-		return "Generic Health Event";
+		return "Targeted Generic Health Event";
 	}
 
 }

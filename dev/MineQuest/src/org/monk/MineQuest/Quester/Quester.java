@@ -1711,12 +1711,14 @@ public class Quester {
 	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
 		
+		if (this instanceof NPCQuester) return;
 		before_quest = player.getLocation();
 		
 		if (!world.getName().equals(player.getWorld().getName())) {
 			player.teleport(world.getSpawnLocation());
 		}
 		clearKills();
+		clearDestroyed();
 	}
 	
 	/**

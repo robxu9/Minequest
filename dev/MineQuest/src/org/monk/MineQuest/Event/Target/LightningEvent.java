@@ -21,4 +21,9 @@ public class LightningEvent extends TargetedEvent {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Targeted Lightning Event";
+	}
+
 }

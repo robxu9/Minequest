@@ -26,4 +26,9 @@ public class CompleteQuestEvent extends NormalEvent {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Complete Quest Event";
+	}
+
 }

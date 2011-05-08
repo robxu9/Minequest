@@ -104,4 +104,9 @@ public class AuraEvent extends RelativeEvent {
 		
 		return ret;
 	}
+
+	@Override
+	public String getName() {
+		return "Relative Aura Event";
+	}
 }
