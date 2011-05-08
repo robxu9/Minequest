@@ -2,11 +2,12 @@ package org.monk.MineQuest.Event.Target;
 
 import org.bukkit.Location;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quest.Target;
 
-public class TargetedEvent extends NormalEvent {
+public abstract class TargetedEvent extends NormalEvent {
 	protected Target target;
 
 	public TargetedEvent(long delay, Target target) {
@@ -14,8 +15,8 @@ public class TargetedEvent extends NormalEvent {
 		this.target = target;
 	}
 	
-	public static TargetedEvent newTargeted(String[] split, Quest quest) throws Exception {
-		TargetedEvent targetEvent = null;
+	public static Event newTargeted(String[] split, Quest quest) throws Exception {
+		Event targetEvent = null;
 		if (split[3].equals("DamageEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -58,8 +59,9 @@ public class TargetedEvent extends NormalEvent {
 		} else if (split[3].equals("AbilityEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			int level = Integer.parseInt(split[8]);
 			
-			targetEvent = new AbilityEvent(delay, target, split[6], split[7]);
+			targetEvent = new AbilityEvent(delay, target, split[6], split[7], level);
 		} else if (split[3].equals("NPCSetTargetEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -69,6 +71,24 @@ public class TargetedEvent extends NormalEvent {
 					Double.parseDouble(split[8]));
 			
 			targetEvent = new NPCSetTargetEvent(delay, target, location);
+		} else if (split[3].equals("NPCPropertyEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			
+			targetEvent = new NPCPropertyEvent(delay, target, split[6], split[7]);
+		} else if (split[3].equals("NPCFollowEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Target other = quest.getTarget(Integer.parseInt(split[6]));
+			
+			targetEvent = new NPCFollowEvent(delay, target, other);
+		} else if (split[3].equals("LineOfSightEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Target target2 = quest.getTarget(Integer.parseInt(split[6]));
+			int index = Integer.parseInt(split[7]);
+			
+			targetEvent = new LineOfSightEvent(quest, delay, index, target, target2);
 		} else {
 			MineQuest.log("Error: Unknown Targeted Event: " + split[3]);
 			throw new Exception();

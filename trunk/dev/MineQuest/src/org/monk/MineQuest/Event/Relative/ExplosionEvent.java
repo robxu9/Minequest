@@ -65,4 +65,9 @@ public class ExplosionEvent extends RelativeEvent {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Relative Explosion Event";
+	}
+
 }

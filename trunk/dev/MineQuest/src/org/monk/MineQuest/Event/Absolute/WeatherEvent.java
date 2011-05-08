@@ -22,4 +22,9 @@ public class WeatherEvent extends NormalEvent {
 		world.setWeatherDuration(duration);
 	}
 
+	@Override
+	public String getName() {
+		return "Weather Event";
+	}
+
 }

@@ -756,6 +756,10 @@ public class SkillClass {
 		
 		fillAbilities();
 	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
 	
 
 }

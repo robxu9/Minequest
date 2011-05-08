@@ -23,12 +23,13 @@ import java.util.Map;
 
 public enum NPCMode {
 	GENERIC, 
-	QUEST_NPC,
 	FOLLOW, 
 	PARTY, 
 	FOR_SALE, 
 	STORE, 
-	PARTY_STAND;
+	PARTY_STAND,
+	QUEST_INVULNERABLE, 
+	QUEST_VULNERABLE;
 	
     private static final Map<String, NPCMode> lookupName = new HashMap<String, NPCMode>();
 

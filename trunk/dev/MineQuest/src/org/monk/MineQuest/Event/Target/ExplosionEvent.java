@@ -33,4 +33,9 @@ public class ExplosionEvent extends TargetedEvent {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Targeted Explosion Event";
+	}
+
 }

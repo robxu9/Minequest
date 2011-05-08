@@ -24,4 +24,9 @@ public class PoisonEvent extends TargetedEvent {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Targeted Poison Event";
+	}
+
 }

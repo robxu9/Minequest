@@ -15,5 +15,10 @@ public class AbilityEvent extends NormalEvent {
 		super.activate(eventParser);
 		ability.eventActivate();
 	}
+	
+	@Override
+	public String getName() {
+		return "Ability Event";
+	}
 
 }

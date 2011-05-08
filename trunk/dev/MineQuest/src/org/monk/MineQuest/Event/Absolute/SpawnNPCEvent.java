@@ -62,4 +62,9 @@ public class SpawnNPCEvent extends NormalEvent {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "Spawn NPC Event" + npcQuester.getName();
+	}
+
 }
