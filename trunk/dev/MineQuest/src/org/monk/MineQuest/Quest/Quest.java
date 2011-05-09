@@ -210,9 +210,22 @@ public class Quest {
 					Float.parseFloat(split[6]));
 			MineQuest.log("Adding NPC " + name);
 			npcs.add(new NPCQuester(name, NPCMode.QUEST_INVULNERABLE, world, location));
+			MineQuest.addQuester(npcs.get(npcs.size() - 1));
 			MineQuest.getQuester(name).setQuest(this, world);
 			MineQuest.log("Added " + name);
+		} else if (split[0].equals("NPCV")) {
+			String name = split[1];
+			Location location = new Location(world,
+					Double.parseDouble(split[2]),
+					Double.parseDouble(split[3]),
+					Double.parseDouble(split[4]),
+					Float.parseFloat(split[5]),
+					Float.parseFloat(split[6]));
+			MineQuest.log("Adding NPC " + name);
+			npcs.add(new NPCQuester(name, NPCMode.QUEST_VULNERABLE, world, location));
 			MineQuest.addQuester(npcs.get(npcs.size() - 1));
+			MineQuest.getQuester(name).setQuest(this, world);
+			MineQuest.log("Added " + name);
 		} else if (split[0].equals("Target")) {
 			targets.add(Target.newTarget(split, this));
 		} else if (split[0].equals("Edit")) {

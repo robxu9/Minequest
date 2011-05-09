@@ -44,6 +44,10 @@ public abstract class Target {
 			double radius = Double.parseDouble(split[4]);
 			
 			target = new AreaTargetQuester(t, radius);
+		} else if (split[2].equals("RandomTarget")) {
+			Target t = quest.getTarget(Integer.parseInt(split[3]));
+			
+			target = new RandomTarget(t);
 		} else if (split[2].equals("PartyTarget")) {
 			target = new PartyTarget(quest.getParty());
 		} else if (split[2].equals("NPCTarget")) {

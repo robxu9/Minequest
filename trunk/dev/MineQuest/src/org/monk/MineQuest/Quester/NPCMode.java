@@ -23,10 +23,9 @@ import java.util.Map;
 
 public enum NPCMode {
 	GENERIC, 
-	FOLLOW, 
 	PARTY, 
 	FOR_SALE, 
-	STORE, 
+	STORE,
 	PARTY_STAND,
 	QUEST_INVULNERABLE, 
 	QUEST_VULNERABLE;

@@ -18,10 +18,13 @@
  */
 package org.monk.MineQuest.Quester.SkillClass.Combat;
 
+import java.util.Random;
+
 import org.bukkit.craftbukkit.entity.CraftCreeper;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 
@@ -33,6 +36,10 @@ public class Warrior extends CombatClass {
 	
 	public Warrior() {
 		// Shell
+		level = 10;
+		ability_list = new Ability[0];
+		type = "Warrior";
+		generator = new Random();
 	}
 
 	@Override
