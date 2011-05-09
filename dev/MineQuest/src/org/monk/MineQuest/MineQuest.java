@@ -585,6 +585,9 @@ public class MineQuest extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		for (Quest quest : quests) {
+			quest.issueNextEvents(-1);
+		}
 		for (Quester quester : questers) {
 			if (quester.getPlayer() != null) {
 				quester.save();

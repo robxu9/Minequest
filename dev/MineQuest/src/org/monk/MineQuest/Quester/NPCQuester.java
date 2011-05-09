@@ -312,7 +312,7 @@ public class NPCQuester extends Quester {
     	long now = Calendar.getInstance().getTimeInMillis();
 
     	if (now - last_attack > 500) {
-    		last_attack = 500;
+    		last_attack = now;
 	    	entity.animateArmSwing();
 			((CraftHumanEntity)player).getHandle().d(((CraftLivingEntity)mobTarget).getHandle());
     	}
@@ -627,7 +627,7 @@ public class NPCQuester extends Quester {
 			if (event instanceof EntityDamageByProjectileEvent) {
 				entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
 			}
-			if (follow != null) {
+			if ((follow != null) && (mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
 				if ((entity instanceof Player) && ((Player)entity).getName().equals(follow.getName())) {
 					PlayerInteractEvent pie = new PlayerInteractEvent(getPlayer(), null, ((Player)entity).getItemInHand(), null, null);
 
@@ -813,7 +813,7 @@ public class NPCQuester extends Quester {
 		if (getHealth() <= 0) {
 			setPlayer(null);
 			if ((mode != NPCMode.PARTY_STAND) && (mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
-				if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_INVULNERABLE)) {
+				if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
 					removeSql();
 				}
 				MineQuest.remQuester(this);
@@ -822,6 +822,7 @@ public class NPCQuester extends Quester {
 				MineQuest.log("NPC Died");
 				entity = null;
 			} else {
+				MineQuest.log(mode + " death");
 				Location location = MineQuest.getTown(town).getNPCSpawn();
 
 				sendMessage("Died!");
@@ -842,6 +843,7 @@ public class NPCQuester extends Quester {
 	}
 	
 	public void setMode(NPCMode mode) {
+		MineQuest.log("Mode for " + name + " set to mode");
 		this.mode = mode;
 		target = null;
 	}
@@ -979,6 +981,8 @@ public class NPCQuester extends Quester {
 	}
 
 	public void clearTarget(Player player) {
+		if (player == null) return;
+		if (mobTarget == null) return;
 		if (mobTarget.getEntityId() == player.getEntityId()) {
 			mobTarget = null;
 		}

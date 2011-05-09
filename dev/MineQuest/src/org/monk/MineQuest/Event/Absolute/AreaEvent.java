@@ -38,6 +38,11 @@ public class AreaEvent extends QuestEvent implements TargetEvent {
 		this.party = party;
 		this.radius = radius;
 		this.loc = loc;
+	}
+	
+	@Override
+	public void reset(long time) {
+		super.reset(time);
 		flags = new boolean[party.getQuesters().size()];
 		int i;
 		for (i = 0; i < flags.length; i++) {
