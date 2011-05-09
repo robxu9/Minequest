@@ -19,7 +19,9 @@ public class NPCTarget extends Target{
 		
 		int i;
 		for (i = 0; i < names.length; i++) {
-			questers.add(MineQuest.getQuester(names[i]));
+			if (MineQuest.getQuester(names[i]) != null) {
+				questers.add(MineQuest.getQuester(names[i]));
+			}
 		}
 		
 		return questers;

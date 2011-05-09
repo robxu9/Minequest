@@ -857,9 +857,9 @@ public class Quest {
 			}
 			
 			for (NPCQuester quester : npcs) {
-				if (quester != null) {
+				if ((quester != null) && (quester.getHealth() > 0)) {
 					MineQuest.remQuester(quester);
-					quester.damage(20000);
+					quester.damage(200000);
 				}
 			}
 			
