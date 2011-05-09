@@ -504,6 +504,13 @@ public class MineQuest extends JavaPlugin {
 	 * @param quester Quester to be removed
 	 */
 	static public void remQuester(Quester quester) {
+		if (quester.getPlayer() != null) {
+			for (Quester npc : questers) {
+				if (npc instanceof NPCQuester) {
+					((NPCQuester)npc).clearTarget(quester.getPlayer());
+				}
+			}
+		}
 		questers.remove(quester);
 	}
 

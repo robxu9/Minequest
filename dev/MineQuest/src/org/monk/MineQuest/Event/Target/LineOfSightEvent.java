@@ -6,14 +6,16 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
+import org.monk.MineQuest.Event.TargetEvent;
 import org.monk.MineQuest.Event.Absolute.QuestEvent;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quest.Target;
 import org.monk.MineQuest.Quester.Quester;
 
-public class LineOfSightEvent extends QuestEvent {
+public class LineOfSightEvent extends QuestEvent implements TargetEvent {
 	protected Target target;
 	private Target target_2;
+	private Quester quester;
 	
 	public LineOfSightEvent(Quest quest, long delay, int index, Target target, Target target_2) {
 		super(quest, delay, index);
@@ -25,7 +27,7 @@ public class LineOfSightEvent extends QuestEvent {
 	public void activate(EventParser eventParser) {
 		eventParser.setComplete(true);
 		
-		boolean flag = true;
+		boolean flag = false;
 		List<Quester> first = target.getTargets();
 		List<Quester> second = target_2.getTargets();
 		if (first.size() == 0) return;
@@ -36,8 +38,9 @@ public class LineOfSightEvent extends QuestEvent {
 			if (q.getPlayer() == null) continue;
 			Location target = q.getPlayer().getLocation();
 			
-			if (!lineOfSight(source, target)) {
-				flag = false;
+			if (lineOfSight(source, target)) {
+				quester = q;
+				flag = true;
 				break;
 			}
 		}
@@ -58,6 +61,7 @@ public class LineOfSightEvent extends QuestEvent {
 		int i;
 		for (i = 0; i < total; i++) {
 			if ((!MineQuest.isOpen(current.getBlock().getType())) && (current.getBlock().getType() != Material.GLASS)) {
+				MineQuest.log("Fail material - " + current.getBlock().getType());
 				return false;
 			}
 			current.setX(current.getX() + change.getX());
@@ -66,6 +70,11 @@ public class LineOfSightEvent extends QuestEvent {
 		}
 		
 		return true;
+	}
+
+	@Override
+	public Quester getTarget() {
+		return quester;
 	}
 
 }

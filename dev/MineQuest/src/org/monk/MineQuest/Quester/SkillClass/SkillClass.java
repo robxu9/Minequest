@@ -761,5 +761,8 @@ public class SkillClass {
 		this.level = level;
 	}
 	
+	public void setQuester(Quester quester) {
+		this.quester = quester;
+	}
 
 }

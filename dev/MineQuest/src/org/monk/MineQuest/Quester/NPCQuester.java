@@ -47,6 +47,7 @@ import org.monk.MineQuest.Event.NPCEvent;
 import org.monk.MineQuest.Event.Absolute.SpawnNPCEvent;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
 import org.monk.MineQuest.Store.Store;
 import org.monk.MineQuest.Store.StoreBlock;
 import org.monk.MineQuest.World.Town;
@@ -91,11 +92,7 @@ public class NPCQuester extends Quester {
 		this.entity = null;
 		mobTarget = null;
 		wander_delay = 30;
-		if (mode == NPCMode.FOLLOW) {
-			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
-		} else {
-			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
-		}
+		MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		if (mode == NPCMode.STORE) {
 			delay = 2000;
 		}
@@ -118,21 +115,20 @@ public class NPCQuester extends Quester {
 		double pitch = location.getPitch();
 		double yaw = location.getYaw();
 		wander_delay = 30;
-		if (mode != NPCMode.QUEST_INVULNERABLE) {
+		if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
 			create(mode, world, x, y, z, pitch, yaw);
 			update();
 		} else {
 			makeNPC(world.getName(), x, y, z, (float)pitch, (float)yaw);
 			health = max_health = 2000;
+			classes = new ArrayList<SkillClass>();
+			classes.add(new Warrior());
+			classes.get(0).setQuester(this);
 		}
 		distance = 0;
 		entity = null;
 		mobTarget = null;
-		if (mode == NPCMode.FOLLOW) {
-			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
-		} else {
-			MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
-		}
+		MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
 		if (mode == NPCMode.STORE) {
 			delay = 2000;
 		}
@@ -353,6 +349,7 @@ public class NPCQuester extends Quester {
 	
 	@Override
 	public boolean checkItemInHand() {
+		if (player == null) return false;
 		PlayerInventory inven = null;
 		if ((follow != null) && (follow.getPlayer() != null)) {
 			inven = follow.getPlayer().getInventory();
@@ -521,7 +518,9 @@ public class NPCQuester extends Quester {
 		} else if (property.equals("health_threshold")) {
 			this.threshold  = Integer.parseInt(value);
 		} else if (property.equals("next_task")) {
-			this.task   = Integer.parseInt(value);
+			this.task = Integer.parseInt(value);
+		} else if (property.equals("health")) {
+			health = max_health = Integer.parseInt(value);
 		} else if (property.equals("quest")) {
 			if ((value == null) || (value.equals("null"))) {
 				this.quest_file = null;
@@ -709,7 +708,6 @@ public class NPCQuester extends Quester {
 
 	private boolean isInvulnerable() {
 		if ((mode != NPCMode.FOR_SALE) && 
-				(mode != NPCMode.FOLLOW) && 
 				(mode != NPCMode.PARTY) && 
 				(mode != NPCMode.QUEST_VULNERABLE) && 
 				(mode != NPCMode.PARTY_STAND)) {
@@ -755,11 +753,12 @@ public class NPCQuester extends Quester {
 	@Override
 	public void save() {
 		if (mode == NPCMode.QUEST_INVULNERABLE) return;
+		if (mode == NPCMode.QUEST_VULNERABLE) return;
 		super.save();
 		
 		if (entity == null) return;
 		Location loc = entity.getBukkitEntity().getLocation();
-		if ((mode != NPCMode.FOLLOW) && (mode != NPCMode.PARTY) && (mode != NPCMode.PARTY_STAND)) {
+		if ((mode != NPCMode.PARTY) && (mode != NPCMode.PARTY_STAND)) {
 			loc = center;
 		}
 		
@@ -814,7 +813,7 @@ public class NPCQuester extends Quester {
 		if (getHealth() <= 0) {
 			setPlayer(null);
 			if ((mode != NPCMode.PARTY_STAND) && (mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
-				if (mode != NPCMode.QUEST_INVULNERABLE) {
+				if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_INVULNERABLE)) {
 					removeSql();
 				}
 				MineQuest.remQuester(this);
@@ -873,6 +872,7 @@ public class NPCQuester extends Quester {
 	
 	public void setTarget(Location location) {
 		target = location;
+		mobTarget = null;
 	}
 	
 	private void setTarget(Location location, double rad, int call) {
@@ -975,6 +975,12 @@ public class NPCQuester extends Quester {
 			}
 		} catch (Exception e) {
 			MineQuest.log("Problem getting NPC Properties");
+		}
+	}
+
+	public void clearTarget(Player player) {
+		if (mobTarget.getEntityId() == player.getEntityId()) {
+			mobTarget = null;
 		}
 	}
 }

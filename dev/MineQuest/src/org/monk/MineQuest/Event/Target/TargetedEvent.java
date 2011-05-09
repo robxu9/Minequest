@@ -48,19 +48,19 @@ public abstract class TargetedEvent extends NormalEvent {
 					Double.parseDouble(split[6]),
 					Double.parseDouble(split[7]),
 					Double.parseDouble(split[8]));
-			
+
 			targetEvent = new EntityTeleportEvent(delay, target, location);
 		} else if (split[3].equals("PoisonEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			int amount = Integer.parseInt(split[6]);
-			
+
 			targetEvent = new PoisonEvent(delay, target, amount);
 		} else if (split[3].equals("AbilityEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			int level = Integer.parseInt(split[8]);
-			
+
 			targetEvent = new AbilityEvent(delay, target, split[6], split[7], level);
 		} else if (split[3].equals("NPCSetTargetEvent")) {
 			long delay = Long.parseLong(split[4]);
@@ -69,7 +69,7 @@ public abstract class TargetedEvent extends NormalEvent {
 					Double.parseDouble(split[6]),
 					Double.parseDouble(split[7]),
 					Double.parseDouble(split[8]));
-			
+
 			targetEvent = new NPCSetTargetEvent(delay, target, location);
 		} else if (split[3].equals("NPCPropertyEvent")) {
 			long delay = Long.parseLong(split[4]);
@@ -82,6 +82,12 @@ public abstract class TargetedEvent extends NormalEvent {
 			Target other = quest.getTarget(Integer.parseInt(split[6]));
 			
 			targetEvent = new NPCFollowEvent(delay, target, other);
+		} else if (split[3].equals("NPCSetAttackTargetEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Target other = quest.getTarget(Integer.parseInt(split[6]));
+			
+			targetEvent = new NPCSetAttackTargetEvent(delay, target, other);
 		} else if (split[3].equals("LineOfSightEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
