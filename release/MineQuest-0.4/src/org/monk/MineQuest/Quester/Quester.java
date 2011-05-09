@@ -1717,6 +1717,7 @@ public class Quester {
 			player.teleport(world.getSpawnLocation());
 		}
 		clearKills();
+		clearDestroyed();
 	}
 	
 	/**
