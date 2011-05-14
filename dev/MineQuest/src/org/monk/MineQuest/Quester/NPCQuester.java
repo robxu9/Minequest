@@ -30,6 +30,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -124,6 +125,7 @@ public class NPCQuester extends Quester {
 			classes = new ArrayList<SkillClass>();
 			classes.add(new Warrior());
 			classes.get(0).setQuester(this);
+			kills = new CreatureType[0];
 		}
 		distance = 0;
 		entity = null;
@@ -822,7 +824,7 @@ public class NPCQuester extends Quester {
 				MineQuest.log("NPC Died");
 				entity = null;
 			} else {
-				MineQuest.log(mode + " death");
+				MineQuest.log(name + ": " + mode + " death");
 				Location location = MineQuest.getTown(town).getNPCSpawn();
 
 				sendMessage("Died!");
@@ -843,7 +845,7 @@ public class NPCQuester extends Quester {
 	}
 	
 	public void setMode(NPCMode mode) {
-		MineQuest.log("Mode for " + name + " set to mode");
+		MineQuest.log("Mode for " + name + " set to mode: " + mode);
 		this.mode = mode;
 		target = null;
 	}

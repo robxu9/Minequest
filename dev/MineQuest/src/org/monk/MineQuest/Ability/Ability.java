@@ -216,6 +216,7 @@ public abstract class Ability {
 	protected int casting_time;
 	protected int required_level;
 	protected int experience;
+	private int lookBind;
 	
 	/**
 	 * Creates an Ability
@@ -229,6 +230,7 @@ public abstract class Ability {
 		if (this instanceof PassiveAbility) enabled = false;
 		count = 0;
 		bind = -1;
+		lookBind = -1;
 		time = now.getTimeInMillis();
 		last_msg = 0;
 	}
@@ -245,6 +247,21 @@ public abstract class Ability {
 			bind = item.getTypeId();
 			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('" + getName() + "', '" + bind + "', '" + bind + "')");
 			quester.sendMessage(getName() + " is now bound to " + item.getTypeId());
+		}
+	}
+	
+	/**
+	 * Bind to left click of item.
+	 * 
+	 * @param player Player binding Ability
+	 * @param item Item to be bound
+	 */
+	public void lookBind(Quester quester, ItemStack item) {
+		if (lookBind != item.getTypeId()) {
+			silentUnBind(quester);
+			lookBind = item.getTypeId();
+			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('LOOK:" + getName() + "', '" + bind + "', '" + bind + "')");
+			quester.sendMessage(getName() + " is now look bound to " + item.getTypeId());
 		}
 	}
 	
@@ -609,6 +626,12 @@ public abstract class Ability {
 
 	public void silentBind(Quester quester, ItemStack itemStack) {
 		bind = itemStack.getTypeId();
+		lookBind = -1;
+	}
+
+	public void silentLookBind(Quester quester, ItemStack itemStack) {
+		lookBind = itemStack.getTypeId();
+		bind = -1;
 	}
 
 	/**
@@ -617,7 +640,9 @@ public abstract class Ability {
 	 */
 	public void silentUnBind(Quester quester) {
 		bind = -1;
+		lookBind = -1;
 		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='LOOK:" + getName() + "'");
 	}
 
 	/**
@@ -627,6 +652,7 @@ public abstract class Ability {
 	public void unBind(Quester quester) {
 		bind = -1;
 		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='" + getName() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + " WHERE abil='LOOK:" + getName() + "'");
 		quester.sendMessage(getName() + " is now unbound");
 	}
 	
@@ -675,5 +701,9 @@ public abstract class Ability {
 
 	public void eventActivate() {
 		
+	}
+
+	public boolean isLookBound(ItemStack itemStack) {
+		return (lookBind == itemStack.getTypeId());
 	}
 }

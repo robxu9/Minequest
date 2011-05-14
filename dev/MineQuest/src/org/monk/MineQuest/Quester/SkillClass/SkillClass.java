@@ -219,6 +219,21 @@ public class SkillClass {
 	 * Will activate any abilities that are left bound on
 	 * the quester's item in hand.
 	 * 
+	 * @param block Block selected for Casting
+	 */
+	public void callLookAbility(Block block) {
+		List<LivingEntity> lentities = Ability.getEntities(block.getLocation(), 2);
+		if (lentities.size() > 0) {
+			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), lentities.get(0));
+		} else {
+			getAbility(quester.getPlayer().getItemInHand()).useAbility(quester, block.getLocation(), null);
+		}
+	}
+
+	/**
+	 * Will activate any abilities that are left bound on
+	 * the quester's item in hand.
+	 * 
 	 * @param entity Entity selected for Casting
 	 */
 	public void callAbility(Entity entity) {
@@ -448,6 +463,14 @@ public class SkillClass {
 			}
 		}
 		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i] != null) {
+				if (ability_list[i].isLookBound(itemInHand)) {
+					return ability_list[i];
+				}
+			}
+		}
+		
 		return null;
 	}
 	
@@ -544,6 +567,27 @@ public class SkillClass {
 		for (i = 0; i < ability_list.length; i++) {
 			if (ability_list[i] != null) {
 				if (ability_list[i].isBound(itemStack)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Check if the given itemstack is bound to an 
+	 * ability that this class is holding.
+	 * 
+	 * @param itemStack Itemstack to check
+	 * @return Boolean True if bound to an Ability.
+	 */
+	public boolean isLookAbilityItem(ItemStack itemStack) {
+		int i;
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i] != null) {
+				if (ability_list[i].isLookBound(itemStack)) {
 					return true;
 				}
 			}
