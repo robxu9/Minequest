@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -412,6 +413,25 @@ public class Quester {
 		return;
 	}
 	
+	public void lookBind(String name) {
+		for (SkillClass skill : classes) {
+			skill.unBind(player.getItemInHand());
+		}
+
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(name) != null) {
+				if (skill.getAbility(name) instanceof PassiveAbility) {
+					sendMessage("Passive Abilities cannot be bound, must be enabled");
+				} else {
+					skill.getAbility(name).lookBind(this, player.getItemInHand());
+				}
+				return;
+			}
+		}
+		sendMessage(name + " is not a valid ability");
+		return;
+	}
+	
 	public void bind(String ability, ItemStack itemStack) {
 		for (SkillClass skill : classes) {
 			skill.silentUnBind(itemStack);
@@ -420,6 +440,18 @@ public class Quester {
 		for (SkillClass skill : classes) {
 			if (skill.getAbility(ability) != null) {
 				skill.getAbility(ability).bind(this, itemStack);
+			}
+		}
+	}
+	
+	public void lookBind(String ability, ItemStack itemStack) {
+		for (SkillClass skill : classes) {
+			skill.silentUnBind(itemStack);
+		}
+
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(ability) != null) {
+				skill.getAbility(ability).lookBind(this, itemStack);
 			}
 		}
 	}
@@ -1641,7 +1673,9 @@ public class Quester {
 		
 		if (npcParty != null) {
 			for (Quester quester : npcParty.getQuesters()) {
-				((NPCQuester)quester).setMode(NPCMode.PARTY_STAND);
+				if (((NPCQuester)quester).getMode() == NPCMode.PARTY) {
+					((NPCQuester)quester).setMode(NPCMode.PARTY_STAND);
+				}
 			}
 		}
 		
@@ -1891,6 +1925,11 @@ public class Quester {
 					if (getAbility(name) == null) {
 						addBinder(name.split(":")[1], results.getInt("bind_2"), new ItemStack(results.getInt("bind")));
 					}
+				} else if (name.contains(":") && name.split(":")[0].equals("LOOK")) {
+					Ability ability = getAbility(name.split(":")[1]);
+					if (ability != null) {
+						ability.silentLookBind(this, new ItemStack(results.getInt("bind")));
+					}
 				} else {
 					Ability ability = getAbility(name);
 					if (ability != null) {
@@ -1923,10 +1962,14 @@ public class Quester {
 		}
 		
 		if (player != null) {
-			if (newValue < player.getHealth()) {
-				player.damage(player.getHealth() - newValue);
-			} else if (newValue != player.getHealth()) {
-				player.setHealth(newValue);
+			if (newValue == 0) {
+				player.damage(5000);
+			} else {
+				if (newValue < player.getHealth()) {
+					player.damage(player.getHealth() - newValue);
+				} else if (newValue != player.getHealth()) {
+					player.setHealth(newValue);
+				}
 			}
 		}
 	}
@@ -1969,6 +2012,26 @@ public class Quester {
 			for (Quester quester : npcParty.getQuesters()) {
 				sendMessage(quester.getName());
 			}
+		}
+	}
+
+	public void armSwing() {
+		HashSet<Byte> transparent = new HashSet<Byte>();
+		transparent.add((byte)Material.AIR.getId());
+		transparent.add((byte)Material.GLASS.getId());
+		transparent.add((byte)Material.FIRE.getId());
+		transparent.add((byte)Material.WATER.getId());
+		List<Block> block = player.getLineOfSight(transparent, 30);
+
+		if (block.size() > 0) {
+			for (SkillClass skill : classes) {
+				if (skill.isLookAbilityItem(player.getItemInHand())) {
+					sendMessage("Last!");
+					skill.callLookAbility(block.get(block.size() - 1));
+				}
+			}
+		} else {
+			sendMessage("None!");
 		}
 	}
 }

@@ -27,6 +27,8 @@ import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -66,6 +68,17 @@ public class MineQuestPlayerListener extends PlayerListener {
 		}
 		
 		super.onPlayerInteract(event);
+	}
+	
+	@Override
+	public void onPlayerAnimation(PlayerAnimationEvent event) {
+		if (event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
+			Quester quester = MineQuest.getQuester(event.getPlayer());
+			
+			quester.armSwing();
+		}
+		
+		super.onPlayerAnimation(event);
 	}
 
 	@Override
@@ -340,6 +353,17 @@ public class MineQuestPlayerListener extends PlayerListener {
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
 			MineQuest.getQuester(player).bind(abil);
+			event.setCancelled(true);
+		} else if (split[0].equals("/look_bind")) {
+			if (split.length < 2) {
+				player.sendMessage("Usage: /bind <ability>");
+				event.setCancelled(true);
+				return;
+			}
+			String abil = split[1];
+			int i;
+			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
+			MineQuest.getQuester(player).lookBind(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/class")) {
 			if (split.length < 2) {

@@ -76,6 +76,11 @@ public abstract class TargetedEvent extends NormalEvent {
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			
 			targetEvent = new NPCPropertyEvent(delay, target, split[6], split[7]);
+		} else if (split[3].equals("MessageEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			
+			targetEvent = new MessageEvent(delay, target, split[6]);
 		} else if (split[3].equals("NPCFollowEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
