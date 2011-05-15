@@ -86,6 +86,7 @@ public class NPCQuester extends Quester {
 	private int wander_delay;
 	private int threshold = 0;
 	private int task = -2;
+	private ItemStack hand = null;
 
 	
 	public NPCQuester(String name) {
@@ -352,6 +353,8 @@ public class NPCQuester extends Quester {
 	@Override
 	public boolean checkItemInHand() {
 		if (player == null) return false;
+		if (mode == NPCMode.QUEST_VULNERABLE) return false;
+		if (mode == NPCMode.QUEST_INVULNERABLE) return false;
 		PlayerInventory inven = null;
 		if ((follow != null) && (follow.getPlayer() != null)) {
 			inven = follow.getPlayer().getInventory();
@@ -523,6 +526,11 @@ public class NPCQuester extends Quester {
 			this.task = Integer.parseInt(value);
 		} else if (property.equals("health")) {
 			health = max_health = Integer.parseInt(value);
+		} else if (property.equals("item_in_hand")) {
+			ItemStack item = new ItemStack(Integer.parseInt(value), 1);
+			item.setDurability(item.getType().getMaxDurability());
+			hand = item;
+			player.setItemInHand(item);
 		} else if (property.equals("quest")) {
 			if ((value == null) || (value.equals("null"))) {
 				this.quest_file = null;
@@ -624,10 +632,14 @@ public class NPCQuester extends Quester {
 		} else {
 			LivingEntity entity = null;
 			if (event instanceof EntityDamageByEntityEvent) {
-				entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
+				if (((EntityDamageByEntityEvent)event).getDamager() instanceof LivingEntity) {
+					entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
+				}
 			}
 			if (event instanceof EntityDamageByProjectileEvent) {
-				entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
+				if (((EntityDamageByProjectileEvent)event).getDamager() instanceof LivingEntity) {
+					entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
+				}
 			}
 			if ((follow != null) && (mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
 				if ((entity instanceof Player) && ((Player)entity).getName().equals(follow.getName())) {
@@ -721,6 +733,9 @@ public class NPCQuester extends Quester {
 	private void makeNPC(String world, double x, double y, double z,
 			float pitch, float yaw) {
 		if (entity != null) {
+			if (player.getItemInHand() != null) {
+				hand = player.getItemInHand();
+			}
 			((Player)entity.getBukkitEntity()).setHealth(0);
 //			entity.getBukkitEntity().setHealth(0);
 			MineQuest.getNPCManager().despawn(name);
@@ -786,6 +801,9 @@ public class NPCQuester extends Quester {
 		if (removed) return;
 		this.entity = entity;
 		setPlayer((Player)entity.getBukkitEntity());
+		if (hand != null) {
+			player.setItemInHand(hand);
+		}
 		last_loc = newLocation(player.getLocation());
 	}
 
