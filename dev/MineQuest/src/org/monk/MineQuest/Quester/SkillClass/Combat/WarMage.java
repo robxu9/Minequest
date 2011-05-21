@@ -20,6 +20,7 @@ package org.monk.MineQuest.Quester.SkillClass.Combat;
 
 import org.bukkit.craftbukkit.entity.CraftSpider;
 import org.bukkit.entity.LivingEntity;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 
@@ -27,11 +28,10 @@ public class WarMage extends CombatClass {
 
 	public WarMage(Quester quester, String type) {
 		super(quester, type);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public WarMage() {
-		type = "WarMage";
+		type = MineQuest.getWarMageName();
 		level = 10;
 	}
 	

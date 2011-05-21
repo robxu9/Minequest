@@ -38,7 +38,7 @@ public class Warrior extends CombatClass {
 		// Shell
 		level = 10;
 		ability_list = new Ability[0];
-		type = "Warrior";
+		type = MineQuest.getWarriorName();
 		generator = new Random();
 	}
 

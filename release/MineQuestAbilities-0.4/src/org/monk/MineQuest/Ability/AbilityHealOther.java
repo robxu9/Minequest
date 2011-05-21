@@ -58,25 +58,36 @@ public class AbilityHealOther extends Ability {
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
-		Player player = quester.getPlayer();
+		Player player = null;
+		if (quester != null) {
+			player = quester.getPlayer();
+		}
 		if (entity instanceof Player) {
 			Quester other = MineQuest.getQuester((Player)entity);
 			if (other != null) {
-				player.getInventory().addItem(new ItemStack(325, 1));
-				player.updateInventory();
+				if (player != null) {
+					player.getInventory().addItem(new ItemStack(325, 1));
+					player.updateInventory();
+				}
 				if (other.getHealth() < other.getMaxHealth()) {
 					other.setHealth(other.getHealth() + myclass.getCasterLevel() + myclass.getGenerator().nextInt(8) + 1);
 				} else {
-					player.sendMessage("Quester must not be at full health to heal");
+					if (player != null) {
+						player.sendMessage("Quester must not be at full health to heal");
+					}
 					return;
 				}
 			} else {
-				giveManaCost(player);
-				player.sendMessage("entity is not a Quester");
+				if (player != null) {
+					giveManaCost(player);
+					player.sendMessage("entity is not a Quester");
+				}
 				return;
 			}
 		} else {
-			player.sendMessage(getName() + " must be cast on another player");
+			if (player != null) {
+				player.sendMessage(getName() + " must be cast on another player");
+			}
 		}
 	}
 

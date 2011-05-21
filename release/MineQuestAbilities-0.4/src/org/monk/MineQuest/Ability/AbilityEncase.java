@@ -32,7 +32,6 @@ public class AbilityEncase extends Ability {
 		
 		// In progress
 		if (x > 0) {
-			MineQuest.log("1");
 			Location loc = new Location(location.getWorld(),
 					location.getX() + 2,
 					location.getY(),
@@ -54,7 +53,6 @@ public class AbilityEncase extends Ability {
 					location.getZ());
 			encase(loc.getWorld().getBlockAt(loc), true);
 		} else {
-			MineQuest.log("2");
 			Location loc = new Location(location.getWorld(),
 					location.getX() + 1,
 					location.getY(),
@@ -79,7 +77,6 @@ public class AbilityEncase extends Ability {
 		
 		// In progress
 		if (z > 0) {
-			MineQuest.log("3");
 			Location loc = new Location(location.getWorld(),
 					location.getX(),
 					location.getY(),
@@ -101,7 +98,6 @@ public class AbilityEncase extends Ability {
 					location.getZ() - 1);
 			encase(loc.getWorld().getBlockAt(loc), true);
 		} else {
-			MineQuest.log("4");
 			Location loc = new Location(location.getWorld(),
 					location.getX(),
 					location.getY(),

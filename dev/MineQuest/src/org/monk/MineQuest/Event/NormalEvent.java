@@ -68,8 +68,6 @@ public abstract class NormalEvent implements Event {
 	public void cancelEvent() {
 		if (myParser != null) {
 			myParser.setComplete(true);
-		} else {
-			MineQuest.log(getName() + " with null parser was cancelled!");
 		}
 	}
 }

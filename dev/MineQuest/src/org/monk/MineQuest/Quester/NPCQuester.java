@@ -87,6 +87,7 @@ public class NPCQuester extends Quester {
 	private int threshold = 0;
 	private int task = -2;
 	private ItemStack hand = null;
+	private boolean mob_protected = false;
 
 	
 	public NPCQuester(String name) {
@@ -323,7 +324,7 @@ public class NPCQuester extends Quester {
 	
 	@Override
 	public void bind(String name) {
-		if ((getAbility(name) != null) && (getAbility(name).getClassType().getName().equals("Warrior"))) {
+		if ((getAbility(name) != null)) {
 			super.bind(name);
 		} else {
 			sendMessage("I can only cast warrior abilities");
@@ -526,6 +527,8 @@ public class NPCQuester extends Quester {
 			this.task = Integer.parseInt(value);
 		} else if (property.equals("health")) {
 			health = max_health = Integer.parseInt(value);
+		} else if (property.equals("mob_protected")) {
+			mob_protected = Boolean.parseBoolean(value);
 		} else if (property.equals("item_in_hand")) {
 			ItemStack item = new ItemStack(Integer.parseInt(value), 1);
 			item.setDurability(item.getType().getMaxDurability());
@@ -733,8 +736,10 @@ public class NPCQuester extends Quester {
 	private void makeNPC(String world, double x, double y, double z,
 			float pitch, float yaw) {
 		if (entity != null) {
-			if (player.getItemInHand() != null) {
+			if ((player.getItemInHand() != null) && (player.getItemInHand().getType() != Material.AIR)) {
 				hand = player.getItemInHand();
+			} else {
+				hand = null;
 			}
 			((Player)entity.getBukkitEntity()).setHealth(0);
 //			entity.getBukkitEntity().setHealth(0);
@@ -1006,5 +1011,9 @@ public class NPCQuester extends Quester {
 		if (mobTarget.getEntityId() == player.getEntityId()) {
 			mobTarget = null;
 		}
+	}
+
+	public boolean isProtected() {
+		return mob_protected;
 	}
 }

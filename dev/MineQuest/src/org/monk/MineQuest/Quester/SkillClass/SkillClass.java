@@ -55,21 +55,21 @@ import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
 public class SkillClass {
 	public static SkillClass newClass(Quester quester, String type) {
 		
-		if (type.equals("Warrior")) {
+		if (type.equals(MineQuest.getWarriorName())) {
 			return new Warrior(quester, type);
-		} else if (type.equals("Archer")) {
+		} else if (type.equals(MineQuest.getArcherName())) {
 			return new Archer(quester, type);
-		} else if (type.equals("WarMage")) {
+		} else if (type.equals(MineQuest.getWarMageName())) {
 			return new WarMage(quester, type);
-		} else if (type.equals("PeaceMage")) {
+		} else if (type.equals(MineQuest.getPeaceMageName())) {
 			return new PeaceMage(quester, type);
-		} else if (type.equals("Digger")) {
+		} else if (type.equals(MineQuest.getDiggerName())) {
 			return new Digger(quester, type);
-		} else if (type.equals("Farmer")) {
+		} else if (type.equals(MineQuest.getFarmerName())) {
 			return new Farmer(quester, type);
-		} else if (type.equals("Lumberjack")) {
+		} else if (type.equals(MineQuest.getLumberjackName())) {
 			return new Lumberjack(quester, type);
-		} else if (type.equals("Miner")) {
+		} else if (type.equals(MineQuest.getMinerName())) {
 			return new Miner(quester, type);
 		}
 		

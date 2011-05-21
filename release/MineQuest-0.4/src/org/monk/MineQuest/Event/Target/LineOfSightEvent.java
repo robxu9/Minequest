@@ -61,7 +61,6 @@ public class LineOfSightEvent extends QuestEvent implements TargetEvent {
 		int i;
 		for (i = 0; i < total; i++) {
 			if ((!MineQuest.isOpen(current.getBlock().getType())) && (current.getBlock().getType() != Material.GLASS)) {
-				MineQuest.log("Fail material - " + current.getBlock().getType());
 				return false;
 			}
 			current.setX(current.getX() + change.getX());

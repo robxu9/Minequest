@@ -460,7 +460,7 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		ability.setSkillClass(new SkillClass());
-		for (ItemStack item : reduce(ability.getRealManaCost())) {
+		for (ItemStack item : reduce(ability.getConfigManaCost())) {
 			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
 		}
 		
@@ -579,6 +579,17 @@ public class MineQuest extends JavaPlugin {
 	private static boolean log_health_change;
 	private static boolean health_spawn_enable;
 	private static int[] town_exceptions;
+	private static String warrior_name;
+	private static String archer_name;
+	private static String war_mage_name;
+	private static String peace_mage_name;
+	private static String digger_name;
+	private static String farmer_name;
+	private static String lumberjack_name;
+	private static String miner_name;
+	private static String[] starting_classes;
+	private static boolean mq_damage_system;
+	private static boolean town_respawn;
 
 	public MineQuest() {
 	}
@@ -623,8 +634,8 @@ public class MineQuest extends JavaPlugin {
         
         (new File("MineQuest/")).mkdir();
         
-        if (!((new File("MineQuest/abilities.jar")).exists())) {
-        	log("MineQuest/abilities.jar not found: Downloading...");
+        if ((!((new File("MineQuest/abilities.jar")).exists())) || (Ability.getVersion() < 0)) {
+        	log("MineQuest/abilities.jar not found or too old: Downloading...");
         	try {
 				downloadAbilities();
 	        	log("MineQuest/abilities.jar download complete");
@@ -644,6 +655,7 @@ public class MineQuest extends JavaPlugin {
 			PropertiesFile experience = new PropertiesFile("MineQuest/experience.properties");
 			PropertiesFile general = new PropertiesFile("MineQuest/general.properties");
 			PropertiesFile npc = new PropertiesFile("MineQuest/npc.properties");
+			PropertiesFile classc = new PropertiesFile("MineQuest/class.properties");
 			url = minequest.getString("url", "localhost");
 			port = minequest.getString("port", "3306");
 			db = minequest.getString("db", "MineQuest/minequest");
@@ -686,6 +698,7 @@ public class MineQuest extends JavaPlugin {
 			sell_percent = general.getDouble("sell_return", .92);
 			price_change = general.getDouble("price_change", .009);
 			starting_health = general.getInt("starting_health", 10);
+			town_respawn = general.getBoolean("town_respawn", true);
 			String exceptions = general.getString("town_edit_exception", "64,77");
 			if (exceptions.contains(",")) {
 				String[] split = exceptions.split(",");
@@ -701,6 +714,7 @@ public class MineQuest extends JavaPlugin {
 					town_exceptions = new int[0];
 				}
 			}
+			mq_damage_system = general.getBoolean("mq_damage_system", true);
 			
 			npc_cost = npc.getInt("npc_cost_level", 1000);
 			npc_cost_class = npc.getInt("npc_cost_class", 1000);
@@ -713,6 +727,16 @@ public class MineQuest extends JavaPlugin {
 			exp_damage = experience.getInt("damage", 3);
 			cast_ability_exp = experience.getInt("cast_ability", 5);
 			exp_class_damage = experience.getInt("class_damage", 5);
+			
+			warrior_name = classc.getString("first_name", "Warrior");
+			archer_name = classc.getString("second_name", "Archer");
+			war_mage_name = classc.getString("third_name", "WarMage");
+			peace_mage_name = classc.getString("fourth_name", "PeaceMage");
+			digger_name = classc.getString("fifth_name", "Digger");
+			farmer_name = classc.getString("sixth_name", "Farmer");
+			miner_name = classc.getString("seventh_name", "Miner");
+			lumberjack_name = classc.getString("eighth_name", "Lumberjack");
+			starting_classes = classc.getString("starting_classes", "Warrior,Archer,WarMage,PeaceMage,Miner,Digger,Lumberjack,Farmer").split(",");
 
 			sql_server
 					.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, "
@@ -813,6 +837,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, el, Priority.Highest, this);
+        pm.registerEvent(Event.Type.ENTITY_TARGET, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
@@ -1338,5 +1363,38 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		return false;
+	}
+	public static String getWarriorName() {
+		return warrior_name;
+	}
+	public static String getArcherName() {
+		return archer_name;
+	}
+	public static String getWarMageName() {
+		return war_mage_name;
+	}
+	public static String getPeaceMageName() {
+		return peace_mage_name;
+	}
+	public static String getDiggerName() {
+		return digger_name;
+	}
+	public static String getFarmerName() {
+		return farmer_name;
+	}
+	public static String getLumberjackName() {
+		return lumberjack_name;
+	}
+	public static String getMinerName() {
+		return miner_name;
+	}
+	public static String[] getClassNames() {
+		return starting_classes;
+	}
+	public static boolean mqDamageEnabled() {
+		return mq_damage_system;
+	}
+	public static boolean townRespawn() {
+		return town_respawn;
 	}
 }

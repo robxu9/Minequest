@@ -169,7 +169,7 @@ public class CombatClass extends SkillClass implements DefendingClass {
 		case 298: 
 			return .05;
 		}
-		
+
 		return 0;
 	}
 	
