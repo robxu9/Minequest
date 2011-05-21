@@ -31,8 +31,10 @@ import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Mob.MQMob;
+import org.monk.MineQuest.Quester.NPCQuester;
 
 public class MineQuestEntityListener extends EntityListener {
 	
@@ -99,6 +101,20 @@ public class MineQuestEntityListener extends EntityListener {
 		} else if ((event.getEntity() instanceof LivingEntity) && MineQuest.getMob((LivingEntity)event.getEntity()) != null) {
 			MineQuest.getMob((LivingEntity)event.getEntity()).damage(event.getDamage());
         }
+	}
+	
+	@Override
+	public void onEntityTarget(EntityTargetEvent event) {
+		if (!(event.getTarget() instanceof LivingEntity)) return;
+		LivingEntity target = (LivingEntity) event.getTarget();
+		
+		if (MineQuest.getQuester(target) instanceof NPCQuester) {
+			NPCQuester quester = (NPCQuester)MineQuest.getQuester(target);
+			
+			if (quester.isProtected()) {
+				event.setCancelled(true);
+			}
+		}
 	}
 	
 	@Override

@@ -82,11 +82,6 @@ public class AbilityBinder extends Ability {
 	}
 
 	@Override
-	public SkillClass getClassType() {
-		return null;
-	}
-
-	@Override
 	public List<ItemStack> getManaCost() {
 		return new ArrayList<ItemStack>();
 	}

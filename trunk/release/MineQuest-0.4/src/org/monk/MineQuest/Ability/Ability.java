@@ -121,6 +121,9 @@ public abstract class Ability {
 					&& (world.getBlockAt(x, i, z).getType() != Material.TORCH) 
 					&& (world.getBlockAt(x, i, z).getType() != Material.SIGN) 
 					&& (world.getBlockAt(x, i, z).getType() != Material.WALL_SIGN) 
+					&& (world.getBlockAt(x, i, z).getType() != Material.WOOD_DOOR) 
+					&& (world.getBlockAt(x, i, z).getType() != Material.IRON_DOOR) 
+					&& (world.getBlockAt(x, i, z).getType() != Material.IRON_DOOR_BLOCK) 
 					&& (world.getBlockAt(x, i, z).getType() != Material.AIR)) && (i < 1000));
 			if (i == 1000) i = 0;
 		} else {
@@ -131,6 +134,8 @@ public abstract class Ability {
 					|| (world.getBlockAt(x, i, z).getType() == Material.TORCH) 
 					|| (world.getBlockAt(x, i, z).getType() == Material.SIGN) 
 					|| (world.getBlockAt(x, i, z).getType() == Material.WALL_SIGN) 
+					|| (world.getBlockAt(x, i, z).getType() == Material.IRON_DOOR) 
+					|| (world.getBlockAt(x, i, z).getType() == Material.IRON_DOOR_BLOCK) 
 					|| (world.getBlockAt(x, i, z).getType() == Material.AIR)) && (i > -100));
 			if (i == -100) i = 0;
 			i++;
@@ -260,7 +265,7 @@ public abstract class Ability {
 		if (lookBind != item.getTypeId()) {
 			silentUnBind(quester);
 			lookBind = item.getTypeId();
-			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('LOOK:" + getName() + "', '" + bind + "', '" + bind + "')");
+			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('LOOK:" + getName() + "', '" + lookBind + "', '" + lookBind + "')");
 			quester.sendMessage(getName() + " is now look bound to " + item.getTypeId());
 		}
 	}

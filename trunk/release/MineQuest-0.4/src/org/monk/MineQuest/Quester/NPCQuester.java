@@ -87,6 +87,7 @@ public class NPCQuester extends Quester {
 	private int threshold = 0;
 	private int task = -2;
 	private ItemStack hand = null;
+	private boolean mob_protected = false;
 
 	
 	public NPCQuester(String name) {
@@ -526,6 +527,8 @@ public class NPCQuester extends Quester {
 			this.task = Integer.parseInt(value);
 		} else if (property.equals("health")) {
 			health = max_health = Integer.parseInt(value);
+		} else if (property.equals("mob_protected")) {
+			mob_protected = Boolean.parseBoolean(value);
 		} else if (property.equals("item_in_hand")) {
 			ItemStack item = new ItemStack(Integer.parseInt(value), 1);
 			item.setDurability(item.getType().getMaxDurability());
@@ -674,7 +677,9 @@ public class NPCQuester extends Quester {
 						if (!(entity instanceof Player)
 								|| (!((Player) entity).getName().equals(name))) {
 							if (NPCMode.FOR_SALE != mode) {
-								mobTarget = entity;
+								if (!follow.getParty().getQuesters().contains(MineQuest.getQuester(entity))) {
+									mobTarget = entity;
+								}
 							}
 						}
 					}
@@ -751,7 +756,9 @@ public class NPCQuester extends Quester {
 	public void questerAttack(LivingEntity entity) {
 		if (NPCMode.PARTY_STAND != mode) {
 			if ((mobTarget == null) || (mobTarget.getHealth() <= 0)) {
-				mobTarget = entity;
+				if (!follow.getParty().getQuesters().contains(MineQuest.getQuester(entity))) {
+					mobTarget = entity;
+				}
 			}
 		}
 	}
@@ -865,7 +872,6 @@ public class NPCQuester extends Quester {
 	}
 	
 	public void setMode(NPCMode mode) {
-		MineQuest.log("Mode for " + name + " set to mode: " + mode);
 		this.mode = mode;
 		target = null;
 	}
@@ -1008,5 +1014,9 @@ public class NPCQuester extends Quester {
 		if (mobTarget.getEntityId() == player.getEntityId()) {
 			mobTarget = null;
 		}
+	}
+
+	public boolean isProtected() {
+		return mob_protected;
 	}
 }

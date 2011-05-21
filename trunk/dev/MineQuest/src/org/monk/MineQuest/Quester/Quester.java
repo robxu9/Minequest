@@ -870,24 +870,13 @@ public class Quester {
 	 */
 	public void create() {
 		int num;
-		List<String> class_names = new ArrayList<String>();
-		class_names.add("Miner");
-		class_names.add("Lumberjack");
-		class_names.add("Digger");
-		class_names.add("Farmer");
-		if (MineQuest.getMaxClasses() >= 4) {
-			class_names.add("Warrior");
-			class_names.add("Archer");
-			class_names.add("WarMage");
-			class_names.add("PeaceMage");
-			MineQuest.log("Adding all classes");
-		}
+		String[] class_names = MineQuest.getClassNames();
 		
 		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health) VALUES('"
 			+ name + "', '" + name + "', '500000', '0', '0', 'Bitville', '";
-		update_string = update_string + class_names.get(0);
+		update_string = update_string + class_names[0];
 		for (String name : class_names) {
-			if (!name.equals(class_names.get(0))) {
+			if (!name.equals(class_names[0])) {
 				update_string = update_string + ", " + name;
 			}
 		}
@@ -1266,7 +1255,15 @@ public class Quester {
 	 * @return
 	 */
 	public int getHealth() {
-		return health;
+		if (MineQuest.mqDamageEnabled()) {
+			return health;
+		} else {
+			if (player != null) {
+				return player.getHealth();
+			} else {
+				return 0;
+			}
+		}
 	}
 
 	public CreatureType[] getKills() {
@@ -1292,7 +1289,11 @@ public class Quester {
 	 * @return
 	 */
 	public int getMaxHealth() {
-		return max_health;
+		if (MineQuest.mqDamageEnabled()) {
+			return max_health;
+		} else {
+			return 20;
+		}
 	}
 
 	/**
@@ -1358,6 +1359,7 @@ public class Quester {
 	 * @return false
 	 */
 	public boolean healthChange(int change, EntityDamageEvent event) {
+		if (!MineQuest.mqDamageEnabled()) return false;
 		if (event.isCancelled()) return false;
 		if (player == null) return false;
 		int newHealth;
@@ -1399,6 +1401,7 @@ public class Quester {
     }
 	
 	public boolean healthIncrease(PlayerInteractEvent event) {
+		if (!MineQuest.mqDamageEnabled()) return false;
 		if (event.getItem() == null) return false;
 		Material type = event.getItem().getType();
 		
@@ -1616,7 +1619,7 @@ public class Quester {
 		if (quest != null) {
 			event.setRespawnLocation(quest.getSpawn());
 		} else {
-			if (MineQuest.getTown(last) != null) {
+			if (MineQuest.townRespawn() && (MineQuest.getTown(last) != null)) {
 				event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
 			}
 		}
@@ -1718,12 +1721,18 @@ public class Quester {
 	 * @param i New Health
 	 */
 	public void setHealth(int i) {
-		if (i > max_health) {
-			i = max_health;
+		if (MineQuest.mqDamageEnabled()) {
+			if (i > max_health) {
+				i = max_health;
+			}
+			health = i;
+			
+			updateHealth();
+		} else {
+			if (player != null) {
+				player.setHealth(i);
+			}
 		}
-		health = i;
-		
-		updateHealth();
 	}
 	
 	public void setParty(Party party) {
@@ -1949,6 +1958,7 @@ public class Quester {
 	 * @param player
 	 */
 	public void updateHealth() {
+		if (!MineQuest.mqDamageEnabled()) return;
 		int newValue;
 		
 		newValue = (int)((20 * (double)health) / max_health);

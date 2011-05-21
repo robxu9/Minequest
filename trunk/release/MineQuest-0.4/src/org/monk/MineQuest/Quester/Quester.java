@@ -1367,7 +1367,9 @@ public class Quester {
         	return false;
         }
 
-    	MineQuest.log(change + " damage to " + name);
+        if (MineQuest.logHealthChange()) {
+        	MineQuest.log(change + " damage to " + name);
+        }
         health -= change;
         
         newHealth = 20 * health / max_health;
@@ -2026,12 +2028,9 @@ public class Quester {
 		if (block.size() > 0) {
 			for (SkillClass skill : classes) {
 				if (skill.isLookAbilityItem(player.getItemInHand())) {
-					sendMessage("Last!");
 					skill.callLookAbility(block.get(block.size() - 1));
 				}
 			}
-		} else {
-			sendMessage("None!");
 		}
 	}
 }

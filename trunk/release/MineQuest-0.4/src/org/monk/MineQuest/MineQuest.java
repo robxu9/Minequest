@@ -813,6 +813,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_COMBUST, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, el, Priority.Highest, this);
+        pm.registerEvent(Event.Type.ENTITY_TARGET, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);

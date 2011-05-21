@@ -51,7 +51,9 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
  */
 public abstract class Ability {
 	@SuppressWarnings({ "rawtypes" })
-	private static List<Class> abil_classes;
+	private static List<Class>[] abil_classes;
+//	private static List<Class> abil_classes;
+	private final static String[] class_types = { "Warrior", "Archer", "WarMage", "PeaceMage", "Digger", "Farmer", "Lumberjack", "Miner"};
 
 	// http://www.devx.com/tips/Tip/38975
 	public static Class<?> getClass(String the_class) throws Exception {
@@ -63,6 +65,26 @@ public abstract class Ability {
 			URL url = new URL("file:abilities.jar");
 			URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
 			return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
+		}
+	}
+	
+	public static int getVersion() {
+		try {
+			Class this_class;
+			try {
+				URL url = new URL("file:MineQuest/abilities.jar");
+				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+				this_class = Class.forName("org.monk.MineQuest.Ability.Version", true, ucl);
+			} catch (Exception e) {
+				URL url = new URL("file:abilities.jar");
+				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+				this_class = Class.forName("org.monk.MineQuest.Ability.Version", true, ucl);
+			}
+			MineQuestVersion version = (MineQuestVersion)this_class.newInstance();
+			
+			return version.getVersion();
+		} catch (Exception e) {
+			return -1;
 		}
 	}
 	
@@ -141,47 +163,56 @@ public abstract class Ability {
 	
 	@SuppressWarnings("rawtypes")
 	static public List<Ability> newAbilities(SkillClass myclass) {
-		List<String> classes = new ArrayList<String>();
 		List<Ability> abilities = new ArrayList<Ability>();
+		int i;
 		
 		if (abil_classes == null) {
-			abil_classes = new ArrayList<Class>();
-			try {
+			List<String> classes = new ArrayList<String>();
+			
+			abil_classes = new ArrayList[class_types.length];
+			for (i = 0; i < class_types.length; i++) {
 				try {
-					MineQuest.log("Attempting to load MineQuest/abilities.jar");
-					classes = getClasseNamesInPackage("MineQuest/abilities.jar", "org.monk.MineQuest.Ability");
-					MineQuest.log("Success!!");
+					try {
+						classes = getClasseNamesInPackage("MineQuest/abilities.jar", "org.monk.MineQuest.Ability." + class_types[i]);
+					} catch (Exception e) {
+						classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability." + class_types[i]);
+						MineQuest.log("Please move abilities.jar to MineQuest/abilities.jar");
+					}
 				} catch (Exception e) {
-					MineQuest.log("Failed to load MineQuest/abilities.jar");
-					classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
-					MineQuest.log("Please move abilities.jar to MineQuest/abilities.jar");
+					MineQuest.log("Unable to get Abilities for class " + class_types[i]);
 				}
-			} catch (Exception e) {
-				MineQuest.log("Unable to get Abilities");
-			}
-			for (String this_class : classes) {
-				try {
-					abil_classes.add(getClass(this_class));
-				} catch (Exception e) {
-					MineQuest.log("Could not load Ability: " + this_class);
+				abil_classes[i] = new ArrayList<Class>();
+				for (String this_class : classes) {
+					try {
+						abil_classes[i].add(getClass(this_class));
+					} catch (Exception e) {
+						MineQuest.log("Could not load Ability: " + this_class);
+					}
 				}
 			}
 		}
 		
-		for (Class this_class : abil_classes) {
-			Ability ability;
+		String type_list[];
+		String type = null;
+		if (myclass != null) {
+			type_list = myclass.getClass().toString().replaceAll("\\.", "/").split("/");
+			if (type_list.length > 1) {
+				type = type_list[type_list.length - 1];
+			} else {
+				type = myclass.getClass().toString();
+			}
+		}
+		for (i = 0; i < class_types.length; i++) {
 			try {
-				ability = (Ability)this_class.newInstance();
-				
-				ability.setSkillClass(myclass);
-				
-				if (myclass == null) {
-					abilities.add(ability);
-				} else if (myclass.getClass().equals(ability.getClassType().getClass())) {
-					abilities.add(ability);
+				if ((myclass == null) || (type.equals(class_types[i]))) {
+					for (Class ability_class : abil_classes[i]) {
+						Ability ability = (Ability) ability_class.newInstance();
+						ability.setSkillClass(myclass);
+						abilities.add(ability);
+					}
 				}
 			} catch (Exception e) {
-				MineQuest.log("Could not load Ability: " + this_class);
+				MineQuest.log("Could not load Ability: " + myclass);
 			}
 		}
 
@@ -217,6 +248,7 @@ public abstract class Ability {
 	protected int required_level;
 	protected int experience;
 	private int lookBind;
+	private List<ItemStack> cost;
 	
 	/**
 	 * Creates an Ability
@@ -260,7 +292,7 @@ public abstract class Ability {
 		if (lookBind != item.getTypeId()) {
 			silentUnBind(quester);
 			lookBind = item.getTypeId();
-			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('LOOK:" + getName() + "', '" + bind + "', '" + bind + "')");
+			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('LOOK:" + getName() + "', '" + lookBind + "', '" + lookBind + "')");
 			quester.sendMessage(getName() + " is now look bound to " + item.getTypeId());
 		}
 	}
@@ -305,7 +337,7 @@ public abstract class Ability {
 	 * @param quester Quester enabling the ability
 	 */
 	public void enable(Quester quester) {
-		if (quester.canCast(getRealManaCost())) {
+		if (quester.canCast(getConfigManaCost())) {
 			enabled = true;
 			quester.sendMessage(getName() + " enabled");
 		} else {
@@ -325,8 +357,6 @@ public abstract class Ability {
 	public int getCastTime() {
 		return 0;
 	}
-
-	public abstract SkillClass getClassType();
 
 	/**
 	 * Gets the distance between a Player and the entity.
@@ -437,6 +467,14 @@ public abstract class Ability {
 		return cost;
 	}
 	
+	public List<ItemStack> getConfigManaCost() {
+		return cost;
+	}
+	
+	public void setConfigManaCost(List<ItemStack> cost) {
+		this.cost = cost;
+	}
+	
 	public int getRealRequiredLevel() {
 		return required_level;
 	}
@@ -458,7 +496,7 @@ public abstract class Ability {
 	 */
 	@SuppressWarnings("deprecation")
 	protected void giveManaCost(Player player) {
-		List<ItemStack> cost = getRealManaCost();
+		List<ItemStack> cost = getConfigManaCost();
 		int i;
 		
 		for (i = 0; i < cost.size(); i++) {
@@ -467,6 +505,22 @@ public abstract class Ability {
 		player.updateInventory();
 		
 		myclass.expAdd(-getRealExperience());
+	}
+	
+	/**
+	 * Gives the casting cost back to the player.
+	 * 
+	 * @param player
+	 */
+	@SuppressWarnings("deprecation")
+	protected void giveManaCostNoExp(Player player) {
+		List<ItemStack> cost = getConfigManaCost();
+		int i;
+		
+		for (i = 0; i < cost.size(); i++) {
+			player.getInventory().addItem(cost.get(i));
+		}
+		player.updateInventory();
 	}
 	
 	/**
@@ -621,6 +675,7 @@ public abstract class Ability {
 			casting_time = MineQuest.getAbilityConfiguration().getCastingTime(getName());
 			experience = MineQuest.getAbilityConfiguration().getExperience(getName());
 			required_level = MineQuest.getAbilityConfiguration().getRequiredLevel(getName());
+			cost = MineQuest.getAbilityConfiguration().getCost(getName());
 		}
 	}
 
@@ -679,7 +734,7 @@ public abstract class Ability {
 			return;
 		}
 		
-		if ((quester == null) || quester.canCast(getRealManaCost())) {
+		if ((quester == null) || quester.canCast(getConfigManaCost())) {
 			if (canCast() || (player == null)) {
 				notify(quester, "Casting " + getName());
 				castAbility(quester, location, entity);
@@ -688,7 +743,7 @@ public abstract class Ability {
 				}
 			} else {
 				if (player != null) {
-					giveManaCost(player);
+					giveManaCostNoExp(player);
 					notify(quester, "You cast that too recently");
 				}
 			}
@@ -705,5 +760,25 @@ public abstract class Ability {
 
 	public boolean isLookBound(ItemStack itemStack) {
 		return (lookBind == itemStack.getTypeId());
+	}
+
+	public String getRealManaCostString() {
+		List<Integer> cost = new ArrayList<Integer>();
+		String ret = "";
+		int i;
+		
+		for (ItemStack item : getRealManaCost()) {
+			for (i = 0; i < item.getAmount(); i++) {
+				cost.add(item.getTypeId());
+			}
+		}
+		if (cost.size() > 0) {
+			ret = ret + cost.get(0);
+			for (i = 1; i < cost.size(); i++) {
+				ret = ret + "," + cost.get(i);
+			}
+		}
+		
+		return ret;
 	}
 }
