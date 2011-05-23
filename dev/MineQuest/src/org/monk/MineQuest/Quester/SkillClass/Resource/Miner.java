@@ -29,11 +29,6 @@ public class Miner extends ResourceClass {
 		super(quester, type);
 		// TODO Auto-generated constructor stub
 	}
-	
-	public Miner() {
-		// Shell
-		super();
-	}
 
 	@Override
 	public boolean canUse(ItemStack itemStack) {

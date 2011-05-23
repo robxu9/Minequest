@@ -28,10 +28,6 @@ public class Lumberjack extends ResourceClass {
 	public Lumberjack(Quester quester, String type) {
 		super(quester, type);
 	}
-	
-	public Lumberjack() {
-		// shell
-	}
 
 	@Override
 	public boolean canUse(ItemStack itemStack) {

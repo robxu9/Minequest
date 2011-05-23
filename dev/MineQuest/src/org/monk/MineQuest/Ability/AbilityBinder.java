@@ -90,4 +90,9 @@ public class AbilityBinder extends Ability {
 	public int getReqLevel() {
 		return 0;
 	}
+
+	@Override
+	public String getSkillClass() {
+		return null;
+	}
 }

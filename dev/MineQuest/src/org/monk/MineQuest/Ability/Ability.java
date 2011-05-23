@@ -51,9 +51,8 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
  */
 public abstract class Ability {
 	@SuppressWarnings({ "rawtypes" })
-	private static List<Class>[] abil_classes;
+	private static List<Class> abil_classes;
 //	private static List<Class> abil_classes;
-	private final static String[] class_types = { "Warrior", "Archer", "WarMage", "PeaceMage", "Digger", "Farmer", "Lumberjack", "Miner"};
 
 	// http://www.devx.com/tips/Tip/38975
 	public static Class<?> getClass(String the_class) throws Exception {
@@ -74,11 +73,11 @@ public abstract class Ability {
 			try {
 				URL url = new URL("file:MineQuest/abilities.jar");
 				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
-				this_class = Class.forName("org.monk.MineQuest.Ability.Version", true, ucl);
+				this_class = Class.forName("org.monk.MineQuest.Ability.Version.Version", true, ucl);
 			} catch (Exception e) {
 				URL url = new URL("file:abilities.jar");
 				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
-				this_class = Class.forName("org.monk.MineQuest.Ability.Version", true, ucl);
+				this_class = Class.forName("org.monk.MineQuest.Ability.Version.Version", true, ucl);
 			}
 			MineQuestVersion version = (MineQuestVersion)this_class.newInstance();
 			
@@ -108,6 +107,7 @@ public abstract class Ability {
 					break;
 				}
 				if ((jarEntry.getName().startsWith(packageName))
+						&& (!jarEntry.getName().contains("Version"))
 						&& (jarEntry.getName().endsWith(".class"))) {
 					if (debug)
 						System.out.println("Found "
@@ -164,50 +164,39 @@ public abstract class Ability {
 	@SuppressWarnings("rawtypes")
 	static public List<Ability> newAbilities(SkillClass myclass) {
 		List<Ability> abilities = new ArrayList<Ability>();
-		int i;
-		
 		if (abil_classes == null) {
 			List<String> classes = new ArrayList<String>();
 			
-			abil_classes = new ArrayList[class_types.length];
-			for (i = 0; i < class_types.length; i++) {
+			abil_classes = new ArrayList<Class>();
+			try {
 				try {
-					try {
-						classes = getClasseNamesInPackage("MineQuest/abilities.jar", "org.monk.MineQuest.Ability." + class_types[i]);
-					} catch (Exception e) {
-						classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability." + class_types[i]);
-						MineQuest.log("Please move abilities.jar to MineQuest/abilities.jar");
-					}
+					classes = getClasseNamesInPackage("MineQuest/abilities.jar", "org.monk.MineQuest.Ability");
 				} catch (Exception e) {
-					MineQuest.log("Unable to get Abilities for class " + class_types[i]);
+					classes = getClasseNamesInPackage("abilities.jar", "org.monk.MineQuest.Ability");
+					MineQuest.log("Please move abilities.jar to MineQuest/abilities.jar");
 				}
-				abil_classes[i] = new ArrayList<Class>();
-				for (String this_class : classes) {
-					try {
-						abil_classes[i].add(getClass(this_class));
-					} catch (Exception e) {
-						MineQuest.log("Could not load Ability: " + this_class);
-					}
+			} catch (Exception e) {
+				MineQuest.log("Unable to get Abilities");
+			}
+			for (String this_class : classes) {
+				try {
+					abil_classes.add(getClass(this_class));
+				} catch (Exception e) {
+					MineQuest.log("Could not load Ability: " + this_class);
 				}
 			}
 		}
 		
-		String type_list[];
 		String type = null;
 		if (myclass != null) {
-			type_list = myclass.getClass().toString().replaceAll("\\.", "/").split("/");
-			if (type_list.length > 1) {
-				type = type_list[type_list.length - 1];
-			} else {
-				type = myclass.getClass().toString();
-			}
+			type = myclass.getType();
 		}
-		for (i = 0; i < class_types.length; i++) {
+		for (Class abil : abil_classes) {
 			try {
-				if ((myclass == null) || (type.equals(class_types[i]))) {
-					for (Class ability_class : abil_classes[i]) {
-						Ability ability = (Ability) ability_class.newInstance();
-						ability.setSkillClass(myclass);
+				Ability ability = (Ability) abil.newInstance();
+				ability.setSkillClass(myclass);
+				if ((myclass == null) || (type.equals(MineQuest.getAbilityConfiguration().getSkillClass(ability.getName())))) {
+					for (Class ability_class : abil_classes) {
 						abilities.add(ability);
 					}
 				}
@@ -244,9 +233,6 @@ public abstract class Ability {
 	protected long last_msg;
 	protected SkillClass myclass;
 	protected long time;
-	protected int casting_time;
-	protected int required_level;
-	protected int experience;
 	private int lookBind;
 	private List<ItemStack> cost;
 	
@@ -422,7 +408,6 @@ public abstract class Ability {
 	 * @return
 	 */
 	int getExp() {
-		// TODO: Fix getExp in Ability.java
 		return 30;
 	}
 	
@@ -460,7 +445,7 @@ public abstract class Ability {
 		List<ItemStack> cost = getManaCost();
 
 		int i;
-		for (i = 0; i < (getRealRequiredLevel() / 4); i++) {
+		for (i = 0; i < (getReqLevel() / 4); i++) {
 			cost.add(new ItemStack(Material.REDSTONE, 1));
 		}
 
@@ -476,15 +461,15 @@ public abstract class Ability {
 	}
 	
 	public int getRealRequiredLevel() {
-		return required_level;
+		return MineQuest.getAbilityConfiguration().getRequiredLevel(getName());
 	}
 	
 	public int getRealExperience() {
-		return experience;
+		return MineQuest.getAbilityConfiguration().getExperience(getName());
 	}
 	
 	public int getRealCastingTime() {
-		return casting_time;
+		return MineQuest.getAbilityConfiguration().getCastingTime(getName());
 	}
 	
 	public abstract int getReqLevel();
@@ -672,9 +657,6 @@ public abstract class Ability {
 	public void setSkillClass(SkillClass skillclass) {
 		this.myclass = skillclass;
 		if (skillclass != null) {
-			casting_time = MineQuest.getAbilityConfiguration().getCastingTime(getName());
-			experience = MineQuest.getAbilityConfiguration().getExperience(getName());
-			required_level = MineQuest.getAbilityConfiguration().getRequiredLevel(getName());
 			cost = MineQuest.getAbilityConfiguration().getCost(getName());
 		}
 	}
@@ -781,4 +763,6 @@ public abstract class Ability {
 		
 		return ret;
 	}
+	
+	public abstract String getSkillClass();
 }

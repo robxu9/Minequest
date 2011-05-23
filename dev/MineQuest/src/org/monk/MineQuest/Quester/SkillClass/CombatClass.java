@@ -30,8 +30,9 @@ public class CombatClass extends SkillClass {
 		super(quester, type);
 	}
 	
-	public CombatClass() {
+	public CombatClass(String type) {
 		// Shell
+		super(type);
 	}
 
 	/**

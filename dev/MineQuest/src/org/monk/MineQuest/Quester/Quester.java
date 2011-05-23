@@ -686,16 +686,25 @@ public class Quester {
     public boolean canWear(ItemStack item) {
 		boolean class_armor = false;
 		boolean can_use = false;
-		for (SkillClass skill : classes) {
-			if (skill.isArmor(item)) {
-				if (skill.canWear(item)) {
-					class_armor = true;
-					can_use = true;
-				} else {
-					if (!class_armor) {
+		for (String type : MineQuest.getFullClassNames()) {
+			SkillClass skill = getClass(type);
+			if (skill != null) {
+				if (skill.isArmor(item)) {
+					if (skill.canWear(item)) {
 						class_armor = true;
-						can_use = false;
+						can_use = true;
+					} else {
+						if (!class_armor) {
+							class_armor = true;
+							can_use = false;
+						}
 					}
+				}
+			} else {
+				SkillClass shell = SkillClass.newShell(type);
+				if (skill.isArmor(item)) {
+					class_armor = true;
+					can_use = false;
 				}
 			}
 		}

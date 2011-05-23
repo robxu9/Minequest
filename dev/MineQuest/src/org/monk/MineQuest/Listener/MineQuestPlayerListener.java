@@ -154,8 +154,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage("Please contact help@theminequest.com");
 			e.printStackTrace();
 		}
-		
-		super.onPlayerCommandPreprocess(event);
 	}
 	
 	private void processHelp(String[] split, Player player, PlayerChatEvent event) {

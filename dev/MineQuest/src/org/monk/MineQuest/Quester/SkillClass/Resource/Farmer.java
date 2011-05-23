@@ -28,10 +28,6 @@ public class Farmer extends ResourceClass {
 	public Farmer(Quester quester, String type) {
 		super(quester, type);
 	}
-	
-	public Farmer() {
-		// Shell
-	}
 
 	@Override
 	public boolean canUse(ItemStack itemStack) {
