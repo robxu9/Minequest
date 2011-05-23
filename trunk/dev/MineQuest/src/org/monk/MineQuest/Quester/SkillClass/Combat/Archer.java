@@ -33,27 +33,6 @@ public class Archer extends CombatClass {
 	public Archer() {
 		// Shell
 	}
-
-	@Override
-	public int[] getClassArmorIds() {
-		int item_ids[] = new int[4];
-
-		item_ids[0] = 306;
-		item_ids[1] = 309;
-		item_ids[2] = 308;
-		item_ids[3] = 307;
-
-		return item_ids;
-	}
-	
-	@Override
-	protected int getExpMob(LivingEntity defend) {
-		if (defend instanceof CraftZombie) {
-			return 10;
-		} else {
-			return 5;
-		}
-	}
 	
 	@Override
 	public boolean isClassItem(ItemStack item) {

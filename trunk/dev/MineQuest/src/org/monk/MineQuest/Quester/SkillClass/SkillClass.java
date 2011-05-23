@@ -28,13 +28,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.Combat.Archer;
 import org.monk.MineQuest.Quester.SkillClass.Combat.PeaceMage;
@@ -83,7 +83,6 @@ public class SkillClass {
 	protected Random generator;
 	protected int level;
 	protected Quester quester;
-	private int req_level;
 	
 	protected String type;
 	
@@ -106,7 +105,6 @@ public class SkillClass {
 		} else {
 			level = MineQuest.getAdjustmentMultiplier() * MineQuest.getAdjustment() * 10;
 		}
-		req_level = MineQuest.getArmorReqLevel();
 	}
 	
 	/**
@@ -251,81 +249,44 @@ public class SkillClass {
 	 * @param itemStack
 	 * @return Boolean False if Quester cannot use item. True otherwise
 	 */
-	public boolean canUse(ItemStack itemStack) {
-		return true;
+	public boolean canUse(ItemStack item) {
+		int item_ids[];
+		int levels[];
+		int i;
+		item_ids = getSkillConfig().getTypes(type);
+		levels = getSkillConfig().getLevels(type);
+		if (levels == null) return false;
+		if (item_ids == null) return false;
+
+		for (i = 0; i < item_ids.length; i++) {
+			if ((item.getTypeId() == item_ids[i]) && (level >= levels[i])) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean canWear(ItemStack item) {
+		int item_ids[];
+		int levels[];
+		int i;
+		item_ids = getSkillConfig().getArmor(type);
+		levels = getSkillConfig().getArmorLevels(type);
+		if (levels == null) return false;
+		if (item_ids == null) return false;
+
+		for (i = 0; i < item_ids.length; i++) {
+			if ((item.getTypeId() == item_ids[i]) && (level >= levels[i])) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
-	/**
-	 * Checks if the Quester is wearing any equipment that
-	 * they are not high enough level to use.
-	 * 
-	 * @param equip Equipment the Quester is Wearing
-	 */
-	public void checkEquip(PlayerInventory equip) {
-		int item_ids[];
-		int i;
-		Player player = quester.getPlayer();
-		
-		if (level >= req_level) {
-			return;
-		}
-
-		if (this instanceof WarMage) {
-			if (quester.getClass("PeaceMage").getLevel() >= req_level) {
-				return;
-			}
-		}
-		if (this instanceof PeaceMage) {
-			if (quester.getClass("WarMage").getLevel() >= req_level) {
-				return;
-			}
-		}
-
-		item_ids = getClassArmorIds();
-		if (item_ids == null) {
-			return;
-		}
-		if (this instanceof ResourceClass) {
-			if (level >= MineQuest.getMinerArmorLevel()) return;
-		}
-		
-		for (i = 0; i < item_ids.length; i++) {
-			if (equip.getBoots().getTypeId() == item_ids[i]) {
-				if (equip.firstEmpty() != -1) {
-					equip.addItem(new ItemStack(item_ids[i]));
-				} else {
-					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
-				}
-				equip.setBoots(null);
-				player.sendMessage("You are not high enough level to use those boots");
-			} else if (equip.getChestplate().getTypeId() == item_ids[i]) {
-				if (equip.firstEmpty() != -1) {
-					equip.addItem(new ItemStack(item_ids[i]));
-				} else {
-					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
-				}
-				equip.setChestplate(null);
-				player.sendMessage("You are not high enough level to use that chestplate");
-			} else if (equip.getHelmet().getTypeId() == item_ids[i]) {
-				if (equip.firstEmpty() != -1) {
-					equip.addItem(new ItemStack(item_ids[i]));
-				} else {
-					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
-				}
-				equip.setHelmet(null);
-				player.sendMessage("You are not high enough level to use that helmet");
-			} else if (equip.getLeggings().getTypeId() == item_ids[i]) {
-				if (equip.firstEmpty() != -1) {
-					equip.addItem(new ItemStack(item_ids[i]));
-				} else {
-					player.getWorld().dropItem(player.getLocation(), new ItemStack(item_ids[i]));
-				}
-				equip.setLeggings(null);
-				player.sendMessage("You are not high enough level to use those leggings");
-			}
-		}
-		
-		return;
+	public SkillClassConfig getSkillConfig() {
+		return MineQuest.getSkillConfig();
 	}
 
 	/**
@@ -361,6 +322,40 @@ public class SkillClass {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Called whenever the Quester that has this class is
+	 * being attacked.
+	 * 
+	 * @param entity Entity that is attacker
+	 * @param amount Amount of damage being dealt
+	 * @return The amount of damage negated by this class
+	 */
+	public int defend(LivingEntity entity, int amount) {
+		int i;
+		int armor[] = MineQuest.getSkillConfig().getArmorLevels(type);
+		int armor_defends[] = MineQuest.getSkillConfig().getArmorDefends(type);
+		int armor_blocks[] = MineQuest.getSkillConfig().getArmorBlocks(type);
+		int sum = 0;
+		
+		if (armor != null) {
+			for (i = 0; i < armor.length; i++) {
+				if (isWearing(armor[i])) {
+					if (generator.nextDouble() < armor_defends[i]) {
+						sum += armor_blocks[i];
+					}
+				}
+			}
+		}
+		
+		for (i = 0; i < ability_list.length; i++) {
+			if (ability_list[i] instanceof DefendingAbility) {
+				sum += ((DefendingAbility)ability_list[i]).parseDefend(quester, entity, amount - sum);
+			}
+		}
+		
+		return sum;
 	}
 	
 	/**
@@ -656,14 +651,15 @@ public class SkillClass {
 	 */
 	protected boolean isWearing(int i) {
 		if (quester.getPlayer() == null) return false;
-		
+
 		PlayerInventory equip = quester.getPlayer().getInventory();
-		
+
 		for (ItemStack itemStack : equip.getArmorContents()) {
 			if (itemStack.getTypeId() == i) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -675,14 +671,26 @@ public class SkillClass {
 	 */
 	public void levelUp() {
 		int num = 400;
-		if (this instanceof ResourceClass) {
-			num *= 2;
-		}
 		level++;
 		exp -= num * (level);
 		quester.sendMessage("Congratulations on becoming a level " + level + " " + type);
 		
 		fillAbilities();
+		
+		int add_health;
+		int size;
+		
+		size = getSize();
+		
+		if (size > 0) {
+			add_health = generator.nextInt(size) + 1;
+			
+			quester.addHealth(add_health);
+		}
+	}
+
+	public int getSize() {
+		return getSkillConfig().getLevelHealth(type);
 	}
 
 	/**
@@ -807,6 +815,20 @@ public class SkillClass {
 	
 	public void setQuester(Quester quester) {
 		this.quester = quester;
+	}
+
+	public boolean isArmor(ItemStack boots) {
+		for (int type_id : getSkillConfig().getArmor(type)) {
+			if (type_id == boots.getTypeId()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public boolean isClassBlock(Block block) {
+		return false;
 	}
 
 }

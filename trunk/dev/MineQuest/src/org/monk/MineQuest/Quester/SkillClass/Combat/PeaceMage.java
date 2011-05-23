@@ -34,25 +34,4 @@ public class PeaceMage extends CombatClass {
 		// Shell
 	}
 
-	@Override
-	public int[] getClassArmorIds() {
-		int item_ids[] = new int[4];
-
-		item_ids[0] = 314;
-		item_ids[1] = 317;
-		item_ids[2] = 316;
-		item_ids[3] = 315;
-
-		return item_ids;
-	}
-	
-	@Override
-	protected int getExpMob(LivingEntity defend) {
-		if (defend instanceof CraftSkeleton) {
-			return 10;
-		} else {
-			return 5;
-		}
-	}
-
 }

@@ -59,7 +59,6 @@ import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
-import org.monk.MineQuest.Quester.SkillClass.DefendingClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.NPCSignShop;
 import org.monk.MineQuest.World.Property;
@@ -683,6 +682,26 @@ public class Quester {
 	    
 	    return false;
     }
+    
+    public boolean canWear(ItemStack item) {
+		boolean class_armor = false;
+		boolean can_use = false;
+		for (SkillClass skill : classes) {
+			if (skill.isArmor(item)) {
+				if (skill.canWear(item)) {
+					class_armor = true;
+					can_use = true;
+				} else {
+					if (!class_armor) {
+						class_armor = true;
+						can_use = false;
+					}
+				}
+			}
+		}
+		
+		return !class_armor || can_use;
+    }
 	
 	/**
 	 * Checks if a Quester can use all of the equipment
@@ -695,9 +714,41 @@ public class Quester {
 		if (!enabled) return;
 		
 		PlayerInventory inven = player.getInventory();
-		
-		for (SkillClass skill : classes) {
-			skill.checkEquip(inven);
+		if (!canWear(inven.getBoots())) {
+			if (inven.firstEmpty() != -1) {
+				inven.addItem(new ItemStack(inven.getBoots().getTypeId(), 1));
+			} else {
+				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getBoots().getTypeId(), 1));
+			}
+			inven.setBoots(null);
+			sendMessage("You are not high enough level to use those boots");
+		}
+		if (!canWear(inven.getChestplate())) {
+			if (inven.firstEmpty() != -1) {
+				inven.addItem(new ItemStack(inven.getChestplate().getTypeId(), 1));
+			} else {
+				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getChestplate().getTypeId(), 1));
+			}
+			inven.setChestplate(null);
+			sendMessage("You are not high enough level to use that chestplate");
+		}
+		if (!canWear(inven.getHelmet())) {
+			if (inven.firstEmpty() != -1) {
+				inven.addItem(new ItemStack(inven.getHelmet().getTypeId(), 1));
+			} else {
+				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getHelmet().getTypeId(), 1));
+			}
+			inven.setHelmet(null);
+			sendMessage("You are not high enough level to use that helmet");
+		}
+		if (!canWear(inven.getLeggings())) {
+			if (inven.firstEmpty() != -1) {
+				inven.addItem(new ItemStack(inven.getLeggings().getTypeId(), 1));
+			} else {
+				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getLeggings().getTypeId(), 1));
+			}
+			inven.setLeggings(null);
+			sendMessage("You are not high enough level to use those leggings");
 		}
 	}
 
@@ -712,23 +763,41 @@ public class Quester {
 		PlayerInventory inven = player.getInventory();
 		ItemStack item = player.getItemInHand();
 
-		for (SkillClass skill : classes) {
-			if (!skill.canUse(item)) {
-				if (inven.firstEmpty() != -1) {
-					inven.addItem(item);
-				} else {
-					player.getWorld().dropItem(player.getLocation(), item);
-				}
-				
-				inven.setItemInHand(null);
-				if (player instanceof Player) {
-					((Player)player).sendMessage("You are not high enough level to use that weapon");
-				}
-				return true;
+		if (!canUse(item)) {
+			if (inven.firstEmpty() != -1) {
+				inven.addItem(item);
+			} else {
+				player.getWorld().dropItem(player.getLocation(), item);
 			}
+			
+			inven.setItemInHand(null);
+			if (player instanceof Player) {
+				((Player)player).sendMessage("You are not high enough level to use that weapon");
+			}
+			return true;
 		}
 
 		return false;
+	}
+
+	public boolean canUse(ItemStack item) {
+		boolean class_item = false;
+		boolean can_use = false;
+		for (SkillClass skill : classes) {
+			if (skill.isClassItem(item)) {
+				if (skill.canUse(item)) {
+					class_item = true;
+					can_use = true;
+				} else {
+					if (!class_item) {
+						class_item = true;
+						can_use = false;
+					}
+				}
+			}
+		}
+		
+		return !class_item || can_use;
 	}
 
 	/**
@@ -1012,9 +1081,7 @@ public class Quester {
 		if (classes != null) {
 			for (SkillClass sclass : classes) {
 				if (entity instanceof LivingEntity) {
-					if (sclass instanceof DefendingClass) {
-						sum += ((DefendingClass)sclass).defend((LivingEntity)entity, amount);
-					}
+					sum += sclass.defend((LivingEntity)entity, amount);
 				}
 			}
 		}
@@ -1054,24 +1121,32 @@ public class Quester {
 			}
 		}
 		
-		switch (blockToClass(event.getBlock())) {
-		case 0: // Miner
-			getClass("Miner").blockBreak(event);
-			expGain(MineQuest.getDestroyBlockExp());
-			return;
-		case 1: // Lumberjack
-			getClass("Lumberjack").blockBreak(event);
-			expGain(MineQuest.getDestroyBlockExp());
-			return;
-		case 2: // Digger
-			getClass("Digger").blockBreak(event);
-			expGain(MineQuest.getDestroyBlockExp());
-			return;
-		case 3: // Farmer
-			getClass("Farmer").blockBreak(event);
-			expGain(MineQuest.getDestroyBlockExp());
-			return;
+		for (SkillClass skill : classes) {
+			if (skill.isClassBlock(event.getBlock())) {
+				skill.blockBreak(event);
+				expGain(MineQuest.getDestroyBlockExp());
+				return;
+			}
 		}
+		
+//		switch (blockToClass(event.getBlock())) {
+//		case 0: // Miner
+//			getClass("Miner").blockBreak(event);
+//			expGain(MineQuest.getDestroyBlockExp());
+//			return;
+//		case 1: // Lumberjack
+//			getClass("Lumberjack").blockBreak(event);
+//			expGain(MineQuest.getDestroyBlockExp());
+//			return;
+//		case 2: // Digger
+//			getClass("Digger").blockBreak(event);
+//			expGain(MineQuest.getDestroyBlockExp());
+//			return;
+//		case 3: // Farmer
+//			getClass("Farmer").blockBreak(event);
+//			expGain(MineQuest.getDestroyBlockExp());
+//			return;
+//		}
 		
 		return;
 	}

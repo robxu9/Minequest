@@ -18,6 +18,7 @@
  */
 package org.monk.MineQuest.Quester.SkillClass;
 
+import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
@@ -77,6 +78,25 @@ public class ResourceClass extends SkillClass {
 		default:
 			return false;
 		}
+	}
+	
+	@Override
+	public boolean isClassBlock(Block block) {
+		int ids[] = getSkillConfig().getBlocks(type);
+		int id = block.getTypeId();
+		
+		for (int the_id : ids) {
+			if (the_id == id) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	 
+	@Override
+	public ResourceClassConfig getSkillConfig() {
+		return MineQuest.getResourceConfig();
 	}
 
 	/**
