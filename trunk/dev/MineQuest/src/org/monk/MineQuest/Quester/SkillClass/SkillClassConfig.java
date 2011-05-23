@@ -11,7 +11,7 @@ public class SkillClassConfig {
 	protected List<int[]> levels;
 	protected List<int[]> armors;
 	protected List<int[]> armor_levels;
-	protected List<int[]> armor_defends;
+	protected List<double[]> armor_defends;
 	protected List<int[]> armor_blocks;
 	protected PropertiesFile properties;
 	private List<Integer> level_health;
@@ -24,14 +24,16 @@ public class SkillClassConfig {
 		levels = new ArrayList<int[]>();
 		armors = new ArrayList<int[]>();
 		armor_levels = new ArrayList<int[]>();
-		armor_defends = new ArrayList<int[]>();
+		armor_defends = new ArrayList<double[]>();
 		armor_blocks = new ArrayList<int[]>();
 		level_health = new ArrayList<Integer>();
 
-		String[] name_list = properties.getString("names").split(",");
+		String[] name_list = properties.getString("names", "").split(",");
 
 		for (String name : name_list) {
-			names.add(name.replaceAll(" ", ""));
+			if (name.replaceAll(" ", "").length() > 0) {
+				names.add(name.replaceAll(" ", ""));
+			}
 		}
 		
 		for (String name : names) {
@@ -40,17 +42,17 @@ public class SkillClassConfig {
 	}
 	
 	protected void parseConfig(String name) {
-		types.add(intList(properties.getString(name + "_types")));
+		types.add(intList(properties.getString(name + "_types", "")));
 
-		levels.add(intList(properties.getString(name + "_levels")));
+		levels.add(intList(properties.getString(name + "_levels", "")));
 
-		armors.add(intList(properties.getString(name + "_armor")));
+		armors.add(intList(properties.getString(name + "_armor", "")));
 
-		armor_levels.add(intList(properties.getString(name + "_armor_levels")));
+		armor_levels.add(intList(properties.getString(name + "_armor_levels", "")));
 
-		armor_defends.add(intList(properties.getString(name + "_armor_defend")));
+		armor_defends.add(doubleList(properties.getString(name + "_armor_defend", "")));
 
-		armor_blocks.add(intList(properties.getString(name + "_armor_blocks")));
+		armor_blocks.add(intList(properties.getString(name + "_armor_blocks", "")));
 		
 		level_health.add(properties.getInt(name + "_level_health"));
 	}
@@ -86,7 +88,7 @@ public class SkillClassConfig {
 	}
 
 	protected void setupProperties() {
-		properties = new PropertiesFile("generic_classes.properties");
+		properties = new PropertiesFile("MineQuest/generic_classes.properties");
 	}
 	
 	public int[] getTypes(String name) {
@@ -137,7 +139,7 @@ public class SkillClassConfig {
 		return null;
 	}
 	
-	public int[] getArmorDefends(String name) {
+	public double[] getArmorDefends(String name) {
 		int i;
 		
 		for (i = 0; i < names.size(); i++) {

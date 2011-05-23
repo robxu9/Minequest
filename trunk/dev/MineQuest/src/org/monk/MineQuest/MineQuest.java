@@ -66,7 +66,6 @@ import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.CombatClassConfig;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClassConfig;
-import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClassConfig;
 import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
@@ -462,7 +461,7 @@ public class MineQuest extends JavaPlugin {
 			return ret;
 		}
 		
-		ability.setSkillClass(new SkillClass());
+//		ability.setSkillClass(new SkillClass(ability_config.getSkillClass(string)));
 		for (ItemStack item : reduce(ability.getConfigManaCost())) {
 			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
 		}
@@ -596,6 +595,7 @@ public class MineQuest extends JavaPlugin {
 	private static SkillClassConfig skill_config;
 	private static CombatClassConfig combat_config;
 	private static ResourceClassConfig resource_config;
+	private static String skeleton_type;
 
 	public MineQuest() {
 	}
@@ -665,7 +665,6 @@ public class MineQuest extends JavaPlugin {
 			PropertiesFile experience = new PropertiesFile("MineQuest/experience.properties");
 			PropertiesFile general = new PropertiesFile("MineQuest/general.properties");
 			PropertiesFile npc = new PropertiesFile("MineQuest/npc.properties");
-			PropertiesFile classc = new PropertiesFile("MineQuest/class.properties");
 			url = minequest.getString("url", "localhost");
 			port = minequest.getString("port", "3306");
 			db = minequest.getString("db", "MineQuest/minequest");
@@ -737,16 +736,8 @@ public class MineQuest extends JavaPlugin {
 			exp_damage = experience.getInt("damage", 3);
 			cast_ability_exp = experience.getInt("cast_ability", 5);
 			exp_class_damage = experience.getInt("class_damage", 5);
-			
-			warrior_name = classc.getString("first_name", "Warrior");
-			archer_name = classc.getString("second_name", "Archer");
-			war_mage_name = classc.getString("third_name", "WarMage");
-			peace_mage_name = classc.getString("fourth_name", "PeaceMage");
-			digger_name = classc.getString("fifth_name", "Digger");
-			farmer_name = classc.getString("sixth_name", "Farmer");
-			miner_name = classc.getString("seventh_name", "Miner");
-			lumberjack_name = classc.getString("eighth_name", "Lumberjack");
-			starting_classes = classc.getString("starting_classes", "Warrior,Archer,WarMage,PeaceMage,Miner,Digger,Lumberjack,Farmer").split(",");
+			starting_classes = general.getString("starting_classes", "Warrior,Archer,WarMage,PeaceMage,Miner,Digger,Lumberjack,Farmer").split(",");
+			skeleton_type = general.getString("skeleton_type", "WarMage");
 
 			sql_server
 					.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, "
@@ -1374,46 +1365,43 @@ public class MineQuest extends JavaPlugin {
 		
 		return false;
 	}
-	public static String getWarriorName() {
-		return warrior_name;
-	}
-	public static String getArcherName() {
-		return archer_name;
-	}
-	public static String getWarMageName() {
-		return war_mage_name;
-	}
-	public static String getPeaceMageName() {
-		return peace_mage_name;
-	}
-	public static String getDiggerName() {
-		return digger_name;
-	}
-	public static String getFarmerName() {
-		return farmer_name;
-	}
-	public static String getLumberjackName() {
-		return lumberjack_name;
-	}
-	public static String getMinerName() {
-		return miner_name;
-	}
+	
 	public static String[] getClassNames() {
 		return starting_classes;
 	}
+	
+	public static List<String> getFullClassNames() {
+		List<String> names = new ArrayList<String>();
+		
+		for (String name : combat_config.getClassNames()) {
+			names.add(name);
+		}
+		for (String name : resource_config.getClassNames()) {
+			names.add(name);
+		}
+		return names;
+	}
+	
 	public static boolean mqDamageEnabled() {
 		return mq_damage_system;
 	}
+	
 	public static boolean townRespawn() {
 		return town_respawn;
 	}
+	
 	public static SkillClassConfig getSkillConfig() {
 		return skill_config;
 	}
+	
 	public static CombatClassConfig getCombatConfig() {
 		return combat_config;
 	}
+	
 	public static ResourceClassConfig getResourceConfig() {
 		return resource_config;
 	}
+	public static String getSkeletonType() {
+		return skeleton_type;
+	}	
 }

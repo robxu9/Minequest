@@ -29,10 +29,5 @@ public class WarMage extends CombatClass {
 	public WarMage(Quester quester, String type) {
 		super(quester, type);
 	}
-	
-	public WarMage() {
-		type = MineQuest.getWarMageName();
-		level = 10;
-	}
 
 }

@@ -1,9 +1,35 @@
 package org.monk.MineQuest.Quester.SkillClass;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.monk.MineQuest.PropertiesFile;
+
 public class ResourceClassConfig extends SkillClassConfig {
+	protected List<int[]> blocks;
+
+	protected void setupProperties() {
+		blocks = new ArrayList<int[]>();
+
+		properties = new PropertiesFile("MineQuest/resource_classes.properties");
+	}
+	
+	@Override
+	protected void parseConfig(String name) {
+		blocks.add(intList(properties.getString(name + "_block_types", "")));
+		
+		super.parseConfig(name);
+	}
 
 	public int[] getBlocks(String type) {
-		// TODO Auto-generated method stub
+		int i;
+		
+		for (i = 0; i < names.size(); i++) {
+			if (names.get(i).equals(type)) {
+				return blocks.get(i);
+			}
+		}
+		
 		return null;
 	}
 

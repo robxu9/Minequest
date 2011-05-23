@@ -33,14 +33,14 @@ public class Warrior extends CombatClass {
 	public Warrior(Quester quester, String type) {
 		super(quester, type);
 	}
-	
-	public Warrior() {
-		// Shell
-		level = 10;
-		ability_list = new Ability[0];
-		type = MineQuest.getWarriorName();
-		generator = new Random();
-	}
+//	
+//	public Warrior() {
+//		// Shell
+//		level = 10;
+//		ability_list = new Ability[0];
+//		type = MineQuest.getWarriorName();
+//		generator = new Random();
+//	}
 
 	@Override
 	public boolean canUse(ItemStack itemStack) {

@@ -29,9 +29,5 @@ public class PeaceMage extends CombatClass {
 		super(quester, type);
 		// TODO Auto-generated constructor stub
 	}
-	
-	public PeaceMage() {
-		// Shell
-	}
 
 }

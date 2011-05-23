@@ -125,7 +125,15 @@ public class NPCQuester extends Quester {
 			makeNPC(world.getName(), x, y, z, (float)pitch, (float)yaw);
 			health = max_health = 2000;
 			classes = new ArrayList<SkillClass>();
-			classes.add(new Warrior());
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11-----------------------------------------------------------------
+			// DEAL WITH THIS!!!!!
+			// TODO
+			// TODO
+			// TODO
+			// TODO
+			// TODO
+			// TODO
+//			classes.add(new Warrior());
 			classes.get(0).setQuester(this);
 			kills = new CreatureType[0];
 		}

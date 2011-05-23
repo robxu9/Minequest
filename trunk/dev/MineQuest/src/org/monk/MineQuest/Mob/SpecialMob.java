@@ -34,6 +34,7 @@ import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.SpecialMobHandler;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
 
 public class SpecialMob extends MQMob {
@@ -86,8 +87,8 @@ public class SpecialMob extends MQMob {
 			}
 		} else if (entity instanceof Skeleton) {
 			double num = generator.nextDouble();
-			WarMage warmage = new WarMage();
-			List<Ability> abilities = Ability.newAbilities(warmage);
+			SkillClass skill = SkillClass.newShell(MineQuest.getSkeletonType());
+			List<Ability> abilities = Ability.newAbilities(skill);
 			int index = (int)(num * abilities.size());
 			
 			if (!abilities.get(index).getName().equals("Trap")) {

@@ -29,10 +29,6 @@ public class Archer extends CombatClass {
 	public Archer(Quester quester, String type) {
 		super(quester, type);
 	}
-
-	public Archer() {
-		// Shell
-	}
 	
 	@Override
 	public boolean isClassItem(ItemStack item) {

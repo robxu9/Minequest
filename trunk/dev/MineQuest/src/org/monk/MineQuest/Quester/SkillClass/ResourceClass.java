@@ -30,9 +30,9 @@ public class ResourceClass extends SkillClass {
 		super(quester, type);
 	}
 	
-	public ResourceClass() {
+	public ResourceClass(String type) {
 		// Shell
-		super();
+		super(type);
 	}
 	
 	@Override

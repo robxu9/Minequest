@@ -23,22 +23,22 @@ public class CombatClassConfig extends SkillClassConfig {
 		max_dmg = new ArrayList<int[]>();
 		crit_chance = new ArrayList<double[]>();
 
-		properties = new PropertiesFile("combat_classes.properties");
+		properties = new PropertiesFile("MineQuest/combat_classes.properties");
 	}
 
 	@Override
 	protected void parseConfig(String name) {
 		super.parseConfig(name);
 		
-		char_dmg_adj.add(intList(properties.getString(name + "_char_dmg_adj")));
+		char_dmg_adj.add(intList(properties.getString(name + "_char_dmg_adj", "")));
 		
-		class_dmg_adj.add(intList(properties.getString(name + "_class_dmg_adj")));
+		class_dmg_adj.add(intList(properties.getString(name + "_class_dmg_adj", "")));
 		
-		base_dmg.add(intList(properties.getString(name + "_base_dmg")));
+		base_dmg.add(intList(properties.getString(name + "_base_dmg", "")));
 		
-		max_dmg.add(intList(properties.getString(name + "_max_dmg")));
+		max_dmg.add(intList(properties.getString(name + "_max_dmg", "")));
 		
-		crit_chance.add(doubleList(properties.getString(name + "_crit_chance")));
+		crit_chance.add(doubleList(properties.getString(name + "_crit_chance", "")));
 	}
 	
 	public int[] getCharLevelDmgAdj(String type) {

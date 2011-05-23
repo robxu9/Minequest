@@ -31,10 +31,6 @@ public class Digger extends ResourceClass {
 		super(quester, type);
 	}
 	
-	public Digger() {
-		// Shell
-	}
-	
 	@Override
 	public void blockBreak(BlockBreakEvent event) {
 		super.blockBreak(event);

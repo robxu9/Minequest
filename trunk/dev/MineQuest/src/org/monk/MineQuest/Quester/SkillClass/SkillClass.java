@@ -36,14 +36,6 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass.Combat.Archer;
-import org.monk.MineQuest.Quester.SkillClass.Combat.PeaceMage;
-import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
-import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
-import org.monk.MineQuest.Quester.SkillClass.Resource.Digger;
-import org.monk.MineQuest.Quester.SkillClass.Resource.Farmer;
-import org.monk.MineQuest.Quester.SkillClass.Resource.Lumberjack;
-import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
 
 /**
  * Holds information referring to a Questers specific class
@@ -55,28 +47,42 @@ import org.monk.MineQuest.Quester.SkillClass.Resource.Miner;
 public class SkillClass {
 	public static SkillClass newClass(Quester quester, String type) {
 		
-		if (type.equals(MineQuest.getWarriorName())) {
-			return new Warrior(quester, type);
-		} else if (type.equals(MineQuest.getArcherName())) {
-			return new Archer(quester, type);
-		} else if (type.equals(MineQuest.getWarMageName())) {
-			return new WarMage(quester, type);
-		} else if (type.equals(MineQuest.getPeaceMageName())) {
-			return new PeaceMage(quester, type);
-		} else if (type.equals(MineQuest.getDiggerName())) {
-			return new Digger(quester, type);
-		} else if (type.equals(MineQuest.getFarmerName())) {
-			return new Farmer(quester, type);
-		} else if (type.equals(MineQuest.getLumberjackName())) {
-			return new Lumberjack(quester, type);
-		} else if (type.equals(MineQuest.getMinerName())) {
-			return new Miner(quester, type);
+		for (String name : MineQuest.getCombatConfig().getClassNames()) {
+			if (name.equalsIgnoreCase(type)) {
+				return new CombatClass(quester, name);
+			}
+		}
+		
+		for (String name : MineQuest.getResourceConfig().getClassNames()) {
+			if (name.equalsIgnoreCase(type)) {
+				return new ResourceClass(quester, name);
+			}
 		}
 		
 		MineQuest.log("Warning: SkillClass " + type + " could not be found");
 		
 		return new SkillClass(quester, type);
 	}
+
+	public static SkillClass newShell(String type) {
+		
+		for (String name : MineQuest.getCombatConfig().getClassNames()) {
+			if (name.equalsIgnoreCase(type)) {
+				return new CombatClass(name);
+			}
+		}
+		
+		for (String name : MineQuest.getResourceConfig().getClassNames()) {
+			if (name.equalsIgnoreCase(type)) {
+				return new ResourceClass(name);
+			}
+		}
+		
+		MineQuest.log("Warning: SkillClass " + type + " could not be found");
+		
+		return new SkillClass(type);
+	}
+	
 	private int abil_list_id;
 	protected Ability ability_list[];
 	private int exp;
@@ -86,8 +92,9 @@ public class SkillClass {
 	
 	protected String type;
 	
-	public SkillClass() {
+	public SkillClass(String type) {
 		//Shell
+		this.type = type;
 	}
 	
 	/**
@@ -335,7 +342,7 @@ public class SkillClass {
 	public int defend(LivingEntity entity, int amount) {
 		int i;
 		int armor[] = MineQuest.getSkillConfig().getArmorLevels(type);
-		int armor_defends[] = MineQuest.getSkillConfig().getArmorDefends(type);
+		double armor_defends[] = MineQuest.getSkillConfig().getArmorDefends(type);
 		int armor_blocks[] = MineQuest.getSkillConfig().getArmorBlocks(type);
 		int sum = 0;
 		
@@ -376,9 +383,6 @@ public class SkillClass {
 	 */
 	public void display() {
 		int num = 400;
-		if (this instanceof ResourceClass) {
-			num *= 2;
-		}
 		quester.sendMessage(" " + type + ": " + level + " - " + exp + "/" + (num*(level+1)));
 		
 		return;
@@ -818,6 +822,7 @@ public class SkillClass {
 	}
 
 	public boolean isArmor(ItemStack boots) {
+		if (getSkillConfig().getArmor(type) == null) return false;
 		for (int type_id : getSkillConfig().getArmor(type)) {
 			if (type_id == boots.getTypeId()) {
 				return true;
