@@ -20,12 +20,12 @@ package org.monk.MineQuest.Quester.SkillClass;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
 
-public class CombatClass extends SkillClass implements DefendingClass {
-
+public class CombatClass extends SkillClass {
+ 
 	public CombatClass(Quester quester, String type) {
 		super(quester, type);
 	}
@@ -70,24 +70,46 @@ public class CombatClass extends SkillClass implements DefendingClass {
 	 * @return Damage to be dealt
 	 */
 	protected int getDamage(LivingEntity defend) {
-		int damage = 2;
-		damage += (quester.getLevel() / 10);
-		damage += (level / 5);
-		
-		if (generator.nextDouble() < getCritChance()) {
-			damage *= 2;
-			quester.sendMessage("Critical Hit!");
-		}
-		
+		int damage;
 		if (!isClassItem(quester.getPlayer().getItemInHand())) {
+			damage = 2;
+			damage += quester.getLevel() / 10;
+			damage += level / 5;
+			
 			damage /= 2;
+		} else {
+			int index = getItemIndex(quester.getPlayer().getItemInHand());
+			int base = getSkillConfig().getBaseDamage(type)[index];
+			int max = getSkillConfig().getMaxDamage(type)[index];
+			damage = generator.nextInt(1 + max - base) + base;
+			damage += (quester.getLevel() / getSkillConfig().getCharLevelDmgAdj(type)[index]);
+			damage += (level / getSkillConfig().getClassLevelDmgAdj(type)[index]);
+			
+			if (generator.nextDouble() < getCritChance(index)) {
+				damage *= 2;
+				quester.sendMessage("Critical Hit!");
+			}
 		}
-		
-//		if (MineQuest.getMob(defend) != null) {
-//			damage = MineQuest.getMob(defend).defend(damage, quester.getPlayer());
-//		}
 		
 		return damage;
+	}
+	
+	private int getItemIndex(ItemStack itemInHand) {
+		int i;
+		int[] items = getSkillConfig().getTypes(type);
+		
+		for (i = 0; i < items.length; i++) {
+			if (items[i] == itemInHand.getTypeId()) {
+				return i;
+			}
+		}
+		
+		return 0;
+	}
+
+	@Override
+	public CombatClassConfig getSkillConfig() {
+		return MineQuest.getCombatConfig();
 	}
 
 	/**
@@ -96,57 +118,16 @@ public class CombatClass extends SkillClass implements DefendingClass {
 	 * 
 	 * @return Critical Hit Chance
 	 */
-	private double getCritChance() {
+	private double getCritChance(int index) {
+		double chance;
+		
+		chance = getSkillConfig().getCritChance(type)[index];
+		
 		if ((getAbility("Deathblow") != null) && (getAbility("Deathblow").isEnabled())) {
-			return 0.1;
+			chance *= 2;
 		}
 		
-		return 0.05;
-	}
-	
-	/**
-	 * Called whenever the Quester that has this class is
-	 * being attacked.
-	 * 
-	 * @param entity Entity that is attacker
-	 * @param amount Amount of damage being dealt
-	 * @return The amount of damage negated by this class
-	 */
-	public int defend(LivingEntity entity, int amount) {
-		int i;
-		int armor[] = getClassArmorIds();
-		boolean flag = true;
-		int sum = 0;
-		
-		if (armor == null) return 0;
-		
-		for (i = 0; i < armor.length; i++) {
-			if (isWearing(armor[i])) {
-				if (generator.nextDouble() < (.05 * (i + 1))) {
-					sum++;
-				}
-			} else {
-				flag = false;
-			}
-		}
-		
-		if (flag) {
-			if (generator.nextDouble() < .4) {
-				sum++;
-			}
-			
-			if (generator.nextDouble() < armorBlockChance(armor)) {
-				return amount;
-			}
-		}
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i] instanceof DefendingAbility) {
-				sum += ((DefendingAbility)ability_list[i]).parseDefend(quester, entity, amount - sum);
-			}
-		}
-		
-		return sum;
+		return chance;
 	}
 
 	/**
@@ -171,29 +152,6 @@ public class CombatClass extends SkillClass implements DefendingClass {
 		}
 
 		return 0;
-	}
-	
-	@Override
-	public void levelUp() {
-		super.levelUp();
-		int add_health;
-		int size;
-		
-		size = getSize();
-		
-		add_health = generator.nextInt(size) + 1;
-		
-		quester.addHealth(add_health);
-	}
-
-	public int getSize() {
-		if (type.equals("Warrior")) {
-			return 10;
-		} else if (type.equals("Archer") || type.equals("PeaceMage")) {
-			return 6;
-		} else {
-			return 4;
-		}
 	}
 
 }

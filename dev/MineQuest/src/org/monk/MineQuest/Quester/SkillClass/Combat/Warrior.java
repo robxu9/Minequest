@@ -55,30 +55,6 @@ public class Warrior extends CombatClass {
 	}
 	
 	@Override
-	public int[] getClassArmorIds() {
-		int item_ids[] = new int[4];
-
-		item_ids[0] = 310;
-		item_ids[1] = 313;
-		item_ids[2] = 312;
-		item_ids[3] = 311;
-
-		return item_ids;
-	}
-	
-	@Override
-	protected int getExpMob(LivingEntity defend) {
-		if (!isClassItem(quester.getPlayer().getItemInHand())) {
-			return 3;
-		}
-		if (defend instanceof CraftCreeper) {
-			return 10;
-		} else {
-			return 5;
-		}
-	}
-	
-	@Override
 	public boolean isClassItem(ItemStack item) {
 		int item_id = item.getTypeId();
 		

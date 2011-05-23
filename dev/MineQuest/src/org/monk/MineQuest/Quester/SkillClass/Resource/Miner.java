@@ -18,15 +18,12 @@
  */
 package org.monk.MineQuest.Quester.SkillClass.Resource;
 
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Ability.DefendingAbility;
 import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass.DefendingClass;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
 
-public class Miner extends ResourceClass implements DefendingClass {
+public class Miner extends ResourceClass {
 
 	public Miner(Quester quester, String type) {
 		super(quester, type);
@@ -48,50 +45,6 @@ public class Miner extends ResourceClass implements DefendingClass {
 		else if (item == 257) return (level >= MineQuest.getIronReqLevel());	// Iron
 		
 		return super.canUse(itemStack);
-	}
-	
-	/**
-	 * Called whenever the Quester that has this class is
-	 * being attacked.
-	 * 
-	 * @param entity Entity that is attacker
-	 * @param amount Amount of damage being dealt
-	 * @return The amount of damage negated by this class
-	 */
-	public int defend(LivingEntity entity, int amount) {
-		int i;
-		int armor[] = getClassArmorIds();
-		boolean flag = true;
-		int sum = 0;
-		
-		if (armor == null) return 0;
-		
-		for (i = 0; i < armor.length; i++) {
-			if (isWearing(armor[i])) {
-				if (generator.nextDouble() < (.05 * i)) {
-					sum++;
-				}
-			} else {
-				flag = false;
-			}
-		}
-		if (flag) {
-			if (generator.nextDouble() < .4) {
-				sum++;
-			}
-			
-			if (generator.nextDouble() < armorBlockChance(armor)) {
-				return amount;
-			}
-		}
-		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i] instanceof DefendingAbility) {
-				sum += ((DefendingAbility)ability_list[i]).parseDefend(quester, entity, amount - sum);
-			}
-		}
-		
-		return sum;
 	}
 
 	/**

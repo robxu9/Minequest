@@ -64,7 +64,10 @@ import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Quester.SkillClass.CombatClassConfig;
+import org.monk.MineQuest.Quester.SkillClass.ResourceClassConfig;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
+import org.monk.MineQuest.Quester.SkillClass.SkillClassConfig;
 import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
 
@@ -590,6 +593,9 @@ public class MineQuest extends JavaPlugin {
 	private static String[] starting_classes;
 	private static boolean mq_damage_system;
 	private static boolean town_respawn;
+	private static SkillClassConfig skill_config;
+	private static CombatClassConfig combat_config;
+	private static ResourceClassConfig resource_config;
 
 	public MineQuest() {
 	}
@@ -631,6 +637,10 @@ public class MineQuest extends JavaPlugin {
         quests = new Quest[0];
         
         npc_m = new NPCManager(this);
+        
+        skill_config = new SkillClassConfig();
+        combat_config = new CombatClassConfig();
+        resource_config = new ResourceClassConfig();
         
         (new File("MineQuest/")).mkdir();
         
@@ -1396,5 +1406,14 @@ public class MineQuest extends JavaPlugin {
 	}
 	public static boolean townRespawn() {
 		return town_respawn;
+	}
+	public static SkillClassConfig getSkillConfig() {
+		return skill_config;
+	}
+	public static CombatClassConfig getCombatConfig() {
+		return combat_config;
+	}
+	public static ResourceClassConfig getResourceConfig() {
+		return resource_config;
 	}
 }
