@@ -53,6 +53,7 @@ public abstract class Ability {
 	@SuppressWarnings({ "rawtypes" })
 	private static List<Class> abil_classes;
 //	private static List<Class> abil_classes;
+	protected int config[];
 
 	// http://www.devx.com/tips/Tip/38975
 	public static Class<?> getClass(String the_class) throws Exception {
@@ -251,6 +252,15 @@ public abstract class Ability {
 		lookBind = -1;
 		time = now.getTimeInMillis();
 		last_msg = 0;
+		config = null;
+	}
+	
+	protected int[] getConfig() {
+		return config;
+	}
+	
+	protected void setConfig(int[] config) {
+		this.config = config;
 	}
 	
 	/**
@@ -666,6 +676,7 @@ public abstract class Ability {
 		this.myclass = skillclass;
 		if (skillclass != null) {
 			cost = MineQuest.getAbilityConfiguration().getCost(getName());
+			config = MineQuest.getAbilityConfiguration().getConfig(getName());
 		}
 	}
 

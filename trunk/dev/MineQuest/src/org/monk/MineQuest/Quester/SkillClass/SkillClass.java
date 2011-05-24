@@ -643,11 +643,10 @@ public class SkillClass {
 	 */
 	public boolean isClassItem(ItemStack item) {
 		if (item == null) return false;
-		for (Ability abil : ability_list) {
-			if (abil != null) {
-				if (abil.isBound(item)) {
-					return true;
-				}
+		if (getSkillConfig().getTypes(type) == null) return false;
+		for (int id : getSkillConfig().getTypes(type)) {
+			if (id == item.getTypeId()) {
+				return true;
 			}
 		}
 		

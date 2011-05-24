@@ -26,7 +26,7 @@ import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClass;
 
 public class Digger extends ResourceClass {
-
+ 
 	public Digger(Quester quester, String type) {
 		super(quester, type);
 	}
