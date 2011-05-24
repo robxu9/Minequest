@@ -66,6 +66,7 @@ import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 import org.monk.MineQuest.Quester.SkillClass.CombatClassConfig;
 import org.monk.MineQuest.Quester.SkillClass.ResourceClassConfig;
+import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClassConfig;
 import org.monk.MineQuest.Store.NPCStringConfig;
 import org.monk.MineQuest.World.Town;
@@ -461,7 +462,7 @@ public class MineQuest extends JavaPlugin {
 			return ret;
 		}
 		
-//		ability.setSkillClass(new SkillClass(ability_config.getSkillClass(string)));
+		ability.setSkillClass(SkillClass.newShell(MineQuest.getAbilityConfiguration().getSkillClass(string)));
 		for (ItemStack item : reduce(ability.getConfigManaCost())) {
 			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
 		}

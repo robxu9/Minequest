@@ -74,7 +74,7 @@ public class SkillClassConfig {
 		}
 	}
 	
-	public int[] intList(String list) {
+	public static int[] intList(String list) {
 		if (list.length() == 0) return null;
 		if (!list.contains(",")) return new int[] {Integer.parseInt(list)};
 		String[] strings = list.split(",");

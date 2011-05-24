@@ -22,6 +22,8 @@ import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Ability.Ability;
+import org.monk.MineQuest.Ability.BreakingAbility;
 import org.monk.MineQuest.Quester.Quester;
 
 public class ResourceClass extends SkillClass {
@@ -50,6 +52,12 @@ public class ResourceClass extends SkillClass {
 				if (isBlockGiveType(event.getBlock().getTypeId())) {
 					quester.getPlayer().getInventory().addItem(getItemGive(event.getBlock().getTypeId()));
 				}
+			}
+		}
+		
+		for (Ability ability : ability_list) {
+			if (ability instanceof BreakingAbility) {
+				((BreakingAbility)ability).blockBreak(quester, event.getBlock());
 			}
 		}
 	}
