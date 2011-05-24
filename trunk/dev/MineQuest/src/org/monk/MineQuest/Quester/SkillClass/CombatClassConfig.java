@@ -1,5 +1,6 @@
 package org.monk.MineQuest.Quester.SkillClass;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,10 @@ public class CombatClassConfig extends SkillClassConfig {
 		base_dmg = new ArrayList<int[]>();
 		max_dmg = new ArrayList<int[]>();
 		crit_chance = new ArrayList<double[]>();
+		
+		if (!(new File("MineQuest/combat_classes.properties")).exists()) {
+			createFile("MineQuest/combat_classes.properties");
+		}
 
 		properties = new PropertiesFile("MineQuest/combat_classes.properties");
 	}

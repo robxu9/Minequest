@@ -125,15 +125,7 @@ public class NPCQuester extends Quester {
 			makeNPC(world.getName(), x, y, z, (float)pitch, (float)yaw);
 			health = max_health = 2000;
 			classes = new ArrayList<SkillClass>();
-			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11-----------------------------------------------------------------
-			// DEAL WITH THIS!!!!!
-			// TODO
-			// TODO
-			// TODO
-			// TODO
-			// TODO
-			// TODO
-//			classes.add(new Warrior());
+			classes.add(SkillClass.newShell(MineQuest.getNPCAttackType()));
 			classes.get(0).setQuester(this);
 			kills = new CreatureType[0];
 		}
@@ -445,9 +437,6 @@ public class NPCQuester extends Quester {
 					mode + "', world='" + 
 					world.getName() + "' WHERE name='"
 					+ name + "'");
-
-			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " +
-					name + "_npc (property VARCHAR(30), value VARCHAR(300))");
 		}
 	}
 	
@@ -771,11 +760,26 @@ public class NPCQuester extends Quester {
 		removed = true;
 		try {
 			MineQuest.getSQLServer().update("DELETE FROM questers WHERE name='" + name + "'");
-			MineQuest.getSQLServer().update("DROP TABLE " + name);
-			MineQuest.getSQLServer().update("DROP TABLE " + name + "_chests");
-			MineQuest.getSQLServer().update("DROP TABLE " + name + "_kills");
-			MineQuest.getSQLServer().update("DROP TABLE " + name + "_npc");
-			MineQuest.getSQLServer().update("DROP TABLE " + name + "_quests");
+		} catch (Exception e) {
+		}
+		try {
+			MineQuest.getSQLServer().update("DELETE FROM binds WHERE name='" + name + "'");
+		} catch (Exception e) {
+		}
+		try {
+			MineQuest.getSQLServer().update("DELETE FROM chests WHERE name='" + name + "'");
+		} catch (Exception e) {
+		}
+		try {
+			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + ",");
+		} catch (Exception e) {
+		}
+		try {
+			MineQuest.getSQLServer().update("DELETE FROM npc WHERE name='" + name + "'");
+		} catch (Exception e) {
+		}
+		try {
+			MineQuest.getSQLServer().update("DELETE FROM quests WHERE name='" + name + "'");
 		} catch (Exception e) {
 		}
 	}
@@ -885,9 +889,9 @@ public class NPCQuester extends Quester {
 		handleProperty(property, value);
 
 		if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
-			MineQuest.getSQLServer().update("DELETE FROM " + name + "_npc WHERE property='" + property + "'");
-			MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
-					" (property, value) VALUES('" + property + "', '" + value + "')");
+			MineQuest.getSQLServer().update("DELETE FROM npc WHERE property='" + property + "' AND name='" + name + "'");
+			MineQuest.getSQLServer().update("INSERT INTO npc " + 
+					" (name, property, value) VALUES('" + name + "', '" + property + "', '" + value + "')");
 		}
 	}
 	
@@ -949,9 +953,9 @@ public class NPCQuester extends Quester {
 
 	public void setTown(String town) {
 		this.town = town;
-		MineQuest.getSQLServer().update("DELETE FROM " + name + "_npc WHERE property='town'");
-		MineQuest.getSQLServer().update("INSERT INTO " + name + "_npc " + 
-				" (property, value) VALUES('town', '" + town + "')");
+		MineQuest.getSQLServer().update("DELETE FROM npc WHERE property='town' AND name='" + name + "'");
+		MineQuest.getSQLServer().update("INSERT INTO npc " + 
+				" (name, property, value) VALUES('" + name + "', 'town', '" + town + "')");
 	}
 
 	public void teleport(Location location) {
@@ -989,11 +993,8 @@ public class NPCQuester extends Quester {
 		} catch (SQLException e) {
 			MineQuest.log("Unable to add NPCQuester");
 		}
-
-		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " +
-				name + "_npc (property VARCHAR(30), value VARCHAR(300))");
 		
-		results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_npc");
+		results = MineQuest.getSQLServer().query("SELECT * FROM npc WHERE name='" + name + "'");
 		
 		this.radius = 0;
 		this.hit_message = null;

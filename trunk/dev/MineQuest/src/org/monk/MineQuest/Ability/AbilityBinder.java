@@ -46,7 +46,7 @@ public class AbilityBinder extends Ability {
 	public void bind(Quester quester, ItemStack item) {
 		if (bind != item.getTypeId()) {
 			bind = item.getTypeId();
-			MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + " (abil, bind, bind_2) VALUES('" + getName() + "', '" + bind + "', '" + bind_to + "')");
+			MineQuest.getSQLServer().update("INSERT INTO binds (name, abil, bind, bind_2) VALUES('" + quester.getName() + "', '" + getName() + "', '" + bind + "', '" + bind_to + "')");
 			quester.sendMessage(getName() + " is now bound to " + item.getTypeId());
 		}
 	}

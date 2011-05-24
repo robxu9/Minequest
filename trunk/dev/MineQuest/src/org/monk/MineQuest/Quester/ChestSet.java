@@ -49,9 +49,7 @@ public class ChestSet {
 		selected = -1;
 		chests = new ArrayList<Location>();
 
-		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + quester.getName() + 
-				"_chests (town VARCHAR(30), x INT, y INT, z INT)");
-		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + quester.getName() + "_chests");
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM chests WHERE name='" + quester.getName() + "'");
 		try {
 			while (results.next()) {
 				chests.add(new Location(null, results.getInt("x"), results.getInt("y"), results.getInt("z")));
@@ -70,9 +68,6 @@ public class ChestSet {
 		add = false;
 		selected = -1;
 		chests = new ArrayList<Location>();
-
-		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + quester.getName() + 
-				"_chests (town VARCHAR(30), x INT, y INT, z INT)");
 	}
 	
 
@@ -97,8 +92,7 @@ public class ChestSet {
 				}
 				
 				chests.add(chest.getLocation());
-				MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + 
-						"_chests (town, x, y, z) VALUES('" + town.getName() + "', '" 
+				MineQuest.getSQLServer().update("INSERT INTO chests (name, town, x, y, z) VALUES('" + quester.getName() + "', '" + town.getName() + "', '" 
 						+ chest.getX() + "', '" 
 						+ chest.getY() + "', '" + chest.getZ() + "')");
 			} else {
@@ -113,8 +107,7 @@ public class ChestSet {
 				}
 				if (!flag) {
 					chests.add(chest.getLocation());
-					MineQuest.getSQLServer().update("INSERT INTO " + quester.getName() + 
-							"_chests (town, x, y, z) VALUES('" + "none" + "', '" + chest.getX() + "', '" 
+					MineQuest.getSQLServer().update("INSERT INTO chests (name, town, x, y, z) VALUES('" + quester.getName() + "', '" + "none" + "', '" + chest.getX() + "', '" 
 							+ chest.getY() + "', '" + chest.getZ() + "')");
 				} else {
 					player.sendMessage("You already have a stash outside of towns");
@@ -138,7 +131,6 @@ public class ChestSet {
 	}
 
 	public void setSelected(int i) {
-		System.out.println("Setting selected to " + i + " from " + selected);
 		if (selected != -1) {
 			moveContents(getChest(chests.get(i)).getInventory(), getChest(chests.get(selected)).getInventory());
 		}
@@ -147,12 +139,12 @@ public class ChestSet {
 		Town town = MineQuest.getTown(chests.get(i));
 		if (((town != null) && (MineQuest.getSQLServer().update("UPDATE questers SET selected_chest='" + town.getName() 
 					+ "' WHERE name='" + quester.getName() + "'") == -1))) {
-			System.out.println("[TownSpawn] [ChestSet] Error: Unable to update selected chest");
+			MineQuest.log("[ChestSet] Error: Unable to update selected chest");
 			if (selected != -1) {
-				System.out.println("[TownSpawn] [ChestSet] Performing chest dump");
+				MineQuest.log("[ChestSet] Performing chest dump");
 				Inventory inven = getChest(chests.get(selected)).getInventory();
 				for (i = 0; i < inven.getContents().length; i++) {
-					System.out.println("[TownSpawn] [ChestSet] Item " + inven.getItem(i).getTypeId() + " " 
+					System.out.println("[ChestSet] Item " + inven.getItem(i).getTypeId() + " " 
 							+ inven.getItem(i).getAmount());
 				}
 			} else {
@@ -160,16 +152,16 @@ public class ChestSet {
 			}
 		} else if ((town == null) && ((MineQuest.getSQLServer().update("UPDATE questers SET selected_chest='" 
 				+ "none" + "' WHERE name='" + quester.getName() + "'") == -1))) {
-			System.out.println("[TownSpawn] [ChestSet] Error: Unable to update selected chest");
+			MineQuest.log("[ChestSet] Error: Unable to update selected chest");
 			if (selected != -1) {
-				System.out.println("[TownSpawn] [ChestSet] Performing chest dump");
+				MineQuest.log("[ChestSet] Performing chest dump");
 				Inventory inven = getChest(chests.get(selected)).getInventory();
 				for (i = 0; i < inven.getContents().length; i++) {
-					System.out.println("[TownSpawn] [ChestSet] Item " + inven.getItem(i).getTypeId() + " " 
+					MineQuest.log("[ChestSet] Item " + inven.getItem(i).getTypeId() + " " 
 							+ inven.getItem(i).getAmount());
 				}
 			} else {
-				System.out.println("[TownSpawn] [ChestSet] No chest select - no dump available");
+				MineQuest.log("[ChestSet] No chest select - no dump available");
 			}
 		}
 	}
@@ -222,8 +214,9 @@ public class ChestSet {
 						selected = 0;
 					}
 				}
-				MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + 
-						"_chests WHERE town='" + "none" + "'");
+				MineQuest.getSQLServer().update(
+						"DELETE FROM chests WHERE town='" + "none"
+								+ "' AND name='" + quester.getName() + "'");
 				chests.remove(i);
 				player.sendMessage("Chest is now longer instance of stash");
 				return;
@@ -236,8 +229,9 @@ public class ChestSet {
 						selected = 0;
 					}
 				}
-				MineQuest.getSQLServer().update("DELETE FROM " + quester.getName() + 
-						"_chests WHERE town='" + town.getName() + "'");
+				MineQuest.getSQLServer().update(
+						"DELETE FROM chests WHERE town='" + town.getName()
+								+ "' AND name='" + quester.getName() + "'");
 				chests.remove(i);
 				player.sendMessage("Chest is now longer instance of stash");
 				return;
