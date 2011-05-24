@@ -1,5 +1,6 @@
 package org.monk.MineQuest.Quester.SkillClass;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,10 @@ public class ResourceClassConfig extends SkillClassConfig {
 
 	protected void setupProperties() {
 		blocks = new ArrayList<int[]>();
+		
+		if (!(new File("MineQuest/resource_classes.properties")).exists()) {
+			createFile("MineQuest/resource_classes.properties");
+		}
 
 		properties = new PropertiesFile("MineQuest/resource_classes.properties");
 	}

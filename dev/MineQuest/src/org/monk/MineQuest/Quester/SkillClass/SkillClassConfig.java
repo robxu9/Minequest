@@ -1,8 +1,11 @@
 package org.monk.MineQuest.Quester.SkillClass;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.PropertiesFile;
 
 public class SkillClassConfig {
@@ -59,6 +62,16 @@ public class SkillClassConfig {
 	
 	public List<String> getClassNames() {
 		return names;
+	}
+
+	protected void createFile(String string) {
+		MineQuest.log("Cannot find " + string + " - downloading template!");
+		try {
+			MineQuest.downloadFile("http://www.theminequest.com/download/" + string, string);
+			MineQuest.log("Download Successful!");
+		} catch (Exception e) {
+			MineQuest.log("(Error) Download Failed!");
+		}
 	}
 	
 	public int[] intList(String list) {

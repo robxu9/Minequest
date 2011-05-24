@@ -581,14 +581,6 @@ public class MineQuest extends JavaPlugin {
 	private static boolean log_health_change;
 	private static boolean health_spawn_enable;
 	private static int[] town_exceptions;
-	private static String warrior_name;
-	private static String archer_name;
-	private static String war_mage_name;
-	private static String peace_mage_name;
-	private static String digger_name;
-	private static String farmer_name;
-	private static String lumberjack_name;
-	private static String miner_name;
 	private static String[] starting_classes;
 	private static boolean mq_damage_system;
 	private static boolean town_respawn;
@@ -596,6 +588,9 @@ public class MineQuest extends JavaPlugin {
 	private static CombatClassConfig combat_config;
 	private static ResourceClassConfig resource_config;
 	private static String skeleton_type;
+	private static boolean half_damage;
+	private static boolean deny_non_class;
+	private static String npc_attack_type;
 
 	public MineQuest() {
 	}
@@ -727,6 +722,7 @@ public class MineQuest extends JavaPlugin {
 			
 			npc_cost = npc.getInt("npc_cost_level", 1000);
 			npc_cost_class = npc.getInt("npc_cost_class", 1000);
+			npc_attack_type = npc.getString("npc_attack_type", "Warrior");
 
 			destroy_class_exp = experience.getInt("destroy_class", 5);
 			destroy_non_class_exp = experience.getInt("destroy_non_class", 2);
@@ -738,6 +734,23 @@ public class MineQuest extends JavaPlugin {
 			exp_class_damage = experience.getInt("class_damage", 5);
 			starting_classes = general.getString("starting_classes", "Warrior,Archer,WarMage,PeaceMage,Miner,Digger,Lumberjack,Farmer").split(",");
 			skeleton_type = general.getString("skeleton_type", "WarMage");
+			half_damage = general.getBoolean("half_damage", true);
+			deny_non_class = general.getBoolean("deny_non_class", true);
+
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS npc (name VARCHAR(30), property VARCHAR(30), value VARCHAR(300))");
+
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS binds (name VARCHAR(30), abil VARCHAR(30), bind INT, bind_2 INT)");
+
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS chests (name VARCHAR(30), town VARCHAR(30), x INT, y INT, z INT)");
+
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS kills (name VARCHAR(30), type VARCHAR(30), count INT)");
+
+			sql_server
+					.update("CREATE TABLE IF NOT EXISTS quests (name VARCHAR(30), type VARCHAR(1), file VARCHAR(30))");
 
 			sql_server
 					.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, "
@@ -764,15 +777,30 @@ public class MineQuest extends JavaPlugin {
 		
 		try {
 			if ((results == null) || (!results.next())) {
-				upgradeDB();
+				createDB();
 			} else {
 				if (!results.getString("version").equals(version)) {
-					upgradeDB();
+					upgradeDB(results.getString("version"));
 				}
+				results = sql_server.query("SELECT * FROM version");
+				results.next();
 				MineQuest.log("DB Version: " + results.getString("version"));
 			}
-		} catch (Exception e1) {
-			upgradeDB();
+		} catch (SQLException e) {
+			try {
+				createDB();
+			} catch (Exception e1) {
+				log("Unable to upgrade DB1! - Disabling MineQuest");
+//				e.printStackTrace();
+//				e1.printStackTrace();
+				onDisable();
+				return;
+			}
+		} catch (Exception e) {
+			log("Unable to upgrade DB - Disabling MineQuest");
+//			e.printStackTrace();
+			onDisable();
+			return;
 		}
         
         checkAllMobs();
@@ -850,7 +878,6 @@ public class MineQuest extends JavaPlugin {
 
 		setupIConomy();
 	}
-	
 	private void setupIConomy() {
 		Plugin test = this.getServer().getPluginManager().getPlugin(
 				"iConomy");
@@ -864,36 +891,41 @@ public class MineQuest extends JavaPlugin {
 	}
 
 	private void downloadAbilities() throws MalformedURLException, IOException {
+		downloadFile("http://www.theminequest.com/download/abilities.jar", "MineQuest/abilities.jar");
+	}
+	
+	public static void downloadFile(String url, String file) throws MalformedURLException, IOException {
 		BufferedInputStream in = new BufferedInputStream(
-				new
-
-				java.net.URL("http://www.theminequest.com/download/abilities.jar")
-						.openStream());
-		FileOutputStream fos = new FileOutputStream(
-				"MineQuest/abilities.jar");
+				new java.net.URL(url).openStream());
+		FileOutputStream fos = new FileOutputStream(file);
 		BufferedOutputStream bout = new BufferedOutputStream(fos, 1024);
 		byte data[] = new byte[1024];
 		int size;
-		
+
 		while ((size = in.read(data, 0, 1024)) >= 0) {
-			bout.write(data,0,size);
+			bout.write(data, 0, size);
 		}
-		
+
 		bout.close();
 		in.close();
 	}
+	
+	private void upgradeDB(String string) throws Exception {
+		int oldVersion = (int)(Double.parseDouble(string) * 10);
+		upgradeDB(oldVersion, 5);
+	}
 
-	private void upgradeDB() {
+	private void createDB() throws Exception {
 		MineQuest.log("Your DB is too old to determine version");
-		MineQuest.log("Upgrading DB to 0.40");
+		MineQuest.log("Upgrading DB to 0.50");
 		
-		upgradeDB(0, 4);
+		upgradeDB(0, 5);
 	}
 	
-	private void upgradeDB(int oldVersion, int newVersion) {
+	private void upgradeDB(int oldVersion, int newVersion) throws Exception {
 		String cols[] = null;
 		String types[] = null;
-		if (newVersion == 4) {
+		if (oldVersion == 0) {
 			cols = new String[] {
 					"world",
 					"x",
@@ -928,6 +960,163 @@ public class MineQuest extends JavaPlugin {
 			};
 
 			addColumns("towns", cols, types);
+		}
+		if (newVersion == 5) {
+			ResultSet results = sql_server.query("SELECT * FROM questers");
+			List<String> questers = new ArrayList<String>();
+			List<Boolean> npc_flag = new ArrayList<Boolean>();
+			
+			try {
+				while (results.next()) {
+					questers.add(results.getString("name"));
+					if (results.getString("mode").equals("Quester")) {
+						npc_flag.add(false);
+					} else {
+						npc_flag.add(true);
+					}
+				}
+			} catch (SQLException e) {
+				log("DB Upgrading failed - Aborting!!");
+				onDisable();
+				throw new Exception();
+			}
+			
+			int index = 0;
+			for (String name : questers) {
+				try {
+					results = sql_server.query("SELECT * FROM " + name);
+					List<String> abil = new ArrayList<String>();
+					List<Integer> bind = new ArrayList<Integer>();
+					List<Integer> bind_2 = new ArrayList<Integer>();
+					
+					while (results.next()) {
+						abil.add(results.getString("abil"));
+						bind.add(results.getInt("bind"));
+						bind_2.add(results.getInt("bind_2"));
+					}
+					int i;
+					for (i = 0; i < abil.size(); i++) {
+						sql_server
+								.update("INSERT INTO binds (name, abil, bind, bind_2) VALUES('"
+										+ name
+										+ "', '"
+										+ abil.get(i)
+										+ "', '"
+										+ bind.get(i)
+										+ "', '"
+										+ bind_2.get(i)
+										+ "')");
+					}
+					sql_server.update("DROP TABLE " + name);
+				} catch (Exception e) {
+				}
+				
+				try {
+					results = sql_server.query("SELECT * FROM " + name + "_chests");
+					List<String> town = new ArrayList<String>();
+					List<Integer> x = new ArrayList<Integer>();
+					List<Integer> y = new ArrayList<Integer>();
+					List<Integer> z = new ArrayList<Integer>();
+					
+					while (results.next()) {
+						town.add(results.getString("town"));
+						x.add(results.getInt("x"));
+						y.add(results.getInt("y"));
+						z.add(results.getInt("z"));
+					}
+					int i;
+					for (i = 0; i < town.size(); i++) {
+						sql_server
+								.update("INSERT INTO chests (name, town, x, y, z) VALUES('"
+										+ name
+										+ "', '"
+										+ town.get(i)
+										+ "', '"
+										+ x.get(i)
+										+ "', '"
+										+ y.get(i)
+										+ "', '"
+										+ z.get(i)
+										+ "')");
+					}
+					sql_server.update("DROP TABLE " + name + "_chests");
+				} catch (Exception e) {
+				}
+				
+				try {
+					results = sql_server.query("SELECT * FROM " + name + "_kills");
+					List<String> type = new ArrayList<String>();
+					List<Integer> count = new ArrayList<Integer>();
+					
+					while (results.next()) {
+						type.add(results.getString("name"));
+						count.add(results.getInt("count"));
+					}
+					int i;
+					for (i = 0; i < type.size(); i++) {
+						sql_server
+								.update("INSERT INTO kills (name, type, count) VALUES('"
+										+ name
+										+ "', '"
+										+ type.get(i)
+										+ "', '"
+										+ count.get(i)
+										+ "')");
+					}
+					sql_server.update("DROP TABLE " + name + "_kills");
+				} catch (Exception e) {
+				}
+				
+				try {
+					results = sql_server.query("SELECT * FROM " + name + "_quests");
+					List<String> type = new ArrayList<String>();
+					List<String> file = new ArrayList<String>();
+					
+					while (results.next()) {
+						type.add(results.getString("type"));
+						file.add(results.getString("file"));
+					}
+					int i;
+					for (i = 0; i < type.size(); i++) {
+						sql_server
+								.update("INSERT INTO quests (name, type, file) VALUES('"
+										+ name
+										+ "', '"
+										+ type.get(i)
+										+ "', '"
+										+ file.get(i)
+										+ "')");
+					}
+					sql_server.update("DROP TABLE " + name + "_quests");
+				} catch (Exception e) {
+				}
+				
+				if (npc_flag.get(index++)) {
+					try {
+						results = sql_server.query("SELECT * FROM " + name + "_npc");
+						List<String> property = new ArrayList<String>();
+						List<String> value = new ArrayList<String>();
+						
+						while (results.next()) {
+							property.add(results.getString("property"));
+							value.add(results.getString("value"));
+						}
+						int i;
+						for (i = 0; i < property.size(); i++) {
+							sql_server
+									.update("INSERT INTO npc (name, property, value) VALUES('"
+											+ name
+											+ "', '"
+											+ property.get(i)
+											+ "', '"
+											+ value.get(i)
+											+ "')");
+						}
+						sql_server.update("DROP TABLE " + name + "_npc");
+					} catch (Exception e) {
+					}
+				}
+			}
 		}
 		
 		sql_server.update("CREATE TABLE IF NOT EXISTS version (version VARCHAR(30))");
@@ -1403,5 +1592,14 @@ public class MineQuest extends JavaPlugin {
 	}
 	public static String getSkeletonType() {
 		return skeleton_type;
+	}
+	public static boolean halfDamageOn() {
+		return half_damage;
+	}
+	public static boolean denyNonClass() {
+		return deny_non_class;
+	}
+	public static String getNPCAttackType() {
+		return npc_attack_type;
 	}	
 }

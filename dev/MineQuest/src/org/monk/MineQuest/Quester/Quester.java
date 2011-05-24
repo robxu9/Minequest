@@ -132,6 +132,7 @@ public class Quester {
 		this.name = name;
 		npcParty = new Party();
 		update();
+		class_exp = 0;
 	}
 
 	/**
@@ -146,6 +147,7 @@ public class Quester {
 		npcParty = new Party();
 		update();
 		distance = 0;
+		class_exp = 0;
 	}
 
 	/**
@@ -294,7 +296,7 @@ public class Quester {
 			return;
 		}
 		available.add(quest);
-		MineQuest.getSQLServer().update("INSERT INTO " + name + "_quests (type, file) VALUES('A', '" 
+		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + name + "', 'A', '" 
 				+ quest.getFile() + "')");
 		sendMessage("You now have access to the quest " + quest.getName());
 	}
@@ -302,7 +304,7 @@ public class Quester {
 	public void addQuestCompleted(QuestProspect quest) {
 		if (isCompleted(quest)) return;
 		completed.add(quest);
-		MineQuest.getSQLServer().update("INSERT INTO " + name + "_quests (type, file) VALUES('C', '" 
+		MineQuest.getSQLServer().update("INSERT INTO " + name + "_quests (name, type, file) VALUES('" + name + "', 'C', '" 
 				+ quest.getFile() + "')");
 	}
 
@@ -363,26 +365,18 @@ public class Quester {
 
 		if (entity instanceof LivingEntity) {
 			for (SkillClass skill : classes) {
-				if (skill.isClassItem(player.getItemInHand())) {
-					if (skill instanceof CombatClass) {
+				if (skill instanceof CombatClass) {
+					if (skill.isClassItem(player.getItemInHand())) {
 						((CombatClass)skill).attack((LivingEntity)entity, event);
 						expGain(MineQuest.getExpClassDamage());
-						return;
-					} else {
-						if (getClass("Warrior") != null) {
-							((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
-							expGain(MineQuest.getExpClassDamage() / 2);
-						}
 						return;
 					}
 				}
 			}
-			event.setDamage(event.getDamage() / 2);
-			if (getClass("Warrior") != null) {
-				((CombatClass)getClass("Warrior")).attack((LivingEntity)entity, event);
+			if (MineQuest.halfDamageOn()) {
+				event.setDamage(event.getDamage() / 2);
 				expGain(MineQuest.getExpClassDamage() / 3);
 			}
-			return;
 		}
 	}
 
@@ -702,9 +696,11 @@ public class Quester {
 				}
 			} else {
 				SkillClass shell = SkillClass.newShell(type);
-				if (skill.isArmor(item)) {
-					class_armor = true;
-					can_use = false;
+				if (shell.isArmor(item)) {
+					if (MineQuest.denyNonClass() && !class_armor) {
+						class_armor = true;
+						can_use = false;
+					}
 				}
 			}
 		}
@@ -792,13 +788,24 @@ public class Quester {
 	public boolean canUse(ItemStack item) {
 		boolean class_item = false;
 		boolean can_use = false;
-		for (SkillClass skill : classes) {
-			if (skill.isClassItem(item)) {
-				if (skill.canUse(item)) {
-					class_item = true;
-					can_use = true;
-				} else {
-					if (!class_item) {
+		for (String type : MineQuest.getFullClassNames()) {
+			SkillClass skill = getClass(type);
+			if (skill != null) {
+				if (skill.isClassItem(item)) {
+					if (skill.canUse(item)) {
+						class_item = true;
+						can_use = true;
+					} else {
+						if (!class_item) {
+							class_item = true;
+							can_use = false;
+						}
+					}
+				}
+			} else {
+				SkillClass shell = SkillClass.newShell(type);
+				if (shell.isClassItem(item)) {
+					if (MineQuest.denyNonClass() && !class_item) {
 						class_item = true;
 						can_use = false;
 					}
@@ -833,23 +840,22 @@ public class Quester {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
 			Map<Material, Integer> destroyed = new HashMap<Material, Integer>();
 			
-			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + name + "'");
 			
 			try {
 				while (results.next()) {
-					if (CreatureType.fromName(results.getString("name")) != null) {
-						kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+					if (CreatureType.fromName(results.getString("type")) != null) {
+						kill_map.put(CreatureType.fromName(results.getString("type")), results.getInt("count"));
 					}
-					if (Material.getMaterial(results.getString("name")) != null) {
-						if (destroyed.get(results.getString("name")) == null) {
-							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count"));
+					if (Material.getMaterial(results.getString("type")) != null) {
+						if (destroyed.get(results.getString("type")) == null) {
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count"));
 						} else {
-							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count") + destroyed.get(results.getString("name")));
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(results.getString("name")));
 						}
 					}
 				}
 			} catch (Exception e) {
-				MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
 			}
 			
 			for (CreatureType creature : kills) {
@@ -862,18 +868,20 @@ public class Quester {
 				}
 			}
 			
-			MineQuest.getSQLServer().update("DELETE FROM " + name + "_kills");
+			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + "'");
 			
 			for (CreatureType creature : kill_map.keySet()) {
 				MineQuest.getSQLServer().update(
-						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+						"INSERT INTO kills (name, type, count) VALUES('"
+								+ name + "', '"
 								+ creature.getName() + "', '"
 								+ kill_map.get(creature) + "')");
 			}
 			
 			for (Material material : destroyed.keySet()) {
 				MineQuest.getSQLServer().update(
-						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+						"INSERT INTO kills (name, type, count) VALUES('"
+								+ name + "', '"
 								+ material.name() + "', '"
 								+ destroyed.get(material) + "')");
 			}
@@ -886,37 +894,38 @@ public class Quester {
 		if (MineQuest.isTrackingDestroy()) {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
 			
-			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_kills");
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + name + "'");
 			
 			try {
 				while (results.next()) {
-					if (CreatureType.fromName(results.getString("name")) != null) {
-						kill_map.put(CreatureType.fromName(results.getString("name")), results.getInt("count"));
+					if (CreatureType.fromName(results.getString("type")) != null) {
+						kill_map.put(CreatureType.fromName(results.getString("type")), results.getInt("count"));
 					}
-					if (Material.getMaterial(results.getString("name")) != null) {
-						if (destroyed.get(results.getString("name")) == null) {
-							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count"));
+					if (Material.getMaterial(results.getString("type")) != null) {
+						if (destroyed.get(results.getString("type")) == null) {
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count"));
 						} else {
-							destroyed.put(Material.getMaterial(results.getString("name")), results.getInt("count") + destroyed.get(results.getString("name")));
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(results.getString("name")));
 						}
 					}
 				}
 			} catch (Exception e) {
-				MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
 			}
 			
-			MineQuest.getSQLServer().update("DELETE FROM " + name + "_kills");
+			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + "'");
 			
 			for (CreatureType creature : kill_map.keySet()) {
 				MineQuest.getSQLServer().update(
-						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+						"INSERT INTO kills (name, type, count) VALUES('"
+								+ name + "', '"
 								+ creature.getName() + "', '"
 								+ kill_map.get(creature) + "')");
 			}
 			
 			for (Material material : destroyed.keySet()) {
 				MineQuest.getSQLServer().update(
-						"INSERT INTO " + name + "_kills (name, count) VALUES('"
+						"INSERT INTO kills (name, type, count) VALUES('"
+								+ name + "', '"
 								+ material.name() + "', '"
 								+ destroyed.get(material) + "')");
 			}
@@ -967,8 +976,6 @@ public class Quester {
 		for (String clazz : class_names) {
 			createClass(clazz, num++);
 		}
-		
-		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (abil VARCHAR(30), bind int, bind_2 int)");
 	}
 
 	public void createClass(String clazz, int abil_list_id) {
@@ -1687,14 +1694,12 @@ public class Quester {
 
 	public void remQuestAvailable(QuestProspect quest) {
 		available.remove(quest);
-		MineQuest.getSQLServer().update("DELETE FROM " + name + 
-				"_quests WHERE type='A' AND file='" + quest.getFile() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='A' AND name='" + name + "' AND file='" + quest.getFile() + "'");
 	}
 	
 	public void remQuestComplete(QuestProspect quest) {
 		completed.remove(quest);
-		MineQuest.getSQLServer().update("DELETE FROM " + name + 
-				"_quests WHERE type='C' AND file='" + quest.getFile() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='C' AND name='" + name + "' AND file='" + quest.getFile() + "'");
 	}
 	
 	public void respawn(PlayerRespawnEvent event) {
@@ -1780,6 +1785,7 @@ public class Quester {
 			((Player)player).sendMessage(string);
 		} else {
 			MineQuest.log("[WARNING] Quester " + name + " doesn't have player, not logged in?");
+			MineQuest.log("[WARNING] Message: " + string);
 		}
 	}
 	
@@ -1846,16 +1852,6 @@ public class Quester {
 		}
 		clearKills();
 		clearDestroyed();
-	}
-	
-	/**
-	 * Sets the last town that the Quester was near.
-	 * 
-	 * @param town Last Town
-	 */
-	public void setTown(Town town) {
-		last = town.getName();
-		MineQuest.getSQLServer().update("UPDATE players SET town='" + town.getName() + "' WHERE name='" + name + "'");
 	}
 	
 	public void spendClassExp(String type, int amount) {
@@ -1927,8 +1923,6 @@ public class Quester {
 		ResultSet results;
 		String split[];
 		int i;
-
-		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (abil VARCHAR(30), bind int, bind_2 int)");
 		
 		try {
 			results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + name + "'");
@@ -1958,12 +1952,7 @@ public class Quester {
 			classes.add(SkillClass.newClass(this, split[i]));
 		}
 		
-		class_exp = 0;
-		
-		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + 
-				"_quests (type VARCHAR(1), file VARCHAR(30))");
-		
-		results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_quests WHERE type='C'");
+		results = MineQuest.getSQLServer().query("SELECT * FROM quests WHERE type='C' AND name='" + name + "'");
 		completed = new ArrayList<QuestProspect>();
 		
 		try {
@@ -1974,7 +1963,7 @@ public class Quester {
 			MineQuest.log("Unable to load completed quests for " + name);
 		}
 		
-		results = MineQuest.getSQLServer().query("SELECT * FROM " + name + "_quests WHERE type='A'");
+		results = MineQuest.getSQLServer().query("SELECT * FROM quests WHERE type='A' AND name='" + name + "'");
 		available = new ArrayList<QuestProspect>();
 		
 		try {
@@ -1988,13 +1977,10 @@ public class Quester {
 		updateBinds();
 		kills = new CreatureType[0];
 		destroyed = new HashMap<Material, Integer>();
-		
 //		if (npcParty != null) {
 //			for (Quester quester : npcParty.getQuesterArray()) {
 //			}
 //		}
-		
-		MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + "_kills" + "(name VARCHAR(30), count INT)");
 	}
 
 	/**
@@ -2011,7 +1997,7 @@ public class Quester {
 	public void updateBinds() {
 		ResultSet results;
 		try {
-			results = MineQuest.getSQLServer().query("SELECT * FROM " + name);
+			results = MineQuest.getSQLServer().query("SELECT * FROM binds WHERE name='" + name + "'");
 			while (results.next()) {
 				String name = results.getString("abil");
 				if (name.contains(":") && name.split(":")[0].equals("Binder")) {

@@ -59,7 +59,7 @@ public class NPCStringConfig {
 		for (i = 0; i < notwant_number; i++) {
 			notwant.add(npc_strings.getString("notwant_string_" + (i + 1), "I am not interested in your %i"));
 		}
-		
+
 		generator = new Random();
 	}
 

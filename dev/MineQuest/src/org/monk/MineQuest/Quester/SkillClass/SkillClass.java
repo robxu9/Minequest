@@ -95,6 +95,8 @@ public class SkillClass {
 	public SkillClass(String type) {
 		//Shell
 		this.type = type;
+		generator = new Random();
+		level = MineQuest.getAdjustmentMultiplier() * MineQuest.getAdjustment() * 10;
 	}
 	
 	/**
@@ -138,8 +140,18 @@ public class SkillClass {
 		}
 		list = new Ability[count];
 		
-		for (i = 0; i < count; i++) {
-			list[i] = Ability.newAbility(results.getString("abil" + i), this);
+		count = 0;
+		for (i = 0; i < 10; i++) {
+			if (!results.getString("abil" + i).equals("0")) {
+				list[count] = Ability.newAbility(results.getString("abil" + i), this);
+				if (list[count++] == null) {
+					MineQuest.getSQLServer().update(
+							"UPDATE abilities SET abil" + i
+									+ "='0' WHERE abil_list_id='" + abilId
+									+ "'");
+					return abilListSQL(abilId);
+				}
+			}
 		}
 		
 		return list;
@@ -164,10 +176,17 @@ public class SkillClass {
 	 */
 	protected void addAbility(String string) {
 		try {
-			ability_list = abilListSQL(abil_list_id);
-			if (ability_list.length == 10) return;
-			MineQuest.getSQLServer().update("UPDATE abilities SET abil" + ability_list.length + "='" + string
-					+ "' WHERE abil_list_id='" + abil_list_id + "'");
+			int i;
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM abilities WHERE abil_list_id='" + abil_list_id + "'");
+			results.next();
+			
+			for (i = 0; i < 10; i++) {
+				if (results.getString("abil" + i).equals("0")) {
+					MineQuest.getSQLServer().update("UPDATE abilities SET abil" + i + "='" + string
+							+ "' WHERE abil_list_id='" + abil_list_id + "'");
+					break;
+				}
+			}
 			ability_list = abilListSQL(abil_list_id);
 			quester.updateBinds();
 		} catch (SQLException e) {
