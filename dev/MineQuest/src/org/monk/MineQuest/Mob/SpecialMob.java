@@ -35,7 +35,6 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.SpecialMobHandler;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
-import org.monk.MineQuest.Quester.SkillClass.Combat.WarMage;
 
 public class SpecialMob extends MQMob {
 	protected boolean half;

@@ -197,10 +197,11 @@ public class Quester {
 	public void addClass(String name) {
 		if (name.equalsIgnoreCase("list")) {
 			sendMessage("Available combat classes are:");
-			sendMessage("   Warrior");
-			sendMessage("   Archer");
-			sendMessage("   WarMage");
-			sendMessage("   PeaceMage");
+			for (String class_name : MineQuest.getCombatConfig().getClassNames()) {
+				if (getClass(class_name) == null) {
+					sendMessage("   " + class_name);
+				}
+			}
 			return;
 		}
 
@@ -214,11 +215,12 @@ public class Quester {
 			return;
 		}
 
-		String names[] = new String[] {"WarMage", "PeaceMage", "Archer", "Warrior"};
+		List<String> names = MineQuest.getCombatConfig().getClassNames();
 		boolean flag = false;
 		for (String clazz : names) {
 			if (name.equals(clazz)) {
 				flag = true;
+				break;
 			}
 		}
 
@@ -612,6 +614,7 @@ public class Quester {
 				}
 			} else {
 				prop = town.getTownProperty();
+				
 				if (prop.canEdit(this)) {
 					return true;
 				} else {
@@ -1346,7 +1349,7 @@ public class Quester {
 	 * @return
 	 */
 	public int getHealth() {
-		if (MineQuest.mqDamageEnabled()) {
+		if (MineQuest.mqDamageEnabled(this)) {
 			return health;
 		} else {
 			if (player != null) {
@@ -1380,7 +1383,7 @@ public class Quester {
 	 * @return
 	 */
 	public int getMaxHealth() {
-		if (MineQuest.mqDamageEnabled()) {
+		if (MineQuest.mqDamageEnabled(this)) {
 			return max_health;
 		} else {
 			return 20;
@@ -1450,7 +1453,7 @@ public class Quester {
 	 * @return false
 	 */
 	public boolean healthChange(int change, EntityDamageEvent event) {
-		if (!MineQuest.mqDamageEnabled()) return false;
+		if (!MineQuest.mqDamageEnabled(this)) return false;
 		if (event.isCancelled()) return false;
 		if (player == null) return false;
 		int newHealth;
@@ -1492,7 +1495,7 @@ public class Quester {
     }
 	
 	public boolean healthIncrease(PlayerInteractEvent event) {
-		if (!MineQuest.mqDamageEnabled()) return false;
+		if (!MineQuest.mqDamageEnabled(this)) return false;
 		if (event.getItem() == null) return false;
 		Material type = event.getItem().getType();
 		
@@ -1811,7 +1814,7 @@ public class Quester {
 	 * @param i New Health
 	 */
 	public void setHealth(int i) {
-		if (MineQuest.mqDamageEnabled()) {
+		if (MineQuest.mqDamageEnabled(this)) {
 			if (i > max_health) {
 				i = max_health;
 			}
@@ -2028,7 +2031,7 @@ public class Quester {
 	 * @param player
 	 */
 	public void updateHealth() {
-		if (!MineQuest.mqDamageEnabled()) return;
+		if (!MineQuest.mqDamageEnabled(this)) return;
 		int newValue;
 		
 		newValue = (int)((20 * (double)health) / max_health);
@@ -2113,5 +2116,16 @@ public class Quester {
 		} else {
 			sendMessage("None!");
 		}
+	}
+
+	public boolean canCommand(String string) {
+		if (MineQuest.isPermissionsEnabled() && (player != null)) {
+			if (!MineQuest.getPermissions().has((Player) player, "MineQuest.Command." + string)) {
+				return false;
+			}
+		}
+		
+		
+		return true;
 	}
 }

@@ -18,7 +18,6 @@
  */
 package org.monk.MineQuest.Event;
 
-import org.monk.MineQuest.MineQuest;
 
 public abstract class NormalEvent implements Event {
 	protected long delay;

@@ -48,7 +48,6 @@ import org.monk.MineQuest.Event.NPCEvent;
 import org.monk.MineQuest.Event.Absolute.SpawnNPCEvent;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
-import org.monk.MineQuest.Quester.SkillClass.Combat.Warrior;
 import org.monk.MineQuest.Store.Store;
 import org.monk.MineQuest.Store.StoreBlock;
 import org.monk.MineQuest.World.Town;

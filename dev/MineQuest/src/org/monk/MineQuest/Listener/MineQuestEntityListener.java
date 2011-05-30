@@ -40,6 +40,7 @@ public class MineQuestEntityListener extends EntityListener {
 	
 	@Override
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
+		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		Entity entity = event.getEntity();
 		
 		if (MineQuest.canCreate(entity)) {
@@ -54,6 +55,7 @@ public class MineQuestEntityListener extends EntityListener {
 	
 	@Override
 	public void onEntityDamage(EntityDamageEvent event) {
+		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.isCancelled()) return;
 		if (event instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
@@ -105,6 +107,7 @@ public class MineQuestEntityListener extends EntityListener {
 	
 	@Override
 	public void onEntityTarget(EntityTargetEvent event) {
+		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (!(event.getTarget() instanceof LivingEntity)) return;
 		LivingEntity target = (LivingEntity) event.getTarget();
 		
@@ -119,6 +122,7 @@ public class MineQuestEntityListener extends EntityListener {
 	
 	@Override
 	public void onEntityExplode(EntityExplodeEvent event) {
+		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.getEntity() instanceof Creeper) {
 			MQMob mob = MineQuest.getMob((LivingEntity)event.getEntity());
 			if (mob != null) {
