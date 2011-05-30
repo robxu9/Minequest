@@ -138,21 +138,21 @@ public class CombatClass extends SkillClass {
 	 * @param armor Set of armor to check.
 	 * @return Chance of armor blocking attack.
 	 */
-	private double armorBlockChance(int[] armor) {
-		switch (armor[0]) {
-		case 302:
-			return .25;
-		case 310:
-			return .20;
-		case 306:
-			return .15;
-		case 314:
-			return .10;
-		case 298: 
-			return .05;
-		}
-
-		return 0;
-	}
+//	private double armorBlockChance(int[] armor) {
+//		switch (armor[0]) {
+//		case 302:
+//			return .25;
+//		case 310:
+//			return .20;
+//		case 306:
+//			return .15;
+//		case 314:
+//			return .10;
+//		case 298: 
+//			return .05;
+//		}
+//
+//		return 0;
+//	}
 
 }

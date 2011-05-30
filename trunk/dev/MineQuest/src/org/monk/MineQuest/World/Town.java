@@ -41,12 +41,12 @@ import org.monk.MineQuest.Store.Store;
 public class Town {
 	private int center_x, center_z;
 	private String name;
+	private Location npc_spawn;
 	private List<Property> properties;
 	private Location spawn;
 	private Location start;
 	private List<NPCSignShop> stores;
-	private Property town;
-	private Location npc_spawn;
+	private TownProperty town;
 	
 	public Town(String name, World world) {
 		ResultSet results = MineQuest.getSQLServer().query("SELECT * from towns WHERE name='" + name + "'");
@@ -60,7 +60,7 @@ public class Town {
 				Location end = new Location(world, (double)results.getInt("max_x"), 
 						(double)results.getInt("y") + height, (double)results.getInt("max_z"));
 				
-				town = new Property(results.getString("owner"), start, end, height > 0, 0);
+				town = new TownProperty(this, results.getString("owner"), start, end, height > 0, 0);
 				center_x = town.getCenterX();
 				center_z = town.getCenterZ();
 				spawn = new Location(world, 
@@ -107,12 +107,49 @@ public class Town {
 		}
 	}
 
+	public void addMerc(String name, Quester quester) {
+		if (!town.canEdit(quester)) {
+			quester.sendMessage("You are not authorized to edit town");
+			return;
+		}
+		if (MineQuest.getQuester(name) != null) {
+			quester.sendMessage("Quester with that name exists already");
+			return;
+		}
+		if ((npc_spawn.getX() == 0) &&
+				(npc_spawn.getY() == 0) &&
+				(npc_spawn.getZ() == 0)) {
+			quester.sendMessage("Mercenary spawn not set");
+			return;
+		}
+		
+		World world = MineQuest.getSServer().getWorlds().get(0);
+		MineQuest.addQuester(new NPCQuester(name, NPCMode.FOR_SALE, world, getNPCSpawn()));
+		((NPCQuester)MineQuest.getQuester(name)).setTown(getName());
+	}
+
+	public void buy(Quester quester, Property prop) {
+		quester.setCubes(quester.getCubes() - prop.getPrice());
+		
+		prop.setOwner(quester);
+		
+		MineQuest.getSQLServer().update("UPDATE " + name + " SET name='" + quester.getName() 
+				+ "' WHERE x='" + prop.getX() + "' AND z='" + prop.getZ() + "' AND y='" + prop.getY() + "'");
+		quester.sendMessage("You now own this property");
+	}
+	
 	public double calcDistance(Location loc) {
 		return MineQuest.distance(loc, town.getLocation());
 	}
-
+	
 	public double calcDistance(Player player) {
 		return calcDistance(player.getLocation());
+	}
+
+	private void checkMob(Monster livingEntity) {
+		if (inTown(livingEntity.getLocation())) {
+			livingEntity.setHealth(0);
+		}
 	}
 	
 	public void checkMobs() {
@@ -125,12 +162,6 @@ public class Town {
 		}
 	}
 	
-	private void checkMob(Monster livingEntity) {
-		if (inTown(livingEntity.getLocation())) {
-			livingEntity.setHealth(0);
-		}
-	}
-
 	public void createProperty(Player player) {
 		if (town.canEdit(MineQuest.getQuester(player))) {
 			player.getName();
@@ -149,6 +180,15 @@ public class Town {
 		}
 	}
 	
+	public void delete() {
+		for (Store store : stores) {
+			store.delete();
+		}
+		MineQuest.getSQLServer().update("DROP TABLE " + name);
+		MineQuest.getSQLServer().update(
+				"DELETE FROM towns WHERE name='" + name + "'");
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof String) {
@@ -158,6 +198,43 @@ public class Town {
 			return name.equals(((Town)obj).getName());
 		}
 		return super.equals(obj);
+	}
+	
+	public void expand(Quester quester) {
+		if (!town.canEdit(quester)) {
+			quester.sendMessage("You cannot edit " + name);
+		}
+		
+		Location loc = quester.getPlayer().getLocation();
+		
+		if (loc.getBlockX() < town.getX()) {
+			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
+				quester.sendMessage("Can only expand in one direction at a time!");
+			}
+			town.setX(loc.getBlockX());
+			quester.sendMessage("Town expanded to min x of " + loc.getBlockX());
+		}
+		
+		if (loc.getBlockX() > town.getMaxX()) {
+			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
+				quester.sendMessage("Can only expand in one direction at a time!");
+			}
+			town.setMaxX(loc.getBlockX());
+			quester.sendMessage("Town expanded to max x of " + loc.getBlockX());
+		}
+		
+		if (loc.getBlockZ() < town.getZ()) {
+			town.setZ(loc.getBlockZ());
+			quester.sendMessage("Town expanded to min z of " + loc.getBlockZ());
+		}
+		
+		if (loc.getBlockZ() > town.getMaxZ()) {
+			town.setMaxZ(loc.getBlockZ());
+			quester.sendMessage("Town expanded to max z of " + loc.getBlockZ());
+		}
+		
+		quester.sendMessage("You are within the x-z area of the town");
+		quester.sendMessage("/expand_town can only be used to expand horizontally");
 	}
 	
 	public void finishProperty(Player player, boolean b) {
@@ -201,7 +278,7 @@ public class Town {
 			player.sendMessage("You do not have town permissions");
 		}
 	}
-	
+
 	public void finishStore(Player player, String name) {
 		if (town.canEdit(MineQuest.getQuester(player))) {
 			Location end = player.getLocation();
@@ -240,7 +317,23 @@ public class Town {
 			player.sendMessage("You do not have town permissions");
 		}
 	}
-	
+
+	public List<NPCQuester> getAvailableNPCs() {
+		List<NPCQuester> npcs = new ArrayList<NPCQuester>();
+		
+		for (Quester quester : MineQuest.getQuesters()) {
+			if (quester instanceof NPCQuester) {
+				NPCQuester npc = (NPCQuester)quester;
+				if ((npc.getMode() == NPCMode.FOR_SALE) &&
+						equals(npc.getNPCTown())) {
+					npcs.add((NPCQuester)quester);
+				}
+			}
+		}
+		
+		return npcs;
+	}
+
 	public int[] getCenter() {
 		int center[] = new int[2];
 		
@@ -253,9 +346,17 @@ public class Town {
 	public Location getLocation() {
 		return spawn;
 	}
-	
+
 	public String getName() {
 		return name;
+	}
+
+	public Location getNPCSpawn() {
+		return new Location(npc_spawn.getWorld(),
+				npc_spawn.getX() + (new Random()).nextDouble() * 5,
+				npc_spawn.getY(),
+				npc_spawn.getZ() + (new Random()).nextDouble() * 5,
+				0, 0);
 	}
 
 	public Property getProperty(Location loc) {
@@ -274,6 +375,14 @@ public class Town {
 		return getProperty(player.getLocation());
 	}
 
+	public Location getSpawn() {
+		return spawn;
+	}
+
+	public NPCSignShop getStore(HumanEntity player) {
+		return getStore(player.getLocation());
+	}
+
 	public NPCSignShop getStore(Location loc) {
 		int i;
 		
@@ -285,15 +394,15 @@ public class Town {
 		
 		return null;
 	}
-	
-	public NPCSignShop getStore(HumanEntity player) {
-		return getStore(player.getLocation());
+
+	public List<NPCSignShop> getStores() {
+		return stores;
 	}
 
 	public Property getTownProperty() {
 		return town;
 	}
-
+	
 	public boolean inTown(Location loc) {
 		return town.inProperty(loc);
 	}
@@ -301,14 +410,43 @@ public class Town {
 	public boolean inTown(Player player) {
 		return inTown(player.getLocation());
 	}
+	
+	public void remove(Store store) {
+		stores.remove(store);
+	}
 
+	public void setHeight(Quester quester, int height) {
+		if (!town.canEdit(quester)) {
+			quester.sendMessage("You cannot edit " + name);
+		}
+		
+		town.setHeight(height);
+		quester.sendMessage("Town set to height of " + height);
+	}
+	
+	public void setMERCSpawn(Location spawn) {
+		this.npc_spawn = new Location(spawn.getWorld(),
+				spawn.getX(), spawn.getY(), spawn.getZ());
+		MineQuest.getSQLServer().update("UPDATE towns SET merc_x='" + (int)spawn.getX() + "', merc_y='" + 
+				(int)spawn.getY() + "', merc_z='" + (int)spawn.getZ() + "' WHERE name='" + name + "'");
+	}
+	
+	public void setMinY(Quester quester, int y) {
+		if (!town.canEdit(quester)) {
+			quester.sendMessage("You cannot edit " + name);
+		}
+		
+		town.setY(y);
+		quester.sendMessage("Town set to min y of " + y);
+	}
+	
 	public void setOwner(String string) {
 		if (MineQuest.getQuester(string) != null) {
 			MineQuest.getSQLServer().update("UPDATE towns SET owner='" + string + "' WHERE name='" + name + "'");
 		}
 		town.setOwner(MineQuest.getQuester(string));
 	}
-
+	
 	public void setPrice(Player player, long price) {
 		Property prop = getProperty(player);
 		if (prop != null) {
@@ -323,143 +461,5 @@ public class Town {
 		this.spawn = spawn;
 		MineQuest.getSQLServer().update("UPDATE towns SET spawn_x='" + (int)spawn.getX() + "', spawn_y='" + 
 				(int)spawn.getY() + "', spawn_z='" + (int)spawn.getZ() + "' WHERE name='" + name + "'");
-	}
-
-	public Location getSpawn() {
-		return spawn;
-	}
-
-	public void buy(Quester quester, Property prop) {
-		quester.setCubes(quester.getCubes() - prop.getPrice());
-		
-		prop.setOwner(quester);
-		
-		MineQuest.getSQLServer().update("UPDATE " + name + " SET name='" + quester.getName() 
-				+ "' WHERE x='" + prop.getX() + "' AND z='" + prop.getZ() + "' AND y='" + prop.getY() + "'");
-		quester.sendMessage("You now own this property");
-	}
-
-	public Location getNPCSpawn() {
-		return new Location(npc_spawn.getWorld(),
-				npc_spawn.getX() + (new Random()).nextDouble() * 5,
-				npc_spawn.getY(),
-				npc_spawn.getZ() + (new Random()).nextDouble() * 5,
-				0, 0);
-	}
-	
-	public List<NPCQuester> getAvailableNPCs() {
-		List<NPCQuester> npcs = new ArrayList<NPCQuester>();
-		
-		for (Quester quester : MineQuest.getQuesters()) {
-			if (quester instanceof NPCQuester) {
-				NPCQuester npc = (NPCQuester)quester;
-				if ((npc.getMode() == NPCMode.FOR_SALE) &&
-						equals(npc.getNPCTown())) {
-					npcs.add((NPCQuester)quester);
-				}
-			}
-		}
-		
-		return npcs;
-	}
-
-	public void setMERCSpawn(Location spawn) {
-		this.npc_spawn = new Location(spawn.getWorld(),
-				spawn.getX(), spawn.getY(), spawn.getZ());
-		MineQuest.getSQLServer().update("UPDATE towns SET merc_x='" + (int)spawn.getX() + "', merc_y='" + 
-				(int)spawn.getY() + "', merc_z='" + (int)spawn.getZ() + "' WHERE name='" + name + "'");
-	}
-	
-	public void addMerc(String name, Quester quester) {
-		if (!town.canEdit(quester)) {
-			quester.sendMessage("You are not authorized to edit town");
-			return;
-		}
-		if (MineQuest.getQuester(name) != null) {
-			quester.sendMessage("Quester with that name exists already");
-			return;
-		}
-		if ((npc_spawn.getX() == 0) &&
-				(npc_spawn.getY() == 0) &&
-				(npc_spawn.getZ() == 0)) {
-			quester.sendMessage("Mercenary spawn not set");
-			return;
-		}
-		
-		World world = MineQuest.getSServer().getWorlds().get(0);
-		MineQuest.addQuester(new NPCQuester(name, NPCMode.FOR_SALE, world, getNPCSpawn()));
-		((NPCQuester)MineQuest.getQuester(name)).setTown(getName());
-	}
-
-	public List<NPCSignShop> getStores() {
-		return stores;
-	}
-	
-	public void delete() {
-		for (Store store : stores) {
-			store.delete();
-		}
-		MineQuest.getSQLServer().update("DROP TABLE " + name);
-		MineQuest.getSQLServer().update(
-				"DELETE FROM towns WHERE name='" + name + "'");
-	}
-	
-	public void expand(Quester quester) {
-		if (!town.canEdit(quester)) {
-			quester.sendMessage("You cannot edit " + name);
-		}
-		
-		Location loc = quester.getPlayer().getLocation();
-		
-		if (loc.getBlockX() < town.getX()) {
-			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
-				quester.sendMessage("Can only expand in one direction at a time!");
-			}
-			town.setX(loc.getBlockX());
-			quester.sendMessage("Town expanded to min x of " + loc.getBlockX());
-		}
-		
-		if (loc.getBlockX() > town.getMaxX()) {
-			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
-				quester.sendMessage("Can only expand in one direction at a time!");
-			}
-			town.setMaxX(loc.getBlockX());
-			quester.sendMessage("Town expanded to max x of " + loc.getBlockX());
-		}
-		
-		if (loc.getBlockZ() < town.getZ()) {
-			town.setZ(loc.getBlockZ());
-			quester.sendMessage("Town expanded to min z of " + loc.getBlockZ());
-		}
-		
-		if (loc.getBlockZ() > town.getMaxZ()) {
-			town.setMaxZ(loc.getBlockZ());
-			quester.sendMessage("Town expanded to max z of " + loc.getBlockZ());
-		}
-		
-		quester.sendMessage("You are within the x-z area of the town");
-		quester.sendMessage("/expand_town can only be used to expand horizontally");
-	}
-	
-	public void setMinY(Quester quester, int y) {
-		if (!town.canEdit(quester)) {
-			quester.sendMessage("You cannot edit " + name);
-		}
-		
-		town.setY(y);
-		quester.sendMessage("Town set to min y of " + y);
-	}
-	
-	public void setHeight(Quester quester, int height) {
-		if (!town.canEdit(quester)) {
-			quester.sendMessage("You cannot edit " + name);
-		}
-		
-		town.setHeight(height);
-		quester.sendMessage("Town set to height of " + height);
-	}
-
-	public void remove(Store store) {
-		stores.remove(store);
 	}
 }

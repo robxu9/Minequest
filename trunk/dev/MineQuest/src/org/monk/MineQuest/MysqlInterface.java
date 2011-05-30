@@ -118,9 +118,14 @@ public class MysqlInterface {
 	public ResultSet query(String the_query) {
 		if (stmt == null) {
 			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+			return null;
 		}
 		if (!silent) {
-			MineQuest.log("(MySQL) " + the_query);
+			if (real) {
+				MineQuest.log("(MySQL) " + the_query);
+			} else {
+				MineQuest.log("(SQLite) " + the_query);
+			}
 		}
 		try {
 			if (last != null) {
@@ -130,7 +135,11 @@ public class MysqlInterface {
 			last = stmt.executeQuery(the_query);
 			return last;
 		} catch (SQLException e) {
-			MineQuest.log("(MySQL) " + the_query);
+			if (real) {
+				MineQuest.log("(MySQL) " + the_query);
+			} else {
+				MineQuest.log("(SQLite) " + the_query);
+			}
 			MineQuest.log("[ERROR] Failed to query database");
 			reconnect();
 			try {
@@ -153,9 +162,14 @@ public class MysqlInterface {
 		int ret;
 		if (stmt == null) {
 			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+			return 1;
 		}
 		if (!silent) {
-			MineQuest.log("(MySQL) " + sql);
+			if (real) {
+				MineQuest.log("(MySQL) " + sql);
+			} else {
+				MineQuest.log("(SQLite) " + sql);
+			}
 		}
 		try {
 			if (last != null) {
@@ -165,7 +179,11 @@ public class MysqlInterface {
 			ret = stmt.executeUpdate(sql);
 			return ret;
 		} catch (SQLException e) {
-			MineQuest.log("(MySQL) " + sql);
+			if (real) {
+				MineQuest.log("(MySQL) " + sql);
+			} else {
+				MineQuest.log("(SQLite) " + sql);
+			}
 			MineQuest.log("[ERROR] Failed to update database (retrying...)");
 			reconnect();
 			try {
@@ -184,9 +202,14 @@ public class MysqlInterface {
 		int ret;
 		if (stmt == null) {
 			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+			return 1;
 		}
 		if (!silent) {
-			MineQuest.log("(MySQL) " + sql);
+			if (real) {
+				MineQuest.log("(MySQL) " + sql);
+			} else {
+				MineQuest.log("(SQLite) " + sql);
+			}
 		}
 		try {
 			if (last != null) {
@@ -197,7 +220,11 @@ public class MysqlInterface {
 			return ret;
 		} catch (SQLException e) {
 			if (!extra_silent) {
-				MineQuest.log("(MySQL) " + sql);
+				if (real) {
+					MineQuest.log("(MySQL) " + sql);
+				} else {
+					MineQuest.log("(SQLite) " + sql);
+				}
 				MineQuest.log("[ERROR] Failed to update database (retrying...)");
 			}
 			reconnect();

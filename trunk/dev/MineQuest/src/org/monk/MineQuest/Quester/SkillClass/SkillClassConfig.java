@@ -1,7 +1,5 @@
 package org.monk.MineQuest.Quester.SkillClass;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +55,7 @@ public class SkillClassConfig {
 
 		armor_blocks.add(intList(properties.getString(name + "_armor_blocks", "")));
 		
-		level_health.add(properties.getInt(name + "_level_health"));
+		level_health.add(properties.getInt(name + "_level_health", 0));
 	}
 	
 	public List<String> getClassNames() {
@@ -81,7 +79,7 @@ public class SkillClassConfig {
 		int[] ints = new int[strings.length];
 		int i = 0;
 		for (String armor_level_string : strings) {
-			ints[i] = Integer.parseInt(armor_level_string);
+			ints[i++] = Integer.parseInt(armor_level_string);
 		}
 
 		return ints;
@@ -94,7 +92,7 @@ public class SkillClassConfig {
 		double[] doubles = new double[strings.length];
 		int i = 0;
 		for (String armor_level_string : strings) {
-			doubles[i] = Double.parseDouble(armor_level_string);
+			doubles[i++] = Double.parseDouble(armor_level_string);
 		}
 
 		return doubles;

@@ -52,10 +52,7 @@ import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 public abstract class Ability {
 	@SuppressWarnings({ "rawtypes" })
 	private static List<Class> abil_classes;
-//	private static List<Class> abil_classes;
-	protected int config[];
-
-	// http://www.devx.com/tips/Tip/38975
+// http://www.devx.com/tips/Tip/38975
 	public static Class<?> getClass(String the_class) throws Exception {
 		try {
 			URL url = new URL("file:MineQuest/abilities.jar");
@@ -67,27 +64,7 @@ public abstract class Ability {
 			return Class.forName(the_class.replaceAll(".class", ""), true, ucl);
 		}
 	}
-	
-	public static int getVersion() {
-		try {
-			Class this_class;
-			try {
-				URL url = new URL("file:MineQuest/abilities.jar");
-				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
-				this_class = Class.forName("org.monk.MineQuest.Ability.Version.Version", true, ucl);
-			} catch (Exception e) {
-				URL url = new URL("file:abilities.jar");
-				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
-				this_class = Class.forName("org.monk.MineQuest.Ability.Version.Version", true, ucl);
-			}
-			MineQuestVersion version = (MineQuestVersion)this_class.newInstance();
-			
-			return version.getVersion();
-		} catch (Exception e) {
-			return -1;
-		}
-	}
-	
+
 	//following code came from http://snippets.dzone.com/posts/show/4831
 	public static List<String> getClasseNamesInPackage(String jarName,
 			String packageName) {
@@ -120,6 +97,53 @@ public abstract class Ability {
 			MineQuest.log("Couldn't get Ability Classes - Missing abilities.jar?");
 		}
 		return classes;
+	}
+	
+	/**
+	 * Gets the entities within a area of a player. name
+	 * 
+	 * Not Implemented in bukkit yet!
+	 * 
+	 * @param player
+	 * @param radius
+	 * @return List of Entities within the area
+	 */
+	public static List<LivingEntity> getEntities(LivingEntity entity, int radius) {
+		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
+		List<LivingEntity> serverList = entity.getWorld().getLivingEntities();
+		int i;
+		
+		for (i = 0; i < serverList.size(); i++) {
+			if ((MineQuest.distance(entity.getLocation(), serverList.get(i).getLocation()) <= radius) 
+				&& (serverList.get(i).getEntityId() != entity.getEntityId())) {
+				entities.add(serverList.get(i));
+			}
+		}
+		
+		return entities;
+	}
+	
+	/**
+	 * Gets the entities within a area of a player. name
+	 * 
+	 * Not Implemented in bukkit yet!
+	 * 
+	 * @param player
+	 * @param radius
+	 * @return List of Entities within the area
+	 */
+	public static List<LivingEntity> getEntities(Location location, int radius) {
+		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
+		List<LivingEntity> serverList = location.getWorld().getLivingEntities();
+		int i;
+		
+		for (i = 0; i < serverList.size(); i++) {
+			if ((MineQuest.distance(location, serverList.get(i).getLocation()) <= radius)) {
+				entities.add(serverList.get(i));
+			}
+		}
+		
+		return entities;
 	}
 	
 	/**
@@ -160,6 +184,26 @@ public abstract class Ability {
 		}
 		
 		return i;
+	}
+	
+	public static int getVersion() {
+		try {
+			Class this_class;
+			try {
+				URL url = new URL("file:MineQuest/abilities.jar");
+				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+				this_class = Class.forName("org.monk.MineQuest.Ability.Version.Version", true, ucl);
+			} catch (Exception e) {
+				URL url = new URL("file:abilities.jar");
+				URLClassLoader ucl = new URLClassLoader(new URL[] {url}, (new AbilityBinder()).getClass().getClassLoader());
+				this_class = Class.forName("org.monk.MineQuest.Ability.Version.Version", true, ucl);
+			}
+			MineQuestVersion version = (MineQuestVersion)this_class.newInstance();
+			
+			return version.getVersion();
+		} catch (Exception e) {
+			return -1;
+		}
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -227,15 +271,18 @@ public abstract class Ability {
 		
 		return null;
 	}
-	
 	protected int bind;
+	//	private static List<Class> abil_classes;
+	protected int config[];
+	private List<ItemStack> cost;
 	protected int count;
 	protected boolean enabled;
 	protected long last_msg;
-	protected SkillClass myclass;
-	protected long time;
 	private int lookBind;
-	private List<ItemStack> cost;
+	
+	protected SkillClass myclass;
+	
+	protected long time;
 	
 	/**
 	 * Creates an Ability
@@ -255,14 +302,6 @@ public abstract class Ability {
 		config = null;
 	}
 	
-	protected int[] getConfig() {
-		return config;
-	}
-	
-	protected void setConfig(int[] config) {
-		this.config = config;
-	}
-	
 	/**
 	 * Bind to left click of item.
 	 * 
@@ -278,25 +317,6 @@ public abstract class Ability {
 							+ quester.getName() + "', '" + getName() + "', '"
 							+ bind + "', '" + bind + "')");
 			quester.sendMessage(getName() + " is now bound to "
-					+ item.getTypeId());
-		}
-	}
-	
-	/**
-	 * Bind to left click of item.
-	 * 
-	 * @param player Player binding Ability
-	 * @param item Item to be bound
-	 */
-	public void lookBind(Quester quester, ItemStack item) {
-		if (lookBind != item.getTypeId()) {
-			silentUnBind(quester);
-			lookBind = item.getTypeId();
-			MineQuest.getSQLServer().update(
-					"INSERT INTO binds (name, abil, bind, bind_2) VALUES('"
-							+ quester.getName() + "', 'LOOK:" + getName()
-							+ "', '" + lookBind + "', '" + lookBind + "')");
-			quester.sendMessage(getName() + " is now look bound to "
 					+ item.getTypeId());
 		}
 	}
@@ -344,6 +364,10 @@ public abstract class Ability {
 		if (quester.canCast(getConfigManaCost())) {
 			enabled = true;
 			quester.sendMessage(getName() + " enabled");
+//			MineQuest.log("Can cast " + getName() + " with config :");
+//			for (int i : config) {
+//				MineQuest.log("        " + i);
+//			}
 		} else {
 			notify(quester, "You do not have the materials to enable that - try /spellcomp " + getName());
 		}
@@ -351,6 +375,10 @@ public abstract class Ability {
 	
 	public boolean equals(String name) {
 		return name.equals(getName());
+	}
+	
+	public void eventActivate() {
+		
 	}
 	
 	/**
@@ -362,6 +390,14 @@ public abstract class Ability {
 		return 0;
 	}
 
+	protected int[] getConfig() {
+		return config;
+	}
+	
+	public List<ItemStack> getConfigManaCost() {
+		return cost;
+	}
+	
 	/**
 	 * Gets the distance between a Player and the entity.
 	 * 
@@ -371,53 +407,6 @@ public abstract class Ability {
 	 */
 	protected int getDistance(Player player, LivingEntity entity) {
 		return (int)MineQuest.distance(player.getLocation(), entity.getLocation());
-	}
-	
-	/**
-	 * Gets the entities within a area of a player. name
-	 * 
-	 * Not Implemented in bukkit yet!
-	 * 
-	 * @param player
-	 * @param radius
-	 * @return List of Entities within the area
-	 */
-	public static List<LivingEntity> getEntities(LivingEntity entity, int radius) {
-		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
-		List<LivingEntity> serverList = entity.getWorld().getLivingEntities();
-		int i;
-		
-		for (i = 0; i < serverList.size(); i++) {
-			if ((MineQuest.distance(entity.getLocation(), serverList.get(i).getLocation()) <= radius) 
-				&& (serverList.get(i).getEntityId() != entity.getEntityId())) {
-				entities.add(serverList.get(i));
-			}
-		}
-		
-		return entities;
-	}
-	
-	/**
-	 * Gets the entities within a area of a player. name
-	 * 
-	 * Not Implemented in bukkit yet!
-	 * 
-	 * @param player
-	 * @param radius
-	 * @return List of Entities within the area
-	 */
-	public static List<LivingEntity> getEntities(Location location, int radius) {
-		List<LivingEntity> entities = new ArrayList<LivingEntity>(0);
-		List<LivingEntity> serverList = location.getWorld().getLivingEntities();
-		int i;
-		
-		for (i = 0; i < serverList.size(); i++) {
-			if ((MineQuest.distance(location, serverList.get(i).getLocation()) <= radius)) {
-				entities.add(serverList.get(i));
-			}
-		}
-		
-		return entities;
 	}
 	
 	/**
@@ -459,6 +448,14 @@ public abstract class Ability {
 		return entities.get(i);
 	}
 	
+	public int getRealCastingTime() {
+		return MineQuest.getAbilityConfiguration().getCastingTime(getName());
+	}
+	
+	public int getRealExperience() {
+		return MineQuest.getAbilityConfiguration().getExperience(getName());
+	}
+	
 	public List<ItemStack> getRealManaCost() {
 		List<ItemStack> cost = getManaCost();
 
@@ -470,27 +467,33 @@ public abstract class Ability {
 		return cost;
 	}
 	
-	public List<ItemStack> getConfigManaCost() {
-		return cost;
-	}
-	
-	public void setConfigManaCost(List<ItemStack> cost) {
-		this.cost = cost;
+	public String getRealManaCostString() {
+		List<Integer> cost = new ArrayList<Integer>();
+		String ret = "";
+		int i;
+		
+		for (ItemStack item : getRealManaCost()) {
+			for (i = 0; i < item.getAmount(); i++) {
+				cost.add(item.getTypeId());
+			}
+		}
+		if (cost.size() > 0) {
+			ret = ret + cost.get(0);
+			for (i = 1; i < cost.size(); i++) {
+				ret = ret + "," + cost.get(i);
+			}
+		}
+		
+		return ret;
 	}
 	
 	public int getRealRequiredLevel() {
 		return MineQuest.getAbilityConfiguration().getRequiredLevel(getName());
 	}
 	
-	public int getRealExperience() {
-		return MineQuest.getAbilityConfiguration().getExperience(getName());
-	}
-	
-	public int getRealCastingTime() {
-		return MineQuest.getAbilityConfiguration().getCastingTime(getName());
-	}
-	
 	public abstract int getReqLevel();
+	
+	public abstract String getSkillClass();
 	
 	/**
 	 * Gives the casting cost back to the player.
@@ -545,6 +548,10 @@ public abstract class Ability {
 		return enabled;
 	}
 	
+	public boolean isLookBound(ItemStack itemStack) {
+		return (lookBind == itemStack.getTypeId());
+	}
+	
 	/**
 	 * This was used to determine if entities are part of type
 	 * for purge spells.
@@ -569,7 +576,7 @@ public abstract class Ability {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Determines if player and baseEntity are within radius distance
 	 * of each other.
@@ -581,6 +588,25 @@ public abstract class Ability {
 	 */
 	protected boolean isWithin(LivingEntity player, LivingEntity baseEntity, int radius) {
 		return MineQuest.distance(player.getLocation(), baseEntity.getLocation()) < radius;
+	}
+	
+	/**
+	 * Bind to left click of item.
+	 * 
+	 * @param player Player binding Ability
+	 * @param item Item to be bound
+	 */
+	public void lookBind(Quester quester, ItemStack item) {
+		if (lookBind != item.getTypeId()) {
+			silentUnBind(quester);
+			lookBind = item.getTypeId();
+			MineQuest.getSQLServer().update(
+					"INSERT INTO binds (name, abil, bind, bind_2) VALUES('"
+							+ quester.getName() + "', 'LOOK:" + getName()
+							+ "', '" + lookBind + "', '" + lookBind + "')");
+			quester.sendMessage(getName() + " is now look bound to "
+					+ item.getTypeId());
+		}
 	}
 
 	/**
@@ -611,7 +637,7 @@ public abstract class Ability {
 		
 		return;
 	}
-	
+
 	public void notify(Quester quester, String message) {
 		Calendar now = Calendar.getInstance();
 		
@@ -672,6 +698,14 @@ public abstract class Ability {
 		
 	}
 
+	protected void setConfig(int[] config) {
+		this.config = config;
+	}
+
+	public void setConfigManaCost(List<ItemStack> cost) {
+		this.cost = cost;
+	}
+
 	public void setSkillClass(SkillClass skillclass) {
 		this.myclass = skillclass;
 		if (skillclass != null) {
@@ -679,7 +713,7 @@ public abstract class Ability {
 			config = MineQuest.getAbilityConfiguration().getConfig(getName());
 		}
 	}
-
+	
 	public void silentBind(Quester quester, ItemStack itemStack) {
 		bind = itemStack.getTypeId();
 		lookBind = -1;
@@ -737,6 +771,10 @@ public abstract class Ability {
 		
 		if ((quester == null) || quester.canCast(getConfigManaCost())) {
 			if (canCast() || (player == null)) {
+//				MineQuest.log("Can cast " + getName() + " with config :");
+//				for (int i : config) {
+//					MineQuest.log("        " + i);
+//				}
 				notify(quester, "Casting " + getName());
 				castAbility(quester, location, entity);
 				if (myclass != null) {
@@ -754,34 +792,4 @@ public abstract class Ability {
 			}
 		}
 	}
-
-	public void eventActivate() {
-		
-	}
-
-	public boolean isLookBound(ItemStack itemStack) {
-		return (lookBind == itemStack.getTypeId());
-	}
-
-	public String getRealManaCostString() {
-		List<Integer> cost = new ArrayList<Integer>();
-		String ret = "";
-		int i;
-		
-		for (ItemStack item : getRealManaCost()) {
-			for (i = 0; i < item.getAmount(); i++) {
-				cost.add(item.getTypeId());
-			}
-		}
-		if (cost.size() > 0) {
-			ret = ret + cost.get(0);
-			for (i = 1; i < cost.size(); i++) {
-				ret = ret + "," + cost.get(i);
-			}
-		}
-		
-		return ret;
-	}
-	
-	public abstract String getSkillClass();
 }

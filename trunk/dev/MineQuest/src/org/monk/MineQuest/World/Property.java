@@ -115,6 +115,12 @@ public class Property {
 			return true;
 		}
 		
+		if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
+			if (MineQuest.getPermissions().has(quester.getPlayer(), "MineQuest.Property." + owner)) {
+				return true;
+			}
+		}
+		
 		for (i = 0; i < editors.size(); i++) {
 			if (editors.get(i).equals(quester)) {
 				return true;

@@ -828,7 +828,13 @@ public class SkillClass {
 			System.out.println("Problem reading Ability");
 		}
 		
-		fillAbilities();
+		if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
+			if (MineQuest.getPermissions().has(quester.getPlayer(), "MineQuest.Abilities")) {
+				fillAbilities();
+			}
+		} else if (!MineQuest.isPermissionsEnabled()) {
+			fillAbilities();
+		}
 	}
 
 	public void setLevel(int level) {
