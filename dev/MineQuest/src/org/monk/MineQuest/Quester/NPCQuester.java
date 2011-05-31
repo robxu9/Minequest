@@ -30,6 +30,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -37,6 +38,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -238,6 +240,14 @@ public class NPCQuester extends Quester {
 						player.getLocation().getY() + move_y,
 						player.getLocation().getZ() + move_z,
 						yaw, target.getPitch());
+				}
+			}
+		} else {
+			if ((mode == NPCMode.PARTY) || (mode == NPCMode.PARTY_STAND)) {
+				if (follow != null) {
+					if (!follow.hasQuester(this)) {
+						follow.addNPC(this);
+					}
 				}
 			}
 		}
@@ -529,7 +539,9 @@ public class NPCQuester extends Quester {
 			ItemStack item = new ItemStack(Integer.parseInt(value), 1);
 			item.setDurability(item.getType().getMaxDurability());
 			hand = item;
-			player.setItemInHand(item);
+			if (player != null) {
+				player.setItemInHand(item);
+			}
 		} else if (property.equals("quest")) {
 			if ((value == null) || (value.equals("null"))) {
 				this.quest_file = null;
@@ -788,6 +800,7 @@ public class NPCQuester extends Quester {
 		if (mode == NPCMode.QUEST_INVULNERABLE) return;
 		if (mode == NPCMode.QUEST_VULNERABLE) return;
 		super.save();
+		if (mode == null) return;
 		
 		if (entity == null) return;
 		Location loc = entity.getBukkitEntity().getLocation();
@@ -1010,6 +1023,18 @@ public class NPCQuester extends Quester {
 			}
 		} catch (Exception e) {
 			MineQuest.log("Problem getting NPC Properties");
+		}
+	}
+	
+	@Override
+	public void targeted(EntityTargetEvent event) {
+		super.targeted(event);
+		
+		if (isProtected()) {
+			event.setCancelled(true);
+			if (event.getEntity() instanceof Creature) {
+				((Creature)event.getEntity()).setTarget(null);
+			}
 		}
 	}
 

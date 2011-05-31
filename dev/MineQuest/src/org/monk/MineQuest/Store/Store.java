@@ -166,14 +166,7 @@ public class Store {
 			page = 1;
 		}
 		
-		String cubes_string;
-		if (quester.getCubes() > 1000000) {
-			cubes_string = (((int)((double)quester.getCubes()) / 1000.0)/1000) + "M";
-		} else if (quester.getCubes() > 1000) {
-			cubes_string = ((double)quester.getCubes() / 1000.0) + "K";
-		} else {
-			cubes_string = quester.getCubes() + "";
-		}
+		String cubes_string = StoreBlock.convert((long)quester.getCubes());
 		player.sendMessage(name + ": page " + (page) + " of " + num_page + " - You have " + cubes_string + "C");
 		player.sendMessage("     Type - Price - Quantity");
 		
@@ -345,6 +338,13 @@ public class Store {
 		}
 		
 		return blocks.get(second_index);
+	}
+
+	public void setBlockQuant(String type, int amount) {
+		StoreBlock block = getBlock(type);
+		if (block == null) return;
+		
+		block.setQuantity(amount);
 	}
 
 }

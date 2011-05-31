@@ -102,74 +102,46 @@ public class MineQuest extends JavaPlugin {
 	private static int exp_damage;
 	private static boolean half_damage;
 	private static boolean health_spawn_enable;
-	
 	private static iConomy IConomy = null;
 	private static boolean log_health_change;
 	private static int maxClass;
-	
 	private static MQMob mobs[];
-	
+	private static int[] money_amounts;
+	private static String[] money_names;
 	private static boolean mq_damage_system;
-	
-	private static String namer;
-	
+    private static String namer;
 	private static List<String> noMobs;
-	
     private static String npc_attack_type;
-	
-	private static int npc_cost;
-    
+    private static int npc_cost;
     private static int npc_cost_class;
-    
-    private static boolean npc_enabled;
-	
-    private static NPCManager npc_m;
-	
+	private static boolean npc_enabled;
+	private static NPCManager npc_m;
 	private static NPCStringConfig npc_strings = new NPCStringConfig();
-	
 	private static PermissionHandler permissionHandler;
-	
 	private static double price_change;
-	
-	private static List<Quester> questers = new ArrayList<Quester>();
-
+	private static List<Quester> questers = new ArrayList<Quester>(); 
 	private static Quest[] quests;
-	
 	private static ResourceClassConfig resource_config;
-	 
 	private static double sell_percent;
-	
 	private static Server server;
-	
-	//	private MineQuestVehicleListener vl;
+//	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
 	private static String server_owner;
-	
 	private static String skeleton_type;
-	
 	private static SkillClassConfig skill_config;
-	
 	private static MysqlInterface sql_server;
-	
 	private static Location start;
-
 	private static String[] starting_classes;
 	private static int starting_health;
-
 	private static boolean town_enable = true;
-
 	private static int[] town_exceptions;
-	
 	private static boolean town_no_mobs;
-
 	private static boolean town_protect;
-
 	private static boolean town_respawn;
-
 	private static List<Town> towns = new ArrayList<Town>();
-
 	private static boolean track_destroy;
 	private static boolean track_kills;
+	
 	public static void addMob(LivingEntity entity) {
 		Random generator = new Random();
 		MQMob newMob;
@@ -516,6 +488,14 @@ public class MineQuest extends JavaPlugin {
 		return i;
 	}
 
+	public static int[] getMoneyAmounts() {
+		return money_amounts;
+	}
+
+	public static String[] getMoneyNames() {
+		return money_names;
+	}
+	
 	/**
 	 * Returns whatever town has the closest spawn point to
 	 * the Location.
@@ -537,7 +517,6 @@ public class MineQuest extends JavaPlugin {
 		
 		return town;
 	}
-
 	public static int getNextAbilId() {
 		int num = 0;
 		try {
@@ -555,6 +534,7 @@ public class MineQuest extends JavaPlugin {
 	public static String getNPCAttackType() {
 		return npc_attack_type;
 	}
+	
 	public static int getNPCCostArcher() {
 		return npc_cost_class;
 	}
@@ -562,7 +542,7 @@ public class MineQuest extends JavaPlugin {
 	public static int getNPCCostLevel() {
 		return npc_cost;
 	}
-	
+
 	public static int getNPCCostPeaceMage() {
 		return npc_cost_class;
 	}
@@ -570,11 +550,11 @@ public class MineQuest extends JavaPlugin {
 	public static int getNPCCostWarMage() {
 		return npc_cost_class;
 	}
-
+	
 	public static int getNPCCostWarrior() {
 		return npc_cost_class;
 	}
-	
+
 	public static NPCManager getNPCManager() {
 		return npc_m;
 	}
@@ -582,7 +562,7 @@ public class MineQuest extends JavaPlugin {
 	public static NPCStringConfig getNPCStringConfiguration() {
 		return npc_strings;
 	}
-
+	
 	public static PermissionHandler getPermissions() {
 		return permissionHandler;
 	}
@@ -590,7 +570,6 @@ public class MineQuest extends JavaPlugin {
 	public static double getPriceChange() {
 		return price_change;
 	}
-	
 	/**
 	 * Gets a Quester of a specific Player
 	 * 
@@ -602,8 +581,8 @@ public class MineQuest extends JavaPlugin {
 		
 		return getQuester(((HumanEntity)player).getName());
 	}
-	
-	/**
+    
+    /**
 	 * Gets a Quester with a specific player name
 	 * 
 	 * @param name Name of Quester
@@ -621,6 +600,7 @@ public class MineQuest extends JavaPlugin {
 		log("[WARNING] Cannot find quester " + name);
 		return null;
 	}
+
 	/**
 	 * Returns lists of Questers within server.
 	 * 
@@ -629,11 +609,11 @@ public class MineQuest extends JavaPlugin {
 	static public List<Quester> getQuesters() {
 		return questers;
 	}
-    
-    public static Quest[] getQuests() {
+	
+	public static Quest[] getQuests() {
 		return quests;
 	}
-
+	
 	public static ResourceClassConfig getResourceConfig() {
 		return resource_config;
 	}
@@ -645,7 +625,6 @@ public class MineQuest extends JavaPlugin {
 	public static String getSkeletonType() {
 		return skeleton_type;
 	}
-	
 	public static SkillClassConfig getSkillConfig() {
 		return skill_config;
 	}
@@ -659,6 +638,7 @@ public class MineQuest extends JavaPlugin {
 	public static MysqlInterface getSQLServer() {
 		return sql_server;
 	}
+	
 	/**
 	 * Returns the Bukkit Server.
 	 * 
@@ -699,7 +679,7 @@ public class MineQuest extends JavaPlugin {
 		
 		return null;
 	}
-	
+
 	/**
 	 * Gets a town based on name of the town.
 	 * 
@@ -717,11 +697,10 @@ public class MineQuest extends JavaPlugin {
 		
 		return null;
 	}
-	
 	public static int[] getTownExceptions() {
 		return town_exceptions;
 	}
-
+	
 	/**
 	 * Gets the list of towns in the server.
 	 * 
@@ -730,6 +709,7 @@ public class MineQuest extends JavaPlugin {
 	static public List<Town> getTowns() {
 		return towns;
 	}
+	
 	/**
 	 * Determines if all three axis of loc have higher value
 	 * than loc2.
@@ -912,11 +892,11 @@ public class MineQuest extends JavaPlugin {
 		//log.info("[MineQuest] " + string);
 		System.out.println("[MineQuest] " + string);
 	}
-	
+
 	public static boolean logHealthChange() {
 		return log_health_change;
 	}
-	
+
 	public static boolean mqDamageEnabled(Quester quester) {
 		if (!mq_damage_system) {
 			return false;
@@ -1069,7 +1049,6 @@ public class MineQuest extends JavaPlugin {
 		
 		addMQMob(newMob);
 	}
-
 	public static boolean townRespawn() {
 		return town_respawn;
 	}
@@ -1079,16 +1058,16 @@ public class MineQuest extends JavaPlugin {
 		
 		return;
 	}
+	
 	private MineQuestBlockListener bl;
-
 	private MineQuestEntityListener el;
 	private MineQuestPlayerListener pl;
-	
 	private MineQuestServerListener sl;
-	
 	private String version;
+	private static int heal_event;
 	
 	public MineQuest() {
+		heal_event = 0;
 	}
 	
 	private void addColumns(String db, String cols[], String types[]) {
@@ -1117,14 +1096,12 @@ public class MineQuest extends JavaPlugin {
 		
 		return false;
 	}
-	
 	private void createDB() throws Exception {
 		MineQuest.log("Your DB is too old to determine version");
 		MineQuest.log("Upgrading DB to 0.50");
 		
 		upgradeDB(0, 5);
 	}
-	
 	private void downloadAbilities() throws MalformedURLException, IOException {
 		downloadFile("http://www.theminequest.com/download/abilities.jar", "MineQuest/abilities.jar");
 	}
@@ -1165,7 +1142,6 @@ public class MineQuest extends JavaPlugin {
         
         npc_m = new NPCManager(this);
         
-        skill_config = new SkillClassConfig();
         combat_config = new CombatClassConfig();
         resource_config = new ResourceClassConfig();
         
@@ -1186,106 +1162,45 @@ public class MineQuest extends JavaPlugin {
         noMobs = new ArrayList<String>();
         
         try {
-			String url, port, db, user, pass;
-			PropertiesFile minequest = new PropertiesFile("MineQuest/main.properties");
-			PropertiesFile experience = new PropertiesFile("MineQuest/experience.properties");
-			PropertiesFile general = new PropertiesFile("MineQuest/general.properties");
-			PropertiesFile npc = new PropertiesFile("MineQuest/npc.properties");
-			url = minequest.getString("url", "localhost");
-			port = minequest.getString("port", "3306");
-			db = minequest.getString("db", "MineQuest/minequest");
-			user = minequest.getString("user", "root");
-			pass = minequest.getString("pass", "1234");
-			maxClass = minequest.getInt("max_classes", 4);
-			boolean real = minequest.getBoolean("mysql", false);
-			boolean nomobs_main = minequest.getBoolean("no_mobs_main_world", false);
-			if (nomobs_main) {
-				eventQueue.addEvent(new NoMobs(5000, "world"));
-				noMobs.add("world");
-			}
-			sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
+			setupMainProperties();
+			setupExperienceProperties();
+			setupGeneralProperties();
+			setupNPCProperties();
+			setupEconomoyProperties();
 			
-			town_enable = general.getBoolean("town_enable", true);
-			npc_enabled = general.getBoolean("npc_enable", true);
-			track_kills = general.getBoolean("track_kills", true);
-			track_destroy = general.getBoolean("track_destroy", true);
-			town_protect = general.getBoolean("town_protect", true);
-			town_no_mobs = general.getBoolean("town_no_mobs", true);
-			log_health_change = general.getBoolean("log_health_change", true);
-			cubonomy_enable = general.getBoolean("cubonomy_enable", true);
-			debug_enable = general.getBoolean("debug_enable", true);
-			health_spawn_enable = general.getBoolean("health_spawn_enable", false);
-			boolean slow_heal = general.getBoolean("slow_heal", false);
-			if (slow_heal) {
-				int amount = general.getInt("slow_heal_amount", 1);
-				int delay = general.getInt("slow_heal_delay_ms", 1500);
-				getEventParser().addEvent(new HealEvent(delay, amount));
-			}
-			server_owner = general.getString("mayor", "jmonk");
-			disable_worlds = general.getString("disable_worlds", "").split(",");
-			sell_percent = general.getDouble("sell_return", .92);
-			price_change = general.getDouble("price_change", .009);
-			starting_health = general.getInt("starting_health", 10);
-			town_respawn = general.getBoolean("town_respawn", true);
-			String exceptions = general.getString("town_edit_exception", "64,77");
-			if (exceptions.contains(",")) {
-				String[] split = exceptions.split(",");
-				town_exceptions = new int[split.length];
-				int i;
-				for (i = 0; i < split.length; i++) {
-					town_exceptions[i] = Integer.parseInt(split[i]);
-				}
-			} else {
-				try {
-					town_exceptions = new int[] {Integer.parseInt(exceptions)};
-				} catch (Exception e) {
-					town_exceptions = new int[0];
-				}
-			}
-			mq_damage_system = general.getBoolean("mq_damage_system", true);
-			
-			npc_cost = npc.getInt("npc_cost_level", 1000);
-			npc_cost_class = npc.getInt("npc_cost_class", 1000);
-			npc_attack_type = npc.getString("npc_attack_type", "Warrior");
+			sql_server.update("CREATE TABLE IF NOT EXISTS"
+							+ " npc (name VARCHAR(30), property VARCHAR(30), value VARCHAR(300))");
 
-			destroy_class_exp = experience.getInt("destroy_class", 5);
-			destroy_non_class_exp = experience.getInt("destroy_non_class", 2);
-			destroy_block_exp = experience.getInt("destroy_block", 2);
-			adjustment_multiplier = experience.getInt("adjustment_multiplier",
-					1);
-			exp_damage = experience.getInt("damage", 3);
-			cast_ability_exp = experience.getInt("cast_ability", 5);
-			exp_class_damage = experience.getInt("class_damage", 5);
-			starting_classes = general.getString("starting_classes", "Warrior,Archer,WarMage,PeaceMage,Miner,Digger,Lumberjack,Farmer").split(",");
-			skeleton_type = general.getString("skeleton_type", "WarMage");
-			half_damage = general.getBoolean("half_damage", true);
-			deny_non_class = general.getBoolean("deny_non_class", true);
+			sql_server.update("CREATE TABLE IF NOT EXISTS"
+							+ " binds (name VARCHAR(30), abil VARCHAR(30), bind INT, bind_2 INT)");
 
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS npc (name VARCHAR(30), property VARCHAR(30), value VARCHAR(300))");
+			sql_server.update("CREATE TABLE IF NOT EXISTS"
+							+ " chests (name VARCHAR(30), town VARCHAR(30), x INT, y INT, z INT)");
 
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS binds (name VARCHAR(30), abil VARCHAR(30), bind INT, bind_2 INT)");
+			sql_server.update("CREATE TABLE IF NOT EXISTS"
+					+ " kills (name VARCHAR(30), type VARCHAR(30), count INT)");
 
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS chests (name VARCHAR(30), town VARCHAR(30), x INT, y INT, z INT)");
+			sql_server.update("CREATE TABLE IF NOT EXISTS"
+							+ " quests (name VARCHAR(30), type VARCHAR(1), file VARCHAR(30))");
 
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS kills (name VARCHAR(30), type VARCHAR(30), count INT)");
-
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS quests (name VARCHAR(30), type VARCHAR(1), file VARCHAR(30))");
-
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS questers (name VARCHAR(30), health INT, max_health INT, cubes DOUBLE, exp INT, "
-							+ "last_town VARCHAR(30), level INT, enabled INT, selected_chest VARCHAR(33), classes VARCHAR(150), "
-							+ "mode VARCHAR(30) DEFAULT 'Quester', world VARCHAR(30) DEFAULT 'world', x DOUBLE DEFAULT '0', y DOUBLE DEFAULT '0', z DOUBLE DEFAULT '0', "
+			sql_server.update("CREATE TABLE IF NOT EXISTS"
+							+ " questers (name VARCHAR(30), health INT, "
+							+ "max_health INT, cubes DOUBLE, exp INT, "
+							+ "last_town VARCHAR(30), level INT, "
+							+ "enabled INT, selected_chest VARCHAR(33), "
+							+ "classes VARCHAR(150), mode VARCHAR(30) DEFAULT 'Quester', "
+							+ "world VARCHAR(30) DEFAULT 'world', x DOUBLE DEFAULT '0', "
+							+ "y DOUBLE DEFAULT '0', z DOUBLE DEFAULT '0', "
 							+ "pitch DOUBLE DEFAULT '0', yaw DOUBLE DEFAULT '0')");
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
-			sql_server
-					.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', abil2 VARCHAR(30) DEFAULT '0',"
-							+ "abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', abil9 VARCHAR(30) DEFAULT '0')");
+			sql_server.update("CREATE TABLE IF NOT EXISTS classes (name VARCHAR(30), "
+							+ "class VARCHAR(30), exp INT, level INT, abil_list_id INT)");
+			sql_server.update("CREATE TABLE IF NOT EXISTS abilities (abil_list_id INT, "
+							+ "abil0 VARCHAR(30) DEFAULT '0', abil1 VARCHAR(30) DEFAULT '0', "
+							+ "abil2 VARCHAR(30) DEFAULT '0',"
+							+ "abil3 VARCHAR(30) DEFAULT '0', abil4 VARCHAR(30) DEFAULT '0', "
+							+ "abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', "
+							+ "abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', "
+							+ "abil9 VARCHAR(30) DEFAULT '0')");
 		} catch (Exception e) {
 			MineQuest.log("Unable to initialize configuration");
         	MineQuest.log("Check configuration in MineQuest directory");
@@ -1322,7 +1237,7 @@ public class MineQuest extends JavaPlugin {
 			}
 		} catch (Exception e) {
 			log("Unable to upgrade DB - Disabling MineQuest");
-//			e.printStackTrace();
+			e.printStackTrace();
 			onDisable();
 			return;
 		}
@@ -1403,6 +1318,110 @@ public class MineQuest extends JavaPlugin {
 		setupIConomy();
 		setupPermissions();
 	}
+	
+	private static void setupEconomoyProperties() {
+		PropertiesFile economy = new PropertiesFile("MineQuest/economy.properties");
+		
+		sell_percent = economy.getDouble("sell_return", .92);
+		price_change = economy.getDouble("price_change", .009);
+		
+		money_names = economy.getString("money_names", "GC,MC,KC,C").split(",");
+		money_amounts = SkillClassConfig.intList(economy.getString("money_amounts", "1000000000,1000000,1000,0"));
+
+		cubonomy_enable = economy.getBoolean("cubonomy_enable", true);
+	}
+
+	private static void setupNPCProperties() {
+		PropertiesFile npc = new PropertiesFile("MineQuest/npc.properties");
+
+		npc_cost = npc.getInt("npc_cost_level", 1000);
+		npc_cost_class = npc.getInt("npc_cost_class", 1000);
+		npc_attack_type = npc.getString("npc_attack_type", "Warrior");
+	}
+
+	private static void setupGeneralProperties() {
+		PropertiesFile general = new PropertiesFile("MineQuest/general.properties");
+		
+		town_enable = general.getBoolean("town_enable", true);
+		npc_enabled = general.getBoolean("npc_enable", true);
+		track_kills = general.getBoolean("track_kills", true);
+		track_destroy = general.getBoolean("track_destroy", true);
+		town_protect = general.getBoolean("town_protect", true);
+		log_health_change = general.getBoolean("log_health_change", true);
+		starting_classes = general.getString("starting_classes", "Warrior,Archer,WarMage,PeaceMage,Miner,Digger,Lumberjack,Farmer").split(",");
+		skeleton_type = general.getString("skeleton_type", "WarMage");
+		half_damage = general.getBoolean("half_damage", true);
+		deny_non_class = general.getBoolean("deny_non_class", true);
+		debug_enable = general.getBoolean("debug_enable", true);
+		health_spawn_enable = general.getBoolean("health_spawn_enable", false);
+		boolean slow_heal = general.getBoolean("slow_heal", false);
+		if (slow_heal) {
+			int amount = general.getInt("slow_heal_amount", 1);
+			int delay = general.getInt("slow_heal_delay_ms", 1500);
+			heal_event = getEventParser().addEvent(new HealEvent(delay, amount));
+		} else {
+			if (heal_event != 0) {
+				MineQuest.getEventParser().cancel(heal_event);
+			}
+		}
+		server_owner = general.getString("mayor", "jmonk");
+		disable_worlds = general.getString("disable_worlds", "").split(",");
+		starting_health = general.getInt("starting_health", 10);
+		town_respawn = general.getBoolean("town_respawn", true);
+		String exceptions = general.getString("town_edit_exception", "64,77");
+		if (exceptions.contains(",")) {
+			String[] split = exceptions.split(",");
+			town_exceptions = new int[split.length];
+			int i;
+			for (i = 0; i < split.length; i++) {
+				town_exceptions[i] = Integer.parseInt(split[i]);
+			}
+		} else {
+			try {
+				town_exceptions = new int[] {Integer.parseInt(exceptions)};
+			} catch (Exception e) {
+				town_exceptions = new int[0];
+			}
+		}
+		mq_damage_system = general.getBoolean("mq_health_system", true);
+	}
+
+	private static void setupExperienceProperties() {
+		PropertiesFile experience = new PropertiesFile("MineQuest/experience.properties");
+
+		destroy_class_exp = experience.getInt("destroy_class", 5);
+		destroy_non_class_exp = experience.getInt("destroy_non_class", 2);
+		destroy_block_exp = experience.getInt("destroy_block", 2);
+		adjustment_multiplier = experience.getInt("adjustment_multiplier",
+				1);
+		exp_damage = experience.getInt("damage", 3);
+		cast_ability_exp = experience.getInt("cast_ability", 5);
+		exp_class_damage = experience.getInt("class_damage", 5);
+	}
+
+	private static void setupMainProperties() throws Exception {
+		PropertiesFile minequest = new PropertiesFile("MineQuest/main.properties");
+		String url, port, db, user, pass;
+		
+		url = minequest.getString("url", "localhost");
+		port = minequest.getString("port", "3306");
+		db = minequest.getString("db", "MineQuest/minequest");
+		user = minequest.getString("user", "root");
+		pass = minequest.getString("pass", "1234");
+		maxClass = minequest.getInt("max_classes", 4);
+		boolean real = minequest.getBoolean("mysql", false);
+		boolean nomobs_main = minequest.getBoolean("no_mobs_main_world", false);
+		if (nomobs_main) {
+			eventQueue.addEvent(new NoMobs(5000, "world"));
+			noMobs.add("world");
+		} else {
+			if (noMobs.contains("world")) {
+				noMobs.remove("world");
+			}
+		}
+		town_no_mobs = minequest.getBoolean("town_no_mobs", true);
+		sql_server = new MysqlInterface(url, port, db, user, pass, minequest.getInt("silent", 1), real);
+	}
 	private void setupIConomy() {
 		Plugin test = this.getServer().getPluginManager().getPlugin(
 				"iConomy");
@@ -1414,6 +1433,7 @@ public class MineQuest extends JavaPlugin {
 			}
 		}
 	}
+	
 	private void setupPermissions() {
 		Plugin permissionsPlugin = this.getServer().getPluginManager()
 				.getPlugin("Permissions");
@@ -1424,11 +1444,10 @@ public class MineQuest extends JavaPlugin {
 						.getHandler();
 			} else {
 				permissionHandler = null;
-				log("Permission system not detected, defaulting to OP");
+				log("Permission system not detected");
 			}
 		}
 	}
-	
 	private void upgradeDB(int oldVersion, int newVersion) throws Exception {
 		String cols[] = null;
 		String types[] = null;
@@ -1468,7 +1487,7 @@ public class MineQuest extends JavaPlugin {
 
 			addColumns("towns", cols, types);
 		}
-		if (newVersion == 5) {
+		if (oldVersion < 5) {
 			ResultSet results = sql_server.query("SELECT * FROM questers");
 			List<String> questers = new ArrayList<String>();
 			List<Boolean> npc_flag = new ArrayList<Boolean>();
@@ -1631,9 +1650,27 @@ public class MineQuest extends JavaPlugin {
 		sql_server.update("INSERT INTO version (version) VALUES('" + version + "')");
 		
 	}
-	
 	private void upgradeDB(String string) throws Exception {
 		int oldVersion = (int)(Double.parseDouble(string) * 10);
+
 		upgradeDB(oldVersion, 5);
+	}
+
+	public static void reloadConfig() {
+		MineQuest.log("Loading Economy Properties");
+		setupEconomoyProperties();
+		MineQuest.log("Loading Experience Properties");
+		setupExperienceProperties();
+		MineQuest.log("Loading General Properties");
+		setupGeneralProperties();
+		MineQuest.log("Loading NPC Properties");
+		setupNPCProperties();
+
+		MineQuest.log("Loading Combat Class Config");
+        combat_config = new CombatClassConfig();
+		MineQuest.log("Loading Resource Class Config");
+        resource_config = new ResourceClassConfig();
+		MineQuest.log("Loading Ability Config - Warning: will not affect loaded abilities!!");
+        ability_config = new AbilityConfigManager();
 	}
 }

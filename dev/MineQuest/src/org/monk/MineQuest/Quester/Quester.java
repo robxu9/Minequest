@@ -43,6 +43,7 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -82,10 +83,12 @@ public class Quester {
 	protected List<QuestProspect> completed;
 	protected double cubes;
 	protected boolean debug;
+	protected Map<Material, Integer> destroyed;
 	protected double distance;
 	protected boolean enabled;
 	protected int exp;
 	protected int health;
+	private List<Integer> ids = new ArrayList<Integer>();
 	protected CreatureType[] kills;
 	protected String last;
 	protected int level;
@@ -97,9 +100,7 @@ public class Quester {
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
-	protected Map<Material, Integer> destroyed;
 	private List<Long> times = new ArrayList<Long>();
-	private List<Integer> ids = new ArrayList<Integer>();
 
 	public Quester() {
 	}
@@ -310,6 +311,26 @@ public class Quester {
 				+ quest.getFile() + "')");
 	}
 
+	public void armSwing() {
+		HashSet<Byte> transparent = new HashSet<Byte>();
+		transparent.add((byte)Material.AIR.getId());
+		transparent.add((byte)Material.GLASS.getId());
+		transparent.add((byte)Material.FIRE.getId());
+		transparent.add((byte)Material.WATER.getId());
+		List<Block> block = player.getLineOfSight(transparent, 30);
+
+		if (block.size() > 0) {
+			for (SkillClass skill : classes) {
+				if (skill.isLookAbilityItem(player.getItemInHand())) {
+					sendMessage("Last!");
+					skill.callLookAbility(block.get(block.size() - 1));
+				}
+			}
+		} else {
+			sendMessage("None!");
+		}
+	}
+
 	/**
 	 * Called whenever a Quester attacks any other entity.
 	 * 
@@ -381,7 +402,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	/**
 	 * Binds an Ability to click of the item
 	 * in the players hand.
@@ -408,25 +429,6 @@ public class Quester {
 		return;
 	}
 	
-	public void lookBind(String name) {
-		for (SkillClass skill : classes) {
-			skill.unBind(player.getItemInHand());
-		}
-
-		for (SkillClass skill : classes) {
-			if (skill.getAbility(name) != null) {
-				if (skill.getAbility(name) instanceof PassiveAbility) {
-					sendMessage("Passive Abilities cannot be bound, must be enabled");
-				} else {
-					skill.getAbility(name).lookBind(this, player.getItemInHand());
-				}
-				return;
-			}
-		}
-		sendMessage(name + " is not a valid ability");
-		return;
-	}
-	
 	public void bind(String ability, ItemStack itemStack) {
 		for (SkillClass skill : classes) {
 			skill.silentUnBind(itemStack);
@@ -439,18 +441,6 @@ public class Quester {
 		}
 	}
 	
-	public void lookBind(String ability, ItemStack itemStack) {
-		for (SkillClass skill : classes) {
-			skill.silentUnBind(itemStack);
-		}
-
-		for (SkillClass skill : classes) {
-			if (skill.getAbility(ability) != null) {
-				skill.getAbility(ability).lookBind(this, itemStack);
-			}
-		}
-	}
-
 	/**
 	 * Determines which resource class a given block belongs to.
 	 * 
@@ -502,7 +492,7 @@ public class Quester {
 		}
 		return 4;
 	}
-	
+
 	public void callAbility() {
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())){
@@ -562,6 +552,17 @@ public class Quester {
 				return false;
 			}
 		}
+		return true;
+	}
+	
+	public boolean canCommand(String string) {
+		if (MineQuest.isPermissionsEnabled() && (player != null)) {
+			if (!MineQuest.getPermissions().has((Player) player, "MineQuest.Command." + string)) {
+				return false;
+			}
+		}
+		
+		
 		return true;
 	}
 
@@ -628,7 +629,69 @@ public class Quester {
 		return true;
 	}
 	
-	private boolean checkDamage(DamageCause cause) {
+	public boolean canUse(ItemStack item) {
+		boolean class_item = false;
+		boolean can_use = false;
+		for (String type : MineQuest.getFullClassNames()) {
+			SkillClass skill = getClass(type);
+			if (skill != null) {
+				if (skill.isClassItem(item)) {
+					if (skill.canUse(item)) {
+						class_item = true;
+						can_use = true;
+					} else {
+						if (!class_item) {
+							class_item = true;
+							can_use = false;
+						}
+					}
+				}
+			} else {
+				SkillClass shell = SkillClass.newShell(type);
+				if (shell.isClassItem(item)) {
+					if (MineQuest.denyNonClass() && !class_item) {
+						class_item = true;
+						can_use = false;
+					}
+				}
+			}
+		}
+		
+		return !class_item || can_use;
+	}
+
+	public boolean canWear(ItemStack item) {
+		boolean class_armor = false;
+		boolean can_use = false;
+		for (String type : MineQuest.getFullClassNames()) {
+			SkillClass skill = getClass(type);
+			if (skill != null) {
+				if (skill.isArmor(item)) {
+					if (skill.canWear(item)) {
+						class_armor = true;
+						can_use = true;
+					} else {
+						if (!class_armor) {
+							class_armor = true;
+							can_use = false;
+						}
+					}
+				}
+			} else {
+				SkillClass shell = SkillClass.newShell(type);
+				if (shell.isArmor(item)) {
+					if (MineQuest.denyNonClass() && !class_armor) {
+						class_armor = true;
+						can_use = false;
+					}
+				}
+			}
+		}
+		
+		return !class_armor || can_use;
+    }
+    
+    private boolean checkDamage(DamageCause cause) {
         if (cause == DamageCause.FIRE) {
         	return checkDamage(24040);
         } else if (cause == DamageCause.FIRE_TICK) {
@@ -643,7 +706,7 @@ public class Quester {
         	return checkDamage(24045);
         }
 	}
-
+	
 	/**
      * This function will check if the damager in the event passed
      * has damaged the quester too recently to damage again.
@@ -679,38 +742,7 @@ public class Quester {
 	    
 	    return false;
     }
-    
-    public boolean canWear(ItemStack item) {
-		boolean class_armor = false;
-		boolean can_use = false;
-		for (String type : MineQuest.getFullClassNames()) {
-			SkillClass skill = getClass(type);
-			if (skill != null) {
-				if (skill.isArmor(item)) {
-					if (skill.canWear(item)) {
-						class_armor = true;
-						can_use = true;
-					} else {
-						if (!class_armor) {
-							class_armor = true;
-							can_use = false;
-						}
-					}
-				}
-			} else {
-				SkillClass shell = SkillClass.newShell(type);
-				if (shell.isArmor(item)) {
-					if (MineQuest.denyNonClass() && !class_armor) {
-						class_armor = true;
-						can_use = false;
-					}
-				}
-			}
-		}
-		
-		return !class_armor || can_use;
-    }
-	
+
 	/**
 	 * Checks if a Quester can use all of the equipment
 	 * that they are wearing. It checks with each class
@@ -729,7 +761,7 @@ public class Quester {
 				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getBoots().getTypeId(), 1));
 			}
 			inven.setBoots(null);
-			sendMessage("You are not high enough level to use those boots");
+			sendMessage("You are not proficient in the use of those boots");
 		}
 		if (!canWear(inven.getChestplate())) {
 			if (inven.firstEmpty() != -1) {
@@ -738,7 +770,7 @@ public class Quester {
 				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getChestplate().getTypeId(), 1));
 			}
 			inven.setChestplate(null);
-			sendMessage("You are not high enough level to use that chestplate");
+			sendMessage("You are not proficient in the use of that chestplate");
 		}
 		if (!canWear(inven.getHelmet())) {
 			if (inven.firstEmpty() != -1) {
@@ -747,7 +779,7 @@ public class Quester {
 				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getHelmet().getTypeId(), 1));
 			}
 			inven.setHelmet(null);
-			sendMessage("You are not high enough level to use that helmet");
+			sendMessage("You are not proficient in the use of that helmet");
 		}
 		if (!canWear(inven.getLeggings())) {
 			if (inven.firstEmpty() != -1) {
@@ -756,7 +788,7 @@ public class Quester {
 				player.getWorld().dropItem(player.getLocation(), new ItemStack(inven.getLeggings().getTypeId(), 1));
 			}
 			inven.setLeggings(null);
-			sendMessage("You are not high enough level to use those leggings");
+			sendMessage("You are not proficient in the use of those leggings");
 		}
 	}
 
@@ -780,43 +812,12 @@ public class Quester {
 			
 			inven.setItemInHand(null);
 			if (player instanceof Player) {
-				((Player)player).sendMessage("You are not high enough level to use that weapon");
+				((Player)player).sendMessage("You are not proficient in the use of that item");
 			}
 			return true;
 		}
 
 		return false;
-	}
-
-	public boolean canUse(ItemStack item) {
-		boolean class_item = false;
-		boolean can_use = false;
-		for (String type : MineQuest.getFullClassNames()) {
-			SkillClass skill = getClass(type);
-			if (skill != null) {
-				if (skill.isClassItem(item)) {
-					if (skill.canUse(item)) {
-						class_item = true;
-						can_use = true;
-					} else {
-						if (!class_item) {
-							class_item = true;
-							can_use = false;
-						}
-					}
-				}
-			} else {
-				SkillClass shell = SkillClass.newShell(type);
-				if (shell.isClassItem(item)) {
-					if (MineQuest.denyNonClass() && !class_item) {
-						class_item = true;
-						can_use = false;
-					}
-				}
-			}
-		}
-		
-		return !class_item || can_use;
 	}
 
 	/**
@@ -836,6 +837,50 @@ public class Quester {
 		}
 		
 		return false;
+	}
+	
+	public void clearDestroyed() {
+		if (MineQuest.isTrackingDestroy()) {
+			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
+			
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + name + "'");
+			
+			try {
+				while (results.next()) {
+					if (CreatureType.fromName(results.getString("type")) != null) {
+						kill_map.put(CreatureType.fromName(results.getString("type")), results.getInt("count"));
+					}
+					if (Material.getMaterial(results.getString("type")) != null) {
+						if (destroyed.get(results.getString("type")) == null) {
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count"));
+						} else {
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(results.getString("name")));
+						}
+					}
+				}
+			} catch (Exception e) {
+			}
+			
+			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + "'");
+			
+			for (CreatureType creature : kill_map.keySet()) {
+				MineQuest.getSQLServer().update(
+						"INSERT INTO kills (name, type, count) VALUES('"
+								+ name + "', '"
+								+ creature.getName() + "', '"
+								+ kill_map.get(creature) + "')");
+			}
+			
+			for (Material material : destroyed.keySet()) {
+				MineQuest.getSQLServer().update(
+						"INSERT INTO kills (name, type, count) VALUES('"
+								+ name + "', '"
+								+ material.name() + "', '"
+								+ destroyed.get(material) + "')");
+			}
+		}
+		
+		destroyed.clear();
 	}
 	
 	public void clearKills() {
@@ -893,50 +938,6 @@ public class Quester {
 		kills = new CreatureType[0];
 	}
 	
-	public void clearDestroyed() {
-		if (MineQuest.isTrackingDestroy()) {
-			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
-			
-			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + name + "'");
-			
-			try {
-				while (results.next()) {
-					if (CreatureType.fromName(results.getString("type")) != null) {
-						kill_map.put(CreatureType.fromName(results.getString("type")), results.getInt("count"));
-					}
-					if (Material.getMaterial(results.getString("type")) != null) {
-						if (destroyed.get(results.getString("type")) == null) {
-							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count"));
-						} else {
-							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(results.getString("name")));
-						}
-					}
-				}
-			} catch (Exception e) {
-			}
-			
-			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + "'");
-			
-			for (CreatureType creature : kill_map.keySet()) {
-				MineQuest.getSQLServer().update(
-						"INSERT INTO kills (name, type, count) VALUES('"
-								+ name + "', '"
-								+ creature.getName() + "', '"
-								+ kill_map.get(creature) + "')");
-			}
-			
-			for (Material material : destroyed.keySet()) {
-				MineQuest.getSQLServer().update(
-						"INSERT INTO kills (name, type, count) VALUES('"
-								+ name + "', '"
-								+ material.name() + "', '"
-								+ destroyed.get(material) + "')");
-			}
-		}
-		
-		destroyed.clear();
-	}
-	
 	public void clearQuest(boolean reset) {
 		this.quest = null;
 		poison_timer = 0;
@@ -964,10 +965,12 @@ public class Quester {
 		
 		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health) VALUES('"
 			+ name + "', '" + name + "', '500000', '0', '0', 'Bitville', '";
-		update_string = update_string + class_names[0];
-		for (String name : class_names) {
-			if (!name.equals(class_names[0])) {
-				update_string = update_string + ", " + name;
+		if ((class_names != null) && (class_names.length > 0)) {
+			update_string = update_string + class_names[0];
+			for (String name : class_names) {
+				if (!name.equals(class_names[0])) {
+					update_string = update_string + ", " + name;
+				}
 			}
 		}
 		update_string = update_string + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingHealth() + "')";
@@ -1064,6 +1067,7 @@ public class Quester {
 			amount = 5;
 		}
 		int levelAdj = MineQuest.getAdjustment();
+		boolean flags[] = new boolean[] {false, false, false, false};
 		if (levelAdj == 0) {
 			levelAdj = 1;
 		} else {
@@ -1100,7 +1104,7 @@ public class Quester {
 		if (classes != null) {
 			for (SkillClass sclass : classes) {
 				if (entity instanceof LivingEntity) {
-					sum += sclass.defend((LivingEntity)entity, amount);
+					sum += sclass.defend((LivingEntity)entity, amount, flags);
 				}
 			}
 		}
@@ -1336,6 +1340,10 @@ public class Quester {
 		return cubes;
 	}
 
+	public Map<Material, Integer> getDestroyed() {
+		return destroyed;
+	}
+
 	/**
 	 * Returns amount of experience for Quester.
 	 * @return
@@ -1362,10 +1370,6 @@ public class Quester {
 
 	public CreatureType[] getKills() {
 		return kills;
-	}
-
-	public Map<Material, Integer> getDestroyed() {
-		return destroyed;
 	}
 
 	/**
@@ -1443,6 +1447,10 @@ public class Quester {
 		return MineQuest.getTown(last);
 	}
 
+	public boolean hasQuester(Quester quester) {
+		return npcParty.getQuesters().contains(quester);
+	}
+	
 	/**
 	 * Called any time a Quester is taking damage of any time
 	 * it adjusts the Quester's health accordingly and sets
@@ -1547,7 +1555,7 @@ public class Quester {
 		
 		return true;
 	}
-	
+
 	public boolean inQuest() {
 		return quest != null;
 	}
@@ -1560,7 +1568,7 @@ public class Quester {
 		}
 		return false;
 	}
-
+	
 	public boolean isAvailable(String quest) {
 		for (QuestProspect qp : available) {
 			if (qp.equals(quest)) {
@@ -1569,7 +1577,7 @@ public class Quester {
 		}
 		return false;
 	}
-	
+
 	public boolean isCompleted(QuestProspect quest) {
 		for (QuestProspect qp : completed) {
 			if (qp.equals(quest)) {
@@ -1587,11 +1595,11 @@ public class Quester {
 		}
 		return false;
 	}
-
+	
 	public boolean isDebug() {
 		return debug;
 	}
-	
+
 	/**
 	 * Returns true if MineQuest is enabled for this
 	 * Quester.
@@ -1637,6 +1645,143 @@ public class Quester {
 		}
 	}
 
+	public void listMercs() {
+		if (npcParty.getQuesters().size() == 0) {
+			sendMessage("You have no mercenaries");
+		} else {
+			sendMessage("Your mercenaries are:");
+			for (Quester quester : npcParty.getQuesters()) {
+				sendMessage(quester.getName());
+			}
+		}
+	}
+
+	public void listProf() {
+		int id = 0;
+		if (player.getItemInHand() != null) {
+			id = player.getItemInHand().getTypeId();
+		}
+		listProf(id);
+	}
+
+	public void listProf(int id) {
+		if (id <= 0) {
+			sendMessage("You are not holding anything");
+			return;
+		}
+		boolean flag = false;
+		
+		for (String class_name : MineQuest.getCombatConfig().getClassNames()) {
+			int i;
+			int ids[] = MineQuest.getCombatConfig().getTypes(class_name);
+			int levels[] = MineQuest.getCombatConfig().getLevels(class_name);
+			if ((ids != null) && (levels != null)) {
+				for (i = 0; i < ids.length; i++) {
+					if (ids[i] == id) {
+						flag = true;
+						String send = class_name + " - Lvl:" + levels[i];
+						send = send + " - Dmg:(" + MineQuest.getCombatConfig().getBaseDamage(class_name)[i];
+						send = send + "-" + MineQuest.getCombatConfig().getMaxDamage(class_name)[i];
+						send = send + ")+ChrLvl/" + MineQuest.getCombatConfig().getCharLevelDmgAdj(class_name)[i];
+						send = send + "+ClsLvl/" + MineQuest.getCombatConfig().getClassLevelDmgAdj(class_name)[i];
+						send = send + " - Crit:" + MineQuest.getCombatConfig().getCritChance(class_name)[i];
+						sendMessage(send);
+					}
+				}
+			}
+		}
+		
+		for (String class_name : MineQuest.getResourceConfig().getClassNames()) {
+			int i;
+			int ids[] = MineQuest.getResourceConfig().getTypes(class_name);
+			int levels[] = MineQuest.getResourceConfig().getLevels(class_name);
+			if ((ids != null) && (levels != null)) {
+				for (i = 0; i < ids.length; i++) {
+					if (ids[i] == id) {
+						flag = true;
+						String send = class_name + " - Lvl:" + levels[i];
+						
+						sendMessage(send);
+					}
+				}
+			}
+		}
+		
+		for (String class_name : MineQuest.getCombatConfig().getClassNames()) {
+			int i;
+			int ids[] = MineQuest.getCombatConfig().getArmor(class_name);
+			int levels[] = MineQuest.getCombatConfig().getArmorLevels(class_name);
+			int blocks[] = MineQuest.getCombatConfig().getArmorBlocks(class_name);
+			double defends[] = MineQuest.getCombatConfig().getArmorDefends(class_name);
+			if ((ids != null) && (levels != null)) {
+				for (i = 0; i < ids.length; i++) {
+					if (ids[i] == id) {
+						flag = true;
+						String send = class_name + " - Lvl:" + levels[i];
+						send = send + " - Chance: " + defends[i];
+						send = send + " - Blocks: " + blocks[i];
+						sendMessage(send);
+					}
+				}
+			}
+		}
+		
+		for (String class_name : MineQuest.getResourceConfig().getClassNames()) {
+			int i;
+			int ids[] = MineQuest.getResourceConfig().getArmor(class_name);
+			int levels[] = MineQuest.getResourceConfig().getArmorLevels(class_name);
+			int blocks[] = MineQuest.getResourceConfig().getArmorBlocks(class_name);
+			double defends[] = MineQuest.getResourceConfig().getArmorDefends(class_name);
+			if ((ids != null) && (levels != null)) {
+				for (i = 0; i < ids.length; i++) {
+					if (ids[i] == id) {
+						flag = true;
+						String send = class_name + " - Lvl:" + levels[i];
+						send = send + " - Chance: " + defends[i];
+						send = send + " - Blocks: " + blocks[i];
+						sendMessage(send);
+					}
+				}
+			}
+		}
+		
+		
+		if (!flag) {
+			sendMessage("No proficiency for this item found");
+		}
+	}
+
+	public void lookBind(String name) {
+		for (SkillClass skill : classes) {
+			skill.unBind(player.getItemInHand());
+		}
+
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(name) != null) {
+				if (skill.getAbility(name) instanceof PassiveAbility) {
+					sendMessage("Passive Abilities cannot be bound, must be enabled");
+				} else {
+					skill.getAbility(name).lookBind(this, player.getItemInHand());
+				}
+				return;
+			}
+		}
+		sendMessage(name + " is not a valid ability");
+		return;
+	}
+	
+	public void lookBind(String ability, ItemStack itemStack) {
+		for (SkillClass skill : classes) {
+			skill.silentUnBind(itemStack);
+		}
+
+		for (SkillClass skill : classes) {
+			if (skill.getAbility(ability) != null) {
+				skill.getAbility(ability).lookBind(this, itemStack);
+			}
+		}
+	}
+	
 	/**
 	 * Called every time a player moves. It makes sure that players
 	 * respawn in the proper town. Handles any poison damage required
@@ -1673,7 +1818,7 @@ public class Quester {
 			setHealth(getHealth() - 1);
 		}
 	}
-
+	
 	/**
 	 * Called each time the player is poisoned.
 	 * Updates the poison counter appropriately.
@@ -1682,7 +1827,58 @@ public class Quester {
 		sendMessage("Poisoned!");
 		poison_timer += 10;
 	}
+	
+	public void priorClass(String string) {
+		String list;
+		if (getClass(string) == null) {
+			sendMessage("You do not have any class " + string);
+			return;
+		}
+		string = getClass(string).getType();
+		list = string;
+		
+		for (SkillClass sclass : classes) {
+			if (!sclass.getType().equals(string)) {
+				list = list + "," + sclass.getType();
+			}
+		}
 
+		MineQuest.getSQLServer().update("UPDATE questers SET classes='" + classes + "' WHERE name='" + this.name + "'");
+		save();
+		update();
+		
+		sendMessage("Class Priority:");
+		for (SkillClass sclass : classes) {
+			sendMessage("  " + sclass.getType());
+		}
+	}
+	
+	public int recalculateHealth() {
+		health = MineQuest.getStartingHealth();
+		Random generator = new Random();
+		
+		for (int i = 0; i < level; i++) {
+			int add_health = generator.nextInt(3) + 1;
+			health += add_health;
+		}
+		
+		for (SkillClass skill : classes) {
+			if (skill instanceof CombatClass) {
+				CombatClass cclass = (CombatClass)skill;
+				for (int i = 0; i < cclass.getLevel(); i++) {
+					int size = cclass.getSize();
+					int add_health = generator.nextInt(size) + 1;
+	
+					health += add_health;
+				}
+			}
+		}
+		
+		max_health = health;
+		
+		return health;
+	}
+	
 	public void regroup() {
 		for (Quester quester : npcParty.getQuesterArray()) {
 			((NPCQuester)quester).setTarget((LivingEntity)null);
@@ -1690,11 +1886,11 @@ public class Quester {
 
 		sendMessage("Regrouping Mercenaries!");
 	}
-
+	
 	public void remNPC(NPCQuester quester) {
 		npcParty.remQuester(quester);
 	}
-
+	
 	public void remQuestAvailable(QuestProspect quest) {
 		available.remove(quest);
 		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='A' AND name='" + name + "' AND file='" + quest.getFile() + "'");
@@ -1807,7 +2003,7 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	/**
 	 * Sets the Health of the Quester.
 	 * 
@@ -1827,11 +2023,11 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	public void setParty(Party party) {
 		this.party = party;
 	}
-	
+
 	/**
 	 * Sets the reference to the Player.
 	 * 
@@ -1843,7 +2039,7 @@ public class Quester {
 		}
 		this.player = player;
 	}
-	
+
 	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
 		
@@ -1872,7 +2068,7 @@ public class Quester {
 		getClass(type).expAdd(amount);
 		sendMessage(amount + " experience spent on " + type);
 	}
-	
+
 	public void startQuest(String string) {
 		if (!isAvailable(string)) {
 			sendMessage("You have no quest named " + string + " available");
@@ -1891,7 +2087,7 @@ public class Quester {
 
 		MineQuest.addQuest(new Quest(getQuestProspect(string).getFile(), party));
 	}
-	
+
 	/**
 	 * Called whenever a Quester is teleported to check for
 	 * respawning.
@@ -1905,7 +2101,7 @@ public class Quester {
 //			setRespawn(true);
 //		}
 	}
-	
+
 	/**
 	 * Unbinds the Item that the Quester is holding
 	 * from all abilities.
@@ -2056,76 +2252,10 @@ public class Quester {
 			}
 		}
 	}
-	
-	public int recalculateHealth() {
-		health = MineQuest.getStartingHealth();
-		Random generator = new Random();
-		
-		for (int i = 0; i < level; i++) {
-			int add_health = generator.nextInt(3) + 1;
-			health += add_health;
-		}
-		
-		for (SkillClass skill : classes) {
-			if (skill instanceof CombatClass) {
-				CombatClass cclass = (CombatClass)skill;
-				for (int i = 0; i < cclass.getLevel(); i++) {
-					int size = cclass.getSize();
-					int add_health = generator.nextInt(size) + 1;
-	
-					health += add_health;
-				}
-			}
-		}
-		
-		max_health = health;
-		
-		return health;
-	}
 
-	public boolean hasQuester(Quester quester) {
-		return npcParty.getQuesters().contains(quester);
-	}
-
-	public void listMercs() {
-		if (npcParty.getQuesters().size() == 0) {
-			sendMessage("You have no mercenaries");
-		} else {
-			sendMessage("Your mercenaries are:");
-			for (Quester quester : npcParty.getQuesters()) {
-				sendMessage(quester.getName());
-			}
+	public void targeted(EntityTargetEvent event) {
+		for (SkillClass sclass : classes) {
+			sclass.targeted(event);
 		}
-	}
-
-	public void armSwing() {
-		HashSet<Byte> transparent = new HashSet<Byte>();
-		transparent.add((byte)Material.AIR.getId());
-		transparent.add((byte)Material.GLASS.getId());
-		transparent.add((byte)Material.FIRE.getId());
-		transparent.add((byte)Material.WATER.getId());
-		List<Block> block = player.getLineOfSight(transparent, 30);
-
-		if (block.size() > 0) {
-			for (SkillClass skill : classes) {
-				if (skill.isLookAbilityItem(player.getItemInHand())) {
-					sendMessage("Last!");
-					skill.callLookAbility(block.get(block.size() - 1));
-				}
-			}
-		} else {
-			sendMessage("None!");
-		}
-	}
-
-	public boolean canCommand(String string) {
-		if (MineQuest.isPermissionsEnabled() && (player != null)) {
-			if (!MineQuest.getPermissions().has((Player) player, "MineQuest.Command." + string)) {
-				return false;
-			}
-		}
-		
-		
-		return true;
 	}
 }

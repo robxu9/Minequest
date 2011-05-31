@@ -308,7 +308,7 @@ public class NPCSignShop extends Store {
 				"Quantity:",
 				block.getQuantity() + "",
 				"Price:",
-				block.getPrice() + ""
+				block.getPriceString() + ""
 		};
 		
 		if (display_2 != null) {
