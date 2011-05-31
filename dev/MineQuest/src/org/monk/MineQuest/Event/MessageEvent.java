@@ -19,6 +19,7 @@
 package org.monk.MineQuest.Event;
 
 import org.monk.MineQuest.Quest.Party;
+import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
 public class MessageEvent extends NormalEvent {
@@ -35,7 +36,9 @@ public class MessageEvent extends NormalEvent {
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		for (Quester quester : party.getQuesterArray()) {
-			quester.sendMessage(message);
+			if (!(quester instanceof NPCQuester)) {
+				quester.sendMessage(message);
+			}
 		}
 	}
 	

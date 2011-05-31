@@ -38,7 +38,6 @@ import org.bukkit.craftbukkit.entity.CraftSpider;
 import org.bukkit.craftbukkit.entity.CraftZombie;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
@@ -187,6 +186,7 @@ public abstract class Ability {
 		return i;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static int getVersion() {
 		try {
 			Class this_class;

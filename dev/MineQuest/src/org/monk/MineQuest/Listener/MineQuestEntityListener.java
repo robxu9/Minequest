@@ -34,7 +34,6 @@ import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Mob.MQMob;
-import org.monk.MineQuest.Quester.NPCQuester;
 
 public class MineQuestEntityListener extends EntityListener {
 	
