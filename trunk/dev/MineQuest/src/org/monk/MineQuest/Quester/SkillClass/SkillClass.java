@@ -30,11 +30,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.DefendingAbility;
+import org.monk.MineQuest.Ability.TargetDefendAbility;
 import org.monk.MineQuest.Quester.Quester;
 
 /**
@@ -358,7 +360,7 @@ public class SkillClass {
 	 * @param amount Amount of damage being dealt
 	 * @return The amount of damage negated by this class
 	 */
-	public int defend(LivingEntity entity, int amount) {
+	public int defend(LivingEntity entity, int amount, boolean flags[]) {
 		int i;
 		int armor[] = MineQuest.getSkillConfig().getArmorLevels(type);
 		double armor_defends[] = MineQuest.getSkillConfig().getArmorDefends(type);
@@ -367,7 +369,7 @@ public class SkillClass {
 		
 		if (armor != null) {
 			for (i = 0; i < armor.length; i++) {
-				if (isWearing(armor[i])) {
+				if (isWearing(armor[i], flags)) {
 					if (generator.nextDouble() < armor_defends[i]) {
 						sum += armor_blocks[i];
 					}
@@ -669,17 +671,23 @@ public class SkillClass {
 	 * a piece of armor.
 	 * 
 	 * @param i ItemId of Item to check
+	 * @param flags 
 	 * @return True if wearing the Item
 	 */
-	protected boolean isWearing(int i) {
+	protected boolean isWearing(int i, boolean[] flags) {
 		if (quester.getPlayer() == null) return false;
+		int ct = 0;;
 
 		PlayerInventory equip = quester.getPlayer().getInventory();
 
 		for (ItemStack itemStack : equip.getArmorContents()) {
 			if (itemStack.getTypeId() == i) {
-				return true;
+				if (!flags[i]) {
+					flags[i] = true;
+					return true;
+				}
 			}
+			ct++;
 		}
 
 		return false;
@@ -818,7 +826,16 @@ public class SkillClass {
 				exp = results.getInt("exp");
 				level = results.getInt("level");
 				abil_list_id = results.getInt("abil_list_id");
-				ability_list = abilListSQL(abil_list_id);
+				
+				if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
+					if (MineQuest.getPermissions().has(quester.getPlayer(), "MineQuest.Abilities")) {
+						ability_list = abilListSQL(abil_list_id);
+					} else {
+						ability_list = new Ability[0];
+					}
+				} else if (!MineQuest.isPermissionsEnabled()) {
+					ability_list = abilListSQL(abil_list_id);
+				}
 				quester.updateBinds();
 			} else {
 				abil_list_id = -1;
@@ -858,6 +875,16 @@ public class SkillClass {
 
 	public boolean isClassBlock(Block block) {
 		return false;
+	}
+
+	public void targeted(EntityTargetEvent event) {
+		for (Ability ability : ability_list) {
+			if (ability instanceof TargetDefendAbility) {
+				if (ability.isEnabled()) {
+					((TargetDefendAbility)ability).targeted(event);
+				}
+			}
+		}
 	}
 
 }

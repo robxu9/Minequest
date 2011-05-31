@@ -462,4 +462,13 @@ public class Town {
 		MineQuest.getSQLServer().update("UPDATE towns SET spawn_x='" + (int)spawn.getX() + "', spawn_y='" + 
 				(int)spawn.getY() + "', spawn_z='" + (int)spawn.getZ() + "' WHERE name='" + name + "'");
 	}
+
+	public void remove(Property prop) {
+		MineQuest.getSQLServer().update(
+				"DELETE FROM " + name + " WHERE x='" + prop.getX()
+						+ "' AND y='" + prop.getY() + "' AND z='" + prop.getZ()
+						+ "' AND max_x='" + prop.getMaxX() + "' AND max_z='"
+						+ prop.getMaxZ() + "'");
+		properties.remove(prop);
+	}
 }

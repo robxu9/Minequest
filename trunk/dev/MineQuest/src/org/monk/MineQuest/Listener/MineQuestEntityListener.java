@@ -111,12 +111,8 @@ public class MineQuestEntityListener extends EntityListener {
 		if (!(event.getTarget() instanceof LivingEntity)) return;
 		LivingEntity target = (LivingEntity) event.getTarget();
 		
-		if (MineQuest.getQuester(target) instanceof NPCQuester) {
-			NPCQuester quester = (NPCQuester)MineQuest.getQuester(target);
-			
-			if (quester.isProtected()) {
-				event.setCancelled(true);
-			}
+		if (MineQuest.getQuester(target) != null) {
+			MineQuest.getQuester(target).targeted(event);
 		}
 	}
 	

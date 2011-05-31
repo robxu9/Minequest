@@ -490,6 +490,21 @@ public class MineQuestPlayerListener extends PlayerListener {
         		MineQuest.getQuester(player).addClass(split[1]);
         	}
         	event.setCancelled(true);
+        } else if (split[0].equals("/prof") || split[0].equals("/proficiency")) {
+        	if (split.length < 2) {
+	        	MineQuest.getQuester(player).listProf();
+        	} else {
+        		int id = Integer.parseInt(split[1]);
+        		MineQuest.getQuester(player).listProf(id);
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/priorityclass")) {
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /priority_class <class_name>");
+        		return;
+        	}
+        	MineQuest.getQuester(player).priorClass(split[1]);
+        	event.setCancelled(true);
         }
 	}
 	
@@ -622,7 +637,7 @@ public class MineQuestPlayerListener extends PlayerListener {
     		}
 			event.setCancelled(true);
         	return;
-        } else if (split[0].equals("/cubes")) {
+        } else if (split[0].equals("/cubes") || split[0].equals("/money")) {
         	String cubes_string = StoreBlock.convert((long)MineQuest.getQuester(player).getCubes());
 	    	
 			player.sendMessage("You have " + cubes_string);
@@ -630,7 +645,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	return;
         } else if (split[0].equals("/addblock")) {
         	if (split.length < 4) {
-        		player.sendMessage("Usage: /addblock type price item_id");
+        		player.sendMessage("Usage: /add_block type price item_id");
         		return;
         	}
         	
@@ -643,6 +658,8 @@ public class MineQuestPlayerListener extends PlayerListener {
     				if (MineQuest.getQuester(player).canEdit(block)) {
         				store.addBlock(split[1], split[2], split[3]);
         				player.sendMessage(split[1] + " added to store");
+    				} else {
+    					player.sendMessage("You are not permitted to edit this store");
     				}
     			} else {
     				player.sendMessage("You are not in a store");
@@ -653,7 +670,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			event.setCancelled(true);
         } else if (split[0].equals("/remblock")) {
         	if (split.length < 2) {
-        		player.sendMessage("Usage: /remblock type");
+        		player.sendMessage("Usage: /rem_block type");
         		return;
         	}
         	
@@ -666,6 +683,40 @@ public class MineQuestPlayerListener extends PlayerListener {
     				if (MineQuest.getQuester(player).canEdit(block)) {
         				store.remBlock(split[1]);
         				player.sendMessage(split[1] + " removed from store");
+    				} else {
+    					player.sendMessage("You are not permitted to edit this store");
+    				}
+    			} else {
+    				player.sendMessage("You are not in a store");
+    			}
+    		} else {
+    			player.sendMessage("You are not in a town");
+    		}
+			event.setCancelled(true);
+        } else if (split[0].equals("/setstorequantity")) {
+        	if (split.length < 3) {
+        		player.sendMessage("Usage: /set_store_quantity type amount");
+        		return;
+        	}
+        	int amount;
+        	try {
+        		amount = Integer.parseInt(split[2]);
+        	} catch (Exception e) {
+        		player.sendMessage("Usage: /set_store_quantity type amount");
+        		return;
+        	}
+        	
+    		Town town = MineQuest.getTown(player);
+    		if (town != null) {
+    			Store store = town.getStore(player);
+
+    			if (store != null) {
+    				Block block = player.getWorld().getBlockAt(player.getLocation());
+    				if (MineQuest.getQuester(player).canEdit(block)) {
+        				store.setBlockQuant(split[1], amount);
+        				player.sendMessage(split[1] + " removed from store");
+    				} else {
+    					player.sendMessage("You are not permitted to edit this store");
     				}
     			} else {
     				player.sendMessage("You are not in a store");
@@ -712,7 +763,13 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
         	
         	Location location = player.getLocation();
-        	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
+    		if (MineQuest.getQuester(split[1]) == null) {
+    			if (nameCheck(split[1], player)) {
+    				MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
+    			}
+    		} else {
+    			player.sendMessage("A quester with that name already exists!");
+    		}
         	event.setCancelled(true);
         } else if (split[0].equals("/deletestore")) {
     		Town town = MineQuest.getTown(player);
@@ -849,7 +906,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if ((MineQuest.getTown(player) != null) && (MineQuest.getTown(player).getProperty(player) != null)) {
         		Property prop = MineQuest.getTown(player).getProperty(player);
         		if (prop.getOwner() == null) {
-        			player.sendMessage("The price of this property is " + prop.getPrice() + " cubes");
+        			player.sendMessage("The price of this property is " + StoreBlock.convert(prop.getPrice()));
         		} else {
         			player.sendMessage("This property is not for sale");
         		}
@@ -875,6 +932,25 @@ public class MineQuestPlayerListener extends PlayerListener {
 	        		}
 	        	} else {
 	        		player.sendMessage("This Property is not for sale");
+	        	}
+        	} else {
+        		player.sendMessage("You are not on a property");
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/remprop")) {
+        	Town town = MineQuest.getTown(player);
+        	if (town == null) {
+        		player.sendMessage("You are not in a town");
+            	event.setCancelled(true);
+            	return;
+        	}
+        	Property prop = town.getProperty(player);
+        	Quester quester = MineQuest.getQuester(player);
+        	if (prop != null) {
+	        	if (town.getTownProperty().canEdit(quester)) {
+	        		town.remove(prop);
+	        	} else {
+	        		player.sendMessage("You are not authorized to modify town");
 	        	}
         	} else {
         		player.sendMessage("You are not on a property");
@@ -1014,7 +1090,13 @@ public class MineQuestPlayerListener extends PlayerListener {
 	    } else if (split[0].equals("/spawnmerc")) {
 	    	if (split.length > 1) {
 	        	if (MineQuest.getTown(player) != null) {
-	        		MineQuest.getTown(player).addMerc(split[1], MineQuest.getQuester(player));
+	        		if (MineQuest.getQuester(split[1]) == null) {
+	        			if (nameCheck(split[1], player)) {
+	        				MineQuest.getTown(player).addMerc(split[1], MineQuest.getQuester(player));
+	        			}
+	        		} else {
+	        			player.sendMessage("A quester with that name already exists!");
+	        		}
 	        	} else {
 	        		player.sendMessage("You are not in a town");
 	        	}
@@ -1074,6 +1156,18 @@ public class MineQuestPlayerListener extends PlayerListener {
 	    }
 	}
 	
+	private boolean nameCheck(String string, Player player) {
+		String[] bad_chars = new String[] {"-", "(", ")", "[", "]", " ", ",", "."};
+		for (String chars : bad_chars) {
+			if (string.contains(chars)) {
+				player.sendMessage("NPC Names cannot contain " + chars);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
 	private void processDebug(String[] split, Player player, PlayerChatEvent event) {
 		if (split[0].equals("/goto")) {
         	if (split.length < 2) {
@@ -1150,6 +1244,15 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/howmany")) {
         	player.sendMessage("There are " + MineQuest.getSServer().getOnlinePlayers().length + " online players");
+        	event.setCancelled(true);
+        } else if (split[0].equals("/reloadconfig")) {
+        	if (player.isOp()) {
+        		player.sendMessage("Reloading...");
+        		MineQuest.reloadConfig();
+        		player.sendMessage("MineQuest Configuration Reloaded");
+        	} else {
+        		player.sendMessage("Only OPs are allowed to reload config");
+        	}
         	event.setCancelled(true);
         }
 	}
