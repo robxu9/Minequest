@@ -1050,7 +1050,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	    if (split[0].equals("/regroup")) {
 	    	MineQuest.getQuester(player).regroup();
 	    	event.setCancelled(true);
-	    } else if (split[0].equals("/npc_property")) {
+	    } else if (split[0].equals("/npcproperty")) {
 	    	if (split.length < 4) {
 	    		player.sendMessage("Usage: /npc_property <npc_name> <property_name> <property_value>");
 	    		event.setCancelled(true);

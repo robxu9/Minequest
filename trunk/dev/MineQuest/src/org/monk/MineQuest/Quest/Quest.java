@@ -142,16 +142,15 @@ public class Quest {
 				return;
 			}
 			if (spawn == null) {
-				MineQuest.log("No Spawn Found");
 				spawn = world.getSpawnLocation();
 			}
 			
-			for (QuestTask task : tasks) {
-				MineQuest.log("Task: " + task.getId());
-				for (Event event : task.getEvents()) {
-					MineQuest.log(event.getName());
-				}
-			}
+//			for (QuestTask task : tasks) {
+//				MineQuest.log("Task: " + task.getId());
+//				for (Event event : task.getEvents()) {
+//					MineQuest.log(event.getName());
+//				}
+//			}
 			
 			for (Quester quester : party.getQuesters()) {
 				quester.setQuest(this, world);

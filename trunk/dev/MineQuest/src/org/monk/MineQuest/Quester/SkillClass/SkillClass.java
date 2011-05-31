@@ -314,7 +314,8 @@ public class SkillClass {
 	}
 
 	public SkillClassConfig getSkillConfig() {
-		return MineQuest.getSkillConfig();
+		MineQuest.log("[WARNING] SkillClass with no type - " + type);
+		return null;
 	}
 
 	/**
@@ -362,9 +363,9 @@ public class SkillClass {
 	 */
 	public int defend(LivingEntity entity, int amount, boolean flags[]) {
 		int i;
-		int armor[] = MineQuest.getSkillConfig().getArmorLevels(type);
-		double armor_defends[] = MineQuest.getSkillConfig().getArmorDefends(type);
-		int armor_blocks[] = MineQuest.getSkillConfig().getArmorBlocks(type);
+		int armor[] = getSkillConfig().getArmorLevels(type);
+		double armor_defends[] = getSkillConfig().getArmorDefends(type);
+		int armor_blocks[] = getSkillConfig().getArmorBlocks(type);
 		int sum = 0;
 		
 		if (armor != null) {

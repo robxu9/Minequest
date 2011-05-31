@@ -128,7 +128,6 @@ public class MineQuest extends JavaPlugin {
 //	private MineQuestWorldListener wl;
 	private static String server_owner;
 	private static String skeleton_type;
-	private static SkillClassConfig skill_config;
 	private static MysqlInterface sql_server;
 	private static Location start;
 	private static String[] starting_classes;
@@ -624,9 +623,6 @@ public class MineQuest extends JavaPlugin {
 	
 	public static String getSkeletonType() {
 		return skeleton_type;
-	}
-	public static SkillClassConfig getSkillConfig() {
-		return skill_config;
 	}
 	
 	/**
@@ -1651,7 +1647,12 @@ public class MineQuest extends JavaPlugin {
 		
 	}
 	private void upgradeDB(String string) throws Exception {
-		int oldVersion = (int)(Double.parseDouble(string) * 10);
+		int oldVersion = 0;
+		try {
+			oldVersion = (int)(Double.parseDouble(string) * 10);
+		} catch (Exception e) {
+			MineQuest.log("Could not detect version - Previously running dev?");
+		}
 
 		upgradeDB(oldVersion, 5);
 	}

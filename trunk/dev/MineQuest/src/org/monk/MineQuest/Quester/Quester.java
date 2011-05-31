@@ -941,7 +941,7 @@ public class Quester {
 	public void clearQuest(boolean reset) {
 		this.quest = null;
 		poison_timer = 0;
-		if (reset) {
+		if (reset && (before_quest != null)) {
 			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(5000, this, before_quest.getWorld().getSpawnLocation()));
 			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(6000, this, before_quest));
 		}
@@ -2025,6 +2025,18 @@ public class Quester {
 	}
 
 	public void setParty(Party party) {
+		
+		if (npcParty != null) {
+			if (party != null) {
+				for (Quester quester : npcParty.getQuesters()) {
+					party.addQuester(quester);
+				}
+			} else {
+				for (Quester quester : npcParty.getQuesters()) {
+					this.party.remQuester(quester);
+				}
+			}
+		}
 		this.party = party;
 	}
 
@@ -2043,7 +2055,6 @@ public class Quester {
 	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
 		
-		if (this instanceof NPCQuester) return;
 		before_quest = player.getLocation();
 		
 		if (!world.getName().equals(player.getWorld().getName())) {

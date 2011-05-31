@@ -2,6 +2,7 @@ package org.monk.MineQuest.Event.Target;
 
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Quest.Target;
+import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
 public class MessageEvent extends TargetedEvent {
@@ -18,7 +19,9 @@ public class MessageEvent extends TargetedEvent {
 		super.activate(eventParser);
 		
 		for (Quester quester : target.getTargets()) {
-			quester.sendMessage(message);
+			if (!(quester instanceof NPCQuester)) {
+				quester.sendMessage(message);
+			}
 		}
 	}
 
