@@ -54,6 +54,7 @@ import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityConfigManager;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Event.NoMobs;
+import org.monk.MineQuest.Event.RespawnEvent;
 import org.monk.MineQuest.Event.Absolute.HealEvent;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
@@ -437,7 +438,7 @@ public class MineQuest extends JavaPlugin {
      * 
      * @return EventParser
      */
-    static public EventQueue getEventParser() {
+    static public EventQueue getEventQueue() {
     	return eventQueue;
     }
 	public static int getExpClassDamage() {
@@ -1098,9 +1099,11 @@ public class MineQuest extends JavaPlugin {
 		
 		upgradeDB(0, 5);
 	}
+	
 	private void downloadAbilities() throws MalformedURLException, IOException {
 		downloadFile("http://www.theminequest.com/download/abilities.jar", "MineQuest/abilities.jar");
 	}
+
 	@Override
 	public void onDisable() {
 		for (Quest quest : quests) {
@@ -1143,7 +1146,7 @@ public class MineQuest extends JavaPlugin {
         
         (new File("MineQuest/")).mkdir();
         
-        if ((!((new File("MineQuest/abilities.jar")).exists())) || (Ability.getVersion() < 0)) {
+        if ((!((new File("MineQuest/abilities.jar")).exists())) || (Ability.getVersion() < 1)) {
         	log("MineQuest/abilities.jar not found or too old: Downloading...");
         	try {
 				downloadAbilities();
@@ -1152,6 +1155,8 @@ public class MineQuest extends JavaPlugin {
 				log("Failed to download abilities.jar");
 			}
         }
+        
+        getEventQueue().addEvent(new RespawnEvent(300000));
         
         ability_config = new AbilityConfigManager();
         
@@ -1354,10 +1359,10 @@ public class MineQuest extends JavaPlugin {
 		if (slow_heal) {
 			int amount = general.getInt("slow_heal_amount", 1);
 			int delay = general.getInt("slow_heal_delay_ms", 1500);
-			heal_event = getEventParser().addEvent(new HealEvent(delay, amount));
+			heal_event = getEventQueue().addEvent(new HealEvent(delay, amount));
 		} else {
 			if (heal_event != 0) {
-				MineQuest.getEventParser().cancel(heal_event);
+				MineQuest.getEventQueue().cancel(heal_event);
 			}
 		}
 		server_owner = general.getString("mayor", "jmonk");

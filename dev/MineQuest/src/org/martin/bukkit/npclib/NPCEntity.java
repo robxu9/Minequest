@@ -8,6 +8,7 @@ import net.minecraft.server.Entity;
 import net.minecraft.server.EntityHuman;
 import net.minecraft.server.EntityLiving;
 import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.EntityTracker;
 import net.minecraft.server.ItemInWorldManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.NetHandler;
@@ -47,11 +48,17 @@ public class NPCEntity extends EntityPlayer {
     }
 
     public void animateArmSwing() {
-        this.b.tracker.a(this, new Packet18ArmAnimation(this, 1));
+//        this.b.tracker.a(this, new Packet18ArmAnimation(this, 1));
+        EntityTracker entitytracker = this.b.b(this.dimension);
+
+        entitytracker.b(this, new Packet18ArmAnimation(this, 1));
     }
 
     public void actAsHurt(){
-        this.b.tracker.a(this, new Packet18ArmAnimation(this, 2));
+//        this.b.tracker.a(this, new Packet18ArmAnimation(this, 2));
+        EntityTracker entitytracker = this.b.b(this.dimension);
+
+        entitytracker.b(this, new Packet18ArmAnimation(this, 2));
     }
 
     @Override

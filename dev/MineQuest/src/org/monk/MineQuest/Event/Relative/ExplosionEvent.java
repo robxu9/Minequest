@@ -54,7 +54,7 @@ public class ExplosionEvent extends RelativeEvent {
 		super.activate(eventParser);
 		
 		Location loc = entity.getLocation();
-		world.getHandle().a(null, x + loc.getX(), y + loc.getY(), z + loc.getZ(), radius);
+		world.getHandle().createExplosion(null, x + loc.getX(), y + loc.getY(), z + loc.getZ(), radius, false);
 		
 		List<LivingEntity> entities = world.getLivingEntities();
 		Location location = new Location(null, x + loc.getX(), y + loc.getY(), z + loc.getZ());

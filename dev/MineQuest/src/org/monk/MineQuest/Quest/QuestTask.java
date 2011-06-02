@@ -44,7 +44,7 @@ public class QuestTask {
 				new_ids[i] = ids[i];
 			}
 			for (Event event : events) {
-				new_ids[i++] = MineQuest.getEventParser().addEvent(event);
+				new_ids[i++] = MineQuest.getEventQueue().addEvent(event);
 			}
 			ids = new_ids;
 			events = null;
@@ -52,7 +52,7 @@ public class QuestTask {
 	}
 	
 	public void clearEvents() {
-		MineQuest.getEventParser().cancel(ids);
+		MineQuest.getEventQueue().cancel(ids);
 	}
 
 	public Event[] getEvents() {

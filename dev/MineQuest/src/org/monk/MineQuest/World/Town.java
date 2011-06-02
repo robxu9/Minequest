@@ -103,7 +103,7 @@ public class Town {
 		}
 		
 		if (MineQuest.isTownNoMobs()) {
-			MineQuest.getEventParser().addEvent(new CheckMobEvent(this));
+			MineQuest.getEventQueue().addEvent(new CheckMobEvent(this));
 		}
 	}
 

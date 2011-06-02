@@ -22,7 +22,7 @@ public class ExplosionEvent extends TargetedEvent {
 		super.activate(eventParser);
 		
 		for (Quester quester : target.getTargets()) {
-			MineQuest.getEventParser().addEvent(
+			MineQuest.getEventQueue().addEvent(
 					new org.monk.MineQuest.Event.Absolute.ExplosionEvent(
 							real_delay, 
 							quester.getPlayer().getWorld(), 

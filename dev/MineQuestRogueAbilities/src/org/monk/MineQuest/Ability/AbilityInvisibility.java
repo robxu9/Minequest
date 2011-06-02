@@ -5,7 +5,6 @@ package org.monk.MineQuest.Ability;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import net.minecraft.server.Packet20NamedEntitySpawn;
@@ -43,13 +42,18 @@ public class AbilityInvisibility extends Ability {
 		caster = quester;
 		names = new ArrayList<String>();
 		active = true;
-		MineQuest.getEventParser().addEvent(new AbilityEvent(300, this));
+		MineQuest.getEventQueue().addEvent(new AbilityEvent(300, this));
+	}
+	
+	@Override
+	public boolean isActive() {
+		return active;
 	}
 	
 	@Override
 	protected boolean canCast() {
 		if (active) {
-			myclass.getQuester().sendMessage("You are already have temporary invisibility active");
+			notify(caster, "You are already have " + getName() + " active");
 			return false;
 		}
 		return super.canCast();
@@ -63,7 +67,7 @@ public class AbilityInvisibility extends Ability {
 		
 		total_time -= 300;
 		if (total_time > 0) {
-			MineQuest.getEventParser().addEvent(new AbilityEvent(300, this));
+			MineQuest.getEventQueue().addEvent(new AbilityEvent(300, this));
 		} else {
 			complete();
 			active = false;
@@ -110,18 +114,39 @@ public class AbilityInvisibility extends Ability {
 		CraftPlayer unHideFrom = (CraftPlayer) player;
 		if (source != player) {
 			if (names.contains(player.getName())) {
-				unHideFrom.getHandle().netServerHandler.sendPacket(new Packet20NamedEntitySpawn(unHide.getHandle()));
+				unHideFrom.getHandle().netServerHandler
+						.sendPacket(new Packet20NamedEntitySpawn(unHide
+								.getHandle()));
 				names.remove(player.getName());
 			}
 		}
 	}
 
 	private void checkInvisible() {
-		
+		if (caster.getPlayer().isSneaking()) {
+			for (Quester quester : MineQuest.getQuesters()) {
+				if ((quester.getPlayer() != null) && (caster.getPlayer() != null)) {
+					if (!outsideSight(caster.getPlayer().getLocation(), quester.getPlayer().getLocation())) {
+						invisible(caster.getPlayer(), quester.getPlayer());
+					}
+				}
+			}
+		} else {
+			for (Quester quester : MineQuest.getQuesters()) {
+				if ((quester.getPlayer() != null) && (caster.getPlayer() != null)) {
+					uninvisible(caster.getPlayer(), quester.getPlayer());
+				}
+			}
+		}
 	}
 
 	private void complete() {
-		
+		for (Quester quester : MineQuest.getQuesters()) {
+			if ((quester.getPlayer() != null) && (caster.getPlayer() != null)) {
+				uninvisible(caster.getPlayer(), quester.getPlayer());
+			}
+		}
+		caster.sendMessage(getName() + " is complete!");
 	}
 
 	@Override
@@ -151,6 +176,14 @@ public class AbilityInvisibility extends Ability {
 	@Override
 	public String getSkillClass() {
 		return "Rogue";
+	}
+	
+	@Override
+	public void setActive(boolean active) {
+		if (this.active && !active) {
+			caster.sendMessage(getName() + " interrupted!");
+		}
+		this.active = active;
 	}
 
 }

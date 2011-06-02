@@ -15,24 +15,38 @@ import org.monk.MineQuest.Quester.Quester;
 
 public class AbilityMoveSilently extends Ability implements TargetDefendAbility {
 	private boolean activated;
+	private Quester caster;
 	
 	public AbilityMoveSilently() {
 		super();
 		config = new int[] {30000, 0};
 		activated = false;
 	}
+	
+	@Override
+	protected boolean canCast() {
+		if (activated) {
+			notify(caster, "You are already have " + getName() + " active");
+			return false;
+		}
+		
+		return super.canCast();
+	}
 
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
+		if (quester == null) return;
 		activated = true;
 		int delay = config[0] + myclass.getCasterLevel() * config[1];
-		MineQuest.getEventParser().addEvent(new AbilityEvent(delay, this));
+		this.caster = quester;
+		MineQuest.getEventQueue().addEvent(new AbilityEvent(delay, this));
 	}
 	
 	@Override
 	public void eventActivate() {
 		activated = false;
+		caster.sendMessage(getName() + " is complete!");
 		super.eventActivate();
 	}
 

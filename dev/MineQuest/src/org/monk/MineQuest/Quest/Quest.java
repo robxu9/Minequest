@@ -156,7 +156,7 @@ public class Quest {
 				quester.setQuest(this, world);
 			}
 			
-			MineQuest.getEventParser().addEvent(new QuestEvent(this, 100, 0));
+			MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, 0));
 		} catch (Exception e) {
 			MineQuest.log("Unable to load Quest - Generic Error");
 			e.printStackTrace();
@@ -295,7 +295,7 @@ public class Quest {
 			}
 			if (i == max) {
 				MineQuest.log("Instances Full - Unable to Start Quest");
-				MineQuest.getEventParser().addEvent(new MessageEvent(10, party, "Instances Full - Unable to Start Quest"));
+				MineQuest.getEventQueue().addEvent(new MessageEvent(10, party, "Instances Full - Unable to Start Quest"));
 			}
 			split[2] = split[2] + i;
 			if (MineQuest.getSServer().getWorld(split[2]) == null) {

@@ -35,7 +35,7 @@ public class RepeatingQuestTask extends QuestTask {
 				new_ids[i] = ids[i];
 			}
 			for (Event event : events) {
-				new_ids[i++] = MineQuest.getEventParser().addEvent(event);
+				new_ids[i++] = MineQuest.getEventQueue().addEvent(event);
 			}
 			ids = new_ids;
 		}

@@ -52,8 +52,8 @@ public class SpecialMobHandler extends PeriodicEvent {
 				Ability.getNearestY(mob.getMonster().getWorld(), (int)loc.getX(), (int)loc.getY(), (int)loc.getZ()) - 1, (int)loc.getZ());
 		
 		if (block.getType() != Material.DIRT){
-			MineQuest.getEventParser().addEvent(new BlockEvent(30000, block, block.getType()));
-			MineQuest.getEventParser().addEvent(new BlockEvent(10, block, Material.DIRT));
+			MineQuest.getEventQueue().addEvent(new BlockEvent(30000, block, block.getType()));
+			MineQuest.getEventQueue().addEvent(new BlockEvent(10, block, Material.DIRT));
 		}
 
 		super.activate(eventParser);

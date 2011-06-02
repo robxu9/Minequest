@@ -45,7 +45,7 @@ public class CombatClass extends SkillClass {
 	 * @return boolean true
 	 */
 	public boolean attack(LivingEntity defend, EntityDamageByEntityEvent event) {
-		event.setDamage(getDamage(defend));
+		event.setDamage(getDamage());
 
 		expAdd(getExpMob(defend) + MineQuest.getAdjustment() * MineQuest.getAdjustmentMultiplier());
 		
@@ -70,7 +70,7 @@ public class CombatClass extends SkillClass {
 	 * @param defend Defending Entity
 	 * @return Damage to be dealt
 	 */
-	protected int getDamage(LivingEntity defend) {
+	public int getDamage() {
 		int damage;
 		if (!isClassItem(quester.getPlayer().getItemInHand())) {
 			damage = 2;

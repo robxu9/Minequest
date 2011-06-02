@@ -46,7 +46,7 @@ public class SpecialMob extends MQMob {
 		half = false;
 		generator = new Random();
 		
-		id = MineQuest.getEventParser().addEvent(new SpecialMobHandler(1, this));
+		id = MineQuest.getEventQueue().addEvent(new SpecialMobHandler(1, this));
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class SpecialMob extends MQMob {
 	
 	@Override
 	public void cancel() {
-		MineQuest.getEventParser().cancel(id);
+		MineQuest.getEventQueue().cancel(id);
 	}
 
 	@Override

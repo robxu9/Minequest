@@ -29,10 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.EntityTracker;
+import net.minecraft.server.Packet18ArmAnimation;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -48,6 +53,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.monk.MineQuest.MineQuest;
@@ -276,13 +282,20 @@ public class Quester {
 		LivingEntity monster = mqMob.getMonster();
 		
 		String name = monster.getClass().getName();
+		if (CreatureType.fromName(getCreatureName(name)) != null) {
+			addKill(CreatureType.fromName(getCreatureName(name)));
+		}
+	}
+	
+	public static String getCreatureName(String name) {
 		name = name.replace('.', '/');
+		
 		if (name.split("/").length > 0) {
 			String type = name.split("/")[name.split("/").length - 1];
 			type = type.replace("Craft", "");
-			if (CreatureType.fromName(type) != null) {
-				addKill(CreatureType.fromName(type));
-			}
+			return type;
+		} else {
+			return null;
 		}
 	}
 
@@ -317,17 +330,15 @@ public class Quester {
 		transparent.add((byte)Material.GLASS.getId());
 		transparent.add((byte)Material.FIRE.getId());
 		transparent.add((byte)Material.WATER.getId());
+		transparent.add((byte)Material.TORCH.getId());
 		List<Block> block = player.getLineOfSight(transparent, 30);
 
 		if (block.size() > 0) {
 			for (SkillClass skill : classes) {
 				if (skill.isLookAbilityItem(player.getItemInHand())) {
-					sendMessage("Last!");
 					skill.callLookAbility(block.get(block.size() - 1));
 				}
 			}
-		} else {
-			sendMessage("None!");
 		}
 	}
 
@@ -942,8 +953,8 @@ public class Quester {
 		this.quest = null;
 		poison_timer = 0;
 		if (reset && (before_quest != null)) {
-			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(5000, this, before_quest.getWorld().getSpawnLocation()));
-			MineQuest.getEventParser().addEvent(new EntityTeleportEvent(6000, this, before_quest));
+			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(5000, this, before_quest.getWorld().getSpawnLocation()));
+			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(6000, this, before_quest));
 		}
 		kills = new CreatureType[0];
 	}
@@ -1477,12 +1488,18 @@ public class Quester {
         newHealth = 20 * health / max_health;
         
         if ((newHealth == 0) && (health > 0)) {
-        	newHealth++;
+        	newHealth = 1;
         }
         
         if (health > max_health) {
         	health = max_health;
         }
+        
+        EntityPlayer pl = ((CraftPlayer)player).getHandle();
+        EntityTracker entitytracker = pl.b.b(pl.dimension);
+
+        entitytracker.b(pl, new Packet18ArmAnimation(pl, 2));
+        pl.world.a(pl, (byte) 2);
         
         if (player.getHealth() >= newHealth) {
         	event.setDamage(player.getHealth() - newHealth);
@@ -1816,6 +1833,11 @@ public class Quester {
 			distance -= 5;
 			poison_timer -= 1;
 			setHealth(getHealth() - 1);
+	        
+	        EntityPlayer pl = ((CraftPlayer)player).getHandle();
+	        EntityTracker entitytracker = pl.b.b(pl.dimension);
+
+	        entitytracker.b(pl, new Packet18ArmAnimation(pl, 3));
 		}
 	}
 	
@@ -2187,6 +2209,22 @@ public class Quester {
 		updateBinds();
 		kills = new CreatureType[0];
 		destroyed = new HashMap<Material, Integer>();
+		if (npcParty != null) {
+			for (Quester quester : MineQuest.getQuesters()) {
+				if (quester instanceof NPCQuester) {
+					NPCQuester nquester = (NPCQuester)quester;
+					if ((nquester.getMode() == NPCMode.PARTY) 
+						|| (nquester.getMode() == NPCMode.PARTY_STAND)) {
+						if (nquester.getFollow() != null) {
+							if ((nquester.getFollow().equals(this)) 
+								&& !npcParty.getQuesters().contains(nquester)) {
+								npcParty.addQuester(nquester);
+							}
+						}
+					}
+				}
+			}
+		}
 //		if (npcParty != null) {
 //			for (Quester quester : npcParty.getQuesterArray()) {
 //			}
@@ -2268,5 +2306,61 @@ public class Quester {
 		for (SkillClass sclass : classes) {
 			sclass.targeted(event);
 		}
+	}
+
+	public boolean inVisible() {
+		if (getAbility("Temporary Invisibility") != null) {
+			return getAbility("Temporary Invisibility").isActive();
+		}
+		
+		return false;
+	}
+
+	@SuppressWarnings("deprecation")
+	public ItemStack stolen() {
+		if (player == null) {
+			return null;
+		}
+		Inventory inven = player.getInventory();
+		if (inven == null) {
+			return null;
+		}
+		List<ItemStack> possibilities = new ArrayList<ItemStack>();
+		
+		for (ItemStack item : inven.getContents()) {
+			if (item != null) {
+				possibilities.add(item);
+			}
+		}
+		
+		if (possibilities.size() > 0) {
+			Random gen = new Random();
+			int index = gen.nextInt(possibilities.size());
+			ItemStack item = possibilities.get(index);
+			
+			if (item.getAmount() > 1) {
+				int amount = gen.nextInt(item.getAmount()) + 1;
+				if (amount == item.getAmount()) {
+					inven.remove(item);
+					getPlayer().updateInventory();
+					return item;
+				} else {
+					ItemStack ret = new ItemStack(item.getTypeId(), amount);
+					item.setAmount(item.getAmount() - amount);
+					getPlayer().updateInventory();
+					return ret;
+				}
+			} else {
+				inven.remove(item);
+				getPlayer().updateInventory();
+				return item;
+			}
+		}
+		
+		return null;
+	}
+
+	public void startled() {
+		sendMessage("Someone is attempting to steal form you!");
 	}
 }

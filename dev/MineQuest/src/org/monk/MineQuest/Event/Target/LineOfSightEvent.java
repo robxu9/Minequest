@@ -39,9 +39,11 @@ public class LineOfSightEvent extends QuestEvent implements TargetEvent {
 			Location target = q.getPlayer().getLocation();
 			
 			if (lineOfSight(source, target)) {
-				quester = q;
-				flag = true;
-				break;
+				if (!quester.inVisible()) {
+					quester = q;
+					flag = true;
+					break;
+				}
 			}
 		}
 		

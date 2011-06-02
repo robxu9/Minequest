@@ -418,10 +418,10 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("You are not holding anything");
         	}
         	event.setCancelled(true);
-        } else if (split[0].equals("/spawn_npc")) {
+        } else if (split[0].equals("/spawnnpc")) {
         	event.setCancelled(true);
         	if (split.length < 2) {
-        		player.sendMessage("Usage: /spawnnpc <npc_name>");
+        		player.sendMessage("Usage: /spawn_npc <npc_name>");
         		return;
         	}
         	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
