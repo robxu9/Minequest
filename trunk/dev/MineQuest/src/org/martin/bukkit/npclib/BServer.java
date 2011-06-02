@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.minecraft.server.EntityTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.NetworkListenThread;
 import net.minecraft.server.PropertyManager;
@@ -89,9 +88,9 @@ public class BServer {
         return mcServer.spawnProtection;
     }
 
-    public EntityTracker getEntityTracker(){
-        return mcServer.tracker;
-    }
+//    public EntityTracker getEntityTracker(){
+//        return mcServer..tracker;
+//    }
 
     public PropertyManager getPropertyManager(){
         return mcServer.propertyManager;

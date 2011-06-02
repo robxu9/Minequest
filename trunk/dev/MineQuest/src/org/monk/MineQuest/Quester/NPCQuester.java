@@ -62,33 +62,32 @@ public class NPCQuester extends Quester {
 	private NPCEntity entity;
 	private Quester follow;
 	private String follow_name;
+	private Random generator;
+	private ItemStack hand = null;
 	private String hit_message;
 	private List<Integer> ids1 = new ArrayList<Integer>();
 	private List<Integer> idsStore;
-	private ItemStack item;
 	private List<Integer> itemStore;
+	private long last_attack;
+    private long last_hit;
+	private boolean mob_protected = false;
 	private LivingEntity mobTarget;
 	private NPCMode mode;
 	private String quest_file;
-    private double rad;
+	private double rad;
 	private int radius;
+	private int reach_count;
+	private boolean removed;
 	private double speed = .6;
 	private Location target = null;
+	private int task = -2;
+	private int threshold = 0;
 	private List<Long> times1 = new ArrayList<Long>();
 	private String town;
 	private String walk_message;
-	private long last_attack;
-	private long last_hit;
-	private boolean removed;
-	private long respawn;
-	private int reach_count;
-	private Location last_loc;
-	private Random generator;
 	private int wander_delay;
-	private int threshold = 0;
-	private int task = -2;
-	private ItemStack hand = null;
-	private boolean mob_protected = false;
+	private int startle_task;
+	private ItemStack steal;
 
 	
 	public NPCQuester(String name) {
@@ -96,7 +95,7 @@ public class NPCQuester extends Quester {
 		this.entity = null;
 		mobTarget = null;
 		wander_delay = 30;
-		MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
+		MineQuest.getEventQueue().addEvent(new NPCEvent(100, this));
 		if (mode == NPCMode.STORE) {
 			delay = 2000;
 		}
@@ -105,7 +104,6 @@ public class NPCQuester extends Quester {
 		last_attack = 0;
 		last_hit = 0;
 		removed = false;
-		respawn = 0;
 		reach_count = 0;
 		generator = new Random();
 	}
@@ -125,6 +123,7 @@ public class NPCQuester extends Quester {
 		} else {
 			makeNPC(world.getName(), x, y, z, (float)pitch, (float)yaw);
 			health = max_health = 2000;
+			startle_task = -2;
 			classes = new ArrayList<SkillClass>();
 			classes.add(SkillClass.newShell(MineQuest.getNPCAttackType()));
 			classes.get(0).setQuester(this);
@@ -133,7 +132,7 @@ public class NPCQuester extends Quester {
 		distance = 0;
 		entity = null;
 		mobTarget = null;
-		MineQuest.getEventParser().addEvent(new NPCEvent(100, this));
+		MineQuest.getEventQueue().addEvent(new NPCEvent(100, this));
 		if (mode == NPCMode.STORE) {
 			delay = 2000;
 		}
@@ -142,7 +141,6 @@ public class NPCQuester extends Quester {
 		last_attack = 0;
 		last_hit = 0;
 		removed = false;
-		respawn = 0;
 		reach_count = 0;
 		generator = new Random();
 	}
@@ -150,11 +148,7 @@ public class NPCQuester extends Quester {
 	public void activate() {
 		if (health <= 0) return;
 		if (player == null) return;
-		
-		if (item != null) {
-			player.setItemInHand(item);
-			item = null;
-		}
+
 		if (MineQuest.getQuester(mobTarget) instanceof NPCQuester) {
 			NPCQuester npc = (NPCQuester)MineQuest.getQuester(mobTarget);
 			if (npc.isMerc()) {
@@ -163,22 +157,17 @@ public class NPCQuester extends Quester {
 			mobTarget = null;
 		}
 
-		if (respawn - Calendar.getInstance().getTimeInMillis() > 300000) {
-			respawn = Calendar.getInstance().getTimeInMillis();
-			Location location = player.getLocation();
-			teleport(location);
-		}
-
 		if (mobTarget == null) {
 			if ((follow != null) && (follow.getPlayer() != null)) {
 				if (mode != NPCMode.PARTY_STAND) {
-					if (MineQuest.distance(follow.getPlayer().getLocation(), entity.getBukkitEntity().getLocation()) > 4) {
+					if (MineQuest.distance(follow.getPlayer().getLocation(), player.getLocation()) > 4) {
 						setTarget(follow.getPlayer().getLocation(), 4, 0);
 					}
 				}
 			}
 		} else {
-			if (MineQuest.distance(player.getLocation(), mobTarget.getLocation()) > 1.3) {
+			double distance = MineQuest.distance(player.getLocation(), mobTarget.getLocation());
+			if (distance > 1.3) {
 				if (MineQuest.getMob(mobTarget) != null) {
 					if (MineQuest.getMob(mobTarget).getHealth() <= 0) {
 						mobTarget = null;
@@ -191,17 +180,13 @@ public class NPCQuester extends Quester {
 					}
 				}
 				setTarget(mobTarget.getLocation(), 1.25, 0);
-			}
-		}
-		if ((follow_name != null) && (!follow_name.equals("null"))) {
-			if ((follow == null) && (MineQuest.getQuester(follow_name) != null)) {
-				follow = MineQuest.getQuester(follow_name);	
-				follow.addNPC(this);
+			} else if (distance < 1.2) {
+				attack(mobTarget);
 			}
 		}
 
 		if (target != null) {
-			if (reach_count > 10) {
+			if (reach_count > 30) {
 				teleport(target);
 				target = null;
 				reach_count = 0;
@@ -213,7 +198,7 @@ public class NPCQuester extends Quester {
 					float yaw = 0;
 					yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
 					entity.setLocation(target.getX(), target.getY(), target.getZ(), yaw, target.getPitch());
-					last_loc = newLocation(player.getLocation());
+					newLocation(player.getLocation());
 					reach_count = 0;
 	
 					target = null;
@@ -222,8 +207,8 @@ public class NPCQuester extends Quester {
 					double move_x = (speed * (target.getX() - player.getLocation().getX()) / distance);
 					double move_y = (speed * (target.getY() - player.getLocation().getY()) / distance);
 					double move_z = (speed * (target.getZ() - player.getLocation().getZ()) / distance);
-					move_x += (new Random()).nextDouble() * .05;
-					move_z += (new Random()).nextDouble() * .05;
+					move_x += (new Random()).nextDouble() * .15;
+					move_z += (new Random()).nextDouble() * .15;
 					move_y = Ability.getNearestY(player.getWorld(), (int)(player.getLocation().getBlockX() + move_x),
 							(int)player.getLocation().getBlockY(), 
 							(int)(player.getLocation().getBlockZ() + move_z)) - player.getLocation().getY();
@@ -231,7 +216,7 @@ public class NPCQuester extends Quester {
 						reach_count++;
 					}
 					if (move_y > 4) {
-						move_y = 0;
+						move_y = 1;
 					}
 					float yaw = 0;
 					yaw = (float)(-180 * Math.atan2(move_x , move_z) / Math.PI);
@@ -242,30 +227,21 @@ public class NPCQuester extends Quester {
 						yaw, target.getPitch());
 				}
 			}
-		} else {
-			if ((mode == NPCMode.PARTY) || (mode == NPCMode.PARTY_STAND)) {
-				if (follow != null) {
-					if (!follow.hasQuester(this)) {
-						follow.addNPC(this);
-					}
-				}
-			}
+//		} else {
+//			if ((mode == NPCMode.PARTY) || (mode == NPCMode.PARTY_STAND)) {
+//				if (follow != null) {
+//					if (!follow.hasQuester(this)) {
+//						follow.addNPC(this);
+//					}
+//				}
+//			}
 		}
-		if (player.getLocation() == null) {
-			if (last_loc != null) {
-				teleport(last_loc);
-			}
-			return;
-		}
-		if (player.getLocation().getY() > 128) {
-			if ((follow != null) && (follow.getPlayer() != null)) {
-				teleport(follow.getPlayer().getLocation());
-			}
-		}
+//		if (player.getLocation().getY() > 128) {
+//			if ((follow != null) && (follow.getPlayer() != null)) {
+//				teleport(follow.getPlayer().getLocation());
+//			}
+//		}
 
-		if ((mobTarget != null) && (MineQuest.distance(mobTarget.getLocation(), player.getLocation()) < 1.2)) {
-			attack(mobTarget);
-		}
 
 		if (rad != 0) {
 			count++;
@@ -293,34 +269,29 @@ public class NPCQuester extends Quester {
 
 		if (mode == NPCMode.STORE) {
 			List<Integer> these_ids = new ArrayList<Integer>();
-			Store store = MineQuest.getTown(player).getStore(player);
-			
-			for (Player player : MineQuest.getSServer().getOnlinePlayers()) {
-				if ((MineQuest.getTown(player) != null) && store.equals(MineQuest.getTown(player).getStore(player))) {
-					if (!checkMessageStore(player.getEntityId(), player.getItemInHand().getTypeId())) {
-						MineQuest.getNPCStringConfiguration().sendRandomMessage(this, MineQuest.getQuester(player), store);
+			if (MineQuest.getTown(player) != null) {
+				Store store = MineQuest.getTown(player).getStore(player);
+				
+				for (Player player : MineQuest.getSServer().getOnlinePlayers()) {
+					if ((MineQuest.getTown(player) != null) && store.equals(MineQuest.getTown(player).getStore(player))) {
+						if (!checkMessageStore(player.getEntityId(), player.getItemInHand().getTypeId())) {
+							MineQuest.getNPCStringConfiguration().sendRandomMessage(this, MineQuest.getQuester(player), store);
+						}
+						these_ids.add(player.getEntityId());
 					}
-					these_ids.add(player.getEntityId());
 				}
-			}
-
-			int i;
-			for (i = 0; i < idsStore.size(); i++) {
-				if (!these_ids.contains(idsStore.get(i))) {
-					itemStore.set(i, -1);
+	
+				int i;
+				for (i = 0; i < idsStore.size(); i++) {
+					if (!these_ids.contains(idsStore.get(i))) {
+						itemStore.set(i, -1);
+					}
 				}
 			}
 		}
 	}
 
-    private boolean isMerc() {
-		if ((mode == NPCMode.FOR_SALE) || (mode == NPCMode.PARTY) || (mode == NPCMode.PARTY_STAND)) {
-			return true;
-		}
-		return false;
-	}
-
-	private void attack(LivingEntity mobTarget) {
+    private void attack(LivingEntity mobTarget) {
 //		entity.attackLivingEntity(mobTarget);
     	long now = Calendar.getInstance().getTimeInMillis();
 
@@ -330,7 +301,7 @@ public class NPCQuester extends Quester {
 			((CraftHumanEntity)player).getHandle().d(((CraftLivingEntity)mobTarget).getHandle());
     	}
 	}
-	
+
 	@Override
 	public void bind(String name) {
 		if ((getAbility(name) != null)) {
@@ -371,22 +342,18 @@ public class NPCQuester extends Quester {
 		}
 		ItemStack item = player.getItemInHand();
 
-		for (SkillClass skill : classes) {
-			if (!skill.canUse(item)) {
-				if (inven.firstEmpty() != -1) {
-					if (inven != null) {
-						inven.addItem(item);
-					}
-				} else {
-					player.getWorld().dropItem(player.getLocation(), item);
-				}
-				
-				player.setItemInHand(null);
-				
-				sendMessage("You are not high enough level to use that weapon");
-				
-				return true;
+		if (!canUse(item)) {
+			if ((inven != null) && (inven.firstEmpty() != -1)) {
+				inven.addItem(item);
+			} else {
+				player.getWorld().dropItem(player.getLocation(), item);
 			}
+			
+			setProperty("item", "0,0,0");
+			
+			sendMessage("You are not proficient with that item");
+			
+			return true;
 		}
 
 		return false;
@@ -432,6 +399,14 @@ public class NPCQuester extends Quester {
 	    
 	    return false;
     }
+	
+	public void clearTarget(Player player) {
+		if (player == null) return;
+		if (mobTarget == null) return;
+		if (mobTarget.getEntityId() == player.getEntityId()) {
+			mobTarget = null;
+		}
+	}
 	
 	public void create(NPCMode mode, World world, double x, double y, double z, double pitch, double yaw) {
 		if (mode != NPCMode.QUEST_INVULNERABLE) {
@@ -531,17 +506,34 @@ public class NPCQuester extends Quester {
 			this.threshold  = Integer.parseInt(value);
 		} else if (property.equals("next_task")) {
 			this.task = Integer.parseInt(value);
+		} else if (property.equals("startle_task")) {
+			this.startle_task = Integer.parseInt(value);
 		} else if (property.equals("health")) {
 			health = max_health = Integer.parseInt(value);
 		} else if (property.equals("mob_protected")) {
 			mob_protected = Boolean.parseBoolean(value);
 		} else if (property.equals("item_in_hand")) {
-			ItemStack item = new ItemStack(Integer.parseInt(value), 1);
-			item.setDurability(item.getType().getMaxDurability());
+			ItemStack item = null; 
+			try {
+				int id = Integer.parseInt(value);
+				if (id > 0) {
+					item = new ItemStack(id, 1);
+					item.setDurability(item.getType().getMaxDurability());
+				}
+			} catch (Exception e) {
+			}
 			hand = item;
 			if (player != null) {
-				player.setItemInHand(item);
+				if (item.getTypeId() <= 0) {
+					player.setItemInHand(null);
+				} else {
+					player.setItemInHand(item);
+				}
 			}
+		} else if (property.equals("steal")) {
+			String split[] = value.split(",");
+			steal = new ItemStack(Integer.parseInt(split[0]), 
+					Integer.parseInt(split[1]));
 		} else if (property.equals("quest")) {
 			if ((value == null) || (value.equals("null"))) {
 				this.quest_file = null;
@@ -570,7 +562,7 @@ public class NPCQuester extends Quester {
 			this.wander_delay = Integer.parseInt(value);
 		} else if (property.equals("item")) {
 			String split[] = value.split(",");
-			item = new ItemStack(Integer.parseInt(split[0]), 
+			ItemStack item = new ItemStack(Integer.parseInt(split[0]), 
 					Integer.parseInt(split[1]));
 			
 			item.setDurability(Short.parseShort(split[2]));
@@ -578,6 +570,16 @@ public class NPCQuester extends Quester {
 				MaterialData md = new MaterialData(Integer.parseInt(split[0]));
 				md.setData(Byte.parseByte(split[3]));
 				item.setData(md);
+			}
+			if (item.getTypeId() > 0) {
+				hand = item;
+			}
+			if (player != null) {
+				if (item.getTypeId() <= 0) {
+					player.setItemInHand(null);
+				} else {
+					player.setItemInHand(item);
+				}
 			}
 		} else {
 			MineQuest.log("Warning: Invalid NPC Property: " + property);
@@ -741,11 +743,23 @@ public class NPCQuester extends Quester {
 		return false;
 	}
 
+	private boolean isMerc() {
+		if ((mode == NPCMode.FOR_SALE) || (mode == NPCMode.PARTY) || (mode == NPCMode.PARTY_STAND)) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isProtected() {
+		return mob_protected;
+	}
+
 	private void makeNPC(String world, double x, double y, double z,
 			float pitch, float yaw) {
 		if (entity != null) {
-			if ((player.getItemInHand() != null) && (player.getItemInHand().getType() != Material.AIR)) {
+			if ((player != null) && (player.getItemInHand() != null) && (player.getItemInHand().getType() != Material.AIR)) {
 				hand = player.getItemInHand();
+				player.setItemInHand(null);
 			} else {
 				hand = null;
 			}
@@ -756,15 +770,26 @@ public class NPCQuester extends Quester {
 			entity = null;
 			player = null;
 		}
-		MineQuest.getEventParser().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
+		MineQuest.getEventQueue().addEvent(new SpawnNPCEvent(200, this, world, x, y, z, (float)pitch, (float)yaw));
 	}
 
+	private Location newLocation(Location location) {
+		Location loc = new Location(location.getWorld(), location.getX(),
+				location.getX(), location.getZ(), location.getYaw(), location
+						.getPitch());
+		return loc;
+	}
+	
 	public void questerAttack(LivingEntity entity) {
 		if (NPCMode.PARTY_STAND != mode) {
 			if ((mobTarget == null) || (mobTarget.getHealth() <= 0)) {
 				mobTarget = entity;
 			}
 		}
+	}
+	
+	public void redo() {
+		teleport(player.getLocation());
 	}
 
 	public void removeSql() {
@@ -816,7 +841,7 @@ public class NPCQuester extends Quester {
 				entity.getBukkitEntity().getWorld().getName() + "' WHERE name='"
 				+ name + "'");
 	}
-	
+
 	@Override
 	public void sendMessage(String string) {
 		if ((NPCMode.PARTY == mode) || (mode == NPCMode.PARTY_STAND)) {
@@ -832,22 +857,16 @@ public class NPCQuester extends Quester {
 		setPlayer((Player)entity.getBukkitEntity());
 		if (hand != null) {
 			player.setItemInHand(hand);
+			hand = null;
 		}
-		last_loc = newLocation(player.getLocation());
+		newLocation(player.getLocation());
 	}
-
-	private Location newLocation(Location location) {
-		Location loc = new Location(location.getWorld(), location.getX(),
-				location.getX(), location.getZ(), location.getYaw(), location
-						.getPitch());
-		return loc;
-	}
-
+	
 	public void setFollow(Quester quester) {
 		setProperty("follow", quester == null?null:quester.getName());
 		target = null;
 	}
-
+	
 	@Override
 	public void setHealth(int i) {
 		super.setHealth(i);
@@ -892,7 +911,6 @@ public class NPCQuester extends Quester {
 	}
 	
 	public void setMode(NPCMode mode) {
-		MineQuest.log("Mode for " + name + " set to mode: " + mode);
 		this.mode = mode;
 		target = null;
 	}
@@ -906,7 +924,7 @@ public class NPCQuester extends Quester {
 					" (name, property, value) VALUES('" + name + "', '" + property + "', '" + value + "')");
 		}
 	}
-	
+
 	public void setTarget(LivingEntity entity) {
 		mobTarget = entity;
 		if (entity == null) {
@@ -920,7 +938,7 @@ public class NPCQuester extends Quester {
 			}
 		}
 	}
-	
+
 	public void setTarget(Location location) {
 		target = location;
 		mobTarget = null;
@@ -969,14 +987,22 @@ public class NPCQuester extends Quester {
 		MineQuest.getSQLServer().update("INSERT INTO npc " + 
 				" (name, property, value) VALUES('" + name + "', 'town', '" + town + "')");
 	}
+	
+	@Override
+	public void targeted(EntityTargetEvent event) {
+		super.targeted(event);
+		
+		if (isProtected()) {
+			event.setCancelled(true);
+			if (event.getEntity() instanceof Creature) {
+				((Creature)event.getEntity()).setTarget(null);
+			}
+		}
+	}
 
 	public void teleport(Location location) {
 		makeNPC(location.getWorld().getName(), location.getX(), location.getY(), 
 				location.getZ(), location.getPitch(), location.getYaw());
-	}
-	
-	public void redo() {
-		teleport(player.getLocation());
 	}
 
 	public void update() {
@@ -1027,26 +1053,16 @@ public class NPCQuester extends Quester {
 	}
 	
 	@Override
-	public void targeted(EntityTargetEvent event) {
-		super.targeted(event);
-		
-		if (isProtected()) {
-			event.setCancelled(true);
-			if (event.getEntity() instanceof Creature) {
-				((Creature)event.getEntity()).setTarget(null);
-			}
-		}
+	public void startled() {
+		quest.issueNextEvents(startle_task);
 	}
-
-	public void clearTarget(Player player) {
-		if (player == null) return;
-		if (mobTarget == null) return;
-		if (mobTarget.getEntityId() == player.getEntityId()) {
-			mobTarget = null;
+	
+	@Override
+	public ItemStack stolen() {
+		if (steal != null) {
+			return steal;
+		} else {
+			return null;
 		}
-	}
-
-	public boolean isProtected() {
-		return mob_protected;
 	}
 }

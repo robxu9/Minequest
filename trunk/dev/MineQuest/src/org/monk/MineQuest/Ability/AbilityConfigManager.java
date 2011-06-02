@@ -84,11 +84,13 @@ public class AbilityConfigManager {
 	}
 
 	public List<ItemStack> getCost(String name) {
-		String[] types = cost.get(name).split(",");
+		int[] types = SkillClassConfig.intList(cost.get(name));
 		List<ItemStack> ret = new ArrayList<ItemStack>();
 		
-		for (String type : types) {
-			ret.add(new ItemStack(Integer.parseInt(type), 1));
+		if (types != null) {
+			for (int type : types) {
+				ret.add(new ItemStack(type, 1));
+			}
 		}
 		
 		return ret;

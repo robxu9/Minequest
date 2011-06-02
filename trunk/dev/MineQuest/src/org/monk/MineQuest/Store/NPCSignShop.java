@@ -301,7 +301,7 @@ public class NPCSignShop extends Store {
 		};
 
 		if (display_1 != null) {
-			MineQuest.getEventParser().addEvent(new UpdateSignEvent(100, display_1, lines));
+			MineQuest.getEventQueue().addEvent(new UpdateSignEvent(100, display_1, lines));
 		}
 		
 		lines = new String [] {
@@ -312,7 +312,7 @@ public class NPCSignShop extends Store {
 		};
 		
 		if (display_2 != null) {
-			MineQuest.getEventParser().addEvent(new UpdateSignEvent(200, display_2, lines));
+			MineQuest.getEventQueue().addEvent(new UpdateSignEvent(200, display_2, lines));
 		}
 		
 //		if (!display_2.update()) {

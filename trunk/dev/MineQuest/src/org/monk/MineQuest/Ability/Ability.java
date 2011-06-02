@@ -247,7 +247,8 @@ public abstract class Ability {
 					}
 				}
 			} catch (Exception e) {
-				MineQuest.log("Could not load Ability: " + myclass);
+				MineQuest.log("Could not load Ability: " + myclass.getType());
+				e.printStackTrace();
 			}
 		}
 
@@ -530,6 +531,10 @@ public abstract class Ability {
 		player.updateInventory();
 	}
 	
+	public boolean isActive() {
+		return enabled;
+	}
+	
 	/**
 	 * Checks if the itemStack is bound to this ability.
 	 * 
@@ -697,6 +702,10 @@ public abstract class Ability {
 			}
 		}
 		
+	}
+	
+	public void setActive(boolean active) {
+		this.enabled = active;
 	}
 
 	protected void setConfig(int[] config) {
