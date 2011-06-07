@@ -48,6 +48,7 @@ import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Event.NPCEvent;
 import org.monk.MineQuest.Event.Absolute.SpawnNPCEvent;
+import org.monk.MineQuest.Event.Relative.MessageEvent;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.Store;
@@ -64,7 +65,7 @@ public class NPCQuester extends Quester {
 	private String follow_name;
 	private Random generator;
 	private ItemStack hand = null;
-	private String hit_message;
+	private String[] hit_message;
 	private List<Integer> ids1 = new ArrayList<Integer>();
 	private List<Integer> idsStore;
 	private List<Integer> itemStore;
@@ -84,14 +85,18 @@ public class NPCQuester extends Quester {
 	private int threshold = 0;
 	private List<Long> times1 = new ArrayList<Long>();
 	private String town;
-	private String walk_message;
+	private String[] walk_message;
 	private int wander_delay;
 	private int startle_task;
 	private ItemStack steal;
+	private long cost;
+	private int message_delay;
+	private int heal_amount;
 
 	
 	public NPCQuester(String name) {
-		super(name);
+		super(getName(name));
+		name = getName(name);
 		this.entity = null;
 		mobTarget = null;
 		wander_delay = 30;
@@ -106,10 +111,15 @@ public class NPCQuester extends Quester {
 		removed = false;
 		reach_count = 0;
 		generator = new Random();
+		cost = 0;
 	}
 	
+	private static String getName(String name) {
+		return name.replaceAll("_", " ");
+	}
+
 	public NPCQuester(String name, NPCMode mode, World world, Location location) {
-		this.name = name;
+		this.name = getName(name);
 		this.mode = mode;
 		double x = location.getX();
 		double y = location.getY();
@@ -143,6 +153,7 @@ public class NPCQuester extends Quester {
 		removed = false;
 		reach_count = 0;
 		generator = new Random();
+		cost = 0;
 	}
 	
 	public void activate() {
@@ -253,13 +264,24 @@ public class NPCQuester extends Quester {
 
 		if (walk_message != null) {
 			for (Player entity : MineQuest.getSServer().getOnlinePlayers()) {
+				if (entity == null) continue;
 				if (MineQuest.distance(player.getLocation(), entity.getLocation()) < radius) {
 					if ((quest_file == null) || (!MineQuest.getQuester(entity).isCompleted(new QuestProspect(quest_file)))) {
 						if (!checkMessage(entity.getEntityId())) {
-							if (walk_message.equals("random")) {
-								MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, MineQuest.getQuester(entity));
-							} else {
-								MineQuest.getQuester(entity).sendMessage("<" + name + "> " + walk_message);
+							int delay = message_delay;
+							for (String message : walk_message) {
+								if (message != null) {
+									if (message.equals("random")) {
+										MineQuest.getNPCStringConfiguration().sendRandomWalkMessage(this, MineQuest.getQuester(entity), delay);
+									} else {
+										MineQuest.getEventQueue().addEvent(
+												new MessageEvent(delay, MineQuest
+														.getQuester(entity), "<"
+														+ name + "> "
+														+ message));
+									}
+									delay += message_delay;
+								}
 							}
 						}
 					}
@@ -420,7 +442,7 @@ public class NPCQuester extends Quester {
 					yaw + "', mode='" + 
 					mode + "', world='" + 
 					world.getName() + "' WHERE name='"
-					+ name + "'");
+					+ getSName() + "'");
 		}
 	}
 	
@@ -465,6 +487,11 @@ public class NPCQuester extends Quester {
 	public Town getNPCTown() {
 		return MineQuest.getTown(town);
 	}
+	
+	@Override
+	public String getSName() {
+		return super.getSName().replaceAll(" ", "_");
+	}
 
 	public LivingEntity getTarget() {
 		return mobTarget;
@@ -496,20 +523,57 @@ public class NPCQuester extends Quester {
 	}
 
 	public void handleProperty(String property, String value) {
+		if ((value != null) && value.equals("null")) {
+			value = null;
+		}
 		if (property.equals("radius")) {
 			this.radius = Integer.parseInt(value);
-		} else if (property.equals("hit_message")) {
-			this.hit_message = value;
-		} else if (property.equals("walk_message")) {
-			this.walk_message = value;
+		} else if (property.startsWith("hit_message")) {
+			if (hit_message == null) {
+				hit_message = new String[10];
+			}
+			int index;
+			try {
+				index = Integer.parseInt(property.replaceAll("hit_message", ""));
+			} catch (Exception e) {
+				MineQuest.delayUpdate("INSERT INTO npc " + 
+						" (name, property, value) VALUES('" + getSName() + "', '" + "hit_message0" + "', '" + value + "')");
+				MineQuest.delayUpdate("DELETE FROM npc WHERE name='" + getSName() + "' AND property='hit_message'");
+				return;
+			}
+			if (index > 9) {
+				MineQuest.log("NPC Hit Message limited to 10");
+			}
+			this.hit_message[index] = value;
+		} else if (property.startsWith("walk_message")) {
+			if (walk_message == null) {
+				walk_message = new String[10];
+			}
+			int index;
+			try {
+				index = Integer.parseInt(property.replaceAll("walk_message", ""));
+			} catch (Exception e) {
+				MineQuest.delayUpdate("INSERT INTO npc " + 
+						" (name, property, value) VALUES('" + getSName() + "', '" + "walk_message0" + "', '" + value + "')");
+				MineQuest.delayUpdate("DELETE FROM npc WHERE name='" + getSName() + "' AND property='walk_message'");
+				return;
+			}
+			if (index > 9) {
+				MineQuest.log("NPC Walk Message limited to 10");
+			}
+			this.walk_message[index] = value;
 		} else if (property.equals("health_threshold")) {
 			this.threshold  = Integer.parseInt(value);
 		} else if (property.equals("next_task")) {
 			this.task = Integer.parseInt(value);
+		} else if (property.equals("heal_amount")) {
+			this.heal_amount = Integer.parseInt(value);
 		} else if (property.equals("startle_task")) {
 			this.startle_task = Integer.parseInt(value);
 		} else if (property.equals("health")) {
 			health = max_health = Integer.parseInt(value);
+		} else if (property.equals("cost")) {
+			cost = Long.parseLong(value);
 		} else if (property.equals("mob_protected")) {
 			mob_protected = Boolean.parseBoolean(value);
 		} else if (property.equals("item_in_hand")) {
@@ -629,17 +693,13 @@ public class NPCQuester extends Quester {
 			if ((event instanceof EntityDamageByEntityEvent) && 
 					(((EntityDamageByEntityEvent)event).getDamager() instanceof Player)) {
 				Player player = (Player)((EntityDamageByEntityEvent)event).getDamager();
-				if (hit_message != null) {
-					if (hit_message.equals("random")) {
-						MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, MineQuest.getQuester(player));
-					} else {
-						MineQuest.getQuester(player).sendMessage("<" + name + "> " + hit_message);
-					}
+				Quester quester = MineQuest.getQuester(player);
+				
+				if (quester.isDebug()) {
+					quester.sendMessage("My name is " + getName());
 				}
-				if (quest_file != null) {
-					if (!MineQuest.getQuester(player).isCompleted(new QuestProspect(quest_file))) {
-						MineQuest.getQuester(player).addQuestAvailable(new QuestProspect(quest_file));
-					}
+				if ((cost == 0) || (quester.canPay(cost))) {
+					paidHit(quester);
 				}
 			}
 		} else {
@@ -733,6 +793,27 @@ public class NPCQuester extends Quester {
 		return ret;
 	}
 
+	private void paidHit(Quester quester) {
+		int delay = message_delay;
+		for (String message : hit_message) {
+			if (message != null) {
+				if (hit_message.equals("random")) {
+					MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, quester, delay);
+				} else {
+					MineQuest.getEventQueue().addEvent(
+							new MessageEvent(delay, quester, "<" + name + "> " + message));
+				}
+			}
+			delay += message_delay;
+		}
+		if (quest_file != null) {
+			if (!quester.isCompleted(new QuestProspect(quest_file))) {
+				quester.addQuestAvailable(new QuestProspect(quest_file));
+			}
+		}
+		quester.setHealth(quester.getHealth() + heal_amount);
+	}
+
 	private boolean isInvulnerable() {
 		if ((mode != NPCMode.FOR_SALE) && 
 				(mode != NPCMode.PARTY) && 
@@ -741,6 +822,10 @@ public class NPCQuester extends Quester {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean isRemoved() {
+		return removed;
 	}
 
 	private boolean isMerc() {
@@ -763,10 +848,7 @@ public class NPCQuester extends Quester {
 			} else {
 				hand = null;
 			}
-			((Player)entity.getBukkitEntity()).setHealth(0);
-//			entity.getBukkitEntity().setHealth(0);
 			MineQuest.getNPCManager().despawn(name);
-//			NpcSpawner.RemoveBasicHumanNpc(this.entity);
 			entity = null;
 			player = null;
 		}
@@ -789,33 +871,35 @@ public class NPCQuester extends Quester {
 	}
 	
 	public void redo() {
-		teleport(player.getLocation());
+		if (player != null) {
+			teleport(player.getLocation());
+		}
 	}
 
 	public void removeSql() {
 		removed = true;
 		try {
-			MineQuest.getSQLServer().update("DELETE FROM questers WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM questers WHERE name='" + getSName() + "'");
 		} catch (Exception e) {
 		}
 		try {
-			MineQuest.getSQLServer().update("DELETE FROM binds WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM binds WHERE name='" + getSName() + "'");
 		} catch (Exception e) {
 		}
 		try {
-			MineQuest.getSQLServer().update("DELETE FROM chests WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM chests WHERE name='" + getSName() + "'");
 		} catch (Exception e) {
 		}
 		try {
-			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + ",");
+			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + getSName() + "'");
 		} catch (Exception e) {
 		}
 		try {
-			MineQuest.getSQLServer().update("DELETE FROM npc WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM npc WHERE name='" + getSName() + "'");
 		} catch (Exception e) {
 		}
 		try {
-			MineQuest.getSQLServer().update("DELETE FROM quests WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM quests WHERE name='" + getSName() + "'");
 		} catch (Exception e) {
 		}
 	}
@@ -839,7 +923,7 @@ public class NPCQuester extends Quester {
 				loc.getZ() + "', mode='" + 
 				mode + "', world='" + 
 				entity.getBukkitEntity().getWorld().getName() + "' WHERE name='"
-				+ name + "'");
+				+ getSName() + "'");
 	}
 
 	@Override
@@ -919,9 +1003,9 @@ public class NPCQuester extends Quester {
 		handleProperty(property, value);
 
 		if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
-			MineQuest.getSQLServer().update("DELETE FROM npc WHERE property='" + property + "' AND name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM npc WHERE property='" + property + "' AND name='" + getSName() + "'");
 			MineQuest.getSQLServer().update("INSERT INTO npc " + 
-					" (name, property, value) VALUES('" + name + "', '" + property + "', '" + value + "')");
+					" (name, property, value) VALUES('" + getSName() + "', '" + property + "', '" + value + "')");
 		}
 	}
 
@@ -983,9 +1067,9 @@ public class NPCQuester extends Quester {
 
 	public void setTown(String town) {
 		this.town = town;
-		MineQuest.getSQLServer().update("DELETE FROM npc WHERE property='town' AND name='" + name + "'");
+		MineQuest.getSQLServer().update("DELETE FROM npc WHERE property='town' AND name='" + getSName() + "'");
 		MineQuest.getSQLServer().update("INSERT INTO npc " + 
-				" (name, property, value) VALUES('" + name + "', 'town', '" + town + "')");
+				" (name, property, value) VALUES('" + getSName() + "', 'town', '" + town + "')");
 	}
 	
 	@Override
@@ -1014,7 +1098,7 @@ public class NPCQuester extends Quester {
 		}
 		super.update();
 
-		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + name + "'");
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + getSName() + "'");
 
 		try {
 			if (!results.next()) return;
@@ -1032,7 +1116,7 @@ public class NPCQuester extends Quester {
 			MineQuest.log("Unable to add NPCQuester");
 		}
 		
-		results = MineQuest.getSQLServer().query("SELECT * FROM npc WHERE name='" + name + "'");
+		results = MineQuest.getSQLServer().query("SELECT * FROM npc WHERE name='" + getSName() + "'");
 		
 		this.radius = 0;
 		this.hit_message = null;

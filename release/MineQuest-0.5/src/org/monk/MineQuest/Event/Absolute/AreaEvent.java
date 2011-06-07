@@ -60,9 +60,11 @@ public class AreaEvent extends QuestEvent implements TargetEvent {
 		if (party != null) questers = party.getQuesterArray();
 		if (questers != null) {
 			for (i = 0; i < questers.length; i++) {
-				if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
-					flags[i] = true;
-					target = questers[i];
+				if (questers[i].getPlayer() != null) {
+					if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
+						flags[i] = true;
+						target = questers[i];
+					}
 				}
 			}
 		}

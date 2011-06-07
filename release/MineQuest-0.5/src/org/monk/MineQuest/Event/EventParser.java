@@ -51,9 +51,14 @@ public class EventParser implements java.lang.Runnable {
 		now = Calendar.getInstance();
 		if (!complete && event.isPassed(now.getTimeInMillis())) {
 			complete = true;
-			event.activate(this);
-			if (!complete) {
-				event.reset(getTime());
+			try {
+				event.activate(this);
+				if (!complete) {
+					event.reset(getTime());
+				}
+			} catch (Exception e) {
+				MineQuest.log("Exception occured while parsing " + event.getName());
+				e.printStackTrace();
 			}
 		} else if (complete) {
 			MineQuest.getSServer().getScheduler().cancelTask(id);

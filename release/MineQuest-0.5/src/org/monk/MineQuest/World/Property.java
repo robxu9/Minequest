@@ -184,7 +184,7 @@ public class Property {
 	}
 
 	public Location getLocation() {
-		return new Location(null, (x + max_x) / 2, y, (z + max_z) / 2);
+		return new Location(MineQuest.getSServer().getWorlds().get(0), (x + max_x) / 2, y, (z + max_z) / 2);
 	}
 
 	public int getCenterX() {

@@ -16,11 +16,12 @@ import net.minecraft.server.NetworkManager;
 import net.minecraft.server.Packet18ArmAnimation;
 import net.minecraft.server.World;
 import net.minecraft.server.WorldServer;
+
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.entity.HumanEntity;
 
 /**
  *

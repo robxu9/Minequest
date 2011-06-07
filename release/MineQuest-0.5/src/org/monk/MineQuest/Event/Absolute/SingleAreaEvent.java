@@ -48,10 +48,12 @@ public class SingleAreaEvent extends AreaEvent {
 		if (party != null) questers = party.getQuesterArray();
 		if (questers != null) {
 			for (i = 0; i < questers.length; i++) {
-				if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
-					this.quester = questers[i];
-					flag = true;
-					target = questers[i];
+				if (questers[i].getPlayer() != null) {
+					if (MineQuest.distance(questers[i].getPlayer().getLocation(), loc) < radius) {
+						this.quester = questers[i];
+						flag = true;
+						target = questers[i];
+					}
 				}
 			}
 		}

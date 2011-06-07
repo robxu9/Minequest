@@ -376,6 +376,7 @@ public class Town {
 	}
 
 	public Location getSpawn() {
+		spawn.setWorld(MineQuest.getSServer().getWorlds().get(0));
 		return spawn;
 	}
 

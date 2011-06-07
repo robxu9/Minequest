@@ -188,4 +188,17 @@ public class SkillClassConfig {
 		
 		return 0;
 	}
+
+	public static long[] longList(String list) {
+		if (list.length() == 0) return null;
+		if (!list.contains(",")) return new long[] {Integer.parseInt(list)};
+		String[] strings = list.split(",");
+		long[] ints = new long[strings.length];
+		int i = 0;
+		for (String armor_level_string : strings) {
+			ints[i++] = Long.parseLong(armor_level_string);
+		}
+
+		return ints;
+	}
 }

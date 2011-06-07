@@ -31,15 +31,15 @@ public class Party {
 	}
 	
 	public void addQuester(Quester quester) {
-		quester.setParty(this);
-		
 		questers.add(quester);
+		
+		quester.setParty(this);
 	}
 	
 	public void remQuester(Quester quester) {
-		quester.setParty(null);
-		
 		questers.remove(quester);
+		
+		quester.setParty(null);
 	}
 	
 	public List<Quester> getQuesters() {

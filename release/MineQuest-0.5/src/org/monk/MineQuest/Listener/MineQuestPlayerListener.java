@@ -439,9 +439,9 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
         		NPCQuester quester = (NPCQuester)MineQuest.getQuester(split[1]);
 	        	if (MineQuest.getQuester(player).canEdit(quester.getPlayer().getLocation().getBlock())) {
-	        		quester.removeSql();
 	        		quester.setHealth(0);
 	        		MineQuest.remQuester(quester);
+	        		quester.removeSql();
 	        	} else {
 	        		player.sendMessage("You don't have permission to edit their area");
 	        	}

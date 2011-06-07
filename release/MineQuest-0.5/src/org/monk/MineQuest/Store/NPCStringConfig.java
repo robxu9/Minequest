@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Material;
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.PropertiesFile;
+import org.monk.MineQuest.Event.Relative.MessageEvent;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
@@ -73,10 +75,10 @@ public class NPCStringConfig {
 		}
 	}
 
-	public void sendRandomWalkMessage(NPCQuester npcQuester, Quester quester) {
+	public void sendRandomWalkMessage(NPCQuester npcQuester, Quester quester, int delay) {
 		String message = getRandomWalkMessage(quester);
 		if (message != null) {
-			quester.sendMessage("<" + npcQuester.getName() + "> " + message);
+			MineQuest.getEventQueue().addEvent(new MessageEvent(delay, quester, "<" + npcQuester.getName() + "> " + message));
 		} else {
 
 		}
@@ -96,10 +98,10 @@ public class NPCStringConfig {
 		return ret;
 	}
 
-	public void sendRandomHitMessage(NPCQuester npcQuester, Quester quester) {
+	public void sendRandomHitMessage(NPCQuester npcQuester, Quester quester, int delay) {
 		String message = getRandomHitMessage(quester);
 		if (message != null) {
-			quester.sendMessage("<" + npcQuester.getName() + "> " + message);
+			MineQuest.getEventQueue().addEvent(new MessageEvent(delay, quester, "<" + npcQuester.getName() + "> " + message));
 		} else {
 
 		}

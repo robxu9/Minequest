@@ -79,7 +79,7 @@ import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Quest {
-	private Quester questers[];
+	private List<Quester> questers;
 	private List<QuestTask> tasks;
 	private List<Event> events;
 	private Location spawn;
@@ -102,7 +102,7 @@ public class Quest {
 	private AreaPreserver areaPreserver;
 	
 	public Quest(String filename, Party party) {
-		this.questers = party.getQuesterArray();
+		this.questers = party.getQuesters();
 		this.party = party;
 		tasks = new ArrayList<QuestTask>();
 		events = new ArrayList<Event>();
@@ -120,7 +120,13 @@ public class Quest {
 			
 			String line = "";
 			int number = 0;
-			world = questers[0].getPlayer().getWorld();
+			if (questers == null) {
+				MineQuest.log("questers");
+			}
+			if (questers.get(0).getPlayer() == null) {
+				MineQuest.log("questers.get(0).getPlayer()");
+			}
+			world = questers.get(0).getPlayer().getWorld();
 			spawn = null;
 			start_x = 0;
 			areaPreserver = null;
@@ -132,6 +138,7 @@ public class Quest {
 					parseLine(split);
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				MineQuest.log("Unable to load Quest Problem on Line " + number);
 				MineQuest.log("  " + line);
 				try {
@@ -302,13 +309,13 @@ public class Quest {
 				deleteDir(new File(split[2]));
 				copyDirectory(new File(split[3]), new File(split[2]));
 				world = null;
-				if (MineQuest.getSServer().getWorld(split[1]) == null) {
+//				if (MineQuest.getSServer().getWorld(split[2]) == null) {
 					if ((split.length == 4) || (split[4].equals("NORMAL"))) {
 						world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
 					} else {
 						world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
 					}
-				}
+//				}
 			} else {
 				boolean flag = false;
 				if ((split.length == 4) || (split[4].equals("NORMAL"))) {
@@ -497,7 +504,7 @@ public class Quest {
 		int id = Integer.parseInt(line[1]);
 		String type = line[2];
 		Event new_event;
-		LivingEntity entities[] = new LivingEntity[questers.length];
+		LivingEntity entities[] = new LivingEntity[questers.size()];
 		int i = 0;
 		for (Quester quester : questers) {
 			entities[i++] = quester.getPlayer();
@@ -837,7 +844,7 @@ public class Quest {
 
 	public void issueNextEvents(int index) {
 		if (index == -1) {
-			for (Quester quester : questers) {
+			for (Quester quester : party.getQuesters()) {
 				if (quester != null) {
 					quester.clearQuest(reset);
 				}
