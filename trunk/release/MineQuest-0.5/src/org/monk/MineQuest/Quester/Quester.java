@@ -32,11 +32,13 @@ import java.util.Random;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EntityTracker;
 import net.minecraft.server.Packet18ArmAnimation;
+import net.minecraft.server.WorldServer;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
@@ -102,7 +104,7 @@ public class Quester {
 	protected String name;
 	protected Party npcParty;
 	protected Party party;
-	protected HumanEntity player;
+	protected Player player;
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
@@ -238,13 +240,13 @@ public class Quester {
 
 		save();
 		try {
-			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + this.name + "'");
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + getSName() + "'");
 			results.next();
 			String classes = results.getString("classes");
 			
 			classes = classes + ", " + name;
 			
-			MineQuest.getSQLServer().update("UPDATE questers SET classes='" + classes + "' WHERE name='" + this.name + "'");
+			MineQuest.getSQLServer().update("UPDATE questers SET classes='" + classes + "' WHERE name='" + getSName() + "'");
 			
 			createClass(name, MineQuest.getNextAbilId());
 			sendMessage(name + " class added!");
@@ -312,7 +314,7 @@ public class Quester {
 			return;
 		}
 		available.add(quest);
-		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + name + "', 'A', '" 
+		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'A', '" 
 				+ quest.getFile() + "')");
 		sendMessage("You now have access to the quest " + quest.getName());
 	}
@@ -320,7 +322,7 @@ public class Quester {
 	public void addQuestCompleted(QuestProspect quest) {
 		if (isCompleted(quest)) return;
 		completed.add(quest);
-		MineQuest.getSQLServer().update("INSERT INTO " + name + "_quests (name, type, file) VALUES('" + name + "', 'C', '" 
+		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'C', '" 
 				+ quest.getFile() + "')");
 	}
 
@@ -854,7 +856,7 @@ public class Quester {
 		if (MineQuest.isTrackingDestroy()) {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
 			
-			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + name + "'");
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + getSName() + "'");
 			
 			try {
 				while (results.next()) {
@@ -872,12 +874,12 @@ public class Quester {
 			} catch (Exception e) {
 			}
 			
-			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + getSName() + "'");
 			
 			for (CreatureType creature : kill_map.keySet()) {
 				MineQuest.getSQLServer().update(
 						"INSERT INTO kills (name, type, count) VALUES('"
-								+ name + "', '"
+								+ getSName() + "', '"
 								+ creature.getName() + "', '"
 								+ kill_map.get(creature) + "')");
 			}
@@ -885,7 +887,7 @@ public class Quester {
 			for (Material material : destroyed.keySet()) {
 				MineQuest.getSQLServer().update(
 						"INSERT INTO kills (name, type, count) VALUES('"
-								+ name + "', '"
+								+ getSName() + "', '"
 								+ material.name() + "', '"
 								+ destroyed.get(material) + "')");
 			}
@@ -899,7 +901,7 @@ public class Quester {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
 			Map<Material, Integer> destroyed = new HashMap<Material, Integer>();
 			
-			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + name + "'");
+			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + getSName() + "'");
 			
 			try {
 				while (results.next()) {
@@ -927,12 +929,12 @@ public class Quester {
 				}
 			}
 			
-			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + name + "'");
+			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + getSName() + "'");
 			
 			for (CreatureType creature : kill_map.keySet()) {
 				MineQuest.getSQLServer().update(
 						"INSERT INTO kills (name, type, count) VALUES('"
-								+ name + "', '"
+								+ getSName() + "', '"
 								+ creature.getName() + "', '"
 								+ kill_map.get(creature) + "')");
 			}
@@ -940,7 +942,7 @@ public class Quester {
 			for (Material material : destroyed.keySet()) {
 				MineQuest.getSQLServer().update(
 						"INSERT INTO kills (name, type, count) VALUES('"
-								+ name + "', '"
+								+ getSName() + "', '"
 								+ material.name() + "', '"
 								+ destroyed.get(material) + "')");
 			}
@@ -953,10 +955,12 @@ public class Quester {
 		this.quest = null;
 		poison_timer = 0;
 		if (reset && (before_quest != null)) {
-			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(5000, this, before_quest.getWorld().getSpawnLocation()));
-			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(6000, this, before_quest));
+			try {
+				player.teleport(before_quest.getWorld().getSpawnLocation());
+			} catch (Exception e) {
+			}
+			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(2000, this, before_quest));
 		}
-		kills = new CreatureType[0];
 	}
 
 	public void completeQuest(QuestProspect quest) {
@@ -975,7 +979,7 @@ public class Quester {
 		String[] class_names = MineQuest.getClassNames();
 		
 		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health) VALUES('"
-			+ name + "', '" + name + "', '500000', '0', '0', 'Bitville', '";
+			+ getSName() + "', '" + getSName() + "', '500000', '0', '0', 'Bitville', '";
 		if ((class_names != null) && (class_names.length > 0)) {
 			update_string = update_string + class_names[0];
 			for (String name : class_names) {
@@ -997,7 +1001,7 @@ public class Quester {
 
 	public void createClass(String clazz, int abil_list_id) {
 		String update_string = "INSERT INTO classes (name, class, exp, level, abil_list_id) VALUES('"
-			+ name + "', '" + clazz + "', '0', '0', '" + abil_list_id + "')";
+			+ getSName() + "', '" + clazz + "', '0', '0', '" + abil_list_id + "')";
 
 		MineQuest.getSQLServer().update(update_string);
 		MineQuest.getSQLServer().update("INSERT INTO abilities (abil_list_id) VALUES('" + abil_list_id + "')");
@@ -1106,7 +1110,9 @@ public class Quester {
 			for (Quester quester : npcParty.getQuesterArray()) {
 				NPCQuester npc = (NPCQuester)quester;
 				
-				npc.questerAttack((LivingEntity)entity);
+				if (entity instanceof LivingEntity) {
+					npc.questerAttack((LivingEntity)entity);
+				}
 			}
 		}
 		
@@ -1343,8 +1349,8 @@ public class Quester {
 	@SuppressWarnings("static-access")
 	public double getCubes() {
 		if (MineQuest.getIsConomyOn()) {
-			if (MineQuest.getIConomy().hasAccount(name)) {
-				Holdings balance = MineQuest.getIConomy().getAccount(name).getHoldings();
+			if (MineQuest.getIConomy().hasAccount(getSName())) {
+				Holdings balance = MineQuest.getIConomy().getAccount(getSName()).getHoldings();
 				return balance.balance();
 			}
 		}
@@ -1413,6 +1419,14 @@ public class Quester {
 		return name;
 	}
 
+	/**
+	 * Returns SQL name of Quester.
+	 * @return
+	 */
+	public String getSName() {
+		return name;
+	}
+
 	public Party getParty() {
 		return party;
 	}
@@ -1423,11 +1437,7 @@ public class Quester {
 	 * @return
 	 */
 	public Player getPlayer() {
-		if (player instanceof Player) {
-			return (Player)player;
-		} else {
-			return null;
-		}
+		return player;
 	}
 	
 	public Quest getQuest() {
@@ -1865,7 +1875,7 @@ public class Quester {
 			}
 		}
 
-		MineQuest.getSQLServer().update("UPDATE questers SET classes='" + list + "' WHERE name='" + this.name + "'");
+		MineQuest.getSQLServer().update("UPDATE questers SET classes='" + list + "' WHERE name='" + getSName() + "'");
 		save();
 		update();
 		
@@ -1915,19 +1925,35 @@ public class Quester {
 	
 	public void remQuestAvailable(QuestProspect quest) {
 		available.remove(quest);
-		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='A' AND name='" + name + "' AND file='" + quest.getFile() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='A' AND name='" + getSName() + "' AND file='" + quest.getFile() + "'");
 	}
 	
 	public void remQuestComplete(QuestProspect quest) {
 		completed.remove(quest);
-		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='C' AND name='" + name + "' AND file='" + quest.getFile() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='C' AND name='" + getSName() + "' AND file='" + quest.getFile() + "'");
 	}
 	
 	public void respawn(PlayerRespawnEvent event) {
 		health = max_health;
 		poison_timer = 0;
 		if (quest != null) {
-			event.setRespawnLocation(quest.getSpawn());
+			if (quest.getSpawn() != null) {
+				if (!quest.getSpawn().getWorld().getName().equals(event.getRespawnLocation().getWorld().getName())) {
+					CraftWorld cworld = (CraftWorld)quest.getWorld();
+					WorldServer world = cworld.getHandle();
+					world.manager.removePlayer(((CraftPlayer)player).getHandle());
+				}
+				try {
+//					event.setRespawnLocation(quest.getSpawn());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(500, this, quest.getSpawn()));
+			} else if (MineQuest.getSServer().getWorlds().get(0).getName().equals(quest.getWorld().getName())) {
+//				if (MineQuest.townRespawn() && (MineQuest.getTown(last) != null)) {
+//					event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+//				}
+			}
 		} else {
 			if (MineQuest.townRespawn() && (MineQuest.getTown(last) != null)) {
 				event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
@@ -1972,7 +1998,7 @@ public class Quester {
 	public void save() {
 		if (MineQuest.getSQLServer().update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
 				+ health + "', max_health='" + max_health + "', enabled='" + 1
-				+ "', cubes='" + (long)cubes + "' WHERE name='" + name + "'") == -1) {
+				+ "', cubes='" + (long)cubes + "' WHERE name='" + getSName() + "'") == -1) {
 			if (player instanceof Player) {
 				((Player)player).sendMessage("May not have saved properly, please try again");
 			} else {
@@ -2019,8 +2045,8 @@ public class Quester {
 	public void setCubes(double d) {
 		cubes = d;
 		if (MineQuest.getIsConomyOn()) {
-			if (MineQuest.getIConomy().hasAccount(name)) {
-				Holdings balance = MineQuest.getIConomy().getAccount(name).getHoldings();
+			if (MineQuest.getIConomy().hasAccount(getSName())) {
+				Holdings balance = MineQuest.getIConomy().getAccount(getSName()).getHoldings();
 				balance.set(d);
 			}
 		}
@@ -2047,15 +2073,16 @@ public class Quester {
 	}
 
 	public void setParty(Party party) {
-		
 		if (npcParty != null) {
 			if (party != null) {
 				for (Quester quester : npcParty.getQuesters()) {
 					party.addQuester(quester);
 				}
 			} else {
-				for (Quester quester : npcParty.getQuesters()) {
-					this.party.remQuester(quester);
+				if (this.party != null) {
+					for (Quester quester : npcParty.getQuesters()) {
+						this.party.remQuester(quester);
+					}
 				}
 			}
 		}
@@ -2067,23 +2094,34 @@ public class Quester {
 	 * 
 	 * @param player New Reference
 	 */
-	public void setPlayer(HumanEntity player) {
+	public void setPlayer(Player player) {
 		if (player == null) {
-			if (party != null) party.remQuester(this);
+			if (!(this instanceof NPCQuester)) {
+				if (party != null) party.remQuester(this);
+				if (quest != null) {
+					quest.removeQuester(this);
+				}
+			}
 		}
 		this.player = player;
 	}
 
 	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
-		
-		before_quest = player.getLocation();
-		
-		if (!world.getName().equals(player.getWorld().getName())) {
-			player.teleport(world.getSpawnLocation());
+
+		if (player != null) {
+			before_quest = player.getLocation();
+			
+			if (quest.getSpawn() != null) {
+				try {
+					player.teleport(quest.getSpawn());
+				} catch (Exception e) {
+				}
+				MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(1000, this, quest.getSpawn()));
+			}
+			clearKills();
+			clearDestroyed();
 		}
-		clearKills();
-		clearDestroyed();
 	}
 	
 	public void spendClassExp(String type, int amount) {
@@ -2157,10 +2195,10 @@ public class Quester {
 		int i;
 		
 		try {
-			results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + name + "'");
+			results = MineQuest.getSQLServer().query("SELECT * FROM questers WHERE name='" + getSName() + "'");
 			results.next();
 		} catch (SQLException e) {
-			System.out.println("Issue querying name");
+			MineQuest.log("Issue querying name");
 			return;
 		}
 		try {
@@ -2175,7 +2213,7 @@ public class Quester {
 			last = results.getString("last_town");
 			chests = new ChestSet(this, results.getString("selected_chest"));
 		} catch (SQLException e) {
-			System.out.println("Issue getting parameters");
+			MineQuest.log("Issue getting parameters");
 			return;
 		}
 		
@@ -2184,7 +2222,7 @@ public class Quester {
 			classes.add(SkillClass.newClass(this, split[i]));
 		}
 		
-		results = MineQuest.getSQLServer().query("SELECT * FROM quests WHERE type='C' AND name='" + name + "'");
+		results = MineQuest.getSQLServer().query("SELECT * FROM quests WHERE type='C' AND name='" + getSName() + "'");
 		completed = new ArrayList<QuestProspect>();
 		
 		try {
@@ -2195,7 +2233,7 @@ public class Quester {
 			MineQuest.log("Unable to load completed quests for " + name);
 		}
 		
-		results = MineQuest.getSQLServer().query("SELECT * FROM quests WHERE type='A' AND name='" + name + "'");
+		results = MineQuest.getSQLServer().query("SELECT * FROM quests WHERE type='A' AND name='" + getSName() + "'");
 		available = new ArrayList<QuestProspect>();
 		
 		try {
@@ -2245,7 +2283,7 @@ public class Quester {
 	public void updateBinds() {
 		ResultSet results;
 		try {
-			results = MineQuest.getSQLServer().query("SELECT * FROM binds WHERE name='" + name + "'");
+			results = MineQuest.getSQLServer().query("SELECT * FROM binds WHERE name='" + getSName() + "'");
 			while (results.next()) {
 				String name = results.getString("abil");
 				if (name.contains(":") && name.split(":")[0].equals("Binder")) {
@@ -2362,5 +2400,14 @@ public class Quester {
 
 	public void startled() {
 		sendMessage("Someone is attempting to steal form you!");
+	}
+
+	public boolean canPay(long cost) {
+		if (getCubes() >= cost) {
+			setCubes(getCubes() - cost);
+			return true;
+		}
+		
+		return false;
 	}
 }

@@ -5,7 +5,9 @@
 package org.martin.bukkit.npclib;
 
 import java.util.HashMap;
+
 import net.minecraft.server.ItemInWorldManager;
+
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 

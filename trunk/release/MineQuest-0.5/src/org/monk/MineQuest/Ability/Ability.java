@@ -73,7 +73,7 @@ public abstract class Ability {
 
 		packageName = packageName.replaceAll("\\.", "/");
 		if (debug)
-			System.out.println("Jar " + jarName + " looking for " + packageName);
+			MineQuest.log("Jar " + jarName + " looking for " + packageName);
 		try {
 			JarInputStream jarFile = new JarInputStream(new FileInputStream(
 					jarName));
@@ -88,7 +88,7 @@ public abstract class Ability {
 						&& (!jarEntry.getName().contains("Version"))
 						&& (jarEntry.getName().endsWith(".class"))) {
 					if (debug)
-						System.out.println("Found "
+						MineQuest.log("Found "
 								+ jarEntry.getName().replaceAll("/", "\\."));
 					classes.add((String)jarEntry.getName().replaceAll("/", "\\."));
 				}
@@ -316,7 +316,7 @@ public abstract class Ability {
 			bind = item.getTypeId();
 			MineQuest.getSQLServer().update(
 					"INSERT INTO binds (name, abil, bind, bind_2) VALUES('"
-							+ quester.getName() + "', '" + getName() + "', '"
+							+ quester.getSName() + "', '" + getName() + "', '"
 							+ bind + "', '" + bind + "')");
 			quester.sendMessage(getName() + " is now bound to "
 					+ item.getTypeId());
@@ -608,7 +608,7 @@ public abstract class Ability {
 			lookBind = item.getTypeId();
 			MineQuest.getSQLServer().update(
 					"INSERT INTO binds (name, abil, bind, bind_2) VALUES('"
-							+ quester.getName() + "', 'LOOK:" + getName()
+							+ quester.getSName() + "', 'LOOK:" + getName()
 							+ "', '" + lookBind + "', '" + lookBind + "')");
 			quester.sendMessage(getName() + " is now look bound to "
 					+ item.getTypeId());
@@ -741,8 +741,8 @@ public abstract class Ability {
 	public void silentUnBind(Quester quester) {
 		bind = -1;
 		lookBind = -1;
-		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getName() + "'");
-		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getName() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getSName() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getSName() + "'");
 	}
 
 	/**
@@ -751,8 +751,8 @@ public abstract class Ability {
 	 */
 	public void unBind(Quester quester) {
 		bind = -1;
-		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getName() + "'");
-		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getName() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getSName() + "'");
+		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getSName() + "'");
 		quester.sendMessage(getName() + " is now unbound");
 	}
 	

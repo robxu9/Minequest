@@ -192,7 +192,7 @@ public class SkillClass {
 			ability_list = abilListSQL(abil_list_id);
 			quester.updateBinds();
 		} catch (SQLException e) {
-			System.out.println("Failed to add ability " + string + " to mysql server");
+			MineQuest.log("Failed to add ability " + string + " to mysql server");
 		}
 		
 		quester.sendMessage("Gained ability " + string);
@@ -378,9 +378,11 @@ public class SkillClass {
 			}
 		}
 		
-		for (i = 0; i < ability_list.length; i++) {
-			if (ability_list[i] instanceof DefendingAbility) {
-				sum += ((DefendingAbility)ability_list[i]).parseDefend(quester, entity, amount - sum);
+		if (ability_list != null) {
+			for (i = 0; i < ability_list.length; i++) {
+				if (ability_list[i] instanceof DefendingAbility) {
+					sum += ((DefendingAbility)ability_list[i]).parseDefend(quester, entity, amount - sum);
+				}
 			}
 		}
 		
@@ -434,9 +436,6 @@ public class SkillClass {
 	 */
 	public void expAdd(int expNum) {
 		int num = 400;
-		if (this instanceof ResourceClass) {
-			num *= 2;
-		}
 		exp += expNum;
 		if (exp >= num * (level + 1)) {
 			levelUp();
@@ -788,7 +787,7 @@ public class SkillClass {
 	 */
 	public void save() {
 		MineQuest.getSQLServer().update("UPDATE classes SET exp='" + exp + "', level='" + level + 
-								"' WHERE name='" + quester.getName() + "' AND class='" + type + "'");
+								"' WHERE name='" + quester.getSName() + "' AND class='" + type + "'");
 	}
 
 	public void silentUnBind(ItemStack itemStack) {
@@ -820,7 +819,7 @@ public class SkillClass {
 	 * changes.
 	 */
 	public void update() {
-		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM classes WHERE name='" + quester.getName() + "' AND class='" + type + "'");
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM classes WHERE name='" + quester.getSName() + "' AND class='" + type + "'");
 		
 		try {
 			if (results.next()) {
@@ -843,7 +842,7 @@ public class SkillClass {
 				ability_list = new Ability[0];
 			}
 		} catch (SQLException e) {
-			System.out.println("Problem reading Ability");
+			MineQuest.log("Problem reading Ability");
 		}
 		
 		if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
@@ -879,6 +878,7 @@ public class SkillClass {
 	}
 
 	public void targeted(EntityTargetEvent event) {
+		if (ability_list == null) return;
 		for (Ability ability : ability_list) {
 			if (ability instanceof TargetDefendAbility) {
 				if (ability.isEnabled()) {

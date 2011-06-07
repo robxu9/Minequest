@@ -147,6 +147,7 @@ public class MineQuestEntityListener extends EntityListener {
 	
 	@Override
 	public void onEntityExplode(EntityExplodeEvent event) {
+		if (event.getEntity() == null) return;
 		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.getEntity() instanceof Creeper) {
 			MQMob mob = MineQuest.getMob((LivingEntity)event.getEntity());

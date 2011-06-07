@@ -27,7 +27,7 @@ import org.monk.MineQuest.Quester.Quester;
 public class StoreBlock {
 	public static String convert(long cubes) {
 		String cubes_string = "";
-		long[] cutoffs = new long[] {1000000000,1000000,1000,0};
+		long[] cutoffs = MineQuest.getMoneyAmounts();
 		String[] names = MineQuest.getMoneyNames();
 		
 		int i;
@@ -135,7 +135,7 @@ public class StoreBlock {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("Strange problem " + e);
+			MineQuest.log("Strange problem " + e);
 		}
 		
 		quantity -= block_quantity;

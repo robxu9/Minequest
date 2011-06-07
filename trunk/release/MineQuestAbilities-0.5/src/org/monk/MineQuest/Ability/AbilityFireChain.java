@@ -72,9 +72,11 @@ public class AbilityFireChain extends Ability {
 			this_entity = getRandomEntity(entity, config[0]);
 			for (i = 0; i < config[2] + (((double)config[3]) / 100 * myclass.getCasterLevel()); i++) {
 				if (this_entity != null) {
-					fireball.castAbility(quester, new Location(player.getWorld(), (int) this_entity.getLocation().getX(),
-							(int) this_entity.getLocation().getY(), (int) this_entity.getLocation().getZ()),
-							this_entity);
+					if (fireball != null) {
+						fireball.castAbility(quester, new Location(player.getWorld(), (int) this_entity.getLocation().getX(),
+								(int) this_entity.getLocation().getY(), (int) this_entity.getLocation().getZ()),
+								this_entity);
+					}
 					this_entity = getRandomEntity(this_entity, config[0]);
 				}
 				if (myclass.getGenerator().nextDouble() < (((double)config[1]) / 100)) {

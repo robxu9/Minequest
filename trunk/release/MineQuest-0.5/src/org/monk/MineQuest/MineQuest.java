@@ -52,6 +52,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.martin.bukkit.npclib.NPCManager;
 import org.monk.MineQuest.Ability.Ability;
 import org.monk.MineQuest.Ability.AbilityConfigManager;
+import org.monk.MineQuest.Event.DelayedSQLEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Event.RespawnEvent;
@@ -107,7 +108,7 @@ public class MineQuest extends JavaPlugin {
 	private static boolean log_health_change;
 	private static int maxClass;
 	private static MQMob mobs[];
-	private static int[] money_amounts;
+	private static long[] money_amounts;
 	private static String[] money_names;
 	private static boolean mq_damage_system;
     private static String namer;
@@ -297,6 +298,11 @@ public class MineQuest extends JavaPlugin {
      */
 	static public double distance(Location loc1, Location loc2) {
 		double x, y, z;
+		if ((loc1.getWorld() != null) && (loc2.getWorld() != null)) {
+			if (!loc1.getWorld().getName().equals(loc2.getWorld().getName())) {
+				return 10000;
+			}
+		}
 		
 		x = loc1.getX() - loc2.getX();
 		y = loc1.getY() - loc2.getY();
@@ -304,6 +310,7 @@ public class MineQuest extends JavaPlugin {
 		
 		return Math.sqrt(x*x + y*y + z*z);
 	}
+
 	public static void downloadFile(String url, String file) throws MalformedURLException, IOException {
 		BufferedInputStream in = new BufferedInputStream(
 				new java.net.URL(url).openStream());
@@ -488,7 +495,7 @@ public class MineQuest extends JavaPlugin {
 		return i;
 	}
 
-	public static int[] getMoneyAmounts() {
+	public static long[] getMoneyAmounts() {
 		return money_amounts;
 	}
 
@@ -525,7 +532,7 @@ public class MineQuest extends JavaPlugin {
 				num++;
 			}
 		} catch (SQLException e) {
-			System.out.println("Unable to get max ability id");
+			log("Unable to get max ability id");
 		}
 		
 		return num;
@@ -1327,7 +1334,7 @@ public class MineQuest extends JavaPlugin {
 		price_change = economy.getDouble("price_change", .009);
 		
 		money_names = economy.getString("money_names", "GC,MC,KC,C").split(",");
-		money_amounts = SkillClassConfig.intList(economy.getString("money_amounts", "1000000000,1000000,1000,0"));
+		money_amounts = SkillClassConfig.longList(economy.getString("money_amounts", "1000000000,1000000,1000,0"));
 
 		cubonomy_enable = economy.getBoolean("cubonomy_enable", true);
 	}
@@ -1678,5 +1685,8 @@ public class MineQuest extends JavaPlugin {
         resource_config = new ResourceClassConfig();
 		MineQuest.log("Loading Ability Config - Warning: will not affect loaded abilities!!");
         ability_config = new AbilityConfigManager();
+	}
+	public static void delayUpdate(String string) {
+		eventQueue.addEvent(new DelayedSQLEvent(50, string));
 	}
 }

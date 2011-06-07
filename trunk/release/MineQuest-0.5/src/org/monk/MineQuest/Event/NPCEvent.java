@@ -13,8 +13,9 @@ public class NPCEvent extends PeriodicEvent {
 	@Override
 	public void activate(EventParser eventParser) {
 		quester.activate();
-		
+
 		super.activate(eventParser);
+		eventParser.setComplete(quester.isRemoved());
 	}
 
 }
