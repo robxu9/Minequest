@@ -116,17 +116,26 @@ public class Quest {
 		edit_message = "A Mystical Force is keeping you from Modifying the world!";
 
 		try {
-			BufferedReader bis = new BufferedReader(new FileReader(filename + ".quest"));
+			BufferedReader bis;
+			if (filename.equals("MineQuest/main.script")) {
+				bis = new BufferedReader(new FileReader(filename));
+			} else {
+				bis = new BufferedReader(new FileReader(filename + ".quest"));
+			}
 			
 			String line = "";
 			int number = 0;
 			if (questers == null) {
 				MineQuest.log("questers");
 			}
-			if (questers.get(0).getPlayer() == null) {
-				MineQuest.log("questers.get(0).getPlayer()");
+			if (questers.size() > 0) {
+				if (questers.get(0).getPlayer() == null) {
+					MineQuest.log("questers.get(0).getPlayer()");
+				}
+				world = questers.get(0).getPlayer().getWorld();
+			} else if (filename.equals("MineQuest/main.script")) {
+				world = MineQuest.getSServer().getWorlds().get(0);
 			}
-			world = questers.get(0).getPlayer().getWorld();
 			spawn = null;
 			start_x = 0;
 			areaPreserver = null;
@@ -147,6 +156,9 @@ public class Quest {
 					MineQuest.log("Unable to unload events properly");
 				}
 				return;
+			}
+			if (world == null) {
+				world = MineQuest.getSServer().getWorlds().get(0);
 			}
 			if (spawn == null) {
 				spawn = world.getSpawnLocation();
@@ -415,6 +427,8 @@ public class Quest {
 	}
 	
 	public Location getSpawn() {
+		if (!reset) return null;
+		
 		return spawn;
 	}
 	
@@ -924,5 +938,9 @@ public class Quest {
 		}
 		
 		return null;
+	}
+
+	public boolean isMainQuest() {
+		return filename.equals("MineQuest/main.script");
 	}
 }

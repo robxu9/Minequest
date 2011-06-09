@@ -63,6 +63,7 @@ import org.monk.MineQuest.Listener.MineQuestPlayerListener;
 import org.monk.MineQuest.Listener.MineQuestServerListener;
 import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Mob.SpecialMob;
+import org.monk.MineQuest.Quest.FullParty;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
@@ -143,6 +144,15 @@ public class MineQuest extends JavaPlugin {
 	private static boolean track_destroy;
 	private static boolean track_kills;
 	
+	/**
+	 * This adds a minequest wrapper to an existing mob.
+	 * This function should not be called outside of MineQuest.
+	 * Instead setMQMob should be used. This function handles
+	 * the random control of whether a mob is a special mob or
+	 * not.
+	 * 
+	 * @param entity Living entity to add
+	 */
 	public static void addMob(LivingEntity entity) {
 		Random generator = new Random();
 		MQMob newMob;
@@ -157,6 +167,14 @@ public class MineQuest extends JavaPlugin {
 		
 		addMQMob(newMob);
 	}
+	
+	/**
+	 * This inserts a already created mob warpper into the list
+	 * of other mobs. This function should not be called outside of MineQuest.
+	 * Instead setMQMob should be used.
+	 * 
+	 * @param newMob
+	 */
 	public static void addMQMob(MQMob newMob) {
 		int i;
 		for (i = 0; i < mobs.length; i++) {
@@ -178,6 +196,14 @@ public class MineQuest extends JavaPlugin {
 		
 		mobs = newList;
 	}
+	
+	/**
+	 * This function adds a quest to the list of quests that MineQuest knows
+	 * about. Any quest started from an external source should be added using
+	 * this function.
+	 * 
+	 * @param quest Quest to add
+	 */
 	public static void addQuest(Quest quest) {
 		Quest[] new_quests = new Quest[quests.length + 1];
 		int i = 0;
@@ -189,6 +215,7 @@ public class MineQuest extends JavaPlugin {
 		
 		quests = new_quests;
 	}
+	
 	/**
 	 * Adds a Quester to the MineQuest Server.
 	 * Does not modify mysql database.
@@ -198,6 +225,7 @@ public class MineQuest extends JavaPlugin {
 	static public void addQuester(Quester quester) {
 		questers.add(quester);
 	}
+
 	/**
 	 * Adds a town to the MineQuest Server. 
 	 * Does not modify mysql database.
@@ -207,6 +235,14 @@ public class MineQuest extends JavaPlugin {
 	static public void addTown(Town town) {
 		towns.add(town);
 	}
+
+	/**
+	 * This is used in the mob control system to determine if a mob should be
+	 * allowed to spawn in any given world.
+	 * 
+	 * @param entity Mob contained in world of question
+	 * @return true if mobs are allowed in the entities world, false if not.
+	 */
 	public static boolean canCreate(Entity entity) {
 		String name = entity.getWorld().getName();
 		
@@ -216,6 +252,11 @@ public class MineQuest extends JavaPlugin {
 		
 		return true;
 	}
+
+	/**
+	 * Forces a check of all of the mobs in every world to check for a mob that
+	 * exists in MC but is not known about by MQ.
+	 */
 	public static void checkAllMobs() {
     	for (World world : getSServer().getWorlds()) {
     		for (LivingEntity entity : world.getLivingEntities()) {
@@ -227,6 +268,11 @@ public class MineQuest extends JavaPlugin {
     		}
     	}
 	}
+	
+	/**
+	 * This checks all MQ related mobs for death to see if any death actions 
+	 * should be taken. Used for kill tracking.
+	 */
 	public static void checkMobs() {
     	int i;
     	
@@ -240,6 +286,7 @@ public class MineQuest extends JavaPlugin {
     		}
     	}
     }
+	
 	/**
 	 * Starts the creation of town based on Player
 	 * Location.
@@ -254,6 +301,16 @@ public class MineQuest extends JavaPlugin {
 			namer = player.getName();
 		}
 	}
+	
+	/**
+	 * This function should be used any time any other plugin wants to damage
+	 * any living entity. This function will automatically determine whether the
+	 * entity is a quester or a mob or not tracked by MQ at all and assign
+	 * damage as needed.
+	 * 
+	 * @param entity Entity to take the damage
+	 * @param i Amount of damage
+	 */
 	public static void damage(LivingEntity entity, int i) {
 		if (entity instanceof HumanEntity) {
 			Quester quester = getQuester((HumanEntity)entity);
@@ -268,6 +325,18 @@ public class MineQuest extends JavaPlugin {
 			entity.setHealth(newHealth);
 		}
 	}
+
+	/**
+	 * This function should be used any time any other plugin wants to damage
+	 * any living entity. This function will automatically determine whether the
+	 * entity is a quester or a mob or not tracked by MQ at all and assign
+	 * damage as needed. When possible this call should be used over the other
+	 * damage function, as this will cause mobs to retailiate properly.
+	 * 
+	 * @param entity Entity to take the damage
+	 * @param i Amount of damage
+	 * @param source Cause of damage
+	 */
 	public static void damage(LivingEntity entity, int i, Quester source) {
 		if (entity instanceof HumanEntity) {
 			Quester quester = getQuester((HumanEntity)entity);
@@ -275,19 +344,14 @@ public class MineQuest extends JavaPlugin {
 		} else if (getMob(entity) != null) {
 			getMob(entity).damage(i, source);
 		} else {
-			int newHealth = entity.getHealth() - i;
-			
-			if (newHealth <= 0) newHealth = 0;
-			
-			entity.setHealth(newHealth);
+			entity.damage(i, source.getPlayer());
 		}
 	}
+
 	public static boolean denyNonClass() {
 		return deny_non_class;
 	}
-	public static void disconnect(String name) {
-		log(name + " disconnected");
-	}
+
 	/**
      * This is a utility for various parts of MineQuest to calculate
      * the distance between two locations.
@@ -311,6 +375,16 @@ public class MineQuest extends JavaPlugin {
 		return Math.sqrt(x*x + y*y + z*z);
 	}
 
+	/**
+	 * This has MineQuest download the file from the specified URL to the
+	 * specified location. Used for downloading templates and updated abilities
+	 * files.
+	 * 
+	 * @param url Location of source file
+	 * @param file Target of download
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
 	public static void downloadFile(String url, String file) throws MalformedURLException, IOException {
 		BufferedInputStream in = new BufferedInputStream(
 				new java.net.URL(url).openStream());
@@ -378,6 +452,13 @@ public class MineQuest extends JavaPlugin {
 	public static AbilityConfigManager getAbilityConfiguration() {
 		return ability_config;
 	}
+	
+	/**
+	 * This gets a list of all of the questers in the server presently. Meaning
+	 * they have not null players.
+	 * 
+	 * @return List of Active Questers
+	 */
 	public static Quester[] getActiveQuesters() {
 		List<Quester> active = new ArrayList<Quester>();
 		
@@ -454,6 +535,12 @@ public class MineQuest extends JavaPlugin {
 	public static int getExpMob() {
 		return exp_damage;
 	}
+	/**
+	 * This returns a list of all of the names of classes in the server, both
+	 * combat and resource.
+	 * 
+	 * @return list of names
+	 */
 	public static List<String> getFullClassNames() {
 		List<String> names = new ArrayList<String>();
 		
@@ -474,6 +561,13 @@ public class MineQuest extends JavaPlugin {
 	public static int getMaxClasses() {
 		return maxClass;
 	}
+	
+	/**
+	 * Gets the wrapper for a specific mob.
+	 * 
+	 * @param entity Living entity of the mob
+	 * @return MQ Wrapper for Mob
+	 */
 	public static MQMob getMob(LivingEntity entity) {
 		for (MQMob mob : mobs) {
 			if (mob != null) {
@@ -485,6 +579,11 @@ public class MineQuest extends JavaPlugin {
 		
 		return null;
 	}
+	
+	/**
+	 * Determines the number of Mobs that MQ is tracking right now.
+	 * @return
+	 */
 	public static int getMobSize() {
 		int i = 0;
 		
@@ -524,6 +623,12 @@ public class MineQuest extends JavaPlugin {
 		
 		return town;
 	}
+	
+	/**
+	 * Determines the next available ability id in the abilities SQL table.
+	 * 
+	 * @return next available id
+	 */
 	public static int getNextAbilId() {
 		int num = 0;
 		try {
@@ -787,6 +892,13 @@ public class MineQuest extends JavaPlugin {
 		return npc_enabled;
 	}
 	
+	/**
+	 * Uses Permissions and MQ Config to determine if a Player should have MQ
+	 * enabled.
+	 * 
+	 * @param player Player in question
+	 * @return true if enabled
+	 */
 	public static boolean isMQEnabled(Player player) {
 		if (!isWorldEnabled(player.getWorld())) {
 			return false;
@@ -801,6 +913,13 @@ public class MineQuest extends JavaPlugin {
 		return true;
 	}
 	
+	/**
+	 * Determines if a material is considered "open" or meaning a NPC should 
+	 * through the block.
+	 * 
+	 * @param type Material to check
+	 * @return true for a "open" material
+	 */
 	public static boolean isOpen(Material type) {
 		if (type == Material.AIR) {
 			return true;
@@ -854,6 +973,13 @@ public class MineQuest extends JavaPlugin {
 		return track_kills;
 	}
 	
+	/**
+	 * Checks MQ Config to determine whether MQ should be enabled on this world
+	 * and should effect events.
+	 * 
+	 * @param world World in question
+	 * @return true if enabled
+	 */
 	public static boolean isWorldEnabled(World world) {
 		for (String name : disable_worlds) {
 			if (world.getName().equals(name)) {
@@ -901,6 +1027,13 @@ public class MineQuest extends JavaPlugin {
 		return log_health_change;
 	}
 
+	/**
+	 * Uses MQ config and permissions to determine if MQ damage should be 
+	 * enabled for a specific quester.
+	 * 
+	 * @param quester Quester in Question
+	 * @return true if enabled
+	 */
 	public static boolean mqDamageEnabled(Quester quester) {
 		if (!mq_damage_system) {
 			return false;
@@ -915,6 +1048,12 @@ public class MineQuest extends JavaPlugin {
 		return true;
 	}
 
+	/**
+	 * Removes all mobs from the designated world and adds it to the MQ no spawn
+	 * list.
+	 * 
+	 * @param world World to remove Mobs from.
+	 */
 	public static void noMobs(World world) {
 		for (LivingEntity entity : world.getLivingEntities()) {
 			if (!(entity instanceof HumanEntity)) {
@@ -925,6 +1064,13 @@ public class MineQuest extends JavaPlugin {
 		noMobs.add(world.getName());
 	}
 
+	/**
+	 * Does a reduction on a list of materials for spell components to add
+	 * together materials of the same type.
+	 * 
+	 * @param manaCost Spell Components
+	 * @return Reduced Spell Components
+	 */
 	private static List<ItemStack> reduce(List<ItemStack> manaCost) {
 		List<ItemStack> ret = new ArrayList<ItemStack>();
 		boolean flag;
@@ -946,6 +1092,14 @@ public class MineQuest extends JavaPlugin {
 		return ret;
 	}
 
+	/**
+	 * This function removes the quest from MQs list of active quests. This
+	 * should be called automatically by any quests that complete on their own.
+	 * This should only be called in the result of trying to force remove a
+	 * quest.
+	 * 
+	 * @param quest Quest to remove.
+	 */
 	public static void remQuest(Quest quest) {
 		Quest[] new_quests = new Quest[quests.length - 1];
 		int i = 0;
@@ -1005,6 +1159,10 @@ public class MineQuest extends JavaPlugin {
 		towns.remove(town);
 	}
 
+	/**
+	 * Respawn all NPCs in case of them disappearing.
+	 * 
+	 */
 	public static void respawnNPCs() {
 		for (Quester quester : questers) {
 			if (quester instanceof NPCQuester) {
@@ -1013,6 +1171,14 @@ public class MineQuest extends JavaPlugin {
 		}
 	}
 
+	/**
+	 * This sets the health of an entity based on a percent of its max health.
+	 * Similar to the damage functions this will handle all types of living
+	 * entities correctly.
+	 * 
+	 * @param entity Living entity to affect.
+	 * @param percent Percent of max health.
+	 */
 	public static void setHealth(LivingEntity entity, double percent) {
 		if (entity instanceof HumanEntity) {
 			getQuester((HumanEntity)entity).setHealth((int)(percent * getQuester((HumanEntity)entity).getHealth()));
@@ -1023,6 +1189,14 @@ public class MineQuest extends JavaPlugin {
 		}
 	}
 
+	/**
+	 * This sets the health of an entity based on an integer number specified.
+	 * Similar to the damage functions this will handle all types of living
+	 * entities correctly.
+	 * 
+	 * @param entity Living entity to affect.
+	 * @param health New health for entity.
+	 */
 	public static void setHealth(LivingEntity entity, int health) {
 		if (entity instanceof HumanEntity) {
 			getQuester((HumanEntity)entity).setHealth(health);
@@ -1039,6 +1213,15 @@ public class MineQuest extends JavaPlugin {
 		MineQuest.IConomy = ((iConomy)object);
 	}
 
+	/**
+	 * This can be used to set the wrapper for a specific. This can be used to
+	 * change a mob from special to normal or from any type to any other type.
+	 * It will replace the old wrapper based on id of the mob it is wrapping.
+	 * If the mob does not already have a wrapper, it will simply be added to 
+	 * the list.
+	 * 
+	 * @param newMob New wrapper to set.
+	 */
 	public static void setMQMob(MQMob newMob) {
 		int i;
 		
@@ -1057,6 +1240,10 @@ public class MineQuest extends JavaPlugin {
 		return town_respawn;
 	}
 
+	/**
+	 * Removes a mob spawn restriction from the specified world.
+	 * @param world
+	 */
 	public static void yesMobs(World world) {
 		noMobs.remove(world.getName());
 		
@@ -1124,6 +1311,7 @@ public class MineQuest extends JavaPlugin {
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is disabled!" );
 	}
+
 	/**
 	 * Sets up an instance of MineQuest. There should never be more than
 	 * one instance of MineQuest required. If enabled this method will load all of the
@@ -1153,7 +1341,7 @@ public class MineQuest extends JavaPlugin {
         
         (new File("MineQuest/")).mkdir();
         
-        if ((!((new File("MineQuest/abilities.jar")).exists())) || (Ability.getVersion() < 1)) {
+        if ((!(new File("MineQuest/abilities.jar")).exists()) || (Ability.getVersion() < 1)) {
         	log("MineQuest/abilities.jar not found or too old: Downloading...");
         	try {
 				downloadAbilities();
@@ -1325,6 +1513,10 @@ public class MineQuest extends JavaPlugin {
 
 		setupIConomy();
 		setupPermissions();
+		
+		if (new File("MineQuest/main.script").exists()) {
+			MineQuest.addQuest(new Quest("MineQuest/main.script", new FullParty()));
+		}
 	}
 	
 	private static void setupEconomoyProperties() {
@@ -1688,5 +1880,24 @@ public class MineQuest extends JavaPlugin {
 	}
 	public static void delayUpdate(String string) {
 		eventQueue.addEvent(new DelayedSQLEvent(50, string));
+	}
+	public static List<Quester> getRealQuesters() {
+		List<Quester> questers = new ArrayList<Quester>();
+		
+		for (Quester quester : MineQuest.questers) {
+			if ((!(quester instanceof NPCQuester)) && (quester.getPlayer() != null)) {
+				questers.add(quester);
+			}
+		}
+		
+		return questers;
+	}
+	public static Quest getMainQuest() {
+		for (Quest quest : quests) {
+			if (quest.isMainQuest()) {
+				return quest;
+			}
+		}
+		return null;
 	}
 }

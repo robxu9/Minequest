@@ -795,16 +795,18 @@ public class NPCQuester extends Quester {
 
 	private void paidHit(Quester quester) {
 		int delay = message_delay;
-		for (String message : hit_message) {
-			if (message != null) {
-				if (hit_message.equals("random")) {
-					MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, quester, delay);
-				} else {
-					MineQuest.getEventQueue().addEvent(
-							new MessageEvent(delay, quester, "<" + name + "> " + message));
+		if (hit_message != null) {
+			for (String message : hit_message) {
+				if (message != null) {
+					if (hit_message.equals("random")) {
+						MineQuest.getNPCStringConfiguration().sendRandomHitMessage(this, quester, delay);
+					} else {
+						MineQuest.getEventQueue().addEvent(
+								new MessageEvent(delay, quester, "<" + name + "> " + message));
+					}
 				}
+				delay += message_delay;
 			}
-			delay += message_delay;
 		}
 		if (quest_file != null) {
 			if (!quester.isCompleted(new QuestProspect(quest_file))) {

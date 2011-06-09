@@ -1059,10 +1059,10 @@ public class MineQuestPlayerListener extends PlayerListener {
     		String value = split[3];
     		int i;
     		for (i = 4; i < split.length; i++) value = value + " " + split[i];
-    		if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
-    			((NPCQuester)MineQuest.getQuester(split[1])).setProperty(split[2], value);
+    		if (MineQuest.getQuester(split[1].replaceAll("_", " ")) instanceof NPCQuester) {
+    			((NPCQuester)MineQuest.getQuester(split[1].replaceAll("_", " "))).setProperty(split[2], value);
     		} else {
-    			player.sendMessage(split[1] + " is not a valid NPC");
+    			player.sendMessage(split[1].replaceAll("_", " ") + " is not a valid NPC");
     		}
 	    	event.setCancelled(true);
 	    } else if (split[0].equals("/listmercs")) {

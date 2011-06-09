@@ -61,7 +61,6 @@ public class SingleAreaEvent extends AreaEvent {
 		eventParser.setComplete(flag);
 		
 		if (flag) {
-			MineQuest.log("AreaEvent Complete");
 			eventComplete();
 		}
 	}

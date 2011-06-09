@@ -163,22 +163,12 @@ public abstract class Ability {
 		if (world.getBlockAt(x, y, z).getTypeId() != 0) {
 			do {
 				i++;
-			} while (((world.getBlockAt(x, i, z).getType() != Material.SNOW) 
-					&& (world.getBlockAt(x, i, z).getType() != Material.FIRE) 
-					&& (world.getBlockAt(x, i, z).getType() != Material.TORCH) 
-					&& (world.getBlockAt(x, i, z).getType() != Material.SIGN) 
-					&& (world.getBlockAt(x, i, z).getType() != Material.WALL_SIGN) 
-					&& (world.getBlockAt(x, i, z).getType() != Material.AIR)) && (i < 1000));
+			} while ((!MineQuest.isOpen(world.getBlockAt(x, i, z).getType())) && (i < 1000));
 			if (i == 1000) i = 0;
 		} else {
 			do {
 				i--;
-			} while (((world.getBlockAt(x, i, z).getType() == Material.SNOW) 
-					|| (world.getBlockAt(x, i, z).getType() == Material.FIRE) 
-					|| (world.getBlockAt(x, i, z).getType() == Material.TORCH) 
-					|| (world.getBlockAt(x, i, z).getType() == Material.SIGN) 
-					|| (world.getBlockAt(x, i, z).getType() == Material.WALL_SIGN) 
-					|| (world.getBlockAt(x, i, z).getType() == Material.AIR)) && (i > -100));
+			} while (MineQuest.isOpen(world.getBlockAt(x, i, z).getType()) && (i > -100));
 			if (i == -100) i = 0;
 			i++;
 		}
