@@ -94,10 +94,13 @@ public class MQMob {
 	}
 
 	public void damage(int i, Quester source) {
-		damage(i);
 		if (source != null) {
 			this.last_attack = source;
 		}
+		if ((entity.getHealth() - i) <= 0) {
+			dead = true;
+		}
+		entity.damage(i, source.getPlayer());
 	}
 
 }

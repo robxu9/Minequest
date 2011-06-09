@@ -1,6 +1,7 @@
 package org.monk.MineQuest.Event.Target;
 
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.Event;
 import org.monk.MineQuest.Event.NormalEvent;
@@ -50,6 +51,15 @@ public abstract class TargetedEvent extends NormalEvent {
 					Double.parseDouble(split[8]));
 
 			targetEvent = new EntityTeleportEvent(delay, target, location);
+		} else if (split[3].equals("FireballEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Vector location = new Vector(
+					Double.parseDouble(split[6]),
+					Double.parseDouble(split[7]),
+					Double.parseDouble(split[8]));
+
+			targetEvent = new FireballEvent(delay, target, location);
 		} else if (split[3].equals("PoisonEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -76,6 +86,11 @@ public abstract class TargetedEvent extends NormalEvent {
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			
 			targetEvent = new NPCPropertyEvent(delay, target, split[6], split[7]);
+		} else if (split[3].equals("StartQuestEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			
+			targetEvent = new StartQuestEvent(delay, target, split[6]);
 		} else if (split[3].equals("MessageEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));

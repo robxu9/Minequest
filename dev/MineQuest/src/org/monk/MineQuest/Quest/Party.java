@@ -21,6 +21,7 @@ package org.monk.MineQuest.Quest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Party {
@@ -31,13 +32,21 @@ public class Party {
 	}
 	
 	public void addQuester(Quester quester) {
-		questers.add(quester);
+		if (!questers.contains(quester)) {
+			questers.add(quester);
+		} else {
+			MineQuest.log("[WARNING] Tried to remove quester " + quester.getName() + " that was already part of party");
+		}
 		
 		quester.setParty(this);
 	}
 	
 	public void remQuester(Quester quester) {
-		questers.remove(quester);
+		if (questers.contains(quester)) {
+			questers.remove(quester);
+		} else {
+			MineQuest.log("[WARNING] Tried to remove quester " + quester.getName() + " that was not part of party");
+		}
 		
 		quester.setParty(null);
 	}

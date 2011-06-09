@@ -606,37 +606,40 @@ public class Quester {
 
 		if (town != null) {
 			int id = block.getTypeId();
+			boolean flag = false;
 			for (int other_id : MineQuest.getTownExceptions()) {
-				if (id == other_id) return true;
+				if (id == other_id) flag = true;
 			}
 			
-			Property prop = town.getProperty(block.getLocation());
-			
-			for (NPCSignShop shop : town.getStores()) {
-				if (shop.parseClick(this, block)) {
-					return false;
-				}
-			}
-			
-			if (prop != null) {
-				if (prop.canEdit(this)) {
-					return true;
-				} else {
-					sendMessage("You are not authorized to modify this property - please get the proper authorization");
-					dropRep(20);
-					return false;
-				}
-			} else {
-				prop = town.getTownProperty();
+			if (!flag) {
+				Property prop = town.getProperty(block.getLocation());
 				
-				if (prop.canEdit(this)) {
-					return true;
-				} else {
-					sendMessage("You are not authorized to modify town - please get the proper authorization");
-					dropRep(10);
-					return false;
+				for (NPCSignShop shop : town.getStores()) {
+					if (shop.parseClick(this, block)) {
+						return false;
+					}
 				}
-			}	
+				
+				if (prop != null) {
+					if (!prop.canEdit(this)) {
+						sendMessage("You are not authorized to modify this property - please get the proper authorization");
+						dropRep(20);
+						return false;
+					}
+				} else {
+					prop = town.getTownProperty();
+					
+					if (!prop.canEdit(this)) {
+						sendMessage("You are not authorized to modify town - please get the proper authorization");
+						dropRep(10);
+						return false;
+					}
+				}
+			}
+		}
+		
+		if (MineQuest.getMainQuest() != null) {
+			return MineQuest.getMainQuest().canEdit(this, block);
 		}
 
 		return true;
@@ -2073,16 +2076,20 @@ public class Quester {
 	}
 
 	public void setParty(Party party) {
+		if (this.party != null) {
+			Party party1 = this.party;
+			this.party = null;
+			party1.remQuester(this);
+		}
 		if (npcParty != null) {
 			if (party != null) {
 				for (Quester quester : npcParty.getQuesters()) {
 					party.addQuester(quester);
 				}
-			} else {
-				if (this.party != null) {
-					for (Quester quester : npcParty.getQuesters()) {
-						this.party.remQuester(quester);
-					}
+			}
+			if (this.party != null) {
+				for (Quester quester : npcParty.getQuesters()) {
+					this.party.remQuester(quester);
 				}
 			}
 		}
