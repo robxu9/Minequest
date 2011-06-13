@@ -131,7 +131,7 @@ public class NPCNetHandler extends NetServerHandler {
     
     @Override
     public void disconnect(String s) {
-    	MineQuest.disconnect(((Player)this.player.getBukkitEntity()).getName());
+//    	MineQuest.disconnect(((Player)this.player.getBukkitEntity()).getName());
     }
     
     @Override

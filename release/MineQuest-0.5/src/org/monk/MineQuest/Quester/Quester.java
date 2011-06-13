@@ -53,7 +53,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -2157,20 +2156,6 @@ public class Quester {
 		}
 
 		MineQuest.addQuest(new Quest(getQuestProspect(string).getFile(), party));
-	}
-
-	/**
-	 * Called whenever a Quester is teleported to check for
-	 * respawning.
-	 * 
-	 * @deprecated
-	 * @param event Teleport Event
-	 */
-	public void teleport(PlayerMoveEvent event) {
-//		if ((health <= 0) && (player.getHealth() == 20)) {
-//			event.setTo(MineQuest.getTown(last).getSpawn());
-//			setRespawn(true);
-//		}
 	}
 
 	/**

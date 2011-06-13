@@ -18,13 +18,8 @@
  */
 package org.monk.MineQuest.Event.Absolute;
 
-import net.minecraft.server.WorldServer;
-
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Event.NormalEvent;
 import org.monk.MineQuest.Quester.NPCQuester;
@@ -52,30 +47,30 @@ public class EntityTeleportEvent extends NormalEvent {
 	@Override
 	public void activate(EventParser eventParser) {
 		try {
-			CraftWorld cworld;
-			CraftWorld aworld;
-			Player target = null;;
+//			CraftWorld cworld;
+//			CraftWorld aworld;
+//			Player target = null;;
 			if (quester != null) {
-				cworld = (CraftWorld)quester.getPlayer().getWorld();
-				aworld = (CraftWorld)location.getWorld();
-				target = quester.getPlayer();
+//				cworld = (CraftWorld)quester.getPlayer().getWorld();
+//				aworld = (CraftWorld)location.getWorld();
+//				target = quester.getPlayer();
 				if (quester instanceof NPCQuester) {
 					((NPCQuester)quester).teleport(location);
 				} else {
 					quester.getPlayer().teleport(location);
 				}
 			} else {
-				cworld = (CraftWorld)entity.getWorld();
-				aworld = (CraftWorld)location.getWorld();
-				if (entity instanceof Player) {
-					target = (Player)entity;
-				}
+//				cworld = (CraftWorld)entity.getWorld();
+//				aworld = (CraftWorld)location.getWorld();
+//				if (entity instanceof Player) {
+//					target = (Player)entity;
+//				}
 				entity.teleport(location);
 			}
-			if ((target != null) && !cworld.getName().equals(aworld.getName())) {
-				WorldServer world = cworld.getHandle();
-				world.manager.removePlayer(((CraftPlayer)target).getHandle());
-			}
+//			if ((target != null) && !cworld.getName().equals(aworld.getName())) {
+//				WorldServer world = cworld.getHandle();
+//				world.manager.removePlayer(((CraftPlayer)target).getHandle());
+//			}
 		} catch (Exception e) {
 			eventParser.setComplete(false);
 		}
