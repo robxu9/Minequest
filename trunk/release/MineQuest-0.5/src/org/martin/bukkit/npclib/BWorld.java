@@ -94,7 +94,7 @@ public class BWorld {
         wServer.b(EnumSkyBlock.BLOCK, block.getX(), block.getY(), block.getZ(), level);
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
 	public void removeEntity(String name,final Player player,JavaPlugin plugin){
         server.getServer().getScheduler().callSyncMethod(plugin, new Callable() {
 
