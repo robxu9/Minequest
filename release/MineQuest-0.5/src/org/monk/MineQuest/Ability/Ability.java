@@ -186,9 +186,9 @@ public abstract class Ability {
 		return i;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static int getVersion() {
 		try {
+			@SuppressWarnings("rawtypes")
 			Class this_class;
 			try {
 				URL url = new URL("file:MineQuest/abilities.jar");
@@ -242,7 +242,7 @@ public abstract class Ability {
 				Ability ability = (Ability) abil.newInstance();
 				ability.setSkillClass(myclass);
 				if ((myclass == null) || (type.equals(MineQuest.getAbilityConfiguration().getSkillClass(ability.getName())))) {
-					for (Class ability_class : abil_classes) {
+					for (@SuppressWarnings("unused") Class ability_class : abil_classes) {
 						abilities.add(ability);
 					}
 				}
