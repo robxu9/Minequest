@@ -135,7 +135,7 @@ public class NPCNetHandler extends NetServerHandler {
     }
     
     @Override
-    public boolean teleport(Location dest) {
-		return false;
+    public void teleport(Location dest) {
+
     }
 }
