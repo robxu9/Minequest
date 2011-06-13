@@ -252,6 +252,7 @@ public class MineQuest extends JavaPlugin {
 		} else {
 			start = player.getLocation();
 			namer = player.getName();
+			player.sendMessage("First corner created at " + start.getX() + " " + start.getY() + " " + start.getZ() + " use /finishtown to complete");
 		}
 	}
 	public static void damage(LivingEntity entity, int i) {
