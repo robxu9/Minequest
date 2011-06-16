@@ -18,7 +18,12 @@
  */
 package org.monk.MineQuest.Event.Target;
 
+import net.minecraft.server.WorldServer;
+
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.monk.MineQuest.Event.EventParser;
 import org.monk.MineQuest.Quest.Target;
 import org.monk.MineQuest.Quester.NPCQuester;
@@ -37,10 +42,17 @@ public class EntityTeleportEvent extends TargetedEvent {
 		super.activate(eventParser);
 		
 		for (Quester quester : target.getTargets()) {
+			CraftWorld cworld = (CraftWorld)quester.getPlayer().getWorld();
+			CraftWorld aworld = (CraftWorld)location.getWorld();
+			Player target = quester.getPlayer();
 			if (quester instanceof NPCQuester) {
 				((NPCQuester)quester).teleport(location);
 			} else {
 				quester.getPlayer().teleport(location);
+			}
+			if ((target != null) && !cworld.getName().equals(aworld.getName())) {
+				WorldServer world = cworld.getHandle();
+				world.manager.removePlayer(((CraftPlayer)target).getHandle());
 			}
 		}
 	}
