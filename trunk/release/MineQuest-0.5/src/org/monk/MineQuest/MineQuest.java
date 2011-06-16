@@ -55,12 +55,12 @@ import org.monk.MineQuest.Ability.AbilityConfigManager;
 import org.monk.MineQuest.Event.DelayedSQLEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Event.NoMobs;
-import org.monk.MineQuest.Event.RespawnEvent;
 import org.monk.MineQuest.Event.Absolute.HealEvent;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
 import org.monk.MineQuest.Listener.MineQuestServerListener;
+import org.monk.MineQuest.Listener.MineQuestWorldListener;
 import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.Quest;
@@ -142,7 +142,7 @@ public class MineQuest extends JavaPlugin {
 	private static List<Town> towns = new ArrayList<Town>();
 	private static boolean track_destroy;
 	private static boolean track_kills;
-	
+
 	public static void addMob(LivingEntity entity) {
 		Random generator = new Random();
 		MQMob newMob;
@@ -157,6 +157,7 @@ public class MineQuest extends JavaPlugin {
 		
 		addMQMob(newMob);
 	}
+
 	public static void addMQMob(MQMob newMob) {
 		int i;
 		for (i = 0; i < mobs.length; i++) {
@@ -240,6 +241,7 @@ public class MineQuest extends JavaPlugin {
     		}
     	}
     }
+
 	/**
 	 * Starts the creation of town based on Player
 	 * Location.
@@ -255,6 +257,7 @@ public class MineQuest extends JavaPlugin {
 			player.sendMessage("First corner created at " + start.getX() + " " + start.getY() + " " + start.getZ() + " use /finishtown to complete");
 		}
 	}
+
 	public static void damage(LivingEntity entity, int i) {
 		if (entity instanceof HumanEntity) {
 			Quester quester = getQuester((HumanEntity)entity);
@@ -269,6 +272,7 @@ public class MineQuest extends JavaPlugin {
 			entity.setHealth(newHealth);
 		}
 	}
+
 	public static void damage(LivingEntity entity, int i, Quester source) {
 		if (entity instanceof HumanEntity) {
 			Quester quester = getQuester((HumanEntity)entity);
@@ -1068,6 +1072,7 @@ public class MineQuest extends JavaPlugin {
 	private MineQuestEntityListener el;
 	private MineQuestPlayerListener pl;
 	private MineQuestServerListener sl;
+	private MineQuestWorldListener wl;
 	private String version;
 	private static int heal_event;
 	
@@ -1164,7 +1169,7 @@ public class MineQuest extends JavaPlugin {
 			}
         }
         
-        getEventQueue().addEvent(new RespawnEvent(300000));
+//        getEventQueue().addEvent(new RespawnEvent(2000));
         
         ability_config = new AbilityConfigManager();
         
@@ -1298,7 +1303,7 @@ public class MineQuest extends JavaPlugin {
 		el = new MineQuestEntityListener();
 		pl = new MineQuestPlayerListener();
 		sl = new MineQuestServerListener();
-//		wl = new MineQuestWorldListener();
+		wl = new MineQuestWorldListener();
 //		vl = new MineQuestVehicleListener();
 		
         PluginManager pm = getServer().getPluginManager();
@@ -1321,6 +1326,8 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLUGIN_DISABLE, sl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.PLUGIN_ENABLE, sl, Priority.Monitor, this);
+        pm.registerEvent(Event.Type.CHUNK_LOAD, wl, Priority.Monitor, this);
+        pm.registerEvent(Event.Type.CHUNK_UNLOAD, wl, Priority.Monitor, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
         start = null;
 
@@ -1335,7 +1342,7 @@ public class MineQuest extends JavaPlugin {
 		price_change = economy.getDouble("price_change", .009);
 		
 		money_names = economy.getString("money_names", "GC,MC,KC,C").split(",");
-		money_amounts = SkillClassConfig.longList(economy.getString("money_amounts", "1000000000,1000000,1000,0"));
+		money_amounts = SkillClassConfig.longList(economy.getString("money_amounts", "1000000000,1000000,1000,1"));
 
 		cubonomy_enable = economy.getBoolean("cubonomy_enable", true);
 	}

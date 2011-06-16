@@ -863,10 +863,10 @@ public class Quester {
 						kill_map.put(CreatureType.fromName(results.getString("type")), results.getInt("count"));
 					}
 					if (Material.getMaterial(results.getString("type")) != null) {
-						if (destroyed.get(results.getString("type")) == null) {
+						if (destroyed.get(Material.getMaterial(results.getString("type"))) == null) {
 							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count"));
 						} else {
-							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(results.getString("name")));
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(Material.getMaterial(results.getString("type"))));
 						}
 					}
 				}
@@ -911,7 +911,7 @@ public class Quester {
 						if (destroyed.get(results.getString("type")) == null) {
 							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count"));
 						} else {
-							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(results.getString("name")));
+							destroyed.put(Material.getMaterial(results.getString("type")), results.getInt("count") + destroyed.get(results.getString("type")));
 						}
 					}
 				}

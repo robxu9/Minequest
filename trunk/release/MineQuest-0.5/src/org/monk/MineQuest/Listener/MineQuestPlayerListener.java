@@ -99,9 +99,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 		}
 		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).update();
-		if (MineQuest.getSServer().getOnlinePlayers().length == 1) {
-			MineQuest.respawnNPCs();
-		}
+//		if (MineQuest.getSServer().getOnlinePlayers().length == 1) {
+//			MineQuest.respawnNPCs();
+//		}
 	}
 	
 	@Override
@@ -714,7 +714,7 @@ public class MineQuestPlayerListener extends PlayerListener {
     				Block block = player.getWorld().getBlockAt(player.getLocation());
     				if (MineQuest.getQuester(player).canEdit(block)) {
         				store.setBlockQuant(split[1], amount);
-        				player.sendMessage(split[1] + " removed from store");
+        				player.sendMessage(split[1] + " set to " + amount);
     				} else {
     					player.sendMessage("You are not permitted to edit this store");
     				}

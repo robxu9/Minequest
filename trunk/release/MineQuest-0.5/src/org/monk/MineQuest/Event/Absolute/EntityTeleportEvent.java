@@ -54,7 +54,7 @@ public class EntityTeleportEvent extends NormalEvent {
 		try {
 			CraftWorld cworld;
 			CraftWorld aworld;
-			Player target = null;;
+			Player target = null;
 			if (quester != null) {
 				cworld = (CraftWorld)quester.getPlayer().getWorld();
 				aworld = (CraftWorld)location.getWorld();

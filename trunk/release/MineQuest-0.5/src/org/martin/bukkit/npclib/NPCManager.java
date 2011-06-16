@@ -7,8 +7,11 @@ package org.martin.bukkit.npclib;
 import java.util.HashMap;
 
 import net.minecraft.server.ItemInWorldManager;
+import net.minecraft.server.WorldServer;
 
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -47,6 +50,18 @@ public class NPCManager {
             npcs.remove(id);
             try {
                 npc.world.removeEntity(npc);
+
+                CraftWorld craftWorld = (CraftWorld) npc.getBukkitEntity().getWorld();
+                CraftPlayer craftPlayer = (CraftPlayer) npc.getBukkitEntity();
+                
+				WorldServer world = craftWorld.getHandle();
+				world.manager.removePlayer(craftPlayer.getHandle());
+				world.players.remove(craftPlayer.getHandle());
+				world.tracker.untrackEntity(craftPlayer.getHandle());
+				craftWorld.getHandle().kill(craftPlayer.getHandle());
+				npc.clearNetHandler();
+				server.getMCServer().serverConfigurationManager.players.remove(craftPlayer.getHandle());
+//				craftPlayer.setHandle(null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
