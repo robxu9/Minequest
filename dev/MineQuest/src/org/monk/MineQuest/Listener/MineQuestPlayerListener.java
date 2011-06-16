@@ -99,9 +99,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 		}
 		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).update();
-		if (MineQuest.getSServer().getOnlinePlayers().length == 1) {
-			MineQuest.respawnNPCs();
-		}
+//		if (MineQuest.getSServer().getOnlinePlayers().length == 1) {
+//			MineQuest.respawnNPCs();
+//		}
 	}
 	
 	@Override
