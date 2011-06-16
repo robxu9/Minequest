@@ -19,8 +19,40 @@
 package org.monk.MineQuest.Listener;
 
 
+import org.bukkit.Chunk;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldListener;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Quester.NPCQuester;
+import org.monk.MineQuest.Quester.Quester;
 
 public class MineQuestWorldListener extends WorldListener{
- 
+	@Override
+	public void onChunkLoad(ChunkLoadEvent event) {
+		Chunk chunk = event.getChunk();
+		
+		for (Quester quester : MineQuest.getQuesters()) {
+			if (quester instanceof NPCQuester) {
+				NPCQuester nquester = (NPCQuester)quester;
+				if (nquester.inChunk(chunk)) {
+					nquester.respawn();
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void onChunkUnload(ChunkUnloadEvent event) {
+		Chunk chunk = event.getChunk();
+		
+		for (Quester quester : MineQuest.getQuesters()) {
+			if (quester instanceof NPCQuester) {
+				NPCQuester nquester = (NPCQuester)quester;
+				if (nquester.inChunk(chunk)) {
+					nquester.despawn();
+				}
+			}
+		}
+	}
 }

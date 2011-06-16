@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -770,6 +771,7 @@ public class NPCQuester extends Quester {
 						removeSql();
 						MineQuest.remQuester(this);
 						MineQuest.getNPCManager().despawn(name);
+						player = null;
 						entity = null;
 					} else {
 						Location location = MineQuest.getTown(town).getNPCSpawn();
@@ -850,6 +852,7 @@ public class NPCQuester extends Quester {
 			} else {
 				hand = null;
 			}
+			player.setHealth(0);
 			MineQuest.getNPCManager().despawn(name);
 			entity = null;
 			player = null;
@@ -939,6 +942,11 @@ public class NPCQuester extends Quester {
 	
 	public void setEntity(NPCEntity entity) {
 		if (removed) return;
+		if (this.entity != null) {
+			MineQuest.getNPCManager().despawn(name);
+			this.entity = null;
+			player = null;
+		}
 		this.entity = entity;
 		setPlayer((Player)entity.getBukkitEntity());
 		if (hand != null) {
@@ -975,6 +983,7 @@ public class NPCQuester extends Quester {
 //				NpcSpawner.RemoveBasicHumanNpc(this.entity);
 				MineQuest.log("NPC Died");
 				entity = null;
+				player = null;
 			} else {
 				MineQuest.log(name + ": " + mode + " death");
 				Location location = MineQuest.getTown(town).getNPCSpawn();
@@ -1150,5 +1159,51 @@ public class NPCQuester extends Quester {
 		} else {
 			return null;
 		}
+	}
+
+	public boolean inChunk(Chunk chunk) {
+		if ((player == null) && (center == null)) return false;
+		Chunk my_chunk;
+		if (player != null) {
+			my_chunk = player.getWorld().getChunkAt(player.getLocation());
+		} else {
+			my_chunk = center.getWorld().getChunkAt(center);
+		}
+		
+		if (my_chunk.getX() == chunk.getX()) {
+			if (my_chunk.getZ() == chunk.getZ()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public void respawn() {
+		MineQuest.log("Respawn " + name);
+		if (center == null) return;
+		teleport(center);
+		MineQuest.log("Respawn Successful " + name);
+	}
+
+	public void despawn() {
+		MineQuest.log("Despawn " + name);
+		if (entity == null) return;
+		Location location = player.getLocation();
+		this.center = new Location(location.getWorld(), location.getX(), 
+				location.getY(), location.getZ(), location.getYaw(), 
+				location.getPitch());
+
+		if ((player != null) && (player.getItemInHand() != null) && (player.getItemInHand().getType() != Material.AIR)) {
+			hand = player.getItemInHand();
+			player.setItemInHand(null);
+		} else {
+			hand = null;
+		}
+		player.setHealth(0);
+		MineQuest.getNPCManager().despawn(name);
+		entity = null;
+		player = null;
+		MineQuest.log("Despawn Successful " + name);
 	}
 }
