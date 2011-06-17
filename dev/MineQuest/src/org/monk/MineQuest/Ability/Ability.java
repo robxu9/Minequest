@@ -420,14 +420,9 @@ public abstract class Ability {
 		return 30;
 	}
 	
-	/**
-	 * Get the spell components of casting the ability.
-	 * Must be overloaded by all abilities that have 
-	 * components.
-	 * 
-	 * @return
-	 */
-	public abstract List<ItemStack> getSpellComps();
+	public int getMana() {
+		return 1;
+	}
 	
 	/**
 	 * Get the name of the Ability
@@ -456,6 +451,14 @@ public abstract class Ability {
 	
 	public int getRealExperience() {
 		return MineQuest.getAbilityConfiguration().getExperience(getName());
+	}
+	
+	private int getRealManaCost() {
+		return MineQuest.getAbilityConfiguration().getMana(getName());
+	}
+	
+	public int getRealRequiredLevel() {
+		return MineQuest.getAbilityConfiguration().getRequiredLevel(getName());
 	}
 	
 	public List<ItemStack> getRealSpellComps() {
@@ -489,14 +492,19 @@ public abstract class Ability {
 		return ret;
 	}
 	
-	public int getRealRequiredLevel() {
-		return MineQuest.getAbilityConfiguration().getRequiredLevel(getName());
-	}
-	
 	public abstract int getReqLevel();
 	
 	public abstract String getSkillClass();
 	
+	/**
+	 * Get the spell components of casting the ability.
+	 * Must be overloaded by all abilities that have 
+	 * components.
+	 * 
+	 * @return
+	 */
+	public abstract List<ItemStack> getSpellComps();
+
 	/**
 	 * Gives the casting cost back to the player.
 	 * 
@@ -507,26 +515,7 @@ public abstract class Ability {
 		
 		myclass.expAdd(-getRealExperience());
 	}
-	
-	private void giveManaCost(Player player) {
-		MineQuest.getQuester(player).addMana(getRealManaCost());
-	}
 
-	private int getRealManaCost() {
-		return MineQuest.getAbilityConfiguration().getMana(getName());
-	}
-
-	@SuppressWarnings("deprecation")
-	protected void giveSpellComps(Player player) {
-		List<ItemStack> cost = getConfigSpellComps();
-		int i;
-		
-		for (i = 0; i < cost.size(); i++) {
-			player.getInventory().addItem(cost.get(i));
-		}
-		player.updateInventory();
-	}
-	
 	/**
 	 * Gives the casting cost back to the player.
 	 * 
@@ -537,8 +526,23 @@ public abstract class Ability {
 			giveSpellComps(player);
 		}
 		if (MineQuest.isManaEnabled()) {
-			giveManaCost(player);
+			giveCost(player);
 		}
+	}
+	
+	private void giveManaCost(Player player) {
+		MineQuest.getQuester(player).addMana(getRealManaCost());
+	}
+	
+	@SuppressWarnings("deprecation")
+	protected void giveSpellComps(Player player) {
+		List<ItemStack> cost = getConfigSpellComps();
+		int i;
+		
+		for (i = 0; i < cost.size(); i++) {
+			player.getInventory().addItem(cost.get(i));
+		}
+		player.updateInventory();
 	}
 	
 	public boolean isActive() {
@@ -567,7 +571,7 @@ public abstract class Ability {
 	public boolean isLookBound(ItemStack itemStack) {
 		return (lookBind == itemStack.getTypeId());
 	}
-	
+
 	/**
 	 * This was used to determine if entities are part of type
 	 * for purge spells.
@@ -592,7 +596,7 @@ public abstract class Ability {
 			return true;
 		}
 	}
-
+	
 	/**
 	 * Determines if player and baseEntity are within radius distance
 	 * of each other.
@@ -605,7 +609,7 @@ public abstract class Ability {
 	protected boolean isWithin(LivingEntity player, LivingEntity baseEntity, int radius) {
 		return MineQuest.distance(player.getLocation(), baseEntity.getLocation()) < radius;
 	}
-	
+
 	/**
 	 * Bind to left click of item.
 	 * 
@@ -691,7 +695,7 @@ public abstract class Ability {
 	public void parseClick(Quester quester, Block block) {
 		useAbility(quester, block.getLocation(), null);
 	}
-
+	
 	/**
 	 * Moves all entities of given type outside of the distance specified
 	 * from the entity passed. 
@@ -713,7 +717,7 @@ public abstract class Ability {
 		}
 		
 	}
-	
+
 	public void setActive(boolean active) {
 		this.enabled = active;
 	}
@@ -725,7 +729,7 @@ public abstract class Ability {
 	public void setConfigSpellComps(List<ItemStack> cost) {
 		this.cost = cost;
 	}
-
+	
 	public void setSkillClass(SkillClass skillclass) {
 		this.myclass = skillclass;
 		if (skillclass != null) {
@@ -733,7 +737,7 @@ public abstract class Ability {
 			config = MineQuest.getAbilityConfiguration().getConfig(getName());
 		}
 	}
-	
+
 	public void silentBind(Quester quester, ItemStack itemStack) {
 		bind = itemStack.getTypeId();
 		lookBind = -1;
@@ -754,7 +758,7 @@ public abstract class Ability {
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getSName() + "'");
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getSName() + "'");
 	}
-
+	
 	/**
 	 * Clears bindings for this ability.
 	 * @param player
@@ -765,7 +769,7 @@ public abstract class Ability {
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getSName() + "'");
 		quester.sendMessage(getName() + " is now unbound");
 	}
-	
+
 	/**
 	 * This activates non-passive abilities. First makes sure that
 	 * the ability is enabled, can be cast, and is bound. Then will
@@ -811,9 +815,5 @@ public abstract class Ability {
 				notify(quester, "You do not have the materials to cast that - try /spellcomp " + getName());
 			}
 		}
-	}
-
-	public int getMana() {
-		return 1;
 	}
 }

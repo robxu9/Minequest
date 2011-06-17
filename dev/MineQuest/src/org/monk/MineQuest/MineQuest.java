@@ -56,6 +56,7 @@ import org.monk.MineQuest.Event.DelayedSQLEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Event.NoMobs;
 import org.monk.MineQuest.Event.Absolute.HealEvent;
+import org.monk.MineQuest.Event.Absolute.ManaEvent;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
@@ -1270,6 +1271,7 @@ public class MineQuest extends JavaPlugin {
 	private static int starting_mana;
 	private static int level_health;
 	private static int level_mana;
+	private static int mana_event;
 	
 	public MineQuest() {
 		heal_event = 0;
@@ -1411,6 +1413,8 @@ public class MineQuest extends JavaPlugin {
 							+ "abil5 VARCHAR(30) DEFAULT '0', abil6 VARCHAR(30) DEFAULT '0', "
 							+ "abil7 VARCHAR(30) DEFAULT '0', abil8 VARCHAR(30) DEFAULT '0', "
 							+ "abil9 VARCHAR(30) DEFAULT '0')");
+			
+			sql_server.update("CREATE TABLE IF NOT EXISTS idle (name VARCHAR(30), file VARCHAR(30), type INT, event_id INT, target VARCHAR(180))");
 		} catch (Exception e) {
 			MineQuest.log("Unable to initialize configuration");
         	MineQuest.log("Check configuration in MineQuest directory");
@@ -1580,6 +1584,16 @@ public class MineQuest extends JavaPlugin {
 		} else {
 			if (heal_event != 0) {
 				MineQuest.getEventQueue().cancel(heal_event);
+			}
+		}
+		boolean slow_mana = general.getBoolean("slow_mana", true);
+		if (slow_mana) {
+			int amount = general.getInt("slow_mana_amount", 1);
+			int delay = general.getInt("slow_mana_delay_ms", 1500);
+			mana_event = getEventQueue().addEvent(new ManaEvent(delay, amount));
+		} else {
+			if (mana_event != 0) {
+				MineQuest.getEventQueue().cancel(mana_event);
 			}
 		}
 		server_owner = general.getString("mayor", "jmonk");

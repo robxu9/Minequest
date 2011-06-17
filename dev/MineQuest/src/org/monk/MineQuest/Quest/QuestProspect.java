@@ -85,4 +85,31 @@ public class QuestProspect {
 		}
 		return super.equals(obj);
 	}
+
+	public String getEventLine(int event) {
+		BufferedReader bis;
+		try {
+			bis = new BufferedReader(new FileReader(file + ".quest"));
+			String line = "";
+			int number = 0;
+			try {
+				while ((line = bis.readLine()) != null) {
+					number++;
+					String split[] = line.split(":");
+					if (split[0].equals("Event")) {
+						if (Integer.parseInt(split[1]) == event) {
+							return line;
+						}
+					}
+				}
+			} catch (Exception e) {
+				MineQuest.log("Unable to load Quest Problem on Line " + number);
+				MineQuest.log("  " + line);
+			}
+		} catch (FileNotFoundException e1) {
+			MineQuest.log("Unable to load quest file " + file + ".quest");
+		}
+		
+		return null;
+	}
 }
