@@ -68,6 +68,7 @@ import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quest.Idle.IdleTask;
+import org.monk.MineQuest.Quest.Idle.IdleType;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.NPCSignShop;
@@ -295,6 +296,16 @@ public class Quester {
 		new_kills[i] = kill;
 		
 		kills = new_kills;
+		
+		checkIdle(IdleType.KILL);
+	}
+	
+	public void checkIdle(IdleType type) {
+		for (IdleTask task : idles) {
+			if (task.getType() == type) {
+				task.checkTask();
+			}
+		}
 	}
 	
 	public void addKill(MQMob mqMob) {
@@ -1199,6 +1210,8 @@ public class Quester {
 		} else {
 			destroyed.put(event.getBlock().getType(), destroyed.get(event.getBlock().getType()) + 1);
 		}
+		
+		checkIdle(IdleType.DESTROY);
 
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())) {
@@ -1964,6 +1977,8 @@ public class Quester {
 
 	        entitytracker.b(pl, new Packet18ArmAnimation(pl, 3));
 		}
+		
+		checkIdle(IdleType.AREA);
 	}
 	
 	/**
@@ -2501,19 +2516,17 @@ public class Quester {
 		idles = new ArrayList<IdleTask>();
 		results = MineQuest.getSQLServer().query("SELECT * FROM idle WHERE name='" + name + "'");
 		List<String> files = new ArrayList<String>();
-		List<Integer> types = new ArrayList<Integer>();
 		List<Integer> event_ids = new ArrayList<Integer>();
 		List<String> targets = new ArrayList<String>();
 		try {
 			while (results.next()) {
 				files.add(results.getString("file"));
-				types.add(results.getInt("type"));
 				event_ids.add(results.getInt("event_id"));
 				targets.add(results.getString("target"));
 			}
 			
 			for (i = 0; i < files.size(); i++) {
-				idles.add(IdleTask.newIdle(files.get(i), types.get(i), event_ids.get(i), targets.get(i)));
+				idles.add(IdleTask.newIdle(this, files.get(i), event_ids.get(i), targets.get(i)));
 			}
 		} catch (SQLException e) {
 			MineQuest.log("Unable to load idle quests for " + name);
