@@ -363,7 +363,7 @@ public abstract class Ability {
 	 * @param quester Quester enabling the ability
 	 */
 	public void enable(Quester quester) {
-		if (quester.canCast(getConfigManaCost())) {
+		if (quester.canCast(getConfigSpellComps(), getRealManaCost())) {
 			enabled = true;
 			quester.sendMessage(getName() + " enabled");
 //			MineQuest.log("Can cast " + getName() + " with config :");
@@ -396,7 +396,7 @@ public abstract class Ability {
 		return config;
 	}
 	
-	public List<ItemStack> getConfigManaCost() {
+	public List<ItemStack> getConfigSpellComps() {
 		return cost;
 	}
 	
@@ -427,7 +427,7 @@ public abstract class Ability {
 	 * 
 	 * @return
 	 */
-	public abstract List<ItemStack> getManaCost();
+	public abstract List<ItemStack> getSpellComps();
 	
 	/**
 	 * Get the name of the Ability
@@ -458,8 +458,8 @@ public abstract class Ability {
 		return MineQuest.getAbilityConfiguration().getExperience(getName());
 	}
 	
-	public List<ItemStack> getRealManaCost() {
-		List<ItemStack> cost = getManaCost();
+	public List<ItemStack> getRealSpellComps() {
+		List<ItemStack> cost = getSpellComps();
 
 		int i;
 		for (i = 0; i < (getReqLevel() / 4); i++) {
@@ -469,12 +469,12 @@ public abstract class Ability {
 		return cost;
 	}
 	
-	public String getRealManaCostString() {
+	public String getRealSpellCompsString() {
 		List<Integer> cost = new ArrayList<Integer>();
 		String ret = "";
 		int i;
 		
-		for (ItemStack item : getRealManaCost()) {
+		for (ItemStack item : getRealSpellComps()) {
 			for (i = 0; i < item.getAmount(); i++) {
 				cost.add(item.getTypeId());
 			}
@@ -502,17 +502,29 @@ public abstract class Ability {
 	 * 
 	 * @param player
 	 */
+	protected void giveCost(Player player) {
+		giveCostNoExp(player);
+		
+		myclass.expAdd(-getRealExperience());
+	}
+	
+	private void giveManaCost(Player player) {
+		MineQuest.getQuester(player).addMana(getRealManaCost());
+	}
+
+	private int getRealManaCost() {
+		return MineQuest.getAbilityConfiguration().getMana(getName());
+	}
+
 	@SuppressWarnings("deprecation")
-	protected void giveManaCost(Player player) {
-		List<ItemStack> cost = getConfigManaCost();
+	protected void giveSpellComps(Player player) {
+		List<ItemStack> cost = getConfigSpellComps();
 		int i;
 		
 		for (i = 0; i < cost.size(); i++) {
 			player.getInventory().addItem(cost.get(i));
 		}
 		player.updateInventory();
-		
-		myclass.expAdd(-getRealExperience());
 	}
 	
 	/**
@@ -520,15 +532,13 @@ public abstract class Ability {
 	 * 
 	 * @param player
 	 */
-	@SuppressWarnings("deprecation")
-	protected void giveManaCostNoExp(Player player) {
-		List<ItemStack> cost = getConfigManaCost();
-		int i;
-		
-		for (i = 0; i < cost.size(); i++) {
-			player.getInventory().addItem(cost.get(i));
+	protected void giveCostNoExp(Player player) {
+		if (MineQuest.isSpellCompEnabled()) {
+			giveSpellComps(player);
 		}
-		player.updateInventory();
+		if (MineQuest.isManaEnabled()) {
+			giveManaCost(player);
+		}
 	}
 	
 	public boolean isActive() {
@@ -712,7 +722,7 @@ public abstract class Ability {
 		this.config = config;
 	}
 
-	public void setConfigManaCost(List<ItemStack> cost) {
+	public void setConfigSpellComps(List<ItemStack> cost) {
 		this.cost = cost;
 	}
 
@@ -779,7 +789,7 @@ public abstract class Ability {
 			return;
 		}
 		
-		if ((quester == null) || quester.canCast(getConfigManaCost())) {
+		if ((quester == null) || quester.canCast(getConfigSpellComps(), getRealManaCost())) {
 			if (canCast() || (player == null)) {
 //				MineQuest.log("Can cast " + getName() + " with config :");
 //				for (int i : config) {
@@ -792,7 +802,7 @@ public abstract class Ability {
 				}
 			} else {
 				if (player != null) {
-					giveManaCostNoExp(player);
+					giveCostNoExp(player);
 					notify(quester, "You cast that too recently");
 				}
 			}
@@ -801,5 +811,9 @@ public abstract class Ability {
 				notify(quester, "You do not have the materials to cast that - try /spellcomp " + getName());
 			}
 		}
+	}
+
+	public int getMana() {
+		return 1;
 	}
 }

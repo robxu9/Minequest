@@ -109,6 +109,9 @@ public class Quester {
 	protected Quest quest;
 	protected int rep;
 	private List<Long> times = new ArrayList<Long>();
+	protected int mana;
+	protected boolean modded_client = false;
+	private int max_mana;
 
 	public Quester() {
 	}
@@ -266,6 +269,18 @@ public class Quester {
 	public void addHealth(int addition) {
 		health += addition;
 		max_health += addition;
+	}
+
+	/**
+	 * Adds to both health and maximum mana of quester.
+	 * Should be used on level up of character of 
+	 * SkillClasses.
+	 * 
+	 * @param addition
+	 */
+	public void addTotalMana(int addition) {
+		mana += addition;
+		max_mana += addition;
 	}
 	
 	private void addKill(CreatureType kill) {
@@ -549,22 +564,40 @@ public class Quester {
 	 * they are removed from the inventory.
 	 * 
 	 * @param list List of Components
+	 * @param mana 
 	 * @return true if cost paid
 	 */
-	public boolean canCast(List<ItemStack> list) {
+	public boolean canCast(List<ItemStack> list, int mana) {
 		int i;
-		PlayerInventory inven = player.getInventory();
-		
-		for (i = 0; i < list.size(); i++) {
-			if (inven.contains(list.get(i).getType())) {
-				inven.removeItem(list.get(i));
-			} else {
-				while (i-- > 0) {
-					inven.addItem(list.get(i));
-				}
+		if (MineQuest.isManaEnabled()) {
+			if (this.mana < mana) {
 				return false;
 			}
+			this.mana -= mana;
 		}
+		
+		if (MineQuest.isSpellCompEnabled()) {
+			PlayerInventory inven = player.getInventory();
+			
+			for (i = 0; i < list.size(); i++) {
+				if (inven.contains(list.get(i).getType())) {
+					inven.removeItem(list.get(i));
+				} else {
+					while (i-- > 0) {
+						inven.addItem(list.get(i));
+					}
+					if (MineQuest.isManaEnabled()) {
+						this.mana += mana;
+					}
+					return false;
+				}
+			}
+		}
+
+		if (MineQuest.isManaEnabled()) {
+			updateMana();
+		}
+		
 		return true;
 	}
 	
@@ -981,7 +1014,7 @@ public class Quester {
 		int num;
 		String[] class_names = MineQuest.getClassNames();
 		
-		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health) VALUES('"
+		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health, mana, max_mana) VALUES('"
 			+ getSName() + "', '" + getSName() + "', '500000', '0', '0', 'Bitville', '";
 		if ((class_names != null) && (class_names.length > 0)) {
 			update_string = update_string + class_names[0];
@@ -991,7 +1024,7 @@ public class Quester {
 				}
 			}
 		}
-		update_string = update_string + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingHealth() + "')";
+		update_string = update_string + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingHealth() + "''" + MineQuest.getStartingMana() + "', '" + MineQuest.getStartingMana() + "')";
 
 		MineQuest.getSQLServer().update(update_string);
 		
@@ -1657,7 +1690,7 @@ public class Quester {
 	 */
 	private void levelUp() {
 		Random generator = new Random();
-		int add_health = generator.nextInt(3) + 1;
+		int add_health = generator.nextInt(MineQuest.getLevelHealth()) + 1;
 		level++;
 		exp -= (400 * level);
 		max_health += add_health;
@@ -1893,7 +1926,7 @@ public class Quester {
 		Random generator = new Random();
 		
 		for (int i = 0; i < level; i++) {
-			int add_health = generator.nextInt(3) + 1;
+			int add_health = generator.nextInt(MineQuest.getLevelHealth()) + 1;
 			health += add_health;
 		}
 		
@@ -1902,9 +1935,13 @@ public class Quester {
 				CombatClass cclass = (CombatClass)skill;
 				for (int i = 0; i < cclass.getLevel(); i++) {
 					int size = cclass.getSize();
-					int add_health = generator.nextInt(size) + 1;
-	
-					health += add_health;
+					if (size > 0) {
+						int add_health = generator.nextInt(size) + 1;
+		
+						health += add_health;
+					} else if (size == 0) {
+						health++;
+					}
 				}
 			}
 		}
@@ -1912,6 +1949,38 @@ public class Quester {
 		max_health = health;
 		
 		return health;
+	}
+	
+	public int recalculateMana() {
+		mana = MineQuest.getStartingMana();
+		Random generator = new Random();
+		
+		for (int i = 0; i < level; i++) {
+			int add_health = generator.nextInt(MineQuest.getLevelMana()) + 1;
+			health += add_health;
+		}
+		
+		for (SkillClass skill : classes) {
+			if (skill instanceof CombatClass) {
+				CombatClass cclass = (CombatClass)skill;
+				for (int i = 0; i < cclass.getLevel(); i++) {
+					int size = cclass.getManaSize();
+					if (size > 0) {
+						int add = generator.nextInt(size) + 1;
+	
+						mana += add;
+					} else if (size == 0) {
+						mana++;
+					}
+				}
+			}
+		}
+		
+		max_mana = mana;
+		
+		updateMana();
+		
+		return mana;
 	}
 	
 	public void regroup() {
@@ -1938,6 +2007,7 @@ public class Quester {
 	
 	public void respawn(PlayerRespawnEvent event) {
 		health = max_health;
+		mana = max_mana;
 		poison_timer = 0;
 		if (quest != null) {
 			if (quest.getSpawn() != null) {
@@ -2000,7 +2070,8 @@ public class Quester {
 	 */
 	public void save() {
 		if (MineQuest.getSQLServer().update("UPDATE questers SET exp='" + exp + "', level='" + level + "', health='" 
-				+ health + "', max_health='" + max_health + "', enabled='" + 1
+				+ health + "', max_health='" + max_health + "', mana='" 
+				+ mana + "', max_mana='" + max_mana + "', enabled='" + 1
 				+ "', cubes='" + (long)cubes + "' WHERE name='" + getSName() + "'") == -1) {
 			if (player instanceof Player) {
 				((Player)player).sendMessage("May not have saved properly, please try again");
@@ -2109,6 +2180,7 @@ public class Quester {
 					quest.removeQuester(this);
 				}
 			}
+			modded_client = false;
 		}
 		this.player = player;
 	}
@@ -2214,6 +2286,9 @@ public class Quester {
 			level = results.getInt("level");
 			health = results.getInt("health");
 			max_health = results.getInt("max_health");
+			mana = results.getInt("mana");
+			max_mana = results.getInt("max_mana");
+			if (max_mana == 0) max_mana++;
 			enabled = results.getInt("enabled") > 0;
 			
 			cubes = results.getDouble("cubes");
@@ -2416,5 +2491,35 @@ public class Quester {
 		}
 		
 		return false;
+	}
+	
+	public boolean isModded() {
+		return modded_client;
+	}
+	
+	public void setModded() {
+		modded_client = true;
+		updateMana();
+	}
+
+	private void updateMana() {
+		if (MineQuest.isManaEnabled()) {
+			sendMessage("MQ:Mana-" + mana + "/" + max_mana);
+			MineQuest.log("MQ:Mana-" + mana + "/" + max_mana);
+		} else {
+			sendMessage("MQ:Mana--1/1");
+		}
+	}
+
+	public void addMana(int realManaCost) {
+		mana += realManaCost;
+	}
+
+	public int getMana() {
+		return mana;
+	}
+
+	public int getMaxMana() {
+		return max_mana;
 	}
 }

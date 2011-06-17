@@ -55,12 +55,12 @@ import org.monk.MineQuest.Ability.AbilityConfigManager;
 import org.monk.MineQuest.Event.DelayedSQLEvent;
 import org.monk.MineQuest.Event.EventQueue;
 import org.monk.MineQuest.Event.NoMobs;
-import org.monk.MineQuest.Event.RespawnEvent;
 import org.monk.MineQuest.Event.Absolute.HealEvent;
 import org.monk.MineQuest.Listener.MineQuestBlockListener;
 import org.monk.MineQuest.Listener.MineQuestEntityListener;
 import org.monk.MineQuest.Listener.MineQuestPlayerListener;
 import org.monk.MineQuest.Listener.MineQuestServerListener;
+import org.monk.MineQuest.Listener.MineQuestWorldListener;
 import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Mob.SpecialMob;
 import org.monk.MineQuest.Quest.FullParty;
@@ -143,6 +143,7 @@ public class MineQuest extends JavaPlugin {
 	private static List<Town> towns = new ArrayList<Town>();
 	private static boolean track_destroy;
 	private static boolean track_kills;
+	private static boolean mana;
 	
 	/**
 	 * This adds a minequest wrapper to an existing mob.
@@ -888,6 +889,14 @@ public class MineQuest extends JavaPlugin {
 		return false;
 	}
 	
+	public static boolean isManaEnabled() {
+		return mana;
+	}
+	
+	public static boolean isSpellCompEnabled() {
+		return spell_comp;
+	}
+	
 	public static boolean isMercEnabled() {
 		return npc_enabled;
 	}
@@ -1006,7 +1015,7 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		ability.setSkillClass(SkillClass.newShell(MineQuest.getAbilityConfiguration().getSkillClass(string)));
-		for (ItemStack item : reduce(ability.getConfigManaCost())) {
+		for (ItemStack item : reduce(ability.getConfigSpellComps())) {
 			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
 		}
 		
@@ -1254,8 +1263,13 @@ public class MineQuest extends JavaPlugin {
 	private MineQuestEntityListener el;
 	private MineQuestPlayerListener pl;
 	private MineQuestServerListener sl;
+	private MineQuestWorldListener wl;
 	private String version;
 	private static int heal_event;
+	private static boolean spell_comp;
+	private static int starting_mana;
+	private static int level_health;
+	private static int level_mana;
 	
 	public MineQuest() {
 		heal_event = 0;
@@ -1336,9 +1350,6 @@ public class MineQuest extends JavaPlugin {
         
         npc_m = new NPCManager(this);
         
-        combat_config = new CombatClassConfig();
-        resource_config = new ResourceClassConfig();
-        
         (new File("MineQuest/")).mkdir();
         
         if ((!(new File("MineQuest/abilities.jar")).exists()) || (Ability.getVersion() < 1)) {
@@ -1351,9 +1362,7 @@ public class MineQuest extends JavaPlugin {
 			}
         }
         
-        getEventQueue().addEvent(new RespawnEvent(300000));
-        
-        ability_config = new AbilityConfigManager();
+//        getEventQueue().addEvent(new RespawnEvent(300000));
         
         noMobs = new ArrayList<String>();
         
@@ -1363,6 +1372,11 @@ public class MineQuest extends JavaPlugin {
 			setupGeneralProperties();
 			setupNPCProperties();
 			setupEconomoyProperties();
+	        
+	        combat_config = new CombatClassConfig();
+	        resource_config = new ResourceClassConfig();
+	        
+	        ability_config = new AbilityConfigManager();
 			
 			sql_server.update("CREATE TABLE IF NOT EXISTS"
 							+ " npc (name VARCHAR(30), property VARCHAR(30), value VARCHAR(300))");
@@ -1485,7 +1499,7 @@ public class MineQuest extends JavaPlugin {
 		el = new MineQuestEntityListener();
 		pl = new MineQuestPlayerListener();
 		sl = new MineQuestServerListener();
-//		wl = new MineQuestWorldListener();
+		wl = new MineQuestWorldListener();
 //		vl = new MineQuestVehicleListener();
 		
         PluginManager pm = getServer().getPluginManager();
@@ -1508,6 +1522,8 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLUGIN_DISABLE, sl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.PLUGIN_ENABLE, sl, Priority.Monitor, this);
+        pm.registerEvent(Event.Type.CHUNK_LOAD, wl, Priority.Monitor, this);
+        pm.registerEvent(Event.Type.CHUNK_UNLOAD, wl, Priority.Monitor, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
         start = null;
 
@@ -1554,6 +1570,8 @@ public class MineQuest extends JavaPlugin {
 		deny_non_class = general.getBoolean("deny_non_class", true);
 		debug_enable = general.getBoolean("debug_enable", true);
 		health_spawn_enable = general.getBoolean("health_spawn_enable", false);
+		mana = general.getBoolean("mana_enable", false);
+		spell_comp = general.getBoolean("spell_comp_enable", true);
 		boolean slow_heal = general.getBoolean("slow_heal", false);
 		if (slow_heal) {
 			int amount = general.getInt("slow_heal_amount", 1);
@@ -1567,6 +1585,9 @@ public class MineQuest extends JavaPlugin {
 		server_owner = general.getString("mayor", "jmonk");
 		disable_worlds = general.getString("disable_worlds", "").split(",");
 		starting_health = general.getInt("starting_health", 10);
+		level_health = general.getInt("level_health", 4);
+		level_mana = general.getInt("level_mana", 4);
+		starting_mana = general.getInt("starting_mana", 10);
 		town_respawn = general.getBoolean("town_respawn", true);
 		String exceptions = general.getString("town_edit_exception", "64,77");
 		if (exceptions.contains(",")) {
@@ -1648,6 +1669,7 @@ public class MineQuest extends JavaPlugin {
 			}
 		}
 	}
+
 	private void upgradeDB(int oldVersion, int newVersion) throws Exception {
 		String cols[] = null;
 		String types[] = null;
@@ -1686,6 +1708,18 @@ public class MineQuest extends JavaPlugin {
 			};
 
 			addColumns("towns", cols, types);
+		}
+		if (oldVersion < 6) {
+			cols = new String[] {
+					"mana",
+					"max_mana"
+			};
+			types = new String[] {
+					"int DEFAULT '10'",
+					"int DEFAULT '10'"
+			};
+			
+			addColumns("questers", cols, types);
 		}
 		if (oldVersion < 5) {
 			ResultSet results = sql_server.query("SELECT * FROM questers");
@@ -1850,6 +1884,7 @@ public class MineQuest extends JavaPlugin {
 		sql_server.update("INSERT INTO version (version) VALUES('" + version + "')");
 		
 	}
+
 	private void upgradeDB(String string) throws Exception {
 		int oldVersion = 0;
 		try {
@@ -1878,9 +1913,11 @@ public class MineQuest extends JavaPlugin {
 		MineQuest.log("Loading Ability Config - Warning: will not affect loaded abilities!!");
         ability_config = new AbilityConfigManager();
 	}
+
 	public static void delayUpdate(String string) {
 		eventQueue.addEvent(new DelayedSQLEvent(50, string));
 	}
+
 	public static List<Quester> getRealQuesters() {
 		List<Quester> questers = new ArrayList<Quester>();
 		
@@ -1892,6 +1929,7 @@ public class MineQuest extends JavaPlugin {
 		
 		return questers;
 	}
+
 	public static Quest getMainQuest() {
 		for (Quest quest : quests) {
 			if (quest.isMainQuest()) {
@@ -1899,5 +1937,17 @@ public class MineQuest extends JavaPlugin {
 			}
 		}
 		return null;
+	}
+
+	public static int getStartingMana() {
+		return starting_mana;
+	}
+
+	public static int getLevelHealth() {
+		return level_health - 1;
+	}
+
+	public static int getLevelMana() {
+		return level_mana - 1;
 	}
 }
