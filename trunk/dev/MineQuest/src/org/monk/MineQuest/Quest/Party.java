@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Party {
@@ -61,6 +62,18 @@ public class Party {
 		
 		for (Quester quester : questers) {
 			ret[i++] = quester;
+		}
+		
+		return ret;
+	}
+	
+	public List<Quester> getRealQuesters() {
+		List<Quester> ret = new ArrayList<Quester>();
+		
+		for (Quester quester : questers) {
+			if (!(quester instanceof NPCQuester)) {
+				ret.add(quester);
+			}
 		}
 		
 		return ret;

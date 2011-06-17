@@ -102,6 +102,18 @@ public class Quest {
 	private AreaPreserver areaPreserver;
 	
 	public Quest(String filename, Party party) {
+		if (setupQuest(filename, party)) {
+			MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, 0));
+		}
+	}
+	
+	public Quest(String file, Party party, int id) {
+		if (setupQuest(filename, party)) {
+			MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, id));
+		}
+	}
+	
+	protected boolean setupQuest(String filename, Party party) {
 		this.questers = party.getQuesters();
 		this.party = party;
 		tasks = new ArrayList<QuestTask>();
@@ -113,8 +125,8 @@ public class Quest {
 		this.filename = filename;
 		this.repeatable = false;
 		this.reset = true;
-		edit_message = "A Mystical Force is keeping you from Modifying the world!";
 
+		edit_message = "A Mystical Force is keeping you from Modifying the world!";
 		try {
 			BufferedReader bis;
 			if (filename.equals("MineQuest/main.script")) {
@@ -155,7 +167,7 @@ public class Quest {
 				} catch (Exception e1) {
 					MineQuest.log("Unable to unload events properly");
 				}
-				return;
+				return false;
 			}
 			if (world == null) {
 				world = MineQuest.getSServer().getWorlds().get(0);
@@ -175,7 +187,7 @@ public class Quest {
 				quester.setQuest(this, world);
 			}
 			
-			MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, 0));
+			return true;
 		} catch (Exception e) {
 			MineQuest.log("Unable to load Quest - Generic Error");
 			e.printStackTrace();
@@ -184,9 +196,11 @@ public class Quest {
 			} catch (Exception e1) {
 				MineQuest.log("Unable to unload events properly");
 			}
+			
+			return false;
 		}
 	}
-	
+
 	public QuestProspect getProspect() {
 		return new QuestProspect(name, filename, repeatable);
 	}

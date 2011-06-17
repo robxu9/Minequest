@@ -67,6 +67,7 @@ import org.monk.MineQuest.Mob.MQMob;
 import org.monk.MineQuest.Quest.Party;
 import org.monk.MineQuest.Quest.Quest;
 import org.monk.MineQuest.Quest.QuestProspect;
+import org.monk.MineQuest.Quest.Idle.IdleTask;
 import org.monk.MineQuest.Quester.SkillClass.CombatClass;
 import org.monk.MineQuest.Quester.SkillClass.SkillClass;
 import org.monk.MineQuest.Store.NPCSignShop;
@@ -83,6 +84,18 @@ import com.iConomy.system.Holdings;
  * @author jmonk
  */
 public class Quester {
+	public static String getCreatureName(String name) {
+		name = name.replace('.', '/');
+		
+		if (name.split("/").length > 0) {
+			String type = name.split("/")[name.split("/").length - 1];
+			type = type.replace("Craft", "");
+			return type;
+		} else {
+			return null;
+		}
+	}
+
 	protected List<QuestProspect> available;
 	protected Location before_quest;
 	protected ChestSet chests;
@@ -100,7 +113,10 @@ public class Quester {
 	protected CreatureType[] kills;
 	protected String last;
 	protected int level;
+	protected int mana;
 	protected int max_health;
+	private int max_mana;
+	protected boolean modded_client = false;
 	protected String name;
 	protected Party npcParty;
 	protected Party party;
@@ -108,10 +124,8 @@ public class Quester {
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
+	protected List<IdleTask> idles;
 	private List<Long> times = new ArrayList<Long>();
-	protected int mana;
-	protected boolean modded_client = false;
-	private int max_mana;
 
 	public Quester() {
 	}
@@ -270,18 +284,6 @@ public class Quester {
 		health += addition;
 		max_health += addition;
 	}
-
-	/**
-	 * Adds to both health and maximum mana of quester.
-	 * Should be used on level up of character of 
-	 * SkillClasses.
-	 * 
-	 * @param addition
-	 */
-	public void addTotalMana(int addition) {
-		mana += addition;
-		max_mana += addition;
-	}
 	
 	private void addKill(CreatureType kill) {
 		CreatureType[] new_kills = new CreatureType[kills.length + 1];
@@ -304,16 +306,8 @@ public class Quester {
 		}
 	}
 	
-	public static String getCreatureName(String name) {
-		name = name.replace('.', '/');
-		
-		if (name.split("/").length > 0) {
-			String type = name.split("/")[name.split("/").length - 1];
-			type = type.replace("Craft", "");
-			return type;
-		} else {
-			return null;
-		}
+	public void addMana(int realManaCost) {
+		mana += realManaCost;
 	}
 
 	public void addNPC(NPCQuester quester) {
@@ -341,6 +335,18 @@ public class Quester {
 				+ quest.getFile() + "')");
 	}
 
+	/**
+	 * Adds to both health and maximum mana of quester.
+	 * Should be used on level up of character of 
+	 * SkillClasses.
+	 * 
+	 * @param addition
+	 */
+	public void addTotalMana(int addition) {
+		mana += addition;
+		max_mana += addition;
+	}
+
 	public void armSwing() {
 		HashSet<Byte> transparent = new HashSet<Byte>();
 		transparent.add((byte)Material.AIR.getId());
@@ -358,7 +364,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	/**
 	 * Called whenever a Quester attacks any other entity.
 	 * 
@@ -468,7 +474,7 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	/**
 	 * Determines which resource class a given block belongs to.
 	 * 
@@ -520,7 +526,7 @@ public class Quester {
 		}
 		return 4;
 	}
-
+	
 	public void callAbility() {
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())){
@@ -600,7 +606,7 @@ public class Quester {
 		
 		return true;
 	}
-	
+
 	public boolean canCommand(String string) {
 		if (MineQuest.isPermissionsEnabled() && (player != null)) {
 			if (!MineQuest.getPermissions().has((Player) player, "MineQuest.Command." + string)) {
@@ -611,7 +617,7 @@ public class Quester {
 		
 		return true;
 	}
-
+	
 	public boolean canEdit(Block block) {
 		Town town = null;
 		if (block != null) {
@@ -677,8 +683,17 @@ public class Quester {
 
 		return true;
 	}
-	
-	public boolean canUse(ItemStack item) {
+
+	public boolean canPay(long cost) {
+		if (getCubes() >= cost) {
+			setCubes(getCubes() - cost);
+			return true;
+		}
+		
+		return false;
+	}
+    
+    public boolean canUse(ItemStack item) {
 		boolean class_item = false;
 		boolean can_use = false;
 		for (String type : MineQuest.getFullClassNames()) {
@@ -708,7 +723,7 @@ public class Quester {
 		
 		return !class_item || can_use;
 	}
-
+	
 	public boolean canWear(ItemStack item) {
 		boolean class_armor = false;
 		boolean can_use = false;
@@ -739,8 +754,8 @@ public class Quester {
 		
 		return !class_armor || can_use;
     }
-    
-    private boolean checkDamage(DamageCause cause) {
+
+	private boolean checkDamage(DamageCause cause) {
         if (cause == DamageCause.FIRE) {
         	return checkDamage(24040);
         } else if (cause == DamageCause.FIRE_TICK) {
@@ -755,7 +770,7 @@ public class Quester {
         	return checkDamage(24045);
         }
 	}
-	
+
 	/**
      * This function will check if the damager in the event passed
      * has damaged the quester too recently to damage again.
@@ -840,7 +855,7 @@ public class Quester {
 			sendMessage("You are not proficient in the use of those leggings");
 		}
 	}
-
+	
 	/**
 	 * Checks if a Quester is allowed to use the item
 	 * in hand. The item is checked with each class
@@ -868,7 +883,7 @@ public class Quester {
 
 		return false;
 	}
-
+	
 	/**
 	 * Checks if the item in the Questers hand is bound
 	 * to any abilities. 
@@ -996,6 +1011,9 @@ public class Quester {
 			} catch (Exception e) {
 			}
 			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(2000, this, before_quest));
+		}
+		if (isModded()) {
+			sendMessage("MQ:ClearQuest");
 		}
 	}
 
@@ -1397,6 +1415,26 @@ public class Quester {
 		return destroyed;
 	}
 
+	public int getDestroyed(Material material) {
+		int count = 0;
+		
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + getSName() + "' AND type='" + material.toString() + "'");
+
+		try {
+			while (results.next()) {
+				count += results.getInt("count");	
+			}
+		} catch (Exception e) {
+			MineQuest.log("[WARNING] Problem getting " + name + "'s kills");
+		}
+		
+		if (destroyed.get(material) != null) {
+			count += destroyed.get(material);
+		}
+		
+		return count;
+	}
+
 	/**
 	 * Returns amount of experience for Quester.
 	 * @return
@@ -1425,6 +1463,27 @@ public class Quester {
 		return kills;
 	}
 
+	public int getKills(CreatureType creature) {
+		int count = 0;
+		
+		ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + getSName() + "' AND type='" + creature.toString() + "'");
+
+		try {
+			while (results.next()) {
+				count += results.getInt("count");	
+			}
+		} catch (Exception e) {
+			MineQuest.log("[WARNING] Problem getting " + name + "'s kills");
+		}
+		for (CreatureType kill : kills) {
+			if (kill.toString().equals(creature.toString())) {
+				count++;
+			}
+		}
+		
+		return count;
+	}
+
 	/**
 	 * Returns level of Quester.
 	 * 
@@ -1432,6 +1491,10 @@ public class Quester {
 	 */
 	public int getLevel() {
 		return level;
+	}
+
+	public int getMana() {
+		return mana;
 	}
 
 	/**
@@ -1447,6 +1510,10 @@ public class Quester {
 		}
 	}
 
+	public int getMaxMana() {
+		return max_mana;
+	}
+	
 	/**
 	 * Returns name of Quester.
 	 * @return
@@ -1454,19 +1521,11 @@ public class Quester {
 	public String getName() {
 		return name;
 	}
-
-	/**
-	 * Returns SQL name of Quester.
-	 * @return
-	 */
-	public String getSName() {
-		return name;
-	}
-
+	
 	public Party getParty() {
 		return party;
 	}
-
+	
 	/**
 	 * Returns player that the Quester wraps.
 	 * 
@@ -1475,7 +1534,7 @@ public class Quester {
 	public Player getPlayer() {
 		return player;
 	}
-	
+
 	public Quest getQuest() {
 		return quest;
 	}
@@ -1495,6 +1554,14 @@ public class Quester {
 		return null;
 	}
 	
+	/**
+	 * Returns SQL name of Quester.
+	 * @return
+	 */
+	public String getSName() {
+		return name;
+	}
+
 	/**
 	 * Returns last town player was near.
 	 * 
@@ -1564,7 +1631,7 @@ public class Quester {
 
         return false;
     }
-	
+
 	public boolean healthIncrease(PlayerInteractEvent event) {
 		if (!MineQuest.mqDamageEnabled(this)) return false;
 		if (event.getItem() == null) return false;
@@ -1622,6 +1689,14 @@ public class Quester {
 	public boolean inQuest() {
 		return quest != null;
 	}
+	
+	public boolean inVisible() {
+		if (getAbility("Temporary Invisibility") != null) {
+			return getAbility("Temporary Invisibility").isActive();
+		}
+		
+		return false;
+	}
 
 	public boolean isAvailable(QuestProspect quest) {
 		for (QuestProspect qp : available) {
@@ -1631,7 +1706,7 @@ public class Quester {
 		}
 		return false;
 	}
-	
+
 	public boolean isAvailable(String quest) {
 		for (QuestProspect qp : available) {
 			if (qp.equals(quest)) {
@@ -1658,7 +1733,7 @@ public class Quester {
 		}
 		return false;
 	}
-	
+
 	public boolean isDebug() {
 		return debug;
 	}
@@ -1674,6 +1749,10 @@ public class Quester {
 		return enabled;
 	}
 
+	public boolean isModded() {
+		return modded_client;
+	}
+
 	/**
 	 * Returns true if Quester is poisoned currently.
 	 * 
@@ -1682,7 +1761,7 @@ public class Quester {
 	public boolean isPoisoned() {
 		return (poison_timer > 0);
 	}
-
+	
 	/**
 	 * Called whenever a Quester's character goes up
 	 * a level. Handles experience changes and health
@@ -1698,7 +1777,7 @@ public class Quester {
 		
 		getPlayer().sendMessage("Congratulations on reaching character level " + level);
 	}
-
+	
 	/**
 	 * Display list of abilities that Quester has.
 	 */
@@ -1707,7 +1786,7 @@ public class Quester {
 			skill.listAbil();
 		}
 	}
-
+	
 	public void listMercs() {
 		if (npcParty.getQuesters().size() == 0) {
 			sendMessage("You have no mercenaries");
@@ -1718,7 +1797,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	public void listProf() {
 		int id = 0;
 		if (player.getItemInHand() != null) {
@@ -1726,7 +1805,7 @@ public class Quester {
 		}
 		listProf(id);
 	}
-
+	
 	public void listProf(int id) {
 		if (id <= 0) {
 			sendMessage("You are not holding anything");
@@ -1813,7 +1892,7 @@ public class Quester {
 			sendMessage("No proficiency for this item found");
 		}
 	}
-
+	
 	public void lookBind(String name) {
 		for (SkillClass skill : classes) {
 			skill.unBind(player.getItemInHand());
@@ -1999,12 +2078,12 @@ public class Quester {
 		available.remove(quest);
 		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='A' AND name='" + getSName() + "' AND file='" + quest.getFile() + "'");
 	}
-	
+
 	public void remQuestComplete(QuestProspect quest) {
 		completed.remove(quest);
 		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='C' AND name='" + getSName() + "' AND file='" + quest.getFile() + "'");
 	}
-	
+
 	public void respawn(PlayerRespawnEvent event) {
 		health = max_health;
 		mana = max_mana;
@@ -2034,7 +2113,7 @@ public class Quester {
 		}
 		return;
 	}
-	
+
 	public void rightClick(Block block) {
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
@@ -2063,7 +2142,7 @@ public class Quester {
 		
 		return;
 	}
-	
+
 	/**
 	 * Saves any changes in the Quester to the MySQL
 	 * Database.
@@ -2109,7 +2188,7 @@ public class Quester {
 			MineQuest.log("[WARNING] Message: " + string);
 		}
 	}
-	
+
 	/**
 	 * Sets the Cubes of the Quester.
 	 * 
@@ -2144,6 +2223,22 @@ public class Quester {
 				player.setHealth(i);
 			}
 		}
+	}
+
+	public void setMana(int i) {
+		if (i > max_mana) {
+			i = max_mana;
+		}
+		if (i < 0) {
+			i = 0;
+		}
+		mana = i;
+		updateMana();
+	}
+
+	public void setModded() {
+		modded_client = true;
+		updateMana();
 	}
 
 	public void setParty(Party party) {
@@ -2201,8 +2296,11 @@ public class Quester {
 			clearKills();
 			clearDestroyed();
 		}
+		if ((quest != null) && isModded()) {
+			sendMessage("MQ:Quest:" + quest.getProspect().getName());
+		}
 	}
-	
+
 	public void spendClassExp(String type, int amount) {
 		if (amount > class_exp) {
 			sendMessage("You only have " + class_exp + " available");
@@ -2217,6 +2315,10 @@ public class Quester {
 		
 		getClass(type).expAdd(amount);
 		sendMessage(amount + " experience spent on " + type);
+	}
+
+	public void startled() {
+		sendMessage("Someone is attempting to steal form you!");
 	}
 
 	public void startQuest(String string) {
@@ -2238,6 +2340,56 @@ public class Quester {
 		MineQuest.addQuest(new Quest(getQuestProspect(string).getFile(), party));
 	}
 
+	@SuppressWarnings("deprecation")
+	public ItemStack stolen() {
+		if (player == null) {
+			return null;
+		}
+		Inventory inven = player.getInventory();
+		if (inven == null) {
+			return null;
+		}
+		List<ItemStack> possibilities = new ArrayList<ItemStack>();
+		
+		for (ItemStack item : inven.getContents()) {
+			if (item != null) {
+				possibilities.add(item);
+			}
+		}
+		
+		if (possibilities.size() > 0) {
+			Random gen = new Random();
+			int index = gen.nextInt(possibilities.size());
+			ItemStack item = possibilities.get(index);
+			
+			if (item.getAmount() > 1) {
+				int amount = gen.nextInt(item.getAmount()) + 1;
+				if (amount == item.getAmount()) {
+					inven.remove(item);
+					getPlayer().updateInventory();
+					return item;
+				} else {
+					ItemStack ret = new ItemStack(item.getTypeId(), amount);
+					item.setAmount(item.getAmount() - amount);
+					getPlayer().updateInventory();
+					return ret;
+				}
+			} else {
+				inven.remove(item);
+				getPlayer().updateInventory();
+				return item;
+			}
+		}
+		
+		return null;
+	}
+
+	public void targeted(EntityTargetEvent event) {
+		for (SkillClass sclass : classes) {
+			sclass.targeted(event);
+		}
+	}
+	
 	/**
 	 * Called whenever a Quester is teleported to check for
 	 * respawning.
@@ -2251,7 +2403,7 @@ public class Quester {
 //			setRespawn(true);
 //		}
 	}
-
+	
 	/**
 	 * Unbinds the Item that the Quester is holding
 	 * from all abilities.
@@ -2345,6 +2497,27 @@ public class Quester {
 				}
 			}
 		}
+
+		idles = new ArrayList<IdleTask>();
+		results = MineQuest.getSQLServer().query("SELECT * FROM idle WHERE name='" + name + "'");
+		List<String> files = new ArrayList<String>();
+		List<Integer> types = new ArrayList<Integer>();
+		List<Integer> event_ids = new ArrayList<Integer>();
+		List<String> targets = new ArrayList<String>();
+		try {
+			while (results.next()) {
+				files.add(results.getString("file"));
+				types.add(results.getInt("type"));
+				event_ids.add(results.getInt("event_id"));
+				targets.add(results.getString("target"));
+			}
+			
+			for (i = 0; i < files.size(); i++) {
+				idles.add(IdleTask.newIdle(files.get(i), types.get(i), event_ids.get(i), targets.get(i)));
+			}
+		} catch (SQLException e) {
+			MineQuest.log("Unable to load idle quests for " + name);
+		}
 //		if (npcParty != null) {
 //			for (Quester quester : npcParty.getQuesterArray()) {
 //			}
@@ -2422,104 +2595,25 @@ public class Quester {
 		}
 	}
 
-	public void targeted(EntityTargetEvent event) {
-		for (SkillClass sclass : classes) {
-			sclass.targeted(event);
-		}
-	}
-
-	public boolean inVisible() {
-		if (getAbility("Temporary Invisibility") != null) {
-			return getAbility("Temporary Invisibility").isActive();
-		}
-		
-		return false;
-	}
-
-	@SuppressWarnings("deprecation")
-	public ItemStack stolen() {
-		if (player == null) {
-			return null;
-		}
-		Inventory inven = player.getInventory();
-		if (inven == null) {
-			return null;
-		}
-		List<ItemStack> possibilities = new ArrayList<ItemStack>();
-		
-		for (ItemStack item : inven.getContents()) {
-			if (item != null) {
-				possibilities.add(item);
-			}
-		}
-		
-		if (possibilities.size() > 0) {
-			Random gen = new Random();
-			int index = gen.nextInt(possibilities.size());
-			ItemStack item = possibilities.get(index);
-			
-			if (item.getAmount() > 1) {
-				int amount = gen.nextInt(item.getAmount()) + 1;
-				if (amount == item.getAmount()) {
-					inven.remove(item);
-					getPlayer().updateInventory();
-					return item;
-				} else {
-					ItemStack ret = new ItemStack(item.getTypeId(), amount);
-					item.setAmount(item.getAmount() - amount);
-					getPlayer().updateInventory();
-					return ret;
-				}
-			} else {
-				inven.remove(item);
-				getPlayer().updateInventory();
-				return item;
-			}
-		}
-		
-		return null;
-	}
-
-	public void startled() {
-		sendMessage("Someone is attempting to steal form you!");
-	}
-
-	public boolean canPay(long cost) {
-		if (getCubes() >= cost) {
-			setCubes(getCubes() - cost);
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public boolean isModded() {
-		return modded_client;
-	}
-	
-	public void setModded() {
-		modded_client = true;
-		updateMana();
-	}
-
 	private void updateMana() {
-		if (MineQuest.isManaEnabled()) {
+		if (MineQuest.isManaEnabled() && isModded()) {
 			sendMessage("MQ:Mana-" + mana + "/" + max_mana);
-			MineQuest.log("MQ:Mana-" + mana + "/" + max_mana);
-		} else {
+		} else if (isModded()) {
 			sendMessage("MQ:Mana--1/1");
 		}
 	}
 
-	public void addMana(int realManaCost) {
-		mana += realManaCost;
+	public void remIdle(IdleTask idleTask) {
+		idles.remove(idleTask);
+		MineQuest.getSQLServer().update("DELETE FROM idle WHERE name='" + name 
+				+ "' AND file='" + idleTask.getQuest().getFile() 
+				+ "' AND event_id='" + idleTask.getEventId() + "'");
 	}
-
-	public int getMana() {
-		return mana;
-	}
-
-	public int getMaxMana() {
-		return max_mana;
+	
+	public void addIdle(IdleTask idleTask) {
+		idles.add(idleTask);
+		MineQuest.getSQLServer().update("INSERT INTO idle (name, file, type, event_id, target)" + 
+				"VALUES('" + name + "', '" + idleTask.getQuest().getFile() + "', '" + idleTask.getTypeId()
+				+ "', '" + idleTask.getEventId() + "', '" + idleTask.getTarget() + "')");
 	}
 }
