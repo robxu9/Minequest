@@ -13,6 +13,7 @@ public class AbilityConfigManager {
 	private Map<String, Integer> casting_times;
 	private Map<String, Integer> required_levels;
 	private Map<String, Integer> experience;
+	private Map<String, Integer> mana;
 	private Map<String, String> cost;
 	private Map<String, String> classes;
 	private Map<String, int[]> config;
@@ -22,11 +23,13 @@ public class AbilityConfigManager {
 		PropertiesFile required;
 		PropertiesFile exper;
 		PropertiesFile cost_config;
+		PropertiesFile mana_config;
 		PropertiesFile class_config;
 		PropertiesFile abil_config;
 		casting_times = new HashMap<String, Integer>();
 		required_levels = new HashMap<String, Integer>();
 		experience = new HashMap<String, Integer>();
+		mana = new HashMap<String, Integer>();
 		cost = new HashMap<String, String>();
 		classes = new HashMap<String, String>();
 		config = new HashMap<String, int[]>();
@@ -35,7 +38,8 @@ public class AbilityConfigManager {
 			casting_times.put(ability.getName(), ability.getCastTime());
 			required_levels.put(ability.getName(), ability.getReqLevel());
 			experience.put(ability.getName(), ability.getExp());
-			cost.put(ability.getName(), ability.getRealManaCostString());
+			mana.put(ability.getName(), ability.getMana());
+			cost.put(ability.getName(), ability.getRealSpellCompsString());
 			classes.put(ability.getName(), ability.getSkillClass());
 			config.put(ability.getName(), ability.getConfig());
 		}
@@ -44,6 +48,7 @@ public class AbilityConfigManager {
 		required = new PropertiesFile("MineQuest/required_levels.properties");
 		exper = new PropertiesFile("MineQuest/experience_given.properties");
 		cost_config = new PropertiesFile("MineQuest/cost.properties");
+		mana_config = new PropertiesFile("MineQuest/mana.properties");
 		class_config = new PropertiesFile("MineQuest/abil_classes.properties");
 		abil_config = new PropertiesFile("MineQuest/abil_config.properties");
 		
@@ -51,6 +56,7 @@ public class AbilityConfigManager {
 			casting_times.put(abil, cast.getInt(abil, casting_times.get(abil)));
 			required_levels.put(abil, required.getInt(abil, required_levels.get(abil)));
 			experience.put(abil, exper.getInt(abil, experience.get(abil)));
+			mana.put(abil, mana_config.getInt(abil, mana.get(abil)));
 			cost.put(abil, cost_config.getString(abil, cost.get(abil)));
 			classes.put(abil, class_config.getString(abil, classes.get(abil)));
 			config.put(abil, SkillClassConfig.intList(abil_config.getString(abil, getConfigString(config.get(abil)))));
@@ -81,6 +87,10 @@ public class AbilityConfigManager {
 
 	public int getExperience(String ability) {
 		return experience.get(ability);
+	}
+
+	public int getMana(String ability) {
+		return mana.get(ability);
 	}
 
 	public List<ItemStack> getCost(String name) {

@@ -707,20 +707,36 @@ public class SkillClass {
 		
 		fillAbilities();
 		
-		int add_health;
+		int add;
 		int size;
 		
 		size = getSize();
 		
 		if (size > 0) {
-			add_health = generator.nextInt(size) + 1;
+			add = generator.nextInt(size) + 1;
 			
-			quester.addHealth(add_health);
+			quester.addHealth(add);
+		} else if (size == 0) {
+			quester.addHealth(1);
+		}
+		
+		size = getManaSize();
+		
+		if (size > 0) {
+			add = generator.nextInt(size) + 1;
+			
+			quester.addTotalMana(add);
+		} else if (size == 0) {
+			quester.addTotalMana(1);
 		}
 	}
 
 	public int getSize() {
-		return getSkillConfig().getLevelHealth(type);
+		return getSkillConfig().getLevelHealth(type) - 1;
+	}
+
+	public int getManaSize() {
+		return getSkillConfig().getLevelMana(type) - 1;
 	}
 
 	/**

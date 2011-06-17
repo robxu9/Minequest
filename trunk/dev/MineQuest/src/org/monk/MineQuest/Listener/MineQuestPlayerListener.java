@@ -315,6 +315,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 			Town town = MineQuest.getTown(player);
 			MineQuest.getQuester(player).getChestSet().rem(player, town);
 			event.setCancelled(true);
+		} else if (split[0].equals("/moddedclient")) {
+			MineQuest.getQuester(player).setModded();
+			event.setCancelled(true);
 		} else if (split[0].equals("/char")) {
 			Quester quester = MineQuest.getQuester(player);
 			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
@@ -388,6 +391,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 			event.setCancelled(true);
 		} else if (split[0].equals("/health")) {
 			player.sendMessage("Your health is " + MineQuest.getQuester(player).getHealth() + "/" + MineQuest.getQuester(player).getMaxHealth());
+			event.setCancelled(true);
+		} else if (split[0].equals("/mana")) {
+			player.sendMessage("Your health is " + MineQuest.getQuester(player).getMana() + "/" + MineQuest.getQuester(player).getMaxMana());
 			event.setCancelled(true);
 		} else if (split[0].equals("/spellcomp")) {
 			if (split.length < 2) {
@@ -1242,6 +1248,18 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Only an op can do that");
         	}
         	event.setCancelled(true);
+        } else if (split[0].equals("/recalculatemana")) {
+        	if (player.isOp()) {
+        		player.sendMessage("Recalculating all Mana");
+        		for (Quester quester : MineQuest.getQuesters()) {
+        			player.sendMessage(quester.getName() + " - " + quester.recalculateMana());
+        			quester.save();
+        		}
+        		player.sendMessage("Recalculated!");
+        	} else {
+        		player.sendMessage("Only an op can do that");
+        	}
+        	event.setCancelled(true);
         } else if (split[0].equals("/howmany")) {
         	player.sendMessage("There are " + MineQuest.getSServer().getOnlinePlayers().length + " online players");
         	event.setCancelled(true);
@@ -1253,6 +1271,11 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		player.sendMessage("Only OPs are allowed to reload config");
         	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/setmana")) {
+        	int mana  = Integer.parseInt(split[1]);
+        	int max = Integer.parseInt(split[2]);
+        	player.sendMessage("MQ:Mana-" + mana + "/" + max);
         	event.setCancelled(true);
         }
 	}

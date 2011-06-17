@@ -16,6 +16,7 @@ public class SkillClassConfig {
 	protected List<int[]> armor_blocks;
 	protected PropertiesFile properties;
 	private List<Integer> level_health;
+	private List<Integer> level_mana;
 	
 	public SkillClassConfig() {
 		setupProperties();
@@ -28,6 +29,7 @@ public class SkillClassConfig {
 		armor_defends = new ArrayList<double[]>();
 		armor_blocks = new ArrayList<int[]>();
 		level_health = new ArrayList<Integer>();
+		level_mana = new ArrayList<Integer>();
 
 		String[] name_list = properties.getString("names", "").split(",");
 
@@ -56,6 +58,8 @@ public class SkillClassConfig {
 		armor_blocks.add(intList(properties.getString(name + "_armor_blocks", "")));
 		
 		level_health.add(properties.getInt(name + "_level_health", 0));
+		
+		level_mana.add(properties.getInt(name + "_level_mana", 0));
 	}
 	
 	public List<String> getClassNames() {
@@ -183,6 +187,21 @@ public class SkillClassConfig {
 					return 0;
 				}
 				return level_health.get(i);
+			}
+		}
+		
+		return 0;
+	}
+	
+	public int getLevelMana(String name) {
+		int i;
+		
+		for (i = 0; i < names.size(); i++) {
+			if (names.get(i).equals(name)) {
+				if (level_mana.get(i) == null) {
+					return 0;
+				}
+				return level_mana.get(i);
 			}
 		}
 		

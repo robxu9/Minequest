@@ -346,9 +346,9 @@ public class NPCQuester extends Quester {
 	}
 	
 	@Override
-	public boolean canCast(List<ItemStack> list) {
+	public boolean canCast(List<ItemStack> list, int mana) {
 		if (follow != null) {
-			return follow.canCast(list);
+			return follow.canCast(list, mana);
 		}
 		
 		return false;
