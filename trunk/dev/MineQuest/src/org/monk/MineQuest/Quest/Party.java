@@ -26,7 +26,7 @@ import org.monk.MineQuest.Quester.NPCQuester;
 import org.monk.MineQuest.Quester.Quester;
 
 public class Party {
-	private List<Quester> questers;
+	protected List<Quester> questers;
 	
 	public Party() {
 		questers = new ArrayList<Quester>();

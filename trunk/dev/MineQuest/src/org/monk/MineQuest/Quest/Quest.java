@@ -103,12 +103,21 @@ public class Quest {
 	
 	public Quest(String filename, Party party) {
 		if (setupQuest(filename, party)) {
+			for (Quester quester : party.getQuesters()) {
+				quester.setQuest(this, world);
+			}
+
 			MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, 0));
 		}
 	}
 	
 	public Quest(String file, Party party, int id) {
 		if (setupQuest(filename, party)) {
+			if (id != -1) {
+				for (Quester quester : party.getQuesters()) {
+					quester.setQuest(this, world);
+				}
+			}
 			MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, id));
 		}
 	}
@@ -137,13 +146,7 @@ public class Quest {
 			
 			String line = "";
 			int number = 0;
-			if (questers == null) {
-				MineQuest.log("questers");
-			}
 			if (questers.size() > 0) {
-				if (questers.get(0).getPlayer() == null) {
-					MineQuest.log("questers.get(0).getPlayer()");
-				}
 				world = questers.get(0).getPlayer().getWorld();
 			} else if (filename.equals("MineQuest/main.script")) {
 				world = MineQuest.getSServer().getWorlds().get(0);
@@ -182,10 +185,6 @@ public class Quest {
 //					MineQuest.log(event.getName());
 //				}
 //			}
-			
-			for (Quester quester : party.getQuesters()) {
-				quester.setQuest(this, world);
-			}
 			
 			return true;
 		} catch (Exception e) {
