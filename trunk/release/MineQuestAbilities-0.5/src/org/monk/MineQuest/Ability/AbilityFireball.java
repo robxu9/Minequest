@@ -45,7 +45,7 @@ public class AbilityFireball extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 
 		list.add(new ItemStack(Material.COAL, 1));
@@ -90,7 +90,7 @@ public class AbilityFireball extends Ability {
 		double leftx, leftz;
 		int x, z;
 		if ((location.getX() == 0) && (location.getY() == 0) && (location.getZ() == 0)) {
-			giveManaCost(player);
+			giveCost(player);
 			return;
 		}
 		
@@ -124,7 +124,7 @@ public class AbilityFireball extends Ability {
 			if (myclass != null) {
 				level = myclass.getCasterLevel() / config[1];
 			}
-			MineQuest.damage(entity, config[0] + level);
+			MineQuest.damage(entity, config[0] + level, quester);
 		}
 	}
 

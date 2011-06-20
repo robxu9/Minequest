@@ -1014,10 +1014,15 @@ public class MineQuest extends JavaPlugin {
 			ret = string + " is not a valid ability";
 			return ret;
 		}
-		
 		ability.setSkillClass(SkillClass.newShell(MineQuest.getAbilityConfiguration().getSkillClass(string)));
-		for (ItemStack item : reduce(ability.getConfigSpellComps())) {
-			ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
+		
+		if (isSpellCompEnabled()) {
+			for (ItemStack item : reduce(ability.getConfigSpellComps())) {
+				ret = ret + item.getAmount() + " " + item.getType().toString() + " ";
+			}
+		}
+		if (isManaEnabled()) {
+			ret = ret + " " + ability.getRealManaCost() + " Mana";
 		}
 		
 		return ret;

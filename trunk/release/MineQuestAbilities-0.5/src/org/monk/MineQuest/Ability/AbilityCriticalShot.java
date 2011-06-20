@@ -23,7 +23,7 @@ public class AbilityCriticalShot extends Ability {
 		if (entity != null) {
 			MineQuest.damage(entity, config[0]);
 		} else {
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 			notify(quester, "Must be bound to an attack");
 		}
 	}
@@ -34,7 +34,7 @@ public class AbilityCriticalShot extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> cost = new ArrayList<ItemStack>();
 		
 		cost.add(new ItemStack(Material.ARROW, 1));

@@ -44,7 +44,7 @@ public class AbilityEnhancedFlint extends Ability implements PassiveAbility, Bre
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> cost = new ArrayList<ItemStack>();
 		int i;
 		

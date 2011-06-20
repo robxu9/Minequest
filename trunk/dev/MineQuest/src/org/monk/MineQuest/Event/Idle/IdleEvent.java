@@ -45,7 +45,7 @@ public abstract class IdleEvent extends NormalEvent {
 				}
 			}
 			i = 0;
-			for (String count : split[6].split(",")) {
+			for (String count : split[7].split(",")) {
 				creatures[i] = CreatureType.fromName(kill_names[i]);
 				kills[i++] = Integer.parseInt(count);
 			}

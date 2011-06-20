@@ -421,7 +421,7 @@ public abstract class Ability {
 	}
 	
 	public int getMana() {
-		return 1;
+		return 1 + getReqLevel();
 	}
 	
 	/**
@@ -453,7 +453,7 @@ public abstract class Ability {
 		return MineQuest.getAbilityConfiguration().getExperience(getName());
 	}
 	
-	private int getRealManaCost() {
+	public int getRealManaCost() {
 		return MineQuest.getAbilityConfiguration().getMana(getName());
 	}
 	
@@ -526,7 +526,7 @@ public abstract class Ability {
 			giveSpellComps(player);
 		}
 		if (MineQuest.isManaEnabled()) {
-			giveCost(player);
+			giveManaCost(player);
 		}
 	}
 	

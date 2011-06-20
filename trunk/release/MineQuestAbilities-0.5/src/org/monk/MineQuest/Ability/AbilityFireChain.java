@@ -35,7 +35,7 @@ public class AbilityFireChain extends Ability {
 	}
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(263, 1));
@@ -84,7 +84,7 @@ public class AbilityFireChain extends Ability {
 				}
 			}
 		} else {
-			giveManaCost(player);
+			giveCost(player);
 			player.sendMessage("FireChain must be bound to an attack");
 			return;
 		}	

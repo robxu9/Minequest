@@ -46,7 +46,7 @@ public class AbilityTeleport extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> cost = new ArrayList<ItemStack>();
 		
 		cost.add(new ItemStack(Material.SIGN, 1));

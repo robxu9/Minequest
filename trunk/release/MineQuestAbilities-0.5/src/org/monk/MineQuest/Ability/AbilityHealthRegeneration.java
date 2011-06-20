@@ -43,7 +43,7 @@ public class AbilityHealthRegeneration extends Ability implements PassiveAbility
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 
 		list.add(new ItemStack(Material.BREAD, 1));

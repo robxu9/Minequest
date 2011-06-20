@@ -71,6 +71,7 @@ import org.monk.MineQuest.Event.Absolute.PartyKill;
 import org.monk.MineQuest.Event.Absolute.QuestEvent;
 import org.monk.MineQuest.Event.Absolute.SingleAreaEvent;
 import org.monk.MineQuest.Event.Absolute.WeatherEvent;
+import org.monk.MineQuest.Event.Idle.IdleEvent;
 import org.monk.MineQuest.Event.Relative.RelativeEvent;
 import org.monk.MineQuest.Event.Target.TargetedEvent;
 import org.monk.MineQuest.Quest.CanEdit.CanEdit;
@@ -112,13 +113,13 @@ public class Quest {
 	}
 	
 	public Quest(String file, Party party, int id) {
-		if (setupQuest(filename, party)) {
+		if (setupQuest(file, party)) {
 			if (id != -1) {
 				for (Quester quester : party.getQuesters()) {
 					quester.setQuest(this, world);
 				}
+				MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, id));
 			}
-			MineQuest.getEventQueue().addEvent(new QuestEvent(this, 100, id));
 		}
 	}
 	
@@ -146,7 +147,7 @@ public class Quest {
 			
 			String line = "";
 			int number = 0;
-			if (questers.size() > 0) {
+			if ((questers.size() > 0) && (questers.get(0).getPlayer() != null)) {
 				world = questers.get(0).getPlayer().getWorld();
 			} else if (filename.equals("MineQuest/main.script")) {
 				world = MineQuest.getSServer().getWorlds().get(0);
@@ -210,6 +211,8 @@ public class Quest {
 				events.add(RelativeEvent.newRelative(split, this));
 			} else if (split[2].equals("T")) {
 				events.add(TargetedEvent.newTargeted(split, this));
+			} else if (split[2].equals("I")) {
+				events.add(IdleEvent.newIdleEvent(this, split));
 			} else {
 				createEvent(split);
 			}

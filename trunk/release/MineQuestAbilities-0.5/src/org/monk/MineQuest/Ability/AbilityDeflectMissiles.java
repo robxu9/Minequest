@@ -30,7 +30,7 @@ public class AbilityDeflectMissiles extends Ability implements DefendingAbility,
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> cost = new ArrayList<ItemStack>();
 		int i;
 		
