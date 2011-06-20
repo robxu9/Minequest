@@ -32,7 +32,7 @@ import org.monk.MineQuest.Quester.Quester;
 public class AbilityCurePoisonOther extends Ability {
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(39, 1));
@@ -69,12 +69,12 @@ public class AbilityCurePoisonOther extends Ability {
 					return;
 				}
 			} else {
-				giveManaCost(player);
+				giveCost(player);
 				player.sendMessage("entity is not a Quester");
 				return;
 			}
 		} else {
-			giveManaCost(player);
+			giveCost(player);
 			player.sendMessage(getName() + " must be cast on another player");
 		}
 	}

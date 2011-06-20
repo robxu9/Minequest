@@ -31,7 +31,7 @@ import org.monk.MineQuest.Quester.Quester;
 public class AbilityHailofArrows extends Ability {
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 
 		list.add(new ItemStack(262, 1));
@@ -77,7 +77,7 @@ public class AbilityHailofArrows extends Ability {
 				start.setZ(start.getZ() + 3);
 			}
 		} else {
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 			quester.getPlayer().sendMessage("Hail of Arrows must be bound to an attack - Recommended that it is ranged");
 			return;
 		}

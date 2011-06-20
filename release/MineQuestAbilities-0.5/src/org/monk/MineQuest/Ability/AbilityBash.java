@@ -24,7 +24,7 @@ public class AbilityBash extends Ability {
 			LivingEntity entity) {
 		if (entity == null) {
 			quester.sendMessage("Must be cast on an entity");
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 		}
 		
 		MineQuest.damage(entity, config[0], quester);
@@ -64,7 +64,7 @@ public class AbilityBash extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> cost = new ArrayList<ItemStack>();
 		
 		cost.add(new ItemStack(Material.STONE_SWORD, 1));

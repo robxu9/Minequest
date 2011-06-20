@@ -319,6 +319,7 @@ public class Quester {
 	
 	public void addMana(int realManaCost) {
 		mana += realManaCost;
+		updateMana();
 	}
 
 	public void addNPC(NPCQuester quester) {
@@ -2351,6 +2352,13 @@ public class Quester {
 				}
 			}
 		}
+		for (Quester quester : party.getQuesterArray()) {
+			if (quester.isIdle(string)) {
+				sendMessage(quester.getName() + " has " + string + " in idle status");
+				quester.sendMessage("You already have " + string + " in idle status");
+				return;
+			}
+		}
 
 		MineQuest.addQuest(new Quest(getQuestProspect(string).getFile(), party));
 	}
@@ -2628,5 +2636,39 @@ public class Quester {
 		MineQuest.getSQLServer().update("INSERT INTO idle (name, file, type, event_id, target)" + 
 				"VALUES('" + name + "', '" + idleTask.getQuest().getFile() + "', '" + idleTask.getTypeId()
 				+ "', '" + idleTask.getEventId() + "', '" + idleTask.getTarget() + "')");
+	}
+
+	public void journal() {
+		for (IdleTask idle : idles) {
+			idle.printStatus();
+		}
+	}
+
+	private boolean isIdle(String quest) {
+		for (IdleTask idle : idles) {
+			if (idle.getQuest().equals(quest)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public void journal(String quest) {
+		for (IdleTask idle : idles) {
+			if (idle.getQuest().equals(quest)) {
+				idle.printStatus();
+			}
+		}
+	}
+
+	public List<QuestProspect> getIdleQuests() {
+		List<QuestProspect> ret = new ArrayList<QuestProspect>();
+		
+		for (IdleTask idle : idles) {
+			ret.add(idle.getQuest());
+		}
+		
+		return ret;
 	}
 }

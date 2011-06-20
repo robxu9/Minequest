@@ -1159,7 +1159,7 @@ public class MineQuest extends JavaPlugin {
         
         (new File("MineQuest/")).mkdir();
         
-        if ((!((new File("MineQuest/abilities.jar")).exists())) || (Ability.getVersion() < 1)) {
+        if ((!((new File("MineQuest/abilities.jar")).exists())) || (Ability.getVersion() < 2)) {
         	log("MineQuest/abilities.jar not found or too old: Downloading...");
         	try {
 				downloadAbilities();

@@ -35,7 +35,7 @@ public class AbilityPowerstrike extends Ability{
 	}
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 
 		list.add(new ItemStack(268, 1));
@@ -59,7 +59,7 @@ public class AbilityPowerstrike extends Ability{
 		if (entity != null) {
 			MineQuest.damage(entity, config[0], quester);
 		} else {
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 			quester.getPlayer().sendMessage(getName() + " must be bound to an attack");
 			return;
 		}

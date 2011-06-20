@@ -36,7 +36,7 @@ public class AbilityHealOther extends Ability {
 	}
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 
 		list.add(new ItemStack(326, 1));
@@ -81,7 +81,7 @@ public class AbilityHealOther extends Ability {
 				}
 			} else {
 				if (player != null) {
-					giveManaCost(player);
+					giveCost(player);
 					player.sendMessage("entity is not a Quester");
 				}
 				return;

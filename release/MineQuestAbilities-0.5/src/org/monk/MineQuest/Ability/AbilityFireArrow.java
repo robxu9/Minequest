@@ -39,7 +39,7 @@ public class AbilityFireArrow extends Ability {
 	}
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(263, 1));
@@ -73,7 +73,7 @@ public class AbilityFireArrow extends Ability {
 				MineQuest.damage(entity, config[0], quester);
 			}
 		} else {
-			giveManaCost(player);
+			giveCost(player);
 			player.sendMessage("Fire Arrow must be bound to a bow attack - Recommended that it is ranged");
 			return;
 		}

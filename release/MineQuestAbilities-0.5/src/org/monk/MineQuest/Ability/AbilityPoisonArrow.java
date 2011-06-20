@@ -42,13 +42,13 @@ public class AbilityPoisonArrow extends Ability {
 		if (entity != null) {
 			MineQuest.getEventQueue().addEvent(new PoisonEvent(config[0], entity, config[1], config[2]));
 		} else {
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 			quester.sendMessage("Must be bound to an attack");
 		}
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> cost = new ArrayList<ItemStack>();
 		
 		cost.add(new ItemStack(Material.PORK, 1));

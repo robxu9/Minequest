@@ -301,6 +301,21 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage(qp.getName());
         	}
         	event.setCancelled(true);
+        } else if (split[0].equals("/journal")) {
+        	if (split.length == 1) {
+        		MineQuest.getQuester(player).journal();
+        	} else {
+    			String quest = split[1];
+    			int i;
+    			for (i = 2; i < split.length; i++) quest = quest + " " + split[i];
+        		MineQuest.getQuester(player).journal(quest);
+        	}
+        	event.setCancelled(true);
+        } else if (split[0].equals("/listidlequest")) {
+        	for (QuestProspect qp : MineQuest.getQuester(player).getIdleQuests()) {
+        		player.sendMessage(qp.getName());
+        	}
+        	event.setCancelled(true);
         }
 	}
 	
@@ -393,7 +408,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage("Your health is " + MineQuest.getQuester(player).getHealth() + "/" + MineQuest.getQuester(player).getMaxHealth());
 			event.setCancelled(true);
 		} else if (split[0].equals("/mana")) {
-			player.sendMessage("Your health is " + MineQuest.getQuester(player).getMana() + "/" + MineQuest.getQuester(player).getMaxMana());
+			player.sendMessage("Your mana is " + MineQuest.getQuester(player).getMana() + "/" + MineQuest.getQuester(player).getMaxMana());
 			event.setCancelled(true);
 		} else if (split[0].equals("/spellcomp")) {
 			if (split.length < 2) {

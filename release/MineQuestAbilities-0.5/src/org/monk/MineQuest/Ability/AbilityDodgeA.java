@@ -39,7 +39,7 @@ public class AbilityDodgeA extends Ability implements PassiveAbility, DefendingA
 	}
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(288, 1));

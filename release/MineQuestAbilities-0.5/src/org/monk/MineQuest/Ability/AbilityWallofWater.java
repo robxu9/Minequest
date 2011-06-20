@@ -39,7 +39,7 @@ public class AbilityWallofWater extends Ability {
 	}
 	
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(326, 1));

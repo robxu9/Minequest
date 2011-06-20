@@ -24,7 +24,7 @@ public class AbilityFireblast extends Ability {
 			LivingEntity entity) {
 		if (entity == null) {
 			quester.sendMessage("Must be cast on an entity");
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 		}
 		
 		AbilityFireball ability;
@@ -63,7 +63,7 @@ public class AbilityFireblast extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> cost = new ArrayList<ItemStack>();
 		int i;
 		

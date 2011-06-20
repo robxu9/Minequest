@@ -1491,7 +1491,9 @@ public class Quester {
         	return false;
         }
 
-    	MineQuest.log(change + " damage to " + name);
+        if (MineQuest.logHealthChange()) {
+        	MineQuest.log(change + " damage to " + name);
+        }
         health -= change;
         
         newHealth = 20 * health / max_health;
