@@ -1,6 +1,7 @@
 package org.monk.MineQuest.Event.Idle;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.CreatureType;
 import org.monk.MineQuest.MineQuest;
 import org.monk.MineQuest.Event.EventParser;
@@ -55,6 +56,32 @@ public abstract class IdleEvent extends NormalEvent {
 			}
 
 			event = new KillIdleEvent(delay, quest.getParty(), quest, task_id, creatures, kills);
+		} else if (split[3].equals("DestroyIdleEvent")) {
+			int i;
+			String[] material_names = split[6].split(",");
+			Material[] materials = new Material[material_names.length];
+			int[] destroys = new int[split[7].split(",").length];
+			if (material_names.length != destroys.length) {
+				MineQuest.log("Error: Unmatched Length of Names and Quantities");
+				throw new Exception();
+			}
+			for (String material_name : material_names) {
+				if (CreatureType.fromName(material_name) == null) {
+					MineQuest.log("Error: Invalid Material Name " + material_name);
+					throw new Exception();
+				}
+			}
+			i = 0;
+			for (String count : split[7].split(",")) {
+				materials[i] = Material.getMaterial(material_names[i]);
+				destroys[i++] = Integer.parseInt(count);
+			}
+			if (material_names.length == 0) {
+				MineQuest.log("Error: Cannot Have 0 Targets");
+				throw new Exception();
+			}
+
+			event = new DestroyIdleEvent(delay, quest.getParty(), quest, task_id, materials, destroys);
 		} else {
 			throw new Exception();
 		}
@@ -67,11 +94,12 @@ public abstract class IdleEvent extends NormalEvent {
 	protected Quest quest;
 	protected int task_id;
 
-	public IdleEvent(long delay, Party party, Quest quest, int task_id) {
+	public IdleEvent(long delay, Party party, Quest quest, int task_id) throws Exception {
 		super(delay);
 		this.party = party;
 		this.quest = quest;
 		this.task_id = task_id;
+		if (party.getQuesters().size() == 0) throw new Exception();
 	}
 	
 	@Override
@@ -79,7 +107,9 @@ public abstract class IdleEvent extends NormalEvent {
 		super.activate(eventParser);
 		
 		quest.issueNextEvents(-1);
-		party.getQuesters().get(0).addIdle(createEvent());
+		if (party.getQuesters().size() > 0) {
+			party.getQuesters().get(0).addIdle(createEvent());
+		}
 	}
 
 	public abstract IdleTask createEvent();

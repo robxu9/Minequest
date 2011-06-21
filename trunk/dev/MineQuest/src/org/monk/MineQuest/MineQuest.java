@@ -439,12 +439,12 @@ public class MineQuest extends JavaPlugin {
 				spawn_x = (x + max_x) / 2;
 				spawn_y = (int)(start.getY() + end.getY()) / 2;
 				spawn_z = (z + max_z) / 2;
-				sql_server.update("INSERT INTO towns (name, x, z, max_x, max_z, spawn_x, spawn_y, spawn_z, owner, height, y) VALUES('"
+				sql_server.update("INSERT INTO towns (name, x, z, max_x, max_z, spawn_x, spawn_y, spawn_z, owner, height, y, world) VALUES('"
 						+ name + "', '" + x + "', '" + z + "', '" + max_x + "', '" + max_z + "', '" + spawn_x + "', '"
-						+ spawn_y + "', '" + spawn_z + "', '" + player.getName() + "', '0', '0')");
+						+ spawn_y + "', '" + spawn_z + "', '" + player.getName() + "', '0', '0', '" + player.getWorld() + "')");
 				sql_server.update("CREATE TABLE IF NOT EXISTS " + name + 
 						"(height INT, x INT, y INT, z INT, max_x INT, max_z INT, price INT, name VARCHAR(30), store_prop BOOLEAN)");
-				towns.add(new Town(name, getSServer().getWorlds().get(0)));
+				towns.add(new Town(name, player.getWorld()));
 				player.sendMessage("Town " + name + " created");
 			} else {
 				player.sendMessage(namer + " is in the process of creating a town - use /createtown to start a new creation");
@@ -1359,7 +1359,7 @@ public class MineQuest extends JavaPlugin {
         
         (new File("MineQuest/")).mkdir();
         
-        if ((!(new File("MineQuest/abilities.jar")).exists()) || (Ability.getVersion() < 1)) {
+        if ((!(new File("MineQuest/abilities.jar")).exists()) || (Ability.getVersion() < 3)) {
         	log("MineQuest/abilities.jar not found or too old: Downloading...");
         	try {
 				downloadAbilities();
@@ -1429,7 +1429,7 @@ public class MineQuest extends JavaPlugin {
         
 //        getEventParser().addEvent(new CheckMQMobs(10000));
 		sql_server.update("CREATE TABLE IF NOT EXISTS towns (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, spawn_x INT, spawn_y INT, spawn_z INT, " +
-		"owner VARCHAR(30), height INT, y INT, merc_x DOUBLE, merc_y DOUBLE, merc_z DOUBLE)");
+				"owner VARCHAR(30), height INT, y INT, merc_x DOUBLE, merc_y DOUBLE, merc_z DOUBLE, world VARCHAR(30))");
 
 		ResultSet results = sql_server.query("SELECT * FROM version");
 		
@@ -1491,17 +1491,20 @@ public class MineQuest extends JavaPlugin {
 		
 		names.clear();
 		results = sql_server.query("SELECT * FROM towns");
+		List<String> worlds = new ArrayList<String>();
 		
 		try {
 			while (results.next()) {
 				names.add(results.getString("name"));
+				worlds.add(results.getString("world"));
 			}
 		} catch (SQLException e) {
 			log("Unable to get list of towns");
 		}
 		
+		int i = 0;
 		for (String name : names) {
-			towns.add(new Town(name, getServer().getWorlds().get(0)));
+			towns.add(new Town(name, getServer().getWorld(worlds.get(i++))));
 		}
 		
 		bl = new MineQuestBlockListener();
@@ -1737,8 +1740,15 @@ public class MineQuest extends JavaPlugin {
 					"int DEFAULT '10'",
 					"int DEFAULT '10'"
 			};
-			
 			addColumns("questers", cols, types);
+			
+			cols = new String[] {
+					"world",
+			};
+			types = new String[] {
+					"VARCHAR(30) DEFAULT '" + server.getWorlds().get(0).getName() + "'"
+			};
+			addColumns("towns", cols, types);
 		}
 		if (oldVersion < 5) {
 			ResultSet results = sql_server.query("SELECT * FROM questers");

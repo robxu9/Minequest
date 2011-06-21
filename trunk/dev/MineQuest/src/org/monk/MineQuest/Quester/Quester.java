@@ -125,8 +125,9 @@ public class Quester {
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
-	protected List<IdleTask> idles;
+	protected IdleTask[] idles;
 	private List<Long> times = new ArrayList<Long>();
+	private String last_destroy;
 
 	public Quester() {
 	}
@@ -1074,8 +1075,11 @@ public class Quester {
 	}
 
 	public void createParty() {
-		party = new Party();
-		party.addQuester(this);
+		if (party != null) {
+			party.remQuester(this);
+		}
+		party = null;
+		(new Party()).addQuester(this);
 	}
 
 	/**
@@ -1211,6 +1215,7 @@ public class Quester {
 		} else {
 			destroyed.put(event.getBlock().getType(), destroyed.get(event.getBlock().getType()) + 1);
 		}
+		last_destroy = event.getBlock().getType().name();
 		
 		checkIdle(IdleType.DESTROY);
 
@@ -1313,7 +1318,7 @@ public class Quester {
 	}
 	
 	public void expClassGain(int class_exp) {
-		this.class_exp = class_exp;
+		this.class_exp += class_exp;
 	}
 
 	/**
@@ -1609,7 +1614,9 @@ public class Quester {
         	return false;
         }
 
-    	MineQuest.log(change + " damage to " + name);
+        if (MineQuest.logHealthChange()) {
+        	MineQuest.log(change + " damage to " + name);
+        }
         health -= change;
         
         newHealth = 20 * health / max_health;
@@ -2521,7 +2528,6 @@ public class Quester {
 			}
 		}
 
-		idles = new ArrayList<IdleTask>();
 		results = MineQuest.getSQLServer().query("SELECT * FROM idle WHERE name='" + name + "'");
 		List<String> files = new ArrayList<String>();
 		List<Integer> event_ids = new ArrayList<Integer>();
@@ -2533,8 +2539,9 @@ public class Quester {
 				targets.add(results.getString("target"));
 			}
 			
+			idles = new IdleTask[files.size()];
 			for (i = 0; i < files.size(); i++) {
-				idles.add(IdleTask.newIdle(this, files.get(i), event_ids.get(i), targets.get(i)));
+				idles[i] = IdleTask.newIdle(this, files.get(i), event_ids.get(i), targets.get(i));
 			}
 		} catch (SQLException e) {
 			MineQuest.log("Unable to load idle quests for " + name);
@@ -2625,14 +2632,53 @@ public class Quester {
 	}
 
 	public void remIdle(IdleTask idleTask) {
-		idles.remove(idleTask);
+		boolean flag = false;
+		
+		for (IdleTask idle : idles) {
+			if (idle.equals(idleTask)) {
+				flag = true;
+				break;
+			}
+		}
+		
+		if (!flag) {
+			return;
+		}
+		
+		IdleTask[] new_idles = new IdleTask[idles.length - 1];
+		int i = 0;
+		for (IdleTask idle : idles) {
+			if (!idle.equals(idleTask)) {
+				new_idles[i++] = idle;
+			}
+		}
+		idles = new_idles;
 		MineQuest.getSQLServer().update("DELETE FROM idle WHERE name='" + name 
 				+ "' AND file='" + idleTask.getQuest().getFile() 
 				+ "' AND event_id='" + idleTask.getEventId() + "'");
 	}
 	
 	public void addIdle(IdleTask idleTask) {
-		idles.add(idleTask);
+		boolean flag = false;
+		
+		for (IdleTask idle : idles) {
+			if (idle.equals(idleTask)) {
+				flag = true;
+				break;
+			}
+		}
+		
+		if (flag) {
+			return;
+		}
+		
+		IdleTask[] new_idles = new IdleTask[idles.length + 1];
+		int i = 0;
+		for (IdleTask idle : idles) {
+			new_idles[i++] = idle;
+		}
+		new_idles[i++] = idleTask;
+		idles = new_idles;
 		MineQuest.getSQLServer().update("INSERT INTO idle (name, file, type, event_id, target)" + 
 				"VALUES('" + name + "', '" + idleTask.getQuest().getFile() + "', '" + idleTask.getTypeId()
 				+ "', '" + idleTask.getEventId() + "', '" + idleTask.getTarget() + "')");
@@ -2670,5 +2716,9 @@ public class Quester {
 		}
 		
 		return ret;
+	}
+
+	public String getLastDestroy() {
+		return last_destroy;
 	}
 }

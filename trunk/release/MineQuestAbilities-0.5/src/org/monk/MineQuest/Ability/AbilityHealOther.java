@@ -66,8 +66,10 @@ public class AbilityHealOther extends Ability {
 			Quester other = MineQuest.getQuester((Player)entity);
 			if (other != null) {
 				if (player != null) {
-					player.getInventory().addItem(new ItemStack(325, 1));
-					player.updateInventory();
+					if (MineQuest.isSpellCompEnabled()) {
+						player.getInventory().addItem(new ItemStack(325, 1));
+						player.updateInventory();
+					}
 				}
 				if (other.getHealth() < other.getMaxHealth()) {
 					int min = config[0] + (int)(((double)config[1] / 100) * myclass.getCasterLevel());

@@ -12,7 +12,7 @@ public class KillIdleEvent extends IdleEvent {
 	private CreatureType[] creatures;
 	private int[] counts;
 
-	public KillIdleEvent(long delay, Party party, Quest quest, int task_id, CreatureType[] creatures, int[] counts) {
+	public KillIdleEvent(long delay, Party party, Quest quest, int task_id, CreatureType[] creatures, int[] counts) throws Exception {
 		super(delay, party, quest, task_id);
 		this.creatures = creatures;
 		this.counts = counts;

@@ -36,7 +36,7 @@ public class Party {
 		if (!questers.contains(quester)) {
 			questers.add(quester);
 		} else {
-			MineQuest.log("[WARNING] Tried to remove quester " + quester.getName() + " that was already part of party");
+			MineQuest.log("[WARNING] Tried to add quester " + quester.getName() + " that was already part of party");
 		}
 		
 		quester.setParty(this);

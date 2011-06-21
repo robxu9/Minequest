@@ -12,7 +12,7 @@ public class NamedAreaIdleEvent extends IdleEvent {
 	private String name;
 
 	public NamedAreaIdleEvent(long delay, Party party, Quest quest, int task_id, 
-			Location location, double radius, String name) {
+			Location location, double radius, String name) throws Exception {
 		super(delay, party, quest, task_id);
 		this.location = location;
 		this.radius = radius;

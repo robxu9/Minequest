@@ -64,12 +64,15 @@ public class NPCEntity extends EntityPlayer {
 
     @Override
     public boolean a(EntityHuman entity) {
-
         EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
         CraftServer server = ((WorldServer) this.world).getServer();
         server.getPluginManager().callEvent(event);
 
-        return super.a(entity);
+        if (entity != null) {
+        	return super.a(entity);
+        } else {
+        	return false;
+        }
     }
 
     @Override
@@ -101,13 +104,13 @@ public class NPCEntity extends EntityPlayer {
 
     @Override
     public void a(Entity entity) {
-        System.out.println(entity);
+//        System.out.println(entity);
         super.a(entity);
     }
 
     @Override
     public void a(EntityLiving entityliving) {
-        System.out.println(entityliving);
+//        System.out.println(entityliving);
         super.a(entityliving);
     }
 

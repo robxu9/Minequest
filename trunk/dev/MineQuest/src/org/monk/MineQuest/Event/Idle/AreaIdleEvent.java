@@ -11,7 +11,7 @@ public class AreaIdleEvent extends IdleEvent {
 	private double radius;
 
 	public AreaIdleEvent(long delay, Party party, Quest quest, int task_id, 
-			Location location, double radius) {
+			Location location, double radius) throws Exception {
 		super(delay, party, quest, task_id);
 		this.location = location;
 		this.radius = radius;
