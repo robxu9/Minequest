@@ -74,10 +74,12 @@ public class AbilityWallofWater extends Ability {
 		int x_change, z_change;
 		int x, z;
 		int i;
-		
-		player.getInventory().addItem(new ItemStack(325, 1));
-		player.getInventory().addItem(new ItemStack(325, 1));
-		player.updateInventory();
+
+		if (MineQuest.isSpellCompEnabled()) {
+			player.getInventory().addItem(new ItemStack(325, 1));
+			player.getInventory().addItem(new ItemStack(325, 1));
+			player.updateInventory();
+		}
 		
 		while (rot < 0) rot += 360;
 		

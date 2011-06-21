@@ -59,7 +59,7 @@ public class NPCManager {
 				world.players.remove(craftPlayer.getHandle());
 				world.tracker.untrackEntity(craftPlayer.getHandle());
 				craftWorld.getHandle().kill(craftPlayer.getHandle());
-				npc.clearNetHandler();
+//				npc.clearNetHandler();
 				server.getMCServer().serverConfigurationManager.players.remove(craftPlayer.getHandle());
 //				craftPlayer.setHandle(null);
             } catch (Exception e) {

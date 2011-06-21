@@ -17,6 +17,7 @@ public class KillIdleTask extends IdleTask {
 		this.creatures = creatures;
 		this.counts = counts;
 		this.targets = targets;
+		printStatus();
 	}
 
 	@Override
@@ -66,10 +67,12 @@ public class KillIdleTask extends IdleTask {
 	@Override
 	public void printStatus() {
 		int i = 0;;
-		quester.sendMessage(quest.getName() + ": waiting for kills");
-		for (CreatureType creature : creatures) {
-			quester.sendMessage("    "  + creature.getName() + " - " + (quester.getKills(creature) - targets[i] + counts[i]) + "/" + counts[i]);
-			i++;
+		if (quester.getPlayer() != null) {
+			quester.sendMessage(quest.getName() + ":");
+			for (CreatureType creature : creatures) {
+				quester.sendMessage("    "  + creature.getName() + " - " + (quester.getKills(creature) - targets[i] + counts[i]) + "/" + counts[i]);
+				i++;
+			}
 		}
 	}
 

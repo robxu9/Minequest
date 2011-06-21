@@ -63,6 +63,7 @@ public class AbilityWallofLava extends Ability {
 		return "Wall of Lava";
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void castAbility(Quester quester, Location location,
 			LivingEntity entity) {
@@ -74,8 +75,11 @@ public class AbilityWallofLava extends Ability {
 		int x, z;
 		int i;
 		
-		player.getInventory().addItem(new ItemStack(325, 1));
-		player.getInventory().addItem(new ItemStack(325, 1));
+		if (MineQuest.isSpellCompEnabled()) {
+			player.getInventory().addItem(new ItemStack(325, 1));
+			player.getInventory().addItem(new ItemStack(325, 1));
+			player.updateInventory();
+		}
 		
 		while (rot < 0) rot += 360;
 		

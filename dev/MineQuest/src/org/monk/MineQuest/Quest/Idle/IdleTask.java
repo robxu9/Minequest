@@ -47,13 +47,12 @@ public abstract class IdleTask {
 		if (quester.inQuest()) {
 			if (!flag) {
 				quester.sendMessage("Idle Task Completed! Will continue when current quest completes.");
+				flag = true;
 			}
 			MineQuest.getEventQueue().addEvent(new IdleTaskEvent(10000, this));
 			return;
 		}
-		if (quester.getParty() == null) {
-			quester.createParty();
-		}
+		quester.createParty();
 		
 		MineQuest.addQuest(new Quest(quest.getFile(), quester.getParty(), id));
 	}
@@ -81,9 +80,26 @@ public abstract class IdleTask {
 			
 			return idle_task;
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof IdleTask) {
+			IdleTask other = (IdleTask)obj;
+			
+			if (other.getQuest().equals(quest)) {
+				if (other.getEventId() == event_id) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		return super.equals(obj);
 	}
 
 }

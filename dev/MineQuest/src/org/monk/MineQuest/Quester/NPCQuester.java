@@ -1180,14 +1180,11 @@ public class NPCQuester extends Quester {
 	}
 
 	public void respawn() {
-		MineQuest.log("Respawn " + name);
 		if (center == null) return;
 		teleport(center);
-		MineQuest.log("Respawn Successful " + name);
 	}
 
 	public void despawn() {
-		MineQuest.log("Despawn " + name);
 		if (entity == null) return;
 		Location location = player.getLocation();
 		this.center = new Location(location.getWorld(), location.getX(), 
@@ -1204,6 +1201,5 @@ public class NPCQuester extends Quester {
 		MineQuest.getNPCManager().despawn(name);
 		entity = null;
 		player = null;
-		MineQuest.log("Despawn Successful " + name);
 	}
 }
