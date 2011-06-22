@@ -823,7 +823,7 @@ public class SkillClass {
 	public void unBind(ItemStack itemInHand) {
 		for (Ability ability : ability_list) {
 			if (ability != null) {
-				if (ability.isBound(itemInHand)) {
+				if (ability.isBound(itemInHand) || ability.isLookBound(itemInHand)) {
 					ability.unBind(quester);
 				}
 			}

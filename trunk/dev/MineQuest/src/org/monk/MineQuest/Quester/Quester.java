@@ -110,9 +110,11 @@ public class Quester {
 	protected boolean enabled;
 	protected int exp;
 	protected int health;
+	protected IdleTask[] idles;
 	private List<Integer> ids = new ArrayList<Integer>();
 	protected CreatureType[] kills;
 	protected String last;
+	private String last_destroy;
 	protected int level;
 	protected int mana;
 	protected int max_health;
@@ -125,9 +127,8 @@ public class Quester {
 	protected int poison_timer;
 	protected Quest quest;
 	protected int rep;
-	protected IdleTask[] idles;
+	protected Map<String, Integer> reputation;
 	private List<Long> times = new ArrayList<Long>();
-	private String last_destroy;
 
 	public Quester() {
 	}
@@ -287,6 +288,32 @@ public class Quester {
 		max_health += addition;
 	}
 	
+	public void addIdle(IdleTask idleTask) {
+		boolean flag = false;
+		
+		for (IdleTask idle : idles) {
+			if (idle.equals(idleTask)) {
+				flag = true;
+				break;
+			}
+		}
+		
+		if (flag) {
+			return;
+		}
+		
+		IdleTask[] new_idles = new IdleTask[idles.length + 1];
+		int i = 0;
+		for (IdleTask idle : idles) {
+			new_idles[i++] = idle;
+		}
+		new_idles[i++] = idleTask;
+		idles = new_idles;
+		MineQuest.getSQLServer().update("INSERT INTO idle (name, file, type, event_id, target)" + 
+				"VALUES('" + name + "', '" + idleTask.getQuest().getFile() + "', '" + idleTask.getTypeId()
+				+ "', '" + idleTask.getEventId() + "', '" + idleTask.getTarget() + "')");
+	}
+	
 	private void addKill(CreatureType kill) {
 		CreatureType[] new_kills = new CreatureType[kills.length + 1];
 		int i;
@@ -299,14 +326,6 @@ public class Quester {
 		kills = new_kills;
 		
 		checkIdle(IdleType.KILL);
-	}
-	
-	public void checkIdle(IdleType type) {
-		for (IdleTask task : idles) {
-			if (task.getType() == type) {
-				task.checkTask();
-			}
-		}
 	}
 	
 	public void addKill(MQMob mqMob) {
@@ -346,6 +365,29 @@ public class Quester {
 		completed.add(quest);
 		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'C', '" 
 				+ quest.getFile() + "')");
+	}
+	
+	public void addReputation(String type, int amount) {
+		if (hasReputation(type)) {
+			setReputation(type, getReputation(type) + amount);
+		} else {
+			addNewReputation(type, amount);
+		}
+		sendMessage("Congratulations your reputation with " + type + " is now " + getReputation(type));
+	}
+
+	protected void addNewReputation(String type, int amount) {
+		MineQuest.getSQLServer().update(
+				"INSERT INTO reps (name, type, amount) VALUES('" + name
+						+ "', '" + type + "', '" + amount + "')");
+		reputation.put(type, amount);
+	}
+
+	public void setReputation(String type, int amount) {
+		MineQuest.getSQLServer().update(
+				"UPDATE reps SET amount='" + amount + "' WHERE name='" + name
+						+ "' AND type='" + type + "'");
+		reputation.put(type, amount);
 	}
 
 	/**
@@ -869,6 +911,14 @@ public class Quester {
 		}
 	}
 	
+	public void checkIdle(IdleType type) {
+		for (IdleTask task : idles) {
+			if (task.getType() == type) {
+				task.checkTask();
+			}
+		}
+	}
+	
 	/**
 	 * Checks if a Quester is allowed to use the item
 	 * in hand. The item is checked with each class
@@ -1014,7 +1064,7 @@ public class Quester {
 		
 		kills = new CreatureType[0];
 	}
-	
+
 	public void clearQuest(boolean reset) {
 		this.quest = null;
 		poison_timer = 0;
@@ -1030,14 +1080,14 @@ public class Quester {
 		}
 	}
 
-	public void completeQuest(QuestProspect quest) {
+    public void completeQuest(QuestProspect quest) {
 		addQuestCompleted(quest);
 		if (!quest.isRepeatable()) {
 			remQuestAvailable(quest);
 		}
 	}
 
-    /**
+	/**
 	 * Creates database entry for this quester with starting
 	 * classes and health.
 	 */
@@ -1055,7 +1105,7 @@ public class Quester {
 				}
 			}
 		}
-		update_string = update_string + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingHealth() + "''" + MineQuest.getStartingMana() + "', '" + MineQuest.getStartingMana() + "')";
+		update_string = update_string + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingMana() + "', '" + MineQuest.getStartingMana() + "')";
 
 		MineQuest.getSQLServer().update(update_string);
 		
@@ -1117,7 +1167,7 @@ public class Quester {
 	public void debug() {
 		debug = !debug;
 	}
-
+	
 	/**
 	 * Called any time there is a generic damage event on 
 	 * the Quester.
@@ -1127,7 +1177,7 @@ public class Quester {
 	public void defend(EntityDamageEvent event) {
 		healthChange(event.getDamage(), event);
 	}
-	
+
 	/**
 	 * Called any time there is a damaged by block event
 	 * on the Quester.
@@ -1276,7 +1326,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	/**
 	 * Drops a Questers reputation by i.
 	 * 
@@ -1285,7 +1335,7 @@ public class Quester {
 	public void dropRep(int i) {
 		rep -= i;
 	}
-	
+
 	/**
 	 * Enable an ability with the given name.
 	 * 
@@ -1302,7 +1352,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Quester) {
@@ -1316,12 +1366,12 @@ public class Quester {
 		}
 		return super.equals(obj);
 	}
-	
+
 	public void expClassGain(int class_exp) {
 		this.class_exp += class_exp;
 	}
 
-	/**
+    /**
 	 * Adds i experience to Quester and checks for level
 	 * up.
 	 * 
@@ -1333,8 +1383,12 @@ public class Quester {
 			levelUp();
 		}
 	}
+	
+	public boolean hasReputation(String type) {
+		return (reputation.get(type) != null);
+	}
 
-    public Ability getAbility(String ability) {
+	public Ability getAbility(String ability) {
 		for (SkillClass skill : classes) {
 			if (skill != null) {
 				if (skill.getAbility(ability) != null) {
@@ -1478,6 +1532,16 @@ public class Quester {
 		}
 	}
 
+	public List<QuestProspect> getIdleQuests() {
+		List<QuestProspect> ret = new ArrayList<QuestProspect>();
+		
+		for (IdleTask idle : idles) {
+			ret.add(idle.getQuest());
+		}
+		
+		return ret;
+	}
+
 	public CreatureType[] getKills() {
 		return kills;
 	}
@@ -1503,6 +1567,10 @@ public class Quester {
 		return count;
 	}
 
+	public String getLastDestroy() {
+		return last_destroy;
+	}
+
 	/**
 	 * Returns level of Quester.
 	 * 
@@ -1511,11 +1579,11 @@ public class Quester {
 	public int getLevel() {
 		return level;
 	}
-
+	
 	public int getMana() {
 		return mana;
 	}
-
+	
 	/**
 	 * Returns maximum health of Quester.
 	 * 
@@ -1528,11 +1596,11 @@ public class Quester {
 			return 20;
 		}
 	}
-
+	
 	public int getMaxMana() {
 		return max_mana;
 	}
-	
+
 	/**
 	 * Returns name of Quester.
 	 * @return
@@ -1557,7 +1625,7 @@ public class Quester {
 	public Quest getQuest() {
 		return quest;
 	}
-	
+
 	private QuestProspect getQuestProspect(String string) {
 		for (QuestProspect qp : available) {
 			if (qp.equals(string)) {
@@ -1571,6 +1639,10 @@ public class Quester {
 		}
 		
 		return null;
+	}
+	
+	public int getReputation(String type) {
+		return reputation.get(type);
 	}
 	
 	/**
@@ -1710,7 +1782,7 @@ public class Quester {
 	public boolean inQuest() {
 		return quest != null;
 	}
-	
+
 	public boolean inVisible() {
 		if (getAbility("Temporary Invisibility") != null) {
 			return getAbility("Temporary Invisibility").isActive();
@@ -1758,7 +1830,7 @@ public class Quester {
 	public boolean isDebug() {
 		return debug;
 	}
-
+	
 	/**
 	 * Returns true if MineQuest is enabled for this
 	 * Quester.
@@ -1769,11 +1841,21 @@ public class Quester {
 	public boolean isEnabled() {
 		return enabled;
 	}
+	
+	private boolean isIdle(String quest) {
+		for (IdleTask idle : idles) {
+			if (idle.getQuest().equals(quest)) {
+				return true;
+			}
+		}
 
+		return false;
+	}
+	
 	public boolean isModded() {
 		return modded_client;
 	}
-
+	
 	/**
 	 * Returns true if Quester is poisoned currently.
 	 * 
@@ -1781,6 +1863,20 @@ public class Quester {
 	 */
 	public boolean isPoisoned() {
 		return (poison_timer > 0);
+	}
+	
+	public void journal() {
+		for (IdleTask idle : idles) {
+			idle.printStatus();
+		}
+	}
+	
+	public void journal(String quest) {
+		for (IdleTask idle : idles) {
+			if (idle.getQuest().equals(quest)) {
+				idle.printStatus();
+			}
+		}
 	}
 	
 	/**
@@ -1997,7 +2093,7 @@ public class Quester {
 		sendMessage("Poisoned!");
 		poison_timer += 10;
 	}
-	
+
 	public void priorClass(String string) {
 		String list;
 		if (getClass(string) == null) {
@@ -2022,7 +2118,7 @@ public class Quester {
 			sendMessage("  " + sclass.getType());
 		}
 	}
-	
+
 	public int recalculateHealth() {
 		health = MineQuest.getStartingHealth();
 		Random generator = new Random();
@@ -2052,7 +2148,7 @@ public class Quester {
 		
 		return health;
 	}
-	
+
 	public int recalculateMana() {
 		mana = MineQuest.getStartingMana();
 		Random generator = new Random();
@@ -2084,7 +2180,7 @@ public class Quester {
 		
 		return mana;
 	}
-	
+
 	public void regroup() {
 		for (Quester quester : npcParty.getQuesterArray()) {
 			((NPCQuester)quester).setTarget((LivingEntity)null);
@@ -2093,10 +2189,37 @@ public class Quester {
 		sendMessage("Regrouping Mercenaries!");
 	}
 	
+	public void remIdle(IdleTask idleTask) {
+		boolean flag = false;
+		
+		for (IdleTask idle : idles) {
+			if (idle.equals(idleTask)) {
+				flag = true;
+				break;
+			}
+		}
+		
+		if (!flag) {
+			return;
+		}
+		
+		IdleTask[] new_idles = new IdleTask[idles.length - 1];
+		int i = 0;
+		for (IdleTask idle : idles) {
+			if (!idle.equals(idleTask)) {
+				new_idles[i++] = idle;
+			}
+		}
+		idles = new_idles;
+		MineQuest.getSQLServer().update("DELETE FROM idle WHERE name='" + name 
+				+ "' AND file='" + idleTask.getQuest().getFile() 
+				+ "' AND event_id='" + idleTask.getEventId() + "'");
+	}
+
 	public void remNPC(NPCQuester quester) {
 		npcParty.remQuester(quester);
 	}
-	
+
 	public void remQuestAvailable(QuestProspect quest) {
 		available.remove(quest);
 		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='A' AND name='" + getSName() + "' AND file='" + quest.getFile() + "'");
@@ -2197,7 +2320,7 @@ public class Quester {
 		clearKills();
 		clearDestroyed();
 	}
-	
+
 	/**
 	 * Sends a message to the Quester's Player.
 	 * 
@@ -2284,7 +2407,7 @@ public class Quester {
 		}
 		this.party = party;
 	}
-
+	
 	/**
 	 * Sets the reference to the Player.
 	 * 
@@ -2302,7 +2425,7 @@ public class Quester {
 		}
 		this.player = player;
 	}
-
+	
 	public void setQuest(Quest quest, World world) {
 		this.quest = quest;
 
@@ -2419,7 +2542,7 @@ public class Quester {
 			sclass.targeted(event);
 		}
 	}
-	
+
 	/**
 	 * Called whenever a Quester is teleported to check for
 	 * respawning.
@@ -2546,6 +2669,16 @@ public class Quester {
 		} catch (SQLException e) {
 			MineQuest.log("Unable to load idle quests for " + name);
 		}
+		reputation = new HashMap<String, Integer>();
+		results = MineQuest.getSQLServer().query("SELECT * FROM reps WHERE name='" + name + "'");
+		try {
+			while (results.next()) {
+				reputation.put(results.getString("type"), results.getInt("amount"));
+			}
+		} catch (SQLException e) {
+			MineQuest.log("Unable to load reputations for " + name);
+		}
+		
 //		if (npcParty != null) {
 //			for (Quester quester : npcParty.getQuesterArray()) {
 //			}
@@ -2629,96 +2762,5 @@ public class Quester {
 		} else if (isModded()) {
 			sendMessage("MQ:Mana--1/1");
 		}
-	}
-
-	public void remIdle(IdleTask idleTask) {
-		boolean flag = false;
-		
-		for (IdleTask idle : idles) {
-			if (idle.equals(idleTask)) {
-				flag = true;
-				break;
-			}
-		}
-		
-		if (!flag) {
-			return;
-		}
-		
-		IdleTask[] new_idles = new IdleTask[idles.length - 1];
-		int i = 0;
-		for (IdleTask idle : idles) {
-			if (!idle.equals(idleTask)) {
-				new_idles[i++] = idle;
-			}
-		}
-		idles = new_idles;
-		MineQuest.getSQLServer().update("DELETE FROM idle WHERE name='" + name 
-				+ "' AND file='" + idleTask.getQuest().getFile() 
-				+ "' AND event_id='" + idleTask.getEventId() + "'");
-	}
-	
-	public void addIdle(IdleTask idleTask) {
-		boolean flag = false;
-		
-		for (IdleTask idle : idles) {
-			if (idle.equals(idleTask)) {
-				flag = true;
-				break;
-			}
-		}
-		
-		if (flag) {
-			return;
-		}
-		
-		IdleTask[] new_idles = new IdleTask[idles.length + 1];
-		int i = 0;
-		for (IdleTask idle : idles) {
-			new_idles[i++] = idle;
-		}
-		new_idles[i++] = idleTask;
-		idles = new_idles;
-		MineQuest.getSQLServer().update("INSERT INTO idle (name, file, type, event_id, target)" + 
-				"VALUES('" + name + "', '" + idleTask.getQuest().getFile() + "', '" + idleTask.getTypeId()
-				+ "', '" + idleTask.getEventId() + "', '" + idleTask.getTarget() + "')");
-	}
-
-	public void journal() {
-		for (IdleTask idle : idles) {
-			idle.printStatus();
-		}
-	}
-
-	private boolean isIdle(String quest) {
-		for (IdleTask idle : idles) {
-			if (idle.getQuest().equals(quest)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public void journal(String quest) {
-		for (IdleTask idle : idles) {
-			if (idle.getQuest().equals(quest)) {
-				idle.printStatus();
-			}
-		}
-	}
-
-	public List<QuestProspect> getIdleQuests() {
-		List<QuestProspect> ret = new ArrayList<QuestProspect>();
-		
-		for (IdleTask idle : idles) {
-			ret.add(idle.getQuest());
-		}
-		
-		return ret;
-	}
-
-	public String getLastDestroy() {
-		return last_destroy;
 	}
 }

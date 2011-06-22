@@ -1401,6 +1401,9 @@ public class MineQuest extends JavaPlugin {
 							+ " quests (name VARCHAR(30), type VARCHAR(1), file VARCHAR(30))");
 
 			sql_server.update("CREATE TABLE IF NOT EXISTS"
+							+ " reps (name VARCHAR(30), type VARCHAR(30), amount INT)");
+
+			sql_server.update("CREATE TABLE IF NOT EXISTS"
 							+ " questers (name VARCHAR(30), health INT, "
 							+ "max_health INT, cubes DOUBLE, exp INT, "
 							+ "last_town VARCHAR(30), level INT, "

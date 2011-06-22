@@ -42,6 +42,23 @@ public abstract class TargetedEvent extends NormalEvent {
 			double percent = Double.parseDouble(split[6]);
 			
 			targetEvent = new HealthEvent(delay, target, percent);
+		} else if (split[3].equals("ReputationAddEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			String type = split[6];
+			int amount = Integer.parseInt(split[7]);
+			
+			targetEvent = new ReputationAddEvent(delay, target, type, amount);
+		} else if (split[3].equals("ReputationCheckEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			String type = split[6];
+			boolean above = Boolean.parseBoolean(split[7]);
+			int amount = Integer.parseInt(split[8]);
+			int task_pass = Integer.parseInt(split[9]);
+			int task_fail = Integer.parseInt(split[10]);
+			
+			targetEvent = new ReputationCheckEvent(quest, delay, target, type, above, amount, task_pass, task_fail);
 		} else if (split[3].equals("TeleportEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
