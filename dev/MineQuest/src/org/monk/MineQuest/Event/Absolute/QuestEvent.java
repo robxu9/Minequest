@@ -23,8 +23,8 @@ import org.monk.MineQuest.Event.PeriodicEvent;
 import org.monk.MineQuest.Quest.Quest;
 
 public class QuestEvent extends PeriodicEvent {
-	private Quest quest;
-	private int index;
+	protected Quest quest;
+	protected int index;
 
 	public QuestEvent(Quest quest, long delay, int index) {
 		super(delay);

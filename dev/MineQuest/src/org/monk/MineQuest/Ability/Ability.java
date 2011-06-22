@@ -765,6 +765,7 @@ public abstract class Ability {
 	 */
 	public void unBind(Quester quester) {
 		bind = -1;
+		lookBind = -1;
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getSName() + "'");
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getSName() + "'");
 		quester.sendMessage(getName() + " is now unbound");

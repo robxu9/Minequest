@@ -40,6 +40,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.Absolute.EntityTeleportEvent;
 import org.monk.MineQuest.Quest.QuestProspect;
 import org.monk.MineQuest.Quester.NPCMode;
 import org.monk.MineQuest.Quester.NPCQuester;
@@ -657,7 +658,7 @@ public class MineQuestPlayerListener extends PlayerListener {
     		}
 			event.setCancelled(true);
         	return;
-        } else if (split[0].equals("/cubes") || split[0].equals("/money")) {
+        } else if (split[0].equals("/cubes") || split[0].equals("/mqmoney")) {
         	String cubes_string = StoreBlock.convert((long)MineQuest.getQuester(player).getCubes());
 	    	
 			player.sendMessage("You have " + cubes_string);
@@ -907,7 +908,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	        	}
         	}
 			event.setCancelled(true);
-        } else if (split[0].equals("/town")) {
+        } else if (split[0].equals("/mqtown")) {
 			if (MineQuest.getTown(player) != null) {
 				player.sendMessage("You are in " + MineQuest.getTown(player).getName());
 			} else {
@@ -1195,13 +1196,14 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		World world = MineQuest.getSServer().getWorld(split[1]);
         		if (world == null) {
-        			if ((split.length < 3) || !split[2].equals("Nether")) {
+        			if ((split.length < 3) || !split[2].equalsIgnoreCase("Nether")) {
         				world = MineQuest.getSServer().createWorld(split[1], Environment.NORMAL);
         			} else {
         				world = MineQuest.getSServer().createWorld(split[1], Environment.NETHER);
         			}
         		}
-        		player.teleport(world.getSpawnLocation());
+        		MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(10, 
+        				MineQuest.getQuester(player), world.getSpawnLocation()));
         		event.setCancelled(true);
         	}
         } else if (split[0].equals("/setworldtime")) {
