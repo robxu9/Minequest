@@ -27,7 +27,7 @@ import net.minecraft.server.Packet9Respawn;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.monk.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.MineQuest;
 
 /**
  *
