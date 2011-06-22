@@ -11,17 +11,17 @@ public class CanEditOutsideArea extends CanEditArea {
 	
 	@Override
 	public boolean within(Location loc) {
-		if ((loc.getX() >= x) && (loc.getX() <= max_x)) {
-			return false;
+		if ((loc.getX() < x) || (loc.getX() > max_x)) {
+			return true;
 		}
-		if ((loc.getY() >= y) && (loc.getY() <= max_y)) {
-			return false;
+		if ((loc.getY() < y) || (loc.getY() > max_y)) {
+			return true;
 		}
-		if ((loc.getZ() >= z) && (loc.getZ() <= max_z)) {
-			return false;
+		if ((loc.getZ() < z) || (loc.getZ() > max_z)) {
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 
 }

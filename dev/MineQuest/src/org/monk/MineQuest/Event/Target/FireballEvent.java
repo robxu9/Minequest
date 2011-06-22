@@ -20,7 +20,6 @@ package org.monk.MineQuest.Event.Target;
 
 import net.minecraft.server.EntityFireball;
 import net.minecraft.server.EntityLiving;
-import net.minecraft.server.Vec3D;
 import net.minecraft.server.World;
 
 import org.bukkit.craftbukkit.CraftWorld;
@@ -42,7 +41,6 @@ public class FireballEvent extends TargetedEvent {
 		this.vector = vector;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void activate(EventParser eventParser) {
 		for (Quester quester : target.getTargets()) {
@@ -51,8 +49,6 @@ public class FireballEvent extends TargetedEvent {
 				World worldObj = ((CraftWorld)entity.getBukkitEntity().getWorld()).getHandle();
 				
                 EntityFireball entityfireball = new EntityFireball(worldObj, entity, vector.getX(), vector.getY(), vector.getZ());
-                double d8 = 4D;
-                Vec3D vec3d = entity.b(1.0F);
                 entityfireball.locX = entity.locX;// + vec3d.a * d8;
                 entityfireball.locY = entity.locY;// + (double)(entity.height / 2.0F) + 0.5D;
                 entityfireball.locZ = entity.locZ;// + vec3d.c * d8;
