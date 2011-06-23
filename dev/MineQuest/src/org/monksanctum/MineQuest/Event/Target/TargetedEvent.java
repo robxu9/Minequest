@@ -5,6 +5,7 @@ import org.bukkit.util.Vector;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Event.Event;
 import org.monksanctum.MineQuest.Event.NormalEvent;
+import org.monksanctum.MineQuest.Event.Absolute.CreateBoatEvent;
 import org.monksanctum.MineQuest.Quest.Quest;
 import org.monksanctum.MineQuest.Quest.Target;
 
@@ -36,6 +37,25 @@ public abstract class TargetedEvent extends NormalEvent {
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			
 			targetEvent = new LightningEvent(delay, target);
+		} else if (split[3].equals("SetVelocityEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Vector velocity = new Vector(Double.parseDouble(split[6]), 
+					Double.parseDouble(split[7]), Double.parseDouble(split[8]));
+			
+			targetEvent = new SetVelocityEvent(delay, target, velocity);
+		} else if (split[3].equals("NPCEnterBoat")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			int id = Integer.parseInt(split[6]);
+			
+			if (!(quest.getEvent(id) instanceof CreateBoatEvent)) {
+				MineQuest.log("Error: Event " + id + 
+											" is not a CreateBoatEvent");
+				throw new Exception();
+			}
+			targetEvent = new NPCEnterBoat(delay, target, 
+					(CreateBoatEvent)quest.getEvent(id));
 		} else if (split[3].equals("HealthEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -58,7 +78,8 @@ public abstract class TargetedEvent extends NormalEvent {
 			int task_pass = Integer.parseInt(split[9]);
 			int task_fail = Integer.parseInt(split[10]);
 			
-			targetEvent = new ReputationCheckEvent(quest, delay, target, type, above, amount, task_pass, task_fail);
+			targetEvent = new ReputationCheckEvent(quest, delay, target, type, 
+					above, amount, task_pass, task_fail);
 		} else if (split[3].equals("TeleportEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -88,7 +109,8 @@ public abstract class TargetedEvent extends NormalEvent {
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			int level = Integer.parseInt(split[8]);
 
-			targetEvent = new AbilityEvent(delay, target, split[6], split[7], level);
+			targetEvent = new AbilityEvent(delay, target, split[6], 
+											split[7], level);
 		} else if (split[3].equals("NPCSetTargetEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -102,7 +124,8 @@ public abstract class TargetedEvent extends NormalEvent {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			
-			targetEvent = new NPCPropertyEvent(delay, target, split[6], split[7]);
+			targetEvent = new NPCPropertyEvent(delay, target, split[6], 
+																split[7]);
 		} else if (split[3].equals("StartQuestEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -133,7 +156,7 @@ public abstract class TargetedEvent extends NormalEvent {
 			
 			targetEvent = new LineOfSightEvent(quest, delay, index, target, target2);
 		} else {
-			MineQuest.log("Error: Unknown Targeted Event: " + split[3]);
+			MineQuest.log("Error: Unknown Targeted Event - " + split[3]);
 			throw new Exception();
 		}
 		

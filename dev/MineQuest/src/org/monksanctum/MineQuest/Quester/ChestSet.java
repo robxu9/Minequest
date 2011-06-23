@@ -83,7 +83,7 @@ public class ChestSet {
 				int i;
 				
 				for (i = 0; i < chests.size(); i++) {
-					if (town.inTown(chests.get(i))) {
+					if (town.isWithin(chests.get(i))) {
 						player.sendMessage("You already have a stash in " + town.getName());
 						add = false;
 						
@@ -220,7 +220,7 @@ public class ChestSet {
 				chests.remove(i);
 				player.sendMessage("Chest is now longer instance of stash");
 				return;
-			} else if ((town != null) && (town.inTown(chests.get(i)))) {
+			} else if ((town != null) && (town.isWithin(chests.get(i)))) {
 				if (chests.size() > 1) {
 					if (i > 0) {
 						setSelected(0);

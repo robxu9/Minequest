@@ -45,8 +45,10 @@ public class ExperienceEvent extends NormalEvent {
 			quester.expGain(exp / party.getQuesters().size());
 			quester.sendMessage("You gained " + class_exp + " unassigned exp from a quest");
 			quester.expClassGain(class_exp / party.getQuesters().size());
-			quester.setCubes(quester.getCubes() + (cubes / party.getQuesters().size()));
-			quester.sendMessage("You gained " + StoreBlock.convert(cubes / party.getQuesters().size()) + " from a quest");
+			if (cubes > 0) {
+				quester.setCubes(quester.getCubes() + (cubes / party.getQuesters().size()));
+				quester.sendMessage("You gained " + StoreBlock.convert(cubes / party.getQuesters().size()) + " from a quest");
+			}
 		}
 	}
 

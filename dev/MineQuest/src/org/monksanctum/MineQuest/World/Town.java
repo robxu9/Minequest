@@ -27,8 +27,6 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Event.CheckMobEvent;
@@ -38,44 +36,17 @@ import org.monksanctum.MineQuest.Quester.Quester;
 import org.monksanctum.MineQuest.Store.NPCSignShop;
 import org.monksanctum.MineQuest.Store.Store;
 
-public class Town {
-	private int center_x, center_z;
-	private String name;
+public class Town extends Village {
 	private Location npc_spawn;
 	private List<Property> properties;
 	private Location spawn;
 	private Location start;
 	private List<NPCSignShop> stores;
-	private TownProperty town;
 	
 	public Town(String name, World world) {
-		ResultSet results = MineQuest.getSQLServer().query("SELECT * from towns WHERE name='" + name + "'");
+		super(name, world);
+		ResultSet results;
 		this.name = name;
-		
-		try {
-			if (results.next()) {
-				int height = results.getInt("height");
-				Location start = new Location(world, (double)results.getInt("x"), 
-						(double)results.getInt("y"), (double)results.getInt("z"));
-				Location end = new Location(world, (double)results.getInt("max_x"), 
-						(double)results.getInt("y") + height, (double)results.getInt("max_z"));
-				
-				town = new TownProperty(this, results.getString("owner"), start, end, height > 0, 0);
-				center_x = town.getCenterX();
-				center_z = town.getCenterZ();
-				spawn = new Location(world, 
-						(double)results.getInt("spawn_x"), 
-						(double)results.getInt("spawn_y"), 
-						(double)results.getInt("spawn_z"));
-				npc_spawn = new Location(MineQuest.getSServer().getWorlds().get(0), 
-						results.getDouble("merc_x"), 
-						results.getDouble("merc_y"), 
-						results.getDouble("merc_z"));
-			}
-		} catch (SQLException e) {
-			MineQuest.log("Error: could not initialize town " + name);
-			e.printStackTrace();
-		}
 		
 		properties = new ArrayList<Property>();
 		stores = new ArrayList<NPCSignShop>();
@@ -108,7 +79,7 @@ public class Town {
 	}
 
 	public void addMerc(String name, Quester quester) {
-		if (!town.canEdit(quester)) {
+		if (!getTownProperty().canEdit(quester)) {
 			quester.sendMessage("You are not authorized to edit town");
 			return;
 		}
@@ -139,31 +110,15 @@ public class Town {
 	}
 	
 	public double calcDistance(Location loc) {
-		return MineQuest.distance(loc, town.getLocation());
+		return MineQuest.distance(loc, getTownProperty().getLocation());
 	}
 	
 	public double calcDistance(Player player) {
 		return calcDistance(player.getLocation());
 	}
-
-	private void checkMob(Monster livingEntity) {
-		if (inTown(livingEntity.getLocation())) {
-			livingEntity.setHealth(0);
-		}
-	}
-	
-	public void checkMobs() {
-		List<LivingEntity> livingEntities = MineQuest.getSServer().getWorlds().get(0).getLivingEntities();
-		
-		for (LivingEntity livingEntity : livingEntities) {
-			if (livingEntity instanceof Monster) {
-				checkMob((Monster)livingEntity);
-			}
-		}
-	}
 	
 	public void createProperty(Player player) {
-		if (town.canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
 			player.getName();
 			start = player.getLocation();
 		} else {
@@ -172,7 +127,7 @@ public class Town {
 	}
 	
 	public void createStore(Player player) {
-		if (town.canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
 			player.getName();
 			start = player.getLocation();
 		} else {
@@ -201,44 +156,44 @@ public class Town {
 	}
 	
 	public void expand(Quester quester) {
-		if (!town.canEdit(quester)) {
+		if (!getTownProperty().canEdit(quester)) {
 			quester.sendMessage("You cannot edit " + name);
 		}
 		
 		Location loc = quester.getPlayer().getLocation();
 		
-		if (loc.getBlockX() < town.getX()) {
-			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
+		if (loc.getBlockX() < getTownProperty().getX()) {
+			if ((loc.getBlockZ() < getTownProperty().getZ()) || (loc.getBlockZ() > getTownProperty().getMaxZ())) {
 				quester.sendMessage("Can only expand in one direction at a time!");
 			}
-			town.setX(loc.getBlockX());
+			getTownProperty().setX(loc.getBlockX());
 			quester.sendMessage("Town expanded to min x of " + loc.getBlockX());
 		}
 		
-		if (loc.getBlockX() > town.getMaxX()) {
-			if ((loc.getBlockZ() < town.getZ()) || (loc.getBlockZ() > town.getMaxZ())) {
+		if (loc.getBlockX() > getTownProperty().getMaxX()) {
+			if ((loc.getBlockZ() < getTownProperty().getZ()) || (loc.getBlockZ() > getTownProperty().getMaxZ())) {
 				quester.sendMessage("Can only expand in one direction at a time!");
 			}
-			town.setMaxX(loc.getBlockX());
+			getTownProperty().setMaxX(loc.getBlockX());
 			quester.sendMessage("Town expanded to max x of " + loc.getBlockX());
 		}
 		
-		if (loc.getBlockZ() < town.getZ()) {
-			town.setZ(loc.getBlockZ());
+		if (loc.getBlockZ() < getTownProperty().getZ()) {
+			getTownProperty().setZ(loc.getBlockZ());
 			quester.sendMessage("Town expanded to min z of " + loc.getBlockZ());
 		}
 		
-		if (loc.getBlockZ() > town.getMaxZ()) {
-			town.setMaxZ(loc.getBlockZ());
+		if (loc.getBlockZ() > getTownProperty().getMaxZ()) {
+			getTownProperty().setMaxZ(loc.getBlockZ());
 			quester.sendMessage("Town expanded to max z of " + loc.getBlockZ());
 		}
 		
-		quester.sendMessage("You are within the x-z area of the town");
+		quester.sendMessage("You are within the x-z getTownProperty() of the town");
 		quester.sendMessage("/expand_town can only be used to expand horizontally");
 	}
 	
 	public void finishProperty(Player player, boolean b) {
-		if (town.canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
 			Location end = player.getLocation();
 			int x, y, z, max_x, max_z, height;
 			if (end.getX() > start.getX()) {
@@ -280,7 +235,7 @@ public class Town {
 	}
 
 	public void finishStore(Player player, String name) {
-		if (town.canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
 			Location end = player.getLocation();
 			int x, y, z, max_x, max_z, height;
 			if (end.getX() > start.getX()) {
@@ -347,10 +302,6 @@ public class Town {
 		return spawn;
 	}
 
-	public String getName() {
-		return name;
-	}
-
 	public Location getNPCSpawn() {
 		return new Location(npc_spawn.getWorld(),
 				npc_spawn.getX() + (new Random()).nextDouble() * 5,
@@ -401,15 +352,7 @@ public class Town {
 	}
 
 	public Property getTownProperty() {
-		return town;
-	}
-	
-	public boolean inTown(Location loc) {
-		return town.inProperty(loc);
-	}
-
-	public boolean inTown(Player player) {
-		return inTown(player.getLocation());
+		return (Property)area;
 	}
 	
 	public void remove(Store store) {
@@ -417,11 +360,11 @@ public class Town {
 	}
 
 	public void setHeight(Quester quester, int height) {
-		if (!town.canEdit(quester)) {
+		if (!getTownProperty().canEdit(quester)) {
 			quester.sendMessage("You cannot edit " + name);
 		}
 		
-		town.setHeight(height);
+		getTownProperty().setHeight(height);
 		quester.sendMessage("Town set to height of " + height);
 	}
 	
@@ -433,11 +376,11 @@ public class Town {
 	}
 	
 	public void setMinY(Quester quester, int y) {
-		if (!town.canEdit(quester)) {
+		if (!getTownProperty().canEdit(quester)) {
 			quester.sendMessage("You cannot edit " + name);
 		}
 		
-		town.setY(y);
+		getTownProperty().setY(y);
 		quester.sendMessage("Town set to min y of " + y);
 	}
 	
@@ -445,7 +388,7 @@ public class Town {
 		if (MineQuest.getQuester(string) != null) {
 			MineQuest.getSQLServer().update("UPDATE towns SET owner='" + string + "' WHERE name='" + name + "'");
 		}
-		town.setOwner(MineQuest.getQuester(string));
+		getTownProperty().setOwner(MineQuest.getQuester(string));
 	}
 	
 	public void setPrice(Player player, long price) {
@@ -471,5 +414,16 @@ public class Town {
 						+ "' AND max_x='" + prop.getMaxX() + "' AND max_z='"
 						+ prop.getMaxZ() + "'");
 		properties.remove(prop);
+	}
+
+	public void getSpawn(ResultSet results, World world) throws SQLException {
+		spawn = new Location(world, 
+				(double)results.getInt("spawn_x"), 
+				(double)results.getInt("spawn_y"), 
+				(double)results.getInt("spawn_z"));
+		npc_spawn = new Location(MineQuest.getSServer().getWorlds().get(0), 
+				results.getDouble("merc_x"), 
+				results.getDouble("merc_y"), 
+				results.getDouble("merc_z"));
 	}
 }
