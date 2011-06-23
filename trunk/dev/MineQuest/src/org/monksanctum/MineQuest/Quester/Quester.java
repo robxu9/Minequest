@@ -72,6 +72,7 @@ import org.monksanctum.MineQuest.Quest.Idle.IdleType;
 import org.monksanctum.MineQuest.Quester.SkillClass.CombatClass;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
 import org.monksanctum.MineQuest.Store.NPCSignShop;
+import org.monksanctum.MineQuest.World.Claim;
 import org.monksanctum.MineQuest.World.Property;
 import org.monksanctum.MineQuest.World.Town;
 
@@ -129,6 +130,7 @@ public class Quester {
 	protected int rep;
 	protected Map<String, Integer> reputation;
 	private List<Long> times = new ArrayList<Long>();
+	private long last_msg;
 
 	public Quester() {
 	}
@@ -698,14 +700,15 @@ public class Quester {
 			return true;
 		}
 
-		if (town != null) {
-			int id = block.getTypeId();
-			boolean flag = false;
-			for (int other_id : MineQuest.getTownExceptions()) {
-				if (id == other_id) flag = true;
-			}
-			
-			if (!flag) {
+		int id = block.getTypeId();
+		boolean flag = false;
+		for (int other_id : MineQuest.getTownExceptions()) {
+			if (id == other_id) flag = true;
+		}
+
+		
+		if (!flag) {
+			if (town != null) {
 				Property prop = town.getProperty(block.getLocation());
 				
 				for (NPCSignShop shop : town.getStores()) {
@@ -726,6 +729,15 @@ public class Quester {
 					if (!prop.canEdit(this)) {
 						sendMessage("You are not authorized to modify town - please get the proper authorization");
 						dropRep(10);
+						return false;
+					}
+				}
+			} else {
+				Claim claim = MineQuest.getClaim(block.getLocation());
+				
+				if (claim != null) {
+					if (!claim.canEdit(this)) {
+						sendMessage("You are not authorized to modify this claim - please get the proper authorization");
 						return false;
 					}
 				}
@@ -2762,5 +2774,14 @@ public class Quester {
 		} else if (isModded()) {
 			sendMessage("MQ:Mana--1/1");
 		}
+	}
+
+	public void notify(String message) {
+		Calendar now = Calendar.getInstance();
+		
+		if ((now.getTimeInMillis() - last_msg) > 2000) {
+			last_msg = now.getTimeInMillis();
+			sendMessage(message);
+		}		
 	}
 }

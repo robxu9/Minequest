@@ -18,25 +18,25 @@
  */
 package org.monksanctum.MineQuest.Event;
 
-import org.monksanctum.MineQuest.World.Town;
+import org.monksanctum.MineQuest.World.Village;
 
 public class CheckMobEvent extends PeriodicEvent {
-	private Town town;
+	private Village village;
 
-	public CheckMobEvent(Town town) {
-		super(1);
-		this.town = town;
+	public CheckMobEvent(Village village) {
+		super(2);
+		this.village = village;
 	}
 	
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		town.checkMobs();
+		village.checkMobs();
 	}
 	
 	@Override
 	public String getName() {
-		return "Check Mobs: " + town.getName();
+		return "Check Mobs: " + village.getName();
 	}
 
 }

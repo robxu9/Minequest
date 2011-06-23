@@ -73,7 +73,9 @@ import org.monksanctum.MineQuest.Quester.SkillClass.ResourceClassConfig;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClassConfig;
 import org.monksanctum.MineQuest.Store.NPCStringConfig;
+import org.monksanctum.MineQuest.World.Claim;
 import org.monksanctum.MineQuest.World.Town;
+import org.monksanctum.MineQuest.World.Village;
 
 import com.iConomy.iConomy;
 import com.nijiko.permissions.PermissionHandler;
@@ -142,6 +144,8 @@ public class MineQuest extends JavaPlugin {
 	private static boolean town_protect;
 	private static boolean town_respawn;
 	private static List<Town> towns = new ArrayList<Town>();
+	private static List<Claim> claims = new ArrayList<Claim>();
+	private static List<Village> villages = new ArrayList<Village>();
 	private static boolean track_destroy;
 	private static boolean track_kills;
 	private static boolean mana;
@@ -236,6 +240,26 @@ public class MineQuest extends JavaPlugin {
 	 */
 	static public void addTown(Town town) {
 		towns.add(town);
+	}
+
+	/**
+	 * Adds a claim to the MineQuest Server. 
+	 * Does not modify mysql database.
+	 * 
+	 * @param claim Claim to be added
+	 */
+	static public void addClaim(Claim claim) {
+		claims.add(claim);
+	}
+
+	/**
+	 * Adds a village to the MineQuest Server. 
+	 * Does not modify mysql database.
+	 * 
+	 * @param village Village to be added
+	 */
+	static public void addVillage(Village village) {
+		villages.add(village);
 	}
 
 	/**
@@ -783,7 +807,7 @@ public class MineQuest extends JavaPlugin {
 		int i;
 		
 		for (i = 0; i < towns.size(); i++) {
-			if (towns.get(i).inTown(loc)) {
+			if (towns.get(i).isWithin(loc)) {
 				return towns.get(i);
 			}
 		}
@@ -808,6 +832,7 @@ public class MineQuest extends JavaPlugin {
 		
 		return null;
 	}
+
 	public static int[] getTownExceptions() {
 		return town_exceptions;
 	}
@@ -819,6 +844,24 @@ public class MineQuest extends JavaPlugin {
 	 */
 	static public List<Town> getTowns() {
 		return towns;
+	}
+	
+	/**
+	 * Gets the list of Claims in the server.
+	 * 
+	 * @return List of Claims
+	 */
+	static public List<Claim> getClaims() {
+		return claims;
+	}
+	
+	/**
+	 * Gets the list of villages in the server.
+	 * 
+	 * @return List of villages
+	 */
+	static public List<Village> getVillages() {
+		return villages;
 	}
 	
 	/**
@@ -1423,6 +1466,16 @@ public class MineQuest extends JavaPlugin {
 							+ "abil9 VARCHAR(30) DEFAULT '0')");
 			
 			sql_server.update("CREATE TABLE IF NOT EXISTS idle (name VARCHAR(30), file VARCHAR(30), type INT, event_id INT, target VARCHAR(180))");
+
+			sql_server.update("CREATE TABLE IF NOT EXISTS towns (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, spawn_x INT, spawn_y INT, spawn_z INT, " +
+					"owner VARCHAR(30), height INT, y INT, merc_x DOUBLE, merc_y DOUBLE, merc_z DOUBLE, world VARCHAR(30))");
+			
+			sql_server.update("CREATE TABLE IF NOT EXISTS claims (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, " +
+					"owner VARCHAR(30), height INT, y INT, world VARCHAR(30))");
+			
+			sql_server.update("CREATE TABLE IF NOT EXISTS villages (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, " +
+					"owner VARCHAR(30), height INT, y INT, world VARCHAR(30))");
+
 		} catch (Exception e) {
 			MineQuest.log("Unable to initialize configuration");
         	MineQuest.log("Check configuration in MineQuest directory");
@@ -1431,9 +1484,6 @@ public class MineQuest extends JavaPlugin {
         }
         
 //        getEventParser().addEvent(new CheckMQMobs(10000));
-		sql_server.update("CREATE TABLE IF NOT EXISTS towns (name VARCHAR(30), x INT, z INT, max_x INT, max_z INT, spawn_x INT, spawn_y INT, spawn_z INT, " +
-				"owner VARCHAR(30), height INT, y INT, merc_x DOUBLE, merc_y DOUBLE, merc_z DOUBLE, world VARCHAR(30))");
-
 		ResultSet results = sql_server.query("SELECT * FROM version");
 		
 		try {
@@ -1509,7 +1559,7 @@ public class MineQuest extends JavaPlugin {
 		for (String name : names) {
 			towns.add(new Town(name, getServer().getWorld(worlds.get(i++))));
 		}
-		
+
 		bl = new MineQuestBlockListener();
 		el = new MineQuestEntityListener();
 		pl = new MineQuestPlayerListener();
@@ -1981,5 +2031,97 @@ public class MineQuest extends JavaPlugin {
 
 	public static int getLevelMana() {
 		return level_mana - 1;
+	}
+	
+	/**
+	 * Gets a village that a specific player is within.
+	 * 
+	 * @param player Player within village
+	 * @return village that player is in or NULL if none exists
+	 */
+	static public Village getVillage(HumanEntity player) {
+		return getVillage(player.getLocation());
+	}
+	
+	/**
+	 * Gets a village that a specific location is within.
+	 * 
+	 * @param loc Location within village.
+	 * @return village that location is in or NULL is none exists
+	 */
+	static public Village getVillage(Location loc) {
+		int i;
+		
+		for (i = 0; i < villages.size(); i++) {
+			if (villages.get(i).isWithin(loc)) {
+				return villages.get(i);
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Gets a village based on name of the village.
+	 * 
+	 * @param name Name of the village
+	 * @return village with Name name or NULL is none exists
+	 */
+	static public Village getVillage(String name) {
+		int i;
+		
+		for (i = 0; i < towns.size(); i++) {
+			if (towns.get(i).equals(name)) {
+				return towns.get(i);
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Gets a claim that a specific player is within.
+	 * 
+	 * @param player Player within claim
+	 * @return claim that player is in or NULL if none exists
+	 */
+	static public Claim getClaim(HumanEntity player) {
+		return getClaim(player.getLocation());
+	}
+	
+	/**
+	 * Gets a claim that a specific location is within.
+	 * 
+	 * @param loc Location within claim.
+	 * @return claim that location is in or NULL is none exists
+	 */
+	static public Claim getClaim(Location loc) {
+		int i;
+		
+		for (i = 0; i < claims.size(); i++) {
+			if (claims.get(i).isWithin(loc)) {
+				return claims.get(i);
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Gets a claim based on name of the claim.
+	 * 
+	 * @param name Name of the claim
+	 * @return claim with Name name or NULL is none exists
+	 */
+	static public Claim getClaim(String name) {
+		int i;
+		
+		for (i = 0; i < claims.size(); i++) {
+			if (claims.get(i).equals(name)) {
+				return claims.get(i);
+			}
+		}
+		
+		return null;
 	}
 }

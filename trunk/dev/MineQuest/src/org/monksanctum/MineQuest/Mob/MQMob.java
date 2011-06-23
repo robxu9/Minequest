@@ -26,11 +26,13 @@ public class MQMob {
 	protected LivingEntity entity;
 	private Quester last_attack;
 	protected boolean dead;
+	protected boolean spawned;
 
 	public MQMob(LivingEntity entity) {
 		this.entity = entity;
 		last_attack = null;
 		dead = false;
+		spawned = false;
 	}
 	
 	public boolean isDead() {
@@ -103,4 +105,11 @@ public class MQMob {
 		entity.damage(i, source.getPlayer());
 	}
 
+	public boolean isSpawned() {
+		return spawned;
+	}
+	
+	public void setSpawned() {
+		spawned = true;
+	}
 }

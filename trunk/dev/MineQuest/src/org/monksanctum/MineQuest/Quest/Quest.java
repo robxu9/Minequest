@@ -57,6 +57,7 @@ import org.monksanctum.MineQuest.Event.Absolute.BlockCDEvent;
 import org.monksanctum.MineQuest.Event.Absolute.BlockDCEvent;
 import org.monksanctum.MineQuest.Event.Absolute.BlockEvent;
 import org.monksanctum.MineQuest.Event.Absolute.CanEditPattern;
+import org.monksanctum.MineQuest.Event.Absolute.CreateBoatEvent;
 import org.monksanctum.MineQuest.Event.Absolute.EntitySpawnerCompleteEvent;
 import org.monksanctum.MineQuest.Event.Absolute.EntitySpawnerCompleteNMEvent;
 import org.monksanctum.MineQuest.Event.Absolute.EntitySpawnerEvent;
@@ -554,6 +555,13 @@ public class Quest {
 			Location loc = new Location(world, Double.parseDouble(line[5]), Double.parseDouble(line[6]), Double.parseDouble(line[7]));
 			double radius = Double.parseDouble(line[8]);
 			new_event = new SingleAreaEvent(this, delay, index, party, loc, radius);
+		} else if (type.equals("parseDouble")) {
+			int delay = Integer.parseInt(line[3]);
+			double x = Double.parseDouble(line[4]);
+			double y = Double.parseDouble(line[5]);
+			double z = Double.parseDouble(line[6]);
+			
+			new_event = new CreateBoatEvent(delay, world, x, y, z);
 		} else if (type.equals("MessageEvent")) {
 			int delay = Integer.parseInt(line[3]);
 
@@ -928,8 +936,8 @@ public class Quest {
 			}
 		}
 
-		quester.sendMessage(edit_message);
-		
+		quester.notify(edit_message);
+
 		return false;
 	}
 
