@@ -24,10 +24,10 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Ability.Ability;
-import org.monk.MineQuest.Event.Relative.AuraEvent;
-import org.monk.MineQuest.Quester.Quester;
+import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Ability.Ability;
+import org.monksanctum.MineQuest.Event.Relative.AuraEvent;
+import org.monksanctum.MineQuest.Quester.Quester;
 
 public class AbilityHealAura extends Ability {
 	public AbilityHealAura() {

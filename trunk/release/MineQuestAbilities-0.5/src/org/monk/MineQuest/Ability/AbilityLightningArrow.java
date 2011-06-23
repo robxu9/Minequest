@@ -7,10 +7,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Ability.Ability;
-import org.monk.MineQuest.Event.Absolute.BlockCDEvent;
-import org.monk.MineQuest.Quester.Quester;
+import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Ability.Ability;
+import org.monksanctum.MineQuest.Event.Absolute.BlockCDEvent;
+import org.monksanctum.MineQuest.Quester.Quester;
 
 public class AbilityLightningArrow extends Ability {
 	public AbilityLightningArrow() {
