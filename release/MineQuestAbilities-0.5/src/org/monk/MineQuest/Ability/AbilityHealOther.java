@@ -25,9 +25,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.monksanctum.MineQuest.MineQuest;
-import org.monksanctum.MineQuest.Ability.Ability;
-import org.monksanctum.MineQuest.Quester.Quester;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Quester.Quester;
 
 public class AbilityHealOther extends Ability {
 	public AbilityHealOther() {
@@ -66,10 +65,8 @@ public class AbilityHealOther extends Ability {
 			Quester other = MineQuest.getQuester((Player)entity);
 			if (other != null) {
 				if (player != null) {
-					if (MineQuest.isSpellCompEnabled()) {
-						player.getInventory().addItem(new ItemStack(325, 1));
-						player.updateInventory();
-					}
+					player.getInventory().addItem(new ItemStack(325, 1));
+					player.updateInventory();
 				}
 				if (other.getHealth() < other.getMaxHealth()) {
 					int min = config[0] + (int)(((double)config[1] / 100) * myclass.getCasterLevel());

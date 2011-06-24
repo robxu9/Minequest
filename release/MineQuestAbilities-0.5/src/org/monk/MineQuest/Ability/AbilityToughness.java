@@ -7,10 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.monksanctum.MineQuest.Ability.Ability;
-import org.monksanctum.MineQuest.Ability.DefendingAbility;
-import org.monksanctum.MineQuest.Ability.PassiveAbility;
-import org.monksanctum.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Quester.Quester;
 
 public class AbilityToughness extends Ability implements DefendingAbility, PassiveAbility {
 	private boolean damage;
