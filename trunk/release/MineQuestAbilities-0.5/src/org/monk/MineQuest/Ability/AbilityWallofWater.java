@@ -28,10 +28,9 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.monksanctum.MineQuest.MineQuest;
-import org.monksanctum.MineQuest.Ability.Ability;
-import org.monksanctum.MineQuest.Event.Absolute.BlockCDEvent;
-import org.monksanctum.MineQuest.Quester.Quester;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.Absolute.BlockCDEvent;
+import org.monk.MineQuest.Quester.Quester;
 
 public class AbilityWallofWater extends Ability {
 
@@ -75,11 +74,9 @@ public class AbilityWallofWater extends Ability {
 		int x, z;
 		int i;
 
-		if (MineQuest.isSpellCompEnabled()) {
-			player.getInventory().addItem(new ItemStack(325, 1));
-			player.getInventory().addItem(new ItemStack(325, 1));
-			player.updateInventory();
-		}
+		player.getInventory().addItem(new ItemStack(325, 1));
+		player.getInventory().addItem(new ItemStack(325, 1));
+		player.updateInventory();
 		
 		while (rot < 0) rot += 360;
 		

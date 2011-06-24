@@ -26,8 +26,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.monksanctum.MineQuest.Ability.Ability;
-import org.monksanctum.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Quester.Quester;
 
 public class AbilityBridge extends Ability {
 	public AbilityBridge() {

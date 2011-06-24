@@ -25,10 +25,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.monksanctum.MineQuest.MineQuest;
-import org.monksanctum.MineQuest.Ability.Ability;
-import org.monksanctum.MineQuest.Event.PoisonEvent;
-import org.monksanctum.MineQuest.Quester.Quester;
+import org.monk.MineQuest.MineQuest;
+import org.monk.MineQuest.Event.PoisonEvent;
+import org.monk.MineQuest.Quester.Quester;
 
 public class AbilityPoisonArrow extends Ability {
 	public AbilityPoisonArrow() {

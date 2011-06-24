@@ -27,8 +27,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import org.monksanctum.MineQuest.Ability.Ability;
-import org.monksanctum.MineQuest.Quester.Quester;
+import org.monk.MineQuest.Quester.Quester;
 
 public class AbilitySprint extends Ability {
 
