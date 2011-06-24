@@ -23,6 +23,7 @@ import org.bukkit.Chunk;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldListener;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Quester.NPCQuester;
 import org.monksanctum.MineQuest.Quester.Quester;
@@ -54,5 +55,10 @@ public class MineQuestWorldListener extends WorldListener{
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void onWorldUnload(WorldUnloadEvent event) {
+		MineQuest.log("World Unload Event");
 	}
 }

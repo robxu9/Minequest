@@ -76,6 +76,7 @@ import org.monksanctum.MineQuest.Event.Idle.IdleEvent;
 import org.monksanctum.MineQuest.Event.Relative.RelativeEvent;
 import org.monksanctum.MineQuest.Event.Target.TargetedEvent;
 import org.monksanctum.MineQuest.Quest.CanEdit.CanEdit;
+import org.monksanctum.MineQuest.Quest.Instance.NewChunkRegionLoader;
 import org.monksanctum.MineQuest.Quester.NPCMode;
 import org.monksanctum.MineQuest.Quester.NPCQuester;
 import org.monksanctum.MineQuest.Quester.Quester;
@@ -243,11 +244,9 @@ public class Quest {
 					Double.parseDouble(split[4]),
 					Float.parseFloat(split[5]),
 					Float.parseFloat(split[6]));
-			MineQuest.log("Adding NPC " + name);
 			npcs.add(new NPCQuester(name, NPCMode.QUEST_INVULNERABLE, world, location));
 			MineQuest.addQuester(npcs.get(npcs.size() - 1));
 			MineQuest.getQuester(name).setQuest(this, world);
-			MineQuest.log("Added " + name);
 		} else if (split[0].equals("NPCV")) {
 			String name = split[1];
 			Location location = new Location(world,
@@ -256,11 +255,9 @@ public class Quest {
 					Double.parseDouble(split[4]),
 					Float.parseFloat(split[5]),
 					Float.parseFloat(split[6]));
-			MineQuest.log("Adding NPC " + name);
 			npcs.add(new NPCQuester(name, NPCMode.QUEST_VULNERABLE, world, location));
 			MineQuest.addQuester(npcs.get(npcs.size() - 1));
 			MineQuest.getQuester(name).setQuest(this, world);
-			MineQuest.log("Added " + name);
 		} else if (split[0].equals("Target")) {
 			targets.add(Target.newTarget(split, this));
 		} else if (split[0].equals("Edit")) {
@@ -333,25 +330,27 @@ public class Quest {
 				MineQuest.log("Instances Full - Unable to Start Quest");
 				MineQuest.getEventQueue().addEvent(new MessageEvent(10, party, "Instances Full - Unable to Start Quest"));
 			}
-			split[2] = split[2] + i;
-			if (MineQuest.getSServer().getWorld(split[2]) == null) {
-				deleteDir(new File(split[2]));
-				copyDirectory(new File(split[3]), new File(split[2]));
+//			split[2] = split[2] + i;
+//			if (MineQuest.getSServer().getWorld(split[2]) == null) {
+//				deleteDir(new File(split[2]));
+//				copyDirectory(new File(split[3]), new File(split[2]));
 				world = null;
 //				if (MineQuest.getSServer().getWorld(split[2]) == null) {
 					if ((split.length == 4) || (split[4].equals("NORMAL"))) {
-						world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
+						world = NewChunkRegionLoader.createWorld(split[3], Environment.NORMAL, i);
+//						world = MineQuest.getSServer().createWorld(split[2], Environment.NORMAL);
 					} else {
-						world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
+						world = NewChunkRegionLoader.createWorld(split[3], Environment.NETHER, i);
+//						world = MineQuest.getSServer().createWorld(split[2], Environment.NETHER);
 					}
 //				}
-			} else {
-				boolean flag = false;
-				if ((split.length == 4) || (split[4].equals("NORMAL"))) {
-					flag = true;
-				}
-				copyWorld(split[3], split[2], flag);
-			}
+//			} else {
+//				boolean flag = false;
+//				if ((split.length == 4) || (split[4].equals("NORMAL"))) {
+//					flag = true;
+//				}
+//				copyWorld(split[3], split[2], flag);
+//			}
 		}
 	}
 

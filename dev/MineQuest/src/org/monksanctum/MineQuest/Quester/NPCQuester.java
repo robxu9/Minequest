@@ -981,7 +981,7 @@ public class NPCQuester extends Quester {
 				MineQuest.remQuester(this);
 				MineQuest.getNPCManager().despawn(name);
 //				NpcSpawner.RemoveBasicHumanNpc(this.entity);
-				MineQuest.log("NPC Died");
+//				MineQuest.log("NPC Died");
 				entity = null;
 				player = null;
 			} else {
