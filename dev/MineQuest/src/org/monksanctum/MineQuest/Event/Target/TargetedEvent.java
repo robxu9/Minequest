@@ -142,6 +142,18 @@ public abstract class TargetedEvent extends NormalEvent {
 			Target other = quest.getTarget(Integer.parseInt(split[6]));
 			
 			targetEvent = new NPCFollowEvent(delay, target, other);
+		} else if (split[3].equals("ArrowTargetEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Target other = quest.getTarget(Integer.parseInt(split[6]));
+			
+			targetEvent = new ArrowTargetEvent(delay, target, other);
+		} else if (split[3].equals("FireballTargetEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Target other = quest.getTarget(Integer.parseInt(split[6]));
+			
+			targetEvent = new FireballTargetEvent(delay, target, other);
 		} else if (split[3].equals("NPCSetAttackTargetEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));

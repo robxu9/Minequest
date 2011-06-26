@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -139,6 +140,7 @@ public class NPCQuester extends Quester {
 			classes.add(SkillClass.newShell(MineQuest.getNPCAttackType()));
 			classes.get(0).setQuester(this);
 			kills = new CreatureType[0];
+			destroyed = new HashMap<Material, Integer>();
 		}
 		distance = 0;
 		entity = null;
@@ -1170,9 +1172,11 @@ public class NPCQuester extends Quester {
 			my_chunk = center.getWorld().getChunkAt(center);
 		}
 		
-		if (my_chunk.getX() == chunk.getX()) {
-			if (my_chunk.getZ() == chunk.getZ()) {
-				return true;
+		if (my_chunk.getWorld().getName().equals(chunk.getWorld().getName())) {
+			if (my_chunk.getX() == chunk.getX()) {
+				if (my_chunk.getZ() == chunk.getZ()) {
+					return true;
+				}
 			}
 		}
 		

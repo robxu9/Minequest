@@ -272,6 +272,8 @@ public class MineQuest extends JavaPlugin {
 	public static boolean canCreate(Entity entity) {
 		String name = entity.getWorld().getName();
 		
+		if (spawning) return true;
+		
 		if (noMobs.contains(name)) {
 			return false;
 		}
@@ -1320,6 +1322,7 @@ public class MineQuest extends JavaPlugin {
 	private static int level_health;
 	private static int level_mana;
 	private static int mana_event;
+	private static boolean spawning;
 	
 	public MineQuest() {
 		heal_event = 0;
@@ -2123,5 +2126,9 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		return null;
+	}
+
+	public static void setSpawning(boolean b) {
+		spawning = b;
 	}
 }

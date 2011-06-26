@@ -360,6 +360,10 @@ public class Quester {
 		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'A', '" 
 				+ quest.getFile() + "')");
 		sendMessage("You now have access to the quest " + quest.getName());
+		
+		if (isModded()) {
+			sendMessage("MQ:AA:" + quest.toString());
+		}
 	}
 
 	public void addQuestCompleted(QuestProspect quest) {
@@ -367,6 +371,10 @@ public class Quester {
 		completed.add(quest);
 		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'C', '" 
 				+ quest.getFile() + "')");
+		
+		if (isModded()) {
+			sendMessage("MQ:AC:" + quest.toString());
+		}
 	}
 	
 	public void addReputation(String type, int amount) {
@@ -1082,9 +1090,10 @@ public class Quester {
 		poison_timer = 0;
 		if (reset && (before_quest != null)) {
 			try {
-				player.teleport(before_quest.getWorld().getSpawnLocation());
+//				player.teleport(before_quest.getWorld().getSpawnLocation());
 			} catch (Exception e) {
 			}
+			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(1000, this, before_quest.getWorld().getSpawnLocation()));
 			MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(2000, this, before_quest));
 		}
 		if (isModded()) {
@@ -1374,7 +1383,7 @@ public class Quester {
 			return name.equals(((HumanEntity)obj).getName());
 		}
 		if (obj instanceof String) {
-			return name.equals(obj);
+			return name.equals(obj) || getSName().equals(obj);
 		}
 		return super.equals(obj);
 	}
@@ -2235,11 +2244,19 @@ public class Quester {
 	public void remQuestAvailable(QuestProspect quest) {
 		available.remove(quest);
 		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='A' AND name='" + getSName() + "' AND file='" + quest.getFile() + "'");
+		
+		if (isModded()) {
+			sendMessage("MQ:RA:" + quest.toString());
+		}
 	}
 
 	public void remQuestComplete(QuestProspect quest) {
 		completed.remove(quest);
 		MineQuest.getSQLServer().update("DELETE FROM quests WHERE type='C' AND name='" + getSName() + "' AND file='" + quest.getFile() + "'");
+		
+		if (isModded()) {
+			sendMessage("MQ:RC:" + quest.toString());
+		}
 	}
 
 	public void respawn(PlayerRespawnEvent event) {
@@ -2397,6 +2414,20 @@ public class Quester {
 	public void setModded() {
 		modded_client = true;
 		updateMana();
+		updateQuests();
+	}
+
+	private void updateQuests() {
+		for (QuestProspect quest : available) {
+			if (isModded()) {
+				sendMessage("MQ:AA:" + quest.toString());
+			}
+		}
+		for (QuestProspect quest : completed) {
+			if (isModded()) {
+				sendMessage("MQ:AC:" + quest.toString());
+			}
+		}
 	}
 
 	public void setParty(Party party) {
@@ -2445,11 +2476,11 @@ public class Quester {
 			before_quest = player.getLocation();
 			
 			if (quest.getSpawn() != null) {
-				try {
-					player.teleport(quest.getSpawn());
-				} catch (Exception e) {
-				}
-				MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(1000, this, quest.getSpawn()));
+//				try {
+//					player.teleport(quest.getSpawn());
+//				} catch (Exception e) {
+//				}
+				MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(1, this, quest.getSpawn()));
 			}
 			clearKills();
 			clearDestroyed();
@@ -2496,7 +2527,9 @@ public class Quester {
 		}
 		for (Quester quester : party.getQuesterArray()) {
 			if (quester.isIdle(string)) {
-				sendMessage(quester.getName() + " has " + string + " in idle status");
+				if (!equals(quester)) {
+					sendMessage(quester.getName() + " has " + string + " in idle status");
+				}
 				quester.sendMessage("You already have " + string + " in idle status");
 				return;
 			}

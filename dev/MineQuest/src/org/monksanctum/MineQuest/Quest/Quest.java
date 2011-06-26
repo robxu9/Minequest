@@ -103,6 +103,7 @@ public class Quest {
 	private boolean reset;
 	private String edit_message;
 	private AreaPreserver areaPreserver;
+	private boolean no_mobs;
 	
 	public Quest(String filename, Party party) {
 		if (setupQuest(filename, party)) {
@@ -137,6 +138,7 @@ public class Quest {
 		this.filename = filename;
 		this.repeatable = false;
 		this.reset = true;
+		this.no_mobs = false;
 
 		edit_message = "A Mystical Force is keeping you from Modifying the world!";
 		try {
@@ -188,6 +190,10 @@ public class Quest {
 //					MineQuest.log(event.getName());
 //				}
 //			}
+			
+			if (no_mobs) {
+				MineQuest.noMobs(world);
+			}
 			
 			return true;
 		} catch (Exception e) {
@@ -268,6 +274,8 @@ public class Quest {
 			repeatable = Boolean.parseBoolean(split[1]);
 		} else if (split[0].equals("Reset")) {
 			reset = Boolean.parseBoolean(split[1]);
+		} else if (split[0].equals("NoMobs")) {
+			no_mobs = Boolean.parseBoolean(split[1]);
 		} else if (split[0].equals("EditMessage")) {
 			edit_message = split[1];
 		} else if (split[0].equals("AreaPreserve")) {
@@ -910,6 +918,10 @@ public class Quest {
 			
 			if (areaPreserver != null) {
 				areaPreserver.resetArea();
+			}
+			
+			if (no_mobs) {
+				MineQuest.yesMobs(world);
 			}
 			
 			return;

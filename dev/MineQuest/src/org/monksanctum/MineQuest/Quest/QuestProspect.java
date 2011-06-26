@@ -112,4 +112,9 @@ public class QuestProspect {
 		
 		return null;
 	}
+	
+	@Override
+	public String toString() {
+		return name + ":" + file + ":" + repeatable;
+	}
 }

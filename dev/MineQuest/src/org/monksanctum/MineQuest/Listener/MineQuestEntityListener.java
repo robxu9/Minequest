@@ -35,7 +35,7 @@ import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Mob.MQMob;
 
 public class MineQuestEntityListener extends EntityListener {
-	private int save_damage;
+//	private int save_damage;
 
 	@Override
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
@@ -109,29 +109,29 @@ public class MineQuestEntityListener extends EntityListener {
 	}
 	
 	private void endEvent(EntityDamageByEntityEvent evente) {
-		if (!(evente.getEntity() instanceof HumanEntity)) {
-			return;
-		}
-		if (!(evente.getDamager() instanceof HumanEntity)) {
-			return;
-		}
-		save_damage = evente.getDamage();
-		evente.setDamage(-1);
+//		if (!(evente.getEntity() instanceof HumanEntity)) {
+//			return;
+//		}
+//		if (!(evente.getDamager() instanceof HumanEntity)) {
+//			return;
+//		}
+//		save_damage = evente.getDamage();
+//		evente.setDamage(-1);
 	}
 
 	private boolean checkEvent(EntityDamageByEntityEvent evente) {
-		if (!(evente.getEntity() instanceof HumanEntity)) {
+//		if (!(evente.getEntity() instanceof HumanEntity)) {
 			return true;
-		}
-		if (!(evente.getDamager() instanceof HumanEntity)) {
-			return true;
-		}
-		if (evente.getDamage() != -1) {
-			return true;
-		}
-		evente.setDamage(save_damage);
-		
-		return false;
+//		}
+//		if (!(evente.getDamager() instanceof HumanEntity)) {
+//			return true;
+//		}
+//		if (evente.getDamage() != -1) {
+//			return true;
+//		}
+//		evente.setDamage(save_damage);
+//		
+//		return false;
 	}
 
 	@Override
