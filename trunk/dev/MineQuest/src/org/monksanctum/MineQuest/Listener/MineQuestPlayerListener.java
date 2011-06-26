@@ -820,6 +820,11 @@ public class MineQuestPlayerListener extends PlayerListener {
 			double distance;
 			List<Town> towns = MineQuest.getTowns();
 			
+			if (MineQuest.getQuester(player).inQuest()) {
+				player.sendMessage("You cannot do that inside a quest");
+				event.setCancelled(true);
+				return;
+			}
 			if (towns.size() == 0) {
 				player.sendMessage("There are no spawns - Contact your administrator");
 				event.setCancelled(true);

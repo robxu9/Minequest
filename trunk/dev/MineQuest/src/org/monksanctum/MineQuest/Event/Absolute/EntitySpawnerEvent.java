@@ -62,7 +62,9 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 			if (creatureType == null) {
 				MineQuest.log("Null CreatureType!!");
 			}
+			MineQuest.setSpawning(true);
 			entity = world.spawnCreature(location, creatureType);
+			MineQuest.setSpawning(false);
 			if (entity != null) {
 				if (superm) {
 					MineQuest.setMQMob(new SpecialMob((Monster)entity));

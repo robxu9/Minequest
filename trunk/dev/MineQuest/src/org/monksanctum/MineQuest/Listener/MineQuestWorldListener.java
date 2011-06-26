@@ -59,6 +59,5 @@ public class MineQuestWorldListener extends WorldListener{
 	
 	@Override
 	public void onWorldUnload(WorldUnloadEvent event) {
-		MineQuest.log("World Unload Event");
 	}
 }
