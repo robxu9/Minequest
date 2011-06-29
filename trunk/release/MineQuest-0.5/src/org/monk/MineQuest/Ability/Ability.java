@@ -427,7 +427,7 @@ public abstract class Ability {
 	 * 
 	 * @return
 	 */
-	public abstract List<ItemStack> getManaCost();
+	public abstract List<ItemStack> getSpellComps();
 	
 	/**
 	 * Get the name of the Ability
@@ -459,7 +459,7 @@ public abstract class Ability {
 	}
 	
 	public List<ItemStack> getRealManaCost() {
-		List<ItemStack> cost = getManaCost();
+		List<ItemStack> cost = getSpellComps();
 
 		int i;
 		for (i = 0; i < (getReqLevel() / 4); i++) {
@@ -504,6 +504,24 @@ public abstract class Ability {
 	 */
 	@SuppressWarnings("deprecation")
 	protected void giveManaCost(Player player) {
+		List<ItemStack> cost = getConfigManaCost();
+		int i;
+		
+		for (i = 0; i < cost.size(); i++) {
+			player.getInventory().addItem(cost.get(i));
+		}
+		player.updateInventory();
+		
+		myclass.expAdd(-getRealExperience());
+	}
+	
+	/**
+	 * Gives the casting cost back to the player.
+	 * 
+	 * @param player
+	 */
+	@SuppressWarnings("deprecation")
+	protected void giveCost(Player player) {
 		List<ItemStack> cost = getConfigManaCost();
 		int i;
 		

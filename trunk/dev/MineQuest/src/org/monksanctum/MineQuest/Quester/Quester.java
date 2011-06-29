@@ -50,6 +50,7 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -116,6 +117,7 @@ public class Quester {
 	protected CreatureType[] kills;
 	protected String last;
 	private String last_destroy;
+	private long last_msg;
 	protected int level;
 	protected int mana;
 	protected int max_health;
@@ -130,7 +132,6 @@ public class Quester {
 	protected int rep;
 	protected Map<String, Integer> reputation;
 	private List<Long> times = new ArrayList<Long>();
-	private long last_msg;
 
 	public Quester() {
 	}
@@ -344,6 +345,13 @@ public class Quester {
 		updateMana();
 	}
 
+	protected void addNewReputation(String type, int amount) {
+		MineQuest.getSQLServer().update(
+				"INSERT INTO reps (name, type, amount) VALUES('" + name
+						+ "', '" + type + "', '" + amount + "')");
+		reputation.put(type, amount);
+	}
+
 	public void addNPC(NPCQuester quester) {
 		npcParty.addQuester(quester);
 		if (!equals(quester.getFollow())) {
@@ -365,7 +373,7 @@ public class Quester {
 			sendMessage("MQ:AA:" + quest.toString());
 		}
 	}
-
+	
 	public void addQuestCompleted(QuestProspect quest) {
 		if (isCompleted(quest)) return;
 		completed.add(quest);
@@ -376,7 +384,7 @@ public class Quester {
 			sendMessage("MQ:AC:" + quest.toString());
 		}
 	}
-	
+
 	public void addReputation(String type, int amount) {
 		if (hasReputation(type)) {
 			setReputation(type, getReputation(type) + amount);
@@ -384,20 +392,6 @@ public class Quester {
 			addNewReputation(type, amount);
 		}
 		sendMessage("Congratulations your reputation with " + type + " is now " + getReputation(type));
-	}
-
-	protected void addNewReputation(String type, int amount) {
-		MineQuest.getSQLServer().update(
-				"INSERT INTO reps (name, type, amount) VALUES('" + name
-						+ "', '" + type + "', '" + amount + "')");
-		reputation.put(type, amount);
-	}
-
-	public void setReputation(String type, int amount) {
-		MineQuest.getSQLServer().update(
-				"UPDATE reps SET amount='" + amount + "' WHERE name='" + name
-						+ "' AND type='" + type + "'");
-		reputation.put(type, amount);
 	}
 
 	/**
@@ -429,7 +423,7 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	/**
 	 * Called whenever a Quester attacks any other entity.
 	 * 
@@ -539,7 +533,7 @@ public class Quester {
 			}
 		}
 	}
-
+	
 	/**
 	 * Determines which resource class a given block belongs to.
 	 * 
@@ -591,7 +585,7 @@ public class Quester {
 		}
 		return 4;
 	}
-	
+
 	public void callAbility() {
 		for (SkillClass skill : classes) {
 			if (skill.isAbilityItem(player.getItemInHand())){
@@ -671,7 +665,7 @@ public class Quester {
 		
 		return true;
 	}
-
+	
 	public boolean canCommand(String string) {
 		if (MineQuest.isPermissionsEnabled() && (player != null)) {
 			if (!MineQuest.getPermissions().has((Player) player, "MineQuest.Command." + string)) {
@@ -682,7 +676,7 @@ public class Quester {
 		
 		return true;
 	}
-	
+
 	public boolean canEdit(Block block) {
 		Town town = null;
 		if (block != null) {
@@ -758,7 +752,7 @@ public class Quester {
 
 		return true;
 	}
-
+	
 	public boolean canPay(long cost) {
 		if (getCubes() >= cost) {
 			setCubes(getCubes() - cost);
@@ -767,8 +761,8 @@ public class Quester {
 		
 		return false;
 	}
-    
-    public boolean canUse(ItemStack item) {
+
+	public boolean canUse(ItemStack item) {
 		boolean class_item = false;
 		boolean can_use = false;
 		for (String type : MineQuest.getFullClassNames()) {
@@ -798,8 +792,8 @@ public class Quester {
 		
 		return !class_item || can_use;
 	}
-	
-	public boolean canWear(ItemStack item) {
+    
+    public boolean canWear(ItemStack item) {
 		boolean class_armor = false;
 		boolean can_use = false;
 		for (String type : MineQuest.getFullClassNames()) {
@@ -829,7 +823,7 @@ public class Quester {
 		
 		return !class_armor || can_use;
     }
-
+	
 	private boolean checkDamage(DamageCause cause) {
         if (cause == DamageCause.FIRE) {
         	return checkDamage(24040);
@@ -930,7 +924,7 @@ public class Quester {
 			sendMessage("You are not proficient in the use of those leggings");
 		}
 	}
-	
+
 	public void checkIdle(IdleType type) {
 		for (IdleTask task : idles) {
 			if (task.getType() == type) {
@@ -949,6 +943,8 @@ public class Quester {
 	public boolean checkItemInHand() {
 		PlayerInventory inven = player.getInventory();
 		ItemStack item = player.getItemInHand();
+		
+		if ((item == null) || (item.getTypeId() == 0)) return false;
 
 		if (!canUse(item)) {
 			if (inven.firstEmpty() != -1) {
@@ -1084,7 +1080,7 @@ public class Quester {
 		
 		kills = new CreatureType[0];
 	}
-
+	
 	public void clearQuest(boolean reset) {
 		this.quest = null;
 		poison_timer = 0;
@@ -1101,14 +1097,14 @@ public class Quester {
 		}
 	}
 
-    public void completeQuest(QuestProspect quest) {
+	public void completeQuest(QuestProspect quest) {
 		addQuestCompleted(quest);
 		if (!quest.isRepeatable()) {
 			remQuestAvailable(quest);
 		}
 	}
 
-	/**
+    /**
 	 * Creates database entry for this quester with starting
 	 * classes and health.
 	 */
@@ -1188,7 +1184,7 @@ public class Quester {
 	public void debug() {
 		debug = !debug;
 	}
-	
+
 	/**
 	 * Called any time there is a generic damage event on 
 	 * the Quester.
@@ -1198,7 +1194,7 @@ public class Quester {
 	public void defend(EntityDamageEvent event) {
 		healthChange(event.getDamage(), event);
 	}
-
+	
 	/**
 	 * Called any time there is a damaged by block event
 	 * on the Quester.
@@ -1235,6 +1231,7 @@ public class Quester {
 		if ((event.getDamager() != null) && 
 				(!(event.getDamager() instanceof Player) && 
 				 checkDamage(event.getDamager().getEntityId()))) {
+			MineQuest.log("Cancelled!");
             event.setCancelled(true);
             return;
         }
@@ -1347,7 +1344,7 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	/**
 	 * Drops a Questers reputation by i.
 	 * 
@@ -1356,7 +1353,7 @@ public class Quester {
 	public void dropRep(int i) {
 		rep -= i;
 	}
-
+	
 	/**
 	 * Enable an ability with the given name.
 	 * 
@@ -1373,7 +1370,7 @@ public class Quester {
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Quester) {
@@ -1387,12 +1384,12 @@ public class Quester {
 		}
 		return super.equals(obj);
 	}
-
+	
 	public void expClassGain(int class_exp) {
 		this.class_exp += class_exp;
 	}
 
-    /**
+	/**
 	 * Adds i experience to Quester and checks for level
 	 * up.
 	 * 
@@ -1404,12 +1401,8 @@ public class Quester {
 			levelUp();
 		}
 	}
-	
-	public boolean hasReputation(String type) {
-		return (reputation.get(type) != null);
-	}
 
-	public Ability getAbility(String ability) {
+    public Ability getAbility(String ability) {
 		for (SkillClass skill : classes) {
 			if (skill != null) {
 				if (skill.getAbility(ability) != null) {
@@ -1419,7 +1412,7 @@ public class Quester {
 		}
 		return null;
 	}
-
+	
 	public List<QuestProspect> getAvailableQuests() {
 		return available;
 	}
@@ -1600,11 +1593,11 @@ public class Quester {
 	public int getLevel() {
 		return level;
 	}
-	
+
 	public int getMana() {
 		return mana;
 	}
-	
+
 	/**
 	 * Returns maximum health of Quester.
 	 * 
@@ -1621,7 +1614,7 @@ public class Quester {
 	public int getMaxMana() {
 		return max_mana;
 	}
-
+	
 	/**
 	 * Returns name of Quester.
 	 * @return
@@ -1633,7 +1626,7 @@ public class Quester {
 	public Party getParty() {
 		return party;
 	}
-	
+
 	/**
 	 * Returns player that the Quester wraps.
 	 * 
@@ -1642,11 +1635,11 @@ public class Quester {
 	public Player getPlayer() {
 		return player;
 	}
-
+	
 	public Quest getQuest() {
 		return quest;
 	}
-
+	
 	private QuestProspect getQuestProspect(String string) {
 		for (QuestProspect qp : available) {
 			if (qp.equals(string)) {
@@ -1661,11 +1654,11 @@ public class Quester {
 		
 		return null;
 	}
-	
+
 	public int getReputation(String type) {
 		return reputation.get(type);
 	}
-	
+
 	/**
 	 * Returns SQL name of Quester.
 	 * @return
@@ -1673,7 +1666,7 @@ public class Quester {
 	public String getSName() {
 		return name;
 	}
-
+	
 	/**
 	 * Returns last town player was near.
 	 * 
@@ -1682,11 +1675,15 @@ public class Quester {
 	public Town getTown() {
 		return MineQuest.getTown(last);
 	}
-
+	
 	public boolean hasQuester(Quester quester) {
 		return npcParty.getQuesters().contains(quester);
 	}
-	
+
+	public boolean hasReputation(String type) {
+		return (reputation.get(type) != null);
+	}
+
 	/**
 	 * Called any time a Quester is taking damage of any time
 	 * it adjusts the Quester's health accordingly and sets
@@ -1702,7 +1699,8 @@ public class Quester {
 		if (player == null) return false;
 		int newHealth;
                 
-        if (checkDamage(event.getCause())) {
+        if (checkDamage(event.getCause()) && !(event instanceof EntityDamageByEntityEvent)) {
+        	MineQuest.log("Class: " + event.getEntity().getClass());
         	event.setCancelled(true);
         	return false;
         }
@@ -1728,14 +1726,17 @@ public class Quester {
         entitytracker.b(pl, new Packet18ArmAnimation(pl, 2));
         pl.world.a(pl, (byte) 2);
         
-        if (player.getHealth() >= newHealth) {
+        if (player.getHealth() > newHealth) {
         	event.setDamage(player.getHealth() - newHealth);
+        	MineQuest.log("Difference damage set - " + (player.getHealth() - newHealth));
         } else {
         	if (player.getHealth() < 20) {
         		player.setHealth(player.getHealth() + 1);
         		event.setDamage(1);
+        		MineQuest.log("Damage set to 1");
         	} else {
         		event.setDamage(0);
+        		MineQuest.log("Damage set to 0");
         	}
         }
 
@@ -1745,11 +1746,13 @@ public class Quester {
 
         return false;
     }
-
+	
 	public boolean healthIncrease(PlayerInteractEvent event) {
 		if (!MineQuest.mqDamageEnabled(this)) return false;
 		if (event.getItem() == null) return false;
 		Material type = event.getItem().getType();
+		
+		if (type == null) return false;
 		
 		switch (type) {
 		case GRILLED_PORK:
@@ -1851,7 +1854,7 @@ public class Quester {
 	public boolean isDebug() {
 		return debug;
 	}
-	
+
 	/**
 	 * Returns true if MineQuest is enabled for this
 	 * Quester.
@@ -2106,6 +2109,15 @@ public class Quester {
 		checkIdle(IdleType.AREA);
 	}
 	
+	public void notify(String message) {
+		Calendar now = Calendar.getInstance();
+		
+		if ((now.getTimeInMillis() - last_msg) > 2000) {
+			last_msg = now.getTimeInMillis();
+			sendMessage(message);
+		}		
+	}
+	
 	/**
 	 * Called each time the player is poisoned.
 	 * Updates the poison counter appropriately.
@@ -2202,6 +2214,14 @@ public class Quester {
 		return mana;
 	}
 
+	public void regain(EntityRegainHealthEvent event) {
+		health += event.getAmount();
+		
+		updateHealth();
+		
+		event.setAmount(0);
+	}
+	
 	public void regroup() {
 		for (Quester quester : npcParty.getQuesterArray()) {
 			((NPCQuester)quester).setTarget((LivingEntity)null);
@@ -2209,7 +2229,7 @@ public class Quester {
 
 		sendMessage("Regrouping Mercenaries!");
 	}
-	
+
 	public void remIdle(IdleTask idleTask) {
 		boolean flag = false;
 		
@@ -2415,19 +2435,7 @@ public class Quester {
 		modded_client = true;
 		updateMana();
 		updateQuests();
-	}
-
-	private void updateQuests() {
-		for (QuestProspect quest : available) {
-			if (isModded()) {
-				sendMessage("MQ:AA:" + quest.toString());
-			}
-		}
-		for (QuestProspect quest : completed) {
-			if (isModded()) {
-				sendMessage("MQ:AC:" + quest.toString());
-			}
-		}
+		updateAbilities();
 	}
 
 	public void setParty(Party party) {
@@ -2450,7 +2458,7 @@ public class Quester {
 		}
 		this.party = party;
 	}
-	
+
 	/**
 	 * Sets the reference to the Player.
 	 * 
@@ -2488,6 +2496,13 @@ public class Quester {
 		if ((quest != null) && isModded()) {
 			sendMessage("MQ:Quest:" + quest.getProspect().getName());
 		}
+	}
+	
+	public void setReputation(String type, int amount) {
+		MineQuest.getSQLServer().update(
+				"UPDATE reps SET amount='" + amount + "' WHERE name='" + name
+						+ "' AND type='" + type + "'");
+		reputation.put(type, amount);
 	}
 
 	public void spendClassExp(String type, int amount) {
@@ -2741,6 +2756,12 @@ public class Quester {
 		updateHealth();
 	}
 
+	private void updateAbilities() {
+		for (SkillClass skill : classes) {
+			skill.updateAbilities();
+		}
+	}
+
 	public void updateBinds() {
 		ResultSet results;
 		try {
@@ -2809,12 +2830,16 @@ public class Quester {
 		}
 	}
 
-	public void notify(String message) {
-		Calendar now = Calendar.getInstance();
-		
-		if ((now.getTimeInMillis() - last_msg) > 2000) {
-			last_msg = now.getTimeInMillis();
-			sendMessage(message);
-		}		
+	private void updateQuests() {
+		for (QuestProspect quest : available) {
+			if (isModded()) {
+				sendMessage("MQ:AA:" + quest.toString());
+			}
+		}
+		for (QuestProspect quest : completed) {
+			if (isModded()) {
+				sendMessage("MQ:AC:" + quest.toString());
+			}
+		}
 	}
 }

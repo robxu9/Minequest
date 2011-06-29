@@ -27,6 +27,7 @@ import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
@@ -62,7 +63,7 @@ public class MineQuestEntityListener extends EntityListener {
 			if (checkEvent(evente)) {
 	            if (evente.getDamager() instanceof HumanEntity) {
 	                MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
-	            }
+	            } 
 	            if (!event.isCancelled()) {
 		            if (event.getEntity() instanceof HumanEntity) {
 		                MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
@@ -77,8 +78,12 @@ public class MineQuestEntityListener extends EntityListener {
 		            	}
 		            }
 	            }
+	            if (event instanceof EntityDamageByProjectileEvent) {
+	            	((EntityDamageByProjectileEvent)event).setBounce(false);
+	            }
 	            endEvent(evente);
 			}
+			
 			return;
 		}
 		

@@ -44,6 +44,13 @@ public abstract class TargetedEvent extends NormalEvent {
 					Double.parseDouble(split[7]), Double.parseDouble(split[8]));
 			
 			targetEvent = new SetVelocityEvent(delay, target, velocity);
+		} else if (split[3].equals("SetVehicleVelocityEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			Vector velocity = new Vector(Double.parseDouble(split[6]), 
+					Double.parseDouble(split[7]), Double.parseDouble(split[8]));
+			
+			targetEvent = new SetVehicleVelocityEvent(delay, target, velocity);
 		} else if (split[3].equals("NPCEnterBoat")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
@@ -131,6 +138,19 @@ public abstract class TargetedEvent extends NormalEvent {
 			Target target = quest.getTarget(Integer.parseInt(split[5]));
 			
 			targetEvent = new StartQuestEvent(delay, target, split[6]);
+		} else if (split[3].equals("AdvancedStartQuestEvent")) {
+			long delay = Long.parseLong(split[4]);
+			Target target = quest.getTarget(Integer.parseInt(split[5]));
+			String[] reqs = split[6].split(",");
+			int i;
+			
+			for (i = 0; i < reqs.length; i++) {
+				if (reqs[i].equals("null")) {
+					reqs[i] = null;
+				}
+			}
+			
+			targetEvent = new AdvancedStartQuestEvent(delay, target, reqs, split[7].split(","));
 		} else if (split[3].equals("MessageEvent")) {
 			long delay = Long.parseLong(split[4]);
 			Target target = quest.getTarget(Integer.parseInt(split[5]));

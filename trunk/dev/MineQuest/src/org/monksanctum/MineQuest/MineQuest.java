@@ -1131,7 +1131,7 @@ public class MineQuest extends JavaPlugin {
 	 * @param manaCost Spell Components
 	 * @return Reduced Spell Components
 	 */
-	private static List<ItemStack> reduce(List<ItemStack> manaCost) {
+	public static List<ItemStack> reduce(List<ItemStack> manaCost) {
 		List<ItemStack> ret = new ArrayList<ItemStack>();
 		boolean flag;
 		
@@ -1585,6 +1585,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_TARGET, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_REGAIN_HEALTH, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);

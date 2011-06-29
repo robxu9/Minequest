@@ -84,9 +84,9 @@ public class BServer {
         return mcServer.worlds;
     }
 
-    public int getSpawnProtationRadius(){
-        return mcServer.spawnProtection;
-    }
+//    public int getSpawnProtationRadius(){
+//        return mcServer.spawnProtection;
+//    }
 
 //    public EntityTracker getEntityTracker(){
 //        return mcServer..tracker;
