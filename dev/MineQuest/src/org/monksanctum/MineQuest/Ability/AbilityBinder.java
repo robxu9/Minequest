@@ -94,4 +94,9 @@ public class AbilityBinder extends Ability {
 	public String getSkillClass() {
 		return null;
 	}
+
+	@Override
+	public int getIconLoc() {
+		return 255;
+	}
 }

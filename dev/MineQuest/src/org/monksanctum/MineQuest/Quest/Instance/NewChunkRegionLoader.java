@@ -38,7 +38,6 @@ import org.monksanctum.MineQuest.MineQuest;
  */
 public class NewChunkRegionLoader extends ChunkRegionLoader {
 	
-	@SuppressWarnings("unused")
 	public static CraftWorld createWorld(String name, Environment environment, int instance) {
 		long seed = (new Random()).nextLong();
 		ChunkGenerator generator = null;

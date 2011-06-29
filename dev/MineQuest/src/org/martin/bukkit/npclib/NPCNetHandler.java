@@ -26,8 +26,6 @@ import net.minecraft.server.Packet9Respawn;
 
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.Player;
-import org.monksanctum.MineQuest.MineQuest;
 
 /**
  *
@@ -38,7 +36,6 @@ public class NPCNetHandler extends NetServerHandler {
     public NPCNetHandler(MinecraftServer minecraftserver, NetworkManager networkmanager, EntityPlayer entityplayer) {
         super(minecraftserver, networkmanager, entityplayer);
     }
-
     @Override
     public CraftPlayer getPlayer() {
         return null;

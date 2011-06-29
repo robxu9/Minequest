@@ -273,6 +273,7 @@ public abstract class Ability {
 		
 		return null;
 	}
+	
 	protected int bind;
 	//	private static List<Class> abil_classes;
 	protected int config[];
@@ -281,7 +282,6 @@ public abstract class Ability {
 	protected boolean enabled;
 	protected long last_msg;
 	private int lookBind;
-	
 	protected SkillClass myclass;
 	
 	protected long time;
@@ -391,11 +391,11 @@ public abstract class Ability {
 	public int getCastTime() {
 		return 0;
 	}
-
+	
 	protected int[] getConfig() {
 		return config;
 	}
-	
+
 	public List<ItemStack> getConfigSpellComps() {
 		return cost;
 	}
@@ -504,7 +504,7 @@ public abstract class Ability {
 	 * @return
 	 */
 	public abstract List<ItemStack> getSpellComps();
-
+	
 	/**
 	 * Gives the casting cost back to the player.
 	 * 
@@ -529,7 +529,7 @@ public abstract class Ability {
 			giveManaCost(player);
 		}
 	}
-	
+
 	private void giveManaCost(Player player) {
 		MineQuest.getQuester(player).addMana(getRealManaCost());
 	}
@@ -571,7 +571,7 @@ public abstract class Ability {
 	public boolean isLookBound(ItemStack itemStack) {
 		return (lookBind == itemStack.getTypeId());
 	}
-
+	
 	/**
 	 * This was used to determine if entities are part of type
 	 * for purge spells.
@@ -596,7 +596,7 @@ public abstract class Ability {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Determines if player and baseEntity are within radius distance
 	 * of each other.
@@ -609,7 +609,7 @@ public abstract class Ability {
 	protected boolean isWithin(LivingEntity player, LivingEntity baseEntity, int radius) {
 		return MineQuest.distance(player.getLocation(), baseEntity.getLocation()) < radius;
 	}
-
+	
 	/**
 	 * Bind to left click of item.
 	 * 
@@ -695,7 +695,7 @@ public abstract class Ability {
 	public void parseClick(Quester quester, Block block) {
 		useAbility(quester, block.getLocation(), null);
 	}
-	
+
 	/**
 	 * Moves all entities of given type outside of the distance specified
 	 * from the entity passed. 
@@ -717,7 +717,7 @@ public abstract class Ability {
 		}
 		
 	}
-
+	
 	public void setActive(boolean active) {
 		this.enabled = active;
 	}
@@ -729,7 +729,7 @@ public abstract class Ability {
 	public void setConfigSpellComps(List<ItemStack> cost) {
 		this.cost = cost;
 	}
-	
+
 	public void setSkillClass(SkillClass skillclass) {
 		this.myclass = skillclass;
 		if (skillclass != null) {
@@ -737,7 +737,7 @@ public abstract class Ability {
 			config = MineQuest.getAbilityConfiguration().getConfig(getName());
 		}
 	}
-
+	
 	public void silentBind(Quester quester, ItemStack itemStack) {
 		bind = itemStack.getTypeId();
 		lookBind = -1;
@@ -757,6 +757,33 @@ public abstract class Ability {
 		lookBind = -1;
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getSName() + "'");
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getSName() + "'");
+	}
+
+	@Override
+	public String toString() {
+		String spellComps = new String();
+		List<ItemStack> reduced = MineQuest.reduce(getConfigSpellComps());
+		
+		if (reduced.size() > 0) {
+			spellComps = reduced.get(0).getTypeId() + "-" + reduced.get(0).getAmount();
+			int i;
+			
+			for (i = 1; i < reduced.size(); i++) {
+				spellComps = spellComps + "," + 
+								reduced.get(i).getTypeId() + "-" + 
+								reduced.get(i).getAmount();
+			}
+		}
+		
+		if (spellComps.length() > 0) {
+			return getName() + ":" + spellComps + ":" + getRealManaCost();
+		} else {
+			return getName() + ":" + getRealManaCost();
+		}
+	}
+	
+	public String toBindString() {
+		return "MQ:Bind:" + getName() + ":" + bind + ":" + lookBind + ":" + MineQuest.getAbilityConfiguration().getIconLocation(getName());
 	}
 	
 	/**
@@ -817,4 +844,6 @@ public abstract class Ability {
 			}
 		}
 	}
+
+	public abstract int getIconLoc();
 }

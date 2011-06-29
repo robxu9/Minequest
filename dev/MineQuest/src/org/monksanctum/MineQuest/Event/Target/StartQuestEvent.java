@@ -19,6 +19,10 @@ public class StartQuestEvent extends TargetedEvent {
 	
 	@Override
 	public void activate(EventParser eventParser) {
+		startQuest(quest, target);
+	}
+	
+	public void startQuest(String quest, Target target) {
 		Party party = new Party();
 		
 		for (Quester quester : target.getTargets()) {

@@ -81,7 +81,7 @@ public class AbilityBinder extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		return new ArrayList<ItemStack>();
 	}
 

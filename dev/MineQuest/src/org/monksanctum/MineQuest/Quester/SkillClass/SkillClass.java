@@ -904,4 +904,13 @@ public class SkillClass {
 		}
 	}
 
+	public void updateAbilities() {
+		for (Ability ability : ability_list) {
+			if (ability != null) {
+				quester.sendMessage("MQ:Ability:" + ability.toString());
+				quester.sendMessage(ability.toBindString());
+			}
+		}
+	}
+
 }

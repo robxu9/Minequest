@@ -1487,7 +1487,7 @@ public class Quester {
 		int newHealth;
                 
         if (checkDamage(event.getCause())) {
-        	event.setCancelled(true);
+        	event.setDamage(0);
         	return false;
         }
 
