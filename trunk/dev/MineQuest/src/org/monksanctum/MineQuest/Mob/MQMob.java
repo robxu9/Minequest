@@ -102,7 +102,11 @@ public class MQMob {
 		if ((entity.getHealth() - i) <= 0) {
 			dead = true;
 		}
-		entity.damage(i, source.getPlayer());
+		if (source != null) {
+			entity.damage(i, source.getPlayer());
+		} else {
+			entity.damage(i, null);
+		}
 	}
 
 	public boolean isSpawned() {

@@ -320,6 +320,9 @@ public abstract class Ability {
 							+ bind + "', '" + bind + "')");
 			quester.sendMessage(getName() + " is now bound to "
 					+ item.getTypeId());
+			if (quester.isModded()) {
+				quester.sendMessage(toBindString());
+			}
 		}
 	}
 	
@@ -392,7 +395,7 @@ public abstract class Ability {
 		return 0;
 	}
 	
-	protected int[] getConfig() {
+	public int[] getConfig() {
 		return config;
 	}
 
@@ -416,7 +419,7 @@ public abstract class Ability {
 	 * 
 	 * @return
 	 */
-	int getExp() {
+	public int getExp() {
 		return 30;
 	}
 	
@@ -626,6 +629,9 @@ public abstract class Ability {
 							+ "', '" + lookBind + "', '" + lookBind + "')");
 			quester.sendMessage(getName() + " is now look bound to "
 					+ item.getTypeId());
+			if (quester.isModded()) {
+				quester.sendMessage(toBindString());
+			}
 		}
 	}
 
@@ -712,7 +718,7 @@ public abstract class Ability {
 		for (i = 0; i < entities.size(); i++) {
 			if (isType(entities.get(i), type)) {
 				moveOut(player, entities.get(i), distance);
-				MineQuest.getMob(entities.get(i)).damage(1, MineQuest.getQuester(player));
+				MineQuest.damage(entities.get(i), 1, MineQuest.getQuester(player));
 			}
 		}
 		
@@ -796,6 +802,9 @@ public abstract class Ability {
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='" + getName() + "' AND name='" + quester.getSName() + "'");
 		MineQuest.getSQLServer().update("DELETE FROM binds WHERE abil='LOOK:" + getName() + "' AND name='" + quester.getSName() + "'");
 		quester.sendMessage(getName() + " is now unbound");
+		if (quester.isModded()) {
+			quester.sendMessage(toBindString());
+		}
 	}
 
 	/**

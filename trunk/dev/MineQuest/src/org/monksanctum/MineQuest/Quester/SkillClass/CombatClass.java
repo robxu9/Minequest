@@ -22,6 +22,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Configuration.CombatClassConfig;
 import org.monksanctum.MineQuest.Quester.Quester;
 
 public class CombatClass extends SkillClass {

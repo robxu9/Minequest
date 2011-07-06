@@ -8,8 +8,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Quester.Quester;
+import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Ability.Ability;
+import org.monksanctum.MineQuest.Quester.Quester;
 
 public class AbilityPickPocket extends Ability {
 	
@@ -24,14 +25,14 @@ public class AbilityPickPocket extends Ability {
 		if (quester == null) return;
 		if (entity == null) {
 			quester.sendMessage("Must be cast on a target");
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 			return;
 		}
 		
 		if (!(entity instanceof Player)) {
 			quester.sendMessage("You cannot Pick Pocket a " + 
 					Quester.getCreatureName(entity.getClass().toString()));
-			giveManaCost(quester.getPlayer());
+			giveCost(quester.getPlayer());
 		} else {
 			int ch = config[0] + config[1] * myclass.getCasterLevel();
 			double chance = ((double)ch) / 100;
@@ -62,7 +63,7 @@ public class AbilityPickPocket extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(Material.BONE, 1));
@@ -86,6 +87,11 @@ public class AbilityPickPocket extends Ability {
 	@Override
 	public String getSkillClass() {
 		return "Rogue";
+	}
+
+	@Override
+	public int getIconLoc() {
+		return 45;
 	}
 
 }

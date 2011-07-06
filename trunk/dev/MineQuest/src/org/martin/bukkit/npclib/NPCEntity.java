@@ -50,16 +50,16 @@ public class NPCEntity extends EntityPlayer {
 
     public void animateArmSwing() {
 //        this.b.tracker.a(this, new Packet18ArmAnimation(this, 1));
-        EntityTracker entitytracker = this.b.b(this.dimension);
+        EntityTracker entitytracker = this.b.getTracker(this.dimension);
 
-        entitytracker.b(this, new Packet18ArmAnimation(this, 1));
+        entitytracker.a(this, new Packet18ArmAnimation(this, 1));
     }
 
     public void actAsHurt(){
 //        this.b.tracker.a(this, new Packet18ArmAnimation(this, 2));
-        EntityTracker entitytracker = this.b.b(this.dimension);
+        EntityTracker entitytracker = this.b.getTracker(this.dimension);
 
-        entitytracker.b(this, new Packet18ArmAnimation(this, 2));
+        entitytracker.a(this, new Packet18ArmAnimation(this, 2));
     }
 
     @Override
@@ -100,18 +100,6 @@ public class NPCEntity extends EntityPlayer {
         lastBounceId = entity.id;
 
         super.c(entity);
-    }
-
-    @Override
-    public void a(Entity entity) {
-//        System.out.println(entity);
-        super.a(entity);
-    }
-
-    @Override
-    public void a(EntityLiving entityliving) {
-//        System.out.println(entityliving);
-        super.a(entityliving);
     }
 
     @Override

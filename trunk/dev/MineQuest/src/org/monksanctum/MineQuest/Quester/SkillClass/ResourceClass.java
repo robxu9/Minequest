@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Ability.Ability;
 import org.monksanctum.MineQuest.Ability.BreakingAbility;
+import org.monksanctum.MineQuest.Configuration.ResourceClassConfig;
 import org.monksanctum.MineQuest.Quester.Quester;
 
 public class ResourceClass extends SkillClass {

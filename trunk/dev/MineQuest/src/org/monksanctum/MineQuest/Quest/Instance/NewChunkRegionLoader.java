@@ -27,7 +27,6 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.util.LongHashtable;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.generator.ChunkGenerator;
 import org.monksanctum.MineQuest.MineQuest;
 
 /**
@@ -40,29 +39,28 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
 	
 	public static CraftWorld createWorld(String name, Environment environment, int instance) {
 		long seed = (new Random()).nextLong();
-		ChunkGenerator generator = null;
         File folder = new File(name);
-        CraftWorld world = (CraftWorld) MineQuest.getSServer().getWorld(name + instance);
+        CraftWorld world = (CraftWorld) MineQuest.getSServer().getWorld(name);
 
-        if (world != null) {
-        	((NewChunkRegionLoader)world.getHandle().p().a(world.getHandle().worldProvider)).reloadChunks(world.getHandle(), name + instance);
-            return world;
-        }
+		if (world != null) {
+			((NewChunkRegionLoader) world.getHandle().p().a(world.getHandle().worldProvider)).reloadChunks(world.getHandle(), name + instance);
+			return world;
+		}
 
         if ((folder.exists()) && (!folder.isDirectory())) {
             throw new IllegalArgumentException("File exists with the name '" + name + "' and isn't a folder");
         }
 
-        MinecraftServer console = ((CraftServer)MineQuest.getSServer()).getServer();
         Convertable converter = new WorldLoaderServer(folder);
+        MinecraftServer console = ((CraftServer)MineQuest.getSServer()).getServer();
         if (converter.isConvertable(name)) {
-        	MineQuest.getSServer().getLogger().info("Converting world '" + name + "'");
+            MineQuest.log("Converting world '" + name + "'");
             converter.convert(name, new ConvertProgressUpdater(console));
         }
 
         int dimension = 200 + console.worlds.size();
-        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name + instance, dimension, seed, environment, generator);
-        internal.z = console.worlds.get(0).z;
+        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name, dimension, seed, environment, null);
+        internal.worldMaps = console.worlds.get(0).worldMaps;
 
         internal.tracker = new EntityTracker(console, dimension);
         internal.addIWorldAccess((IWorldAccess) new WorldManager(console, internal));
@@ -70,11 +68,8 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
         internal.setSpawnFlags(true, true);
         console.worlds.add(internal);
 
-        if (generator != null) {
-            internal.getWorld().getPopulators().addAll(generator.getDefaultPopulators(internal.getWorld()));
-        }
-
         MineQuest.getSServer().getPluginManager().callEvent(new WorldInitEvent(internal.getWorld()));
+        System.out.print("Preparing start region for level " + (console.worlds.size() -1) + " (Seed: " + internal.getSeed() + ")");
 
         short short1 = 196;
         long i = System.currentTimeMillis();
@@ -102,9 +97,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
                 }
             }
         }
-        
         MineQuest.getSServer().getPluginManager().callEvent(new WorldLoadEvent(internal.getWorld()));
-        
         return internal.getWorld();
 	}
 
@@ -184,5 +177,5 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
             }
         }
 	}
-
+//
 }

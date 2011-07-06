@@ -1,9 +1,9 @@
 package org.monksanctum.MineQuest.Quest.Idle;
 
 import org.bukkit.entity.CreatureType;
+import org.monksanctum.MineQuest.Configuration.SkillClassConfig;
 import org.monksanctum.MineQuest.Quest.QuestProspect;
 import org.monksanctum.MineQuest.Quester.Quester;
-import org.monksanctum.MineQuest.Quester.SkillClass.SkillClassConfig;
 
 public class KillIdleTask extends IdleTask {
 

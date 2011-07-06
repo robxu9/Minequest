@@ -1,8 +1,11 @@
 package org.monksanctum.MineQuest.Quest.Instance;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -10,6 +13,7 @@ import net.minecraft.server.CompressedStreamTools;
 import net.minecraft.server.EntityHuman;
 import net.minecraft.server.IChunkLoader;
 import net.minecraft.server.IDataManager;
+import net.minecraft.server.MinecraftException;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.PlayerFileData;
 import net.minecraft.server.RegionFileCache;
@@ -27,6 +31,7 @@ public class NewServerNBTManager implements PlayerFileData, IDataManager {
 
 	private File instance;
 	private String name;
+
 	public NewServerNBTManager(File file, int instance, String s, boolean flag) {
         b = new File(file, s);
         b.mkdirs();
@@ -61,62 +66,6 @@ public class NewServerNBTManager implements PlayerFileData, IDataManager {
             return new NewChunkRegionLoader(instance, file);
         }
     }
-    
-    
-    
-    @Override
-    public void b() {
-    }
-
-    private void f()
-    {
-    }
-
-    protected File a()
-    {
-        return b;
-    }
-
-    public WorldData c()
-    {
-        File file = new File(b, "level.dat");
-        if(file.exists())
-        {
-            try
-            {
-                NBTTagCompound nbttagcompound = CompressedStreamTools.a(new FileInputStream(file));
-                NBTTagCompound nbttagcompound2 = nbttagcompound.k("Data");
-            	WorldData ret = new WorldData(nbttagcompound2);
-            	
-            	ret.name = name;
-            	
-            	return ret;
-            }
-            catch(Exception exception)
-            {
-                exception.printStackTrace();
-            }
-        }
-        file = new File(b, "level.dat_old");
-        if(file.exists())
-        {
-            try
-            {
-                NBTTagCompound nbttagcompound1 = CompressedStreamTools.a(new FileInputStream(file));
-                NBTTagCompound nbttagcompound3 = nbttagcompound1.k("Data");
-            	WorldData ret = new WorldData(nbttagcompound3);
-            	
-            	ret.name = name;
-            	
-            	return ret;
-            }
-            catch(Exception exception1)
-            {
-                exception1.printStackTrace();
-            }
-        }
-        return null;
-    }
 
     public void a(WorldData worlddata, @SuppressWarnings("rawtypes") List list)
     {
@@ -149,6 +98,98 @@ public class NewServerNBTManager implements PlayerFileData, IDataManager {
         {
             exception.printStackTrace();
         }
+    }
+
+    private void f()
+    {
+        try
+        {
+            File file = new File(b, "session.lock");
+            DataOutputStream dataoutputstream = new DataOutputStream(new FileOutputStream(file));
+            try
+            {
+                dataoutputstream.writeLong(e);
+            }
+            finally
+            {
+                dataoutputstream.close();
+            }
+        }
+        catch(IOException ioexception)
+        {
+            ioexception.printStackTrace();
+            throw new RuntimeException("Failed to check session lock, aborting");
+        }
+    }
+
+    protected File a()
+    {
+        return b;
+    }
+
+    public void b()
+    {
+        try
+        {
+            File file = new File(b, "session.lock");
+            DataInputStream datainputstream = new DataInputStream(new FileInputStream(file));
+            try
+            {
+                if(datainputstream.readLong() != e)
+                {
+                    throw new MinecraftException("The save is being accessed from another location, aborting");
+                }
+            }
+            finally
+            {
+                datainputstream.close();
+            }
+        }
+        catch(IOException ioexception)
+        {
+            throw new MinecraftException("Failed to check session lock, aborting");
+        }
+    }
+
+    public WorldData c()
+    {
+        File file = new File(b, "level.dat");
+        if(file.exists())
+        {
+            try
+            {
+                NBTTagCompound nbttagcompound = CompressedStreamTools.a(new FileInputStream(file));
+                NBTTagCompound nbttagcompound2 = nbttagcompound.k("Data");
+                WorldData ret = new WorldData(nbttagcompound2);
+                
+                ret.name = name;
+                
+                return ret;
+            }
+            catch(Exception exception)
+            {
+                exception.printStackTrace();
+            }
+        }
+        file = new File(b, "level.dat_old");
+        if(file.exists())
+        {
+            try
+            {
+                NBTTagCompound nbttagcompound1 = CompressedStreamTools.a(new FileInputStream(file));
+                NBTTagCompound nbttagcompound3 = nbttagcompound1.k("Data");
+                WorldData ret = new WorldData(nbttagcompound3);
+                
+                ret.name = name;
+                
+                return ret;
+            }
+            catch(Exception exception1)
+            {
+                exception1.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public void a(WorldData worlddata)
@@ -245,5 +286,6 @@ public class NewServerNBTManager implements PlayerFileData, IDataManager {
     private final File b;
     private final File c;
     private final File d;
+    private final long e = System.currentTimeMillis();
 
 }

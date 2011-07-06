@@ -37,6 +37,7 @@ import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Ability.Ability;
 import org.monksanctum.MineQuest.Ability.DefendingAbility;
 import org.monksanctum.MineQuest.Ability.TargetDefendAbility;
+import org.monksanctum.MineQuest.Configuration.SkillClassConfig;
 import org.monksanctum.MineQuest.Quester.Quester;
 
 /**
