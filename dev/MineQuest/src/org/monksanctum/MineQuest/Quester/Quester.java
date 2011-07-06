@@ -1700,7 +1700,6 @@ public class Quester {
 		int newHealth;
                 
         if (checkDamage(event.getCause()) && !(event instanceof EntityDamageByEntityEvent)) {
-        	MineQuest.log("Class: " + event.getEntity().getClass());
         	event.setCancelled(true);
         	return false;
         }
@@ -1721,9 +1720,9 @@ public class Quester {
         }
         
         EntityPlayer pl = ((CraftPlayer)player).getHandle();
-        EntityTracker entitytracker = pl.b.b(pl.dimension);
+        EntityTracker entitytracker = pl.b.getTracker(pl.dimension);
 
-        entitytracker.b(pl, new Packet18ArmAnimation(pl, 2));
+        entitytracker.a(pl, new Packet18ArmAnimation(pl, 2));
         pl.world.a(pl, (byte) 2);
         
         if (player.getHealth() > newHealth) {
@@ -1755,34 +1754,21 @@ public class Quester {
 		if (type == null) return false;
 		
 		switch (type) {
-		case GRILLED_PORK:
-			health += 8;
-			break;
-		case PORK:
-			health += 3;
-			break;
-		case MUSHROOM_SOUP:
-			health += 10;
-			break;
-		case BREAD:
-			health += 5;
-			break;
-		case CAKE:
-			health += 3;
-			break;
 		case GOLDEN_APPLE:
 			health = max_health;
 			break;
 		case APPLE:
 			health += (int)(.15 * max_health);
 			break;
-		case RAW_FISH:
-			health += 2;
-			break;
-		case COOKED_FISH:
-			health += 5;
-			break;
 		default:
+			break;
+		}
+
+		if (MineQuest.getHealthConfiguration().isHealingItem(type)) {
+			setHealth(getHealth() + MineQuest.getHealthConfiguration().getHealAmount(type));
+		} else if (MineQuest.getHealthConfiguration().isManaItem(type)) {
+			mana += MineQuest.getHealthConfiguration().getManaAmount(type);
+		} else {
 			return false;
 		}
 		
@@ -1797,8 +1783,10 @@ public class Quester {
 		}
 		
 		if (health > max_health) health = max_health;
+		if (mana > max_mana) mana = max_mana;
 		
 		updateHealth();
+		updateMana();
 		
 		return true;
 	}
@@ -2101,9 +2089,9 @@ public class Quester {
 			setHealth(getHealth() - 1);
 	        
 	        EntityPlayer pl = ((CraftPlayer)player).getHandle();
-	        EntityTracker entitytracker = pl.b.b(pl.dimension);
+	        EntityTracker entitytracker = pl.b.getTracker(pl.dimension);
 
-	        entitytracker.b(pl, new Packet18ArmAnimation(pl, 3));
+	        entitytracker.a(pl, new Packet18ArmAnimation(pl, 3));
 		}
 		
 		checkIdle(IdleType.AREA);
@@ -2436,6 +2424,12 @@ public class Quester {
 		updateMana();
 		updateQuests();
 		updateAbilities();
+		if (MineQuest.isManaEnabled()) {
+			sendMessage("MQ:ManaSystem");
+		}
+		if (MineQuest.isSpellCompEnabled()) {
+			sendMessage("MQ:SpellCompSystem");
+		}
 	}
 
 	public void setParty(Party party) {

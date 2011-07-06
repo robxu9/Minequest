@@ -54,7 +54,7 @@ public abstract class Target {
 			String[] names = split[3].split(",");
 			
 			target = new NPCTarget(names);
-		} else if (split[2].equals("Targetter")) {
+		} else if (split[2].equals("Targetter") || split[2].equals("Targeter")) {
 			String[] event_ids = split[3].split(",");
 			TargetEvent[] events = new TargetEvent[event_ids.length];
 			int i = 0;

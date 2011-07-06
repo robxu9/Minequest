@@ -51,7 +51,11 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.martin.bukkit.npclib.NPCManager;
 import org.monksanctum.MineQuest.Ability.Ability;
-import org.monksanctum.MineQuest.Ability.AbilityConfigManager;
+import org.monksanctum.MineQuest.Configuration.AbilityConfigManager;
+import org.monksanctum.MineQuest.Configuration.CombatClassConfig;
+import org.monksanctum.MineQuest.Configuration.HealItemConfig;
+import org.monksanctum.MineQuest.Configuration.ResourceClassConfig;
+import org.monksanctum.MineQuest.Configuration.SkillClassConfig;
 import org.monksanctum.MineQuest.Event.DelayedSQLEvent;
 import org.monksanctum.MineQuest.Event.EventQueue;
 import org.monksanctum.MineQuest.Event.NoMobs;
@@ -68,10 +72,7 @@ import org.monksanctum.MineQuest.Quest.FullParty;
 import org.monksanctum.MineQuest.Quest.Quest;
 import org.monksanctum.MineQuest.Quester.NPCQuester;
 import org.monksanctum.MineQuest.Quester.Quester;
-import org.monksanctum.MineQuest.Quester.SkillClass.CombatClassConfig;
-import org.monksanctum.MineQuest.Quester.SkillClass.ResourceClassConfig;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
-import org.monksanctum.MineQuest.Quester.SkillClass.SkillClassConfig;
 import org.monksanctum.MineQuest.Store.NPCStringConfig;
 import org.monksanctum.MineQuest.World.Claim;
 import org.monksanctum.MineQuest.World.Town;
@@ -372,7 +373,11 @@ public class MineQuest extends JavaPlugin {
 		} else if (getMob(entity) != null) {
 			getMob(entity).damage(i, source);
 		} else {
-			entity.damage(i, source.getPlayer());
+			if (source != null) {
+				entity.damage(i, source.getPlayer());
+			} else {
+				entity.damage(i, null);
+			}
 		}
 	}
 
@@ -1323,6 +1328,7 @@ public class MineQuest extends JavaPlugin {
 	private static int level_mana;
 	private static int mana_event;
 	private static boolean spawning;
+	private static HealItemConfig heal_item_config;
 	
 	public MineQuest() {
 		heal_event = 0;
@@ -1684,6 +1690,8 @@ public class MineQuest extends JavaPlugin {
 			}
 		}
 		mq_damage_system = general.getBoolean("mq_health_system", true);
+		
+		heal_item_config = new HealItemConfig();
 	}
 
 	private static void setupExperienceProperties() {
@@ -2131,5 +2139,9 @@ public class MineQuest extends JavaPlugin {
 
 	public static void setSpawning(boolean b) {
 		spawning = b;
+	}
+
+	public static HealItemConfig getHealthConfiguration() {
+		return heal_item_config;
 	}
 }

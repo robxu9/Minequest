@@ -9,9 +9,11 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Event.AbilityEvent;
-import org.monk.MineQuest.Quester.Quester;
+import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Ability.Ability;
+import org.monksanctum.MineQuest.Ability.TargetDefendAbility;
+import org.monksanctum.MineQuest.Event.AbilityEvent;
+import org.monksanctum.MineQuest.Quester.Quester;
 
 public class AbilityMoveSilently extends Ability implements TargetDefendAbility {
 	private boolean activated;
@@ -51,7 +53,7 @@ public class AbilityMoveSilently extends Ability implements TargetDefendAbility 
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(Material.FEATHER, 1));
@@ -86,6 +88,11 @@ public class AbilityMoveSilently extends Ability implements TargetDefendAbility 
 				((Creature)event.getEntity()).setTarget(null);
 			}
 		}
+	}
+
+	@Override
+	public int getIconLoc() {
+		return 44;
 	}
 
 }

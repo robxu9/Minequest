@@ -18,9 +18,10 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Event.AbilityEvent;
-import org.monk.MineQuest.Quester.Quester;
+import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Ability.Ability;
+import org.monksanctum.MineQuest.Event.AbilityEvent;
+import org.monksanctum.MineQuest.Quester.Quester;
 
 public class AbilityInvisibility extends Ability {
 	private int total_time;
@@ -150,7 +151,7 @@ public class AbilityInvisibility extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(Material.SAPLING, 1));
@@ -184,6 +185,11 @@ public class AbilityInvisibility extends Ability {
 			caster.sendMessage(getName() + " interrupted!");
 		}
 		this.active = active;
+	}
+
+	@Override
+	public int getIconLoc() {
+		return 43;
 	}
 
 }

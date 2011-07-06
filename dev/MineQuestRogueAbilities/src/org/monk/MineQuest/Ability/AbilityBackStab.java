@@ -9,9 +9,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import org.monk.MineQuest.MineQuest;
-import org.monk.MineQuest.Quester.Quester;
-import org.monk.MineQuest.Quester.SkillClass.CombatClass;
+import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Ability.Ability;
+import org.monksanctum.MineQuest.Quester.Quester;
+import org.monksanctum.MineQuest.Quester.SkillClass.CombatClass;
 
 public class AbilityBackStab extends Ability {
 	public AbilityBackStab() {
@@ -27,7 +28,7 @@ public class AbilityBackStab extends Ability {
 		if (player == null) return;
 		if (entity == null) {
 			quester.sendMessage(getName() + " must be used on an entity");
-			giveManaCost(player);
+			giveCost(player);
 			return;
 		}
 		
@@ -40,11 +41,11 @@ public class AbilityBackStab extends Ability {
 			} else {
 				damage = config[3];
 			}
-			MineQuest.damage(entity, (int)(damage * multiply));
+			MineQuest.damage(entity, (int)(damage * multiply), quester);
 		} else {
 			notify(quester, getName() + " must be used from behind the target");
 			if (config[3] > 0) {
-				giveManaCost(player);
+				giveCost(player);
 			}
 		}
 	}
@@ -68,7 +69,7 @@ public class AbilityBackStab extends Ability {
 	}
 
 	@Override
-	public List<ItemStack> getManaCost() {
+	public List<ItemStack> getSpellComps() {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		
 		list.add(new ItemStack(Material.BONE, 1));
@@ -92,6 +93,11 @@ public class AbilityBackStab extends Ability {
 	@Override
 	public String getSkillClass() {
 		return "Rogue";
+	}
+
+	@Override
+	public int getIconLoc() {
+		return 42;
 	}
 
 }

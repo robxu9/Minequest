@@ -51,6 +51,8 @@ import org.monksanctum.MineQuest.Ability.Ability;
 import org.monksanctum.MineQuest.Event.NPCEvent;
 import org.monksanctum.MineQuest.Event.Absolute.SpawnNPCEvent;
 import org.monksanctum.MineQuest.Event.Relative.MessageEvent;
+import org.monksanctum.MineQuest.Event.Target.StartQuestEvent;
+import org.monksanctum.MineQuest.Quest.AreaTarget;
 import org.monksanctum.MineQuest.Quest.QuestProspect;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
 import org.monksanctum.MineQuest.Store.Store;
@@ -94,6 +96,8 @@ public class NPCQuester extends Quester {
 	private long cost;
 	private int message_delay;
 	private int heal_amount;
+	private String start_quest;
+	private double start_quest_radius;
 
 	
 	public NPCQuester(String name) {
@@ -114,6 +118,8 @@ public class NPCQuester extends Quester {
 		reach_count = 0;
 		generator = new Random();
 		cost = 0;
+		start_quest = null;
+		start_quest_radius = 3;
 	}
 	
 	private static String getName(String name) {
@@ -157,6 +163,8 @@ public class NPCQuester extends Quester {
 		reach_count = 0;
 		generator = new Random();
 		cost = 0;
+		start_quest = null;
+		start_quest_radius = 3;
 	}
 	
 	public void activate() {
@@ -567,6 +575,10 @@ public class NPCQuester extends Quester {
 			this.walk_message[index] = value;
 		} else if (property.equals("health_threshold")) {
 			this.threshold  = Integer.parseInt(value);
+		} else if (property.equals("start_quest_radius")) {
+			this.start_quest_radius  = Integer.parseInt(value);
+		} else if (property.equals("start_quest")) {
+			this.start_quest  = value;
 		} else if (property.equals("next_task")) {
 			this.task = Integer.parseInt(value);
 		} else if (property.equals("heal_amount")) {
@@ -815,6 +827,11 @@ public class NPCQuester extends Quester {
 		if (quest_file != null) {
 			if (!quester.isCompleted(new QuestProspect(quest_file))) {
 				quester.addQuestAvailable(new QuestProspect(quest_file));
+			}
+		}
+		if (start_quest != null) {
+			if (!quester.isCompleted(new QuestProspect(quest_file))) {
+				MineQuest.getEventQueue().addEvent(new StartQuestEvent(10, new AreaTarget(player.getLocation(), start_quest_radius), start_quest));
 			}
 		}
 		quester.setHealth(quester.getHealth() + heal_amount);
