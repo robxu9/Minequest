@@ -14,6 +14,7 @@ public class ReputationCheckEvent extends QuestEvent implements TargetEvent {
 	private int task_fail;
 	private Quester fail;
 	private Target target;
+	private int task_pass;
 
 	public ReputationCheckEvent(Quest quest, long delay, Target target, String reputation, boolean above, int amount, int task_pass, int task_fail) {
 		super(quest, delay, task_pass);
@@ -21,7 +22,14 @@ public class ReputationCheckEvent extends QuestEvent implements TargetEvent {
 		this.reputation = reputation;
 		this.above = above;
 		this.amount = amount;
+		this.task_pass = task_pass;
 		this.task_fail = task_fail;
+	}
+	
+	@Override
+	public void reset(long time) {
+		this.index = this.task_pass;
+		super.reset(time);
 	}
 	
 	@Override

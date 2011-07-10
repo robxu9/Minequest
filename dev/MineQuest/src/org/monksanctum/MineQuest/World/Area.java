@@ -62,8 +62,10 @@ public class Area {
 				return false;
 			}
 		}
-		if (!world.getName().equals(loc.getWorld().getName())) {
-			return false;
+		if (world != null) {
+			if (!world.getName().equals(loc.getWorld().getName())) {
+				return false;
+			}
 		}
 		
 		return true;

@@ -1374,13 +1374,13 @@ public class Quester {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Quester) {
-			return name.equals(((Quester)obj).getName());
+			return name.equalsIgnoreCase(((Quester)obj).getName());
 		}
 		if (obj instanceof HumanEntity) {
-			return name.equals(((HumanEntity)obj).getName());
+			return name.equalsIgnoreCase(((HumanEntity)obj).getName());
 		}
 		if (obj instanceof String) {
-			return name.equals(obj) || getSName().equals(obj);
+			return name.equalsIgnoreCase((String) obj) || getSName().equalsIgnoreCase((String) obj);
 		}
 		return super.equals(obj);
 	}
