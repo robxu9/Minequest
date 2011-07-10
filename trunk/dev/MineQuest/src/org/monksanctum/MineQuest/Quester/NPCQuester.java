@@ -118,7 +118,6 @@ public class NPCQuester extends Quester {
 		reach_count = 0;
 		generator = new Random();
 		cost = 0;
-		start_quest = null;
 		start_quest_radius = 3;
 	}
 	
@@ -163,7 +162,6 @@ public class NPCQuester extends Quester {
 		reach_count = 0;
 		generator = new Random();
 		cost = 0;
-		start_quest = null;
 		start_quest_radius = 3;
 	}
 	
@@ -578,7 +576,8 @@ public class NPCQuester extends Quester {
 		} else if (property.equals("start_quest_radius")) {
 			this.start_quest_radius  = Integer.parseInt(value);
 		} else if (property.equals("start_quest")) {
-			this.start_quest  = value;
+			this.start_quest = value;
+			MineQuest.log("Start quest " + value);
 		} else if (property.equals("next_task")) {
 			this.task = Integer.parseInt(value);
 		} else if (property.equals("heal_amount")) {
@@ -830,9 +829,9 @@ public class NPCQuester extends Quester {
 			}
 		}
 		if (start_quest != null) {
-			if (!quester.isCompleted(new QuestProspect(quest_file))) {
-				MineQuest.getEventQueue().addEvent(new StartQuestEvent(10, new AreaTarget(player.getLocation(), start_quest_radius), start_quest));
-			}
+//			if (!quester.isCompleted(new QuestProspect(start_quest)) || (new QuestProspect(start_quest).isRepeatable())) {
+			MineQuest.getEventQueue().addEvent(new StartQuestEvent(10, new AreaTarget(player.getLocation(), start_quest_radius), start_quest));
+//			}
 		}
 		quester.setHealth(quester.getHealth() + heal_amount);
 	}
