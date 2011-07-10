@@ -67,9 +67,9 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 			MineQuest.setSpawning(false);
 			if (entity != null) {
 				if (superm) {
-					MineQuest.setMQMob(new SpecialMob((Monster)entity));
+					MineQuest.setMQMob(new SpecialMob(entity));
 				} else {
-					MineQuest.setMQMob(new MQMob((Monster)entity));
+					MineQuest.setMQMob(new MQMob(entity));
 				}
 			}
 			MineQuest.getMob(entity).setSpawned();

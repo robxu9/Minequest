@@ -67,7 +67,11 @@ public class Property extends Area{
 	}
 	
 	public void setOwner(Quester quester) {
-		owner = quester.getName();
+		if (quester != null) {	
+			owner = quester.getName();
+		} else {
+			MineQuest.getQuester(owner).sendMessage("Invalid Quester");
+		}
 	}
 	
 	public boolean canEdit(Quester quester) {
