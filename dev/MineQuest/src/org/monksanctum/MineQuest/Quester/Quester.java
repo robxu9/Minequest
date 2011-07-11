@@ -1230,8 +1230,8 @@ public class Quester {
 		
 		if ((event.getDamager() != null) && 
 				(!(event.getDamager() instanceof Player) && 
-				 checkDamage(event.getDamager().getEntityId()))) {
-			MineQuest.log("Cancelled!");
+				 checkDamage(event.getDamager().getEntityId())) &&
+				 MineQuest.mqDamageEnabled(this)) {
             event.setCancelled(true);
             return;
         }
