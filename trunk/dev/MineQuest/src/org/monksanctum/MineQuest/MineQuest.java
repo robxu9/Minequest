@@ -28,7 +28,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Location;
@@ -116,7 +118,6 @@ public class MineQuest extends JavaPlugin {
 	private static long[] money_amounts;
 	private static String[] money_names;
 	private static boolean mq_damage_system;
-    private static String namer;
 	private static List<String> noMobs;
     private static String npc_attack_type;
     private static int npc_cost;
@@ -136,7 +137,6 @@ public class MineQuest extends JavaPlugin {
 	private static String server_owner;
 	private static String skeleton_type;
 	private static MysqlInterface sql_server;
-	private static Location start;
 	private static String[] starting_classes;
 	private static int starting_health;
 	private static boolean town_enable = true;
@@ -150,6 +150,14 @@ public class MineQuest extends JavaPlugin {
 	private static boolean track_destroy;
 	private static boolean track_kills;
 	private static boolean mana;
+	private static Map<String, Location> start_locations = new HashMap<String, Location>();
+	private static boolean op_restricted;
+	private static boolean mayor_restricted;
+	private static boolean is_village_restricted;
+	private static boolean is_claim_restricted;
+	private static int claim_cost;
+	private static int town_cost;
+	private static int village_cost;
 	
 	/**
 	 * This adds a minequest wrapper to an existing mob.
@@ -322,13 +330,8 @@ public class MineQuest extends JavaPlugin {
 	 * 
 	 * @param player Player Creating the Town
 	 */
-	public static void createTown(Player player) {
-		if (!isMayor(getQuester(player))) {
-			player.sendMessage("Only mayors are allowed to create towns");
-		} else {
-			start = player.getLocation();
-			namer = player.getName();
-		}
+	public static void startCreate(Player player) {
+		start_locations.put(player.getName(), player.getLocation());
 	}
 	
 	/**
@@ -433,6 +436,115 @@ public class MineQuest extends JavaPlugin {
 		bout.close();
 		in.close();
 	}
+
+	/**
+	 * Finishes creation of vvillage based on Player
+	 * Location.
+	 * 
+	 * @param player Player Creating Village
+	 * @param name Name of Village
+	 */
+	public static void finishClaim(Player player, String name) {
+		if (isClaimRestricted()) {
+			if (!isPermissionsEnabled() || !permissionHandler.has(player, "MineQuest.Claim")) {
+				if (!player.isOp()) {
+					player.sendMessage("You do not have permission to create a claim");
+					return;
+				}
+			}
+		}
+
+		if (start_locations.get(player.getName()) == null) {
+			player.sendMessage("You have to use /startcreate first...");
+			return;
+		}
+
+		Location start = start_locations.get(player.getName());
+		Location end = player.getLocation();
+		int x, z, max_x, max_z;
+		if (end.getX() > start.getX()) {
+			x = (int)start.getX();
+			max_x = (int)end.getX();
+		} else {
+			x = (int)end.getX();
+			max_x = (int)start.getX();
+		}
+		if (end.getZ() > start.getZ()) {
+			z = (int)start.getZ();
+			max_z = (int)end.getZ();
+		} else {
+			z = (int)end.getZ();
+			max_z = (int)start.getZ();
+		}
+		if (MineQuest.getQuester(player).canPay((max_x - x) * (max_z - z) * claim_cost)) {
+			sql_server.update("INSERT INTO claims (name, x, z, max_x, max_z, owner, height, y, world) VALUES('"
+					+ name + "', '" + x + "', '" + z + "', '" + max_x + "', '" + max_z + "', '" + player.getName() + "', '0', '0', '" + player.getWorld() + "')");
+			claims.add(new Claim(name, player.getWorld()));
+			player.sendMessage("Claim " + name + " created");
+		} else {
+			player.sendMessage("You cannot afford to buy a claim of size " + (max_x - x) + " by " + (max_z - z));
+			player.sendMessage("It would cost " + ((max_x - x) * (max_z - z) * claim_cost));
+		}
+	}
+
+	public static boolean isClaimRestricted() {
+		return is_claim_restricted;
+	}
+
+	/**
+	 * Finishes creation of vvillage based on Player
+	 * Location.
+	 * 
+	 * @param player Player Creating Village
+	 * @param name Name of Village
+	 */
+	public static void finishVillage(Player player, String name) {
+		if (isVillageRestricted()) {
+			if (!isPermissionsEnabled() || !permissionHandler.has(player, "MineQuest.Village")) {
+				if (!player.isOp()) {
+					player.sendMessage("You do not have permission to create a village");
+					return;
+				}
+			}
+		}
+
+		if (start_locations.get(player.getName()) == null) {
+			player.sendMessage("You have to use /startcreate first...");
+			return;
+		}
+
+		Location start = start_locations.get(player.getName());
+		Location end = player.getLocation();
+		int x, z, max_x, max_z;
+		if (end.getX() > start.getX()) {
+			x = (int)start.getX();
+			max_x = (int)end.getX();
+		} else {
+			x = (int)end.getX();
+			max_x = (int)start.getX();
+		}
+		if (end.getZ() > start.getZ()) {
+			z = (int)start.getZ();
+			max_z = (int)end.getZ();
+		} else {
+			z = (int)end.getZ();
+			max_z = (int)start.getZ();
+		}
+		if (MineQuest.getQuester(player).canPay((max_x - x) * (max_z - z) * village_cost)) {
+			sql_server.update("INSERT INTO villages (name, x, z, max_x, max_z, owner, height, y, world) VALUES('"
+					+ name + "', '" + x + "', '" + z + "', '" + max_x + "', '" + max_z + "', '" + player.getName() + "', '0', '0', '" + player.getWorld() + "')");
+			villages.add(new Village(name, player.getWorld()));
+			player.sendMessage("Village " + name + " created");
+		} else {
+			player.sendMessage("You cannot afford to buy a village of size " + (max_x - x) + " by " + (max_z - z));
+			player.sendMessage("It would cost " + ((max_x - x) * (max_z - z) * village_cost));
+		}
+	}
+
+	public static boolean isVillageRestricted() {
+		return is_village_restricted;
+	}
+
 	/**
 	 * Finishes creation of town based on Player
 	 * Location.
@@ -441,47 +553,66 @@ public class MineQuest extends JavaPlugin {
 	 * @param name Name of Town
 	 */
 	public static void finishTown(Player player, String name) {
-		if (!isMayor(getQuester(player))) {
-			player.sendMessage("Only mayors are allowed to create towns");
-		} else {
-			if (namer == null) {
-				player.sendMessage("You have to use /createtown first...");
+		if (isMayorRestricted()) {
+			if (!isMayor(getQuester(player))) {
+				player.sendMessage("Only mayors are allowed to create towns");
 				return;
 			}
-
-			if (namer.equals(player.getName())) {
-				Location end = player.getLocation();
-				int x, z, max_x, max_z;
-				int spawn_x, spawn_y, spawn_z;
-				if (end.getX() > start.getX()) {
-					x = (int)start.getX();
-					max_x = (int)end.getX();
-				} else {
-					x = (int)end.getX();
-					max_x = (int)start.getX();
-				}
-				if (end.getZ() > start.getZ()) {
-					z = (int)start.getZ();
-					max_z = (int)end.getZ();
-				} else {
-					z = (int)end.getZ();
-					max_z = (int)start.getZ();
-				}
-				spawn_x = (x + max_x) / 2;
-				spawn_y = (int)(start.getY() + end.getY()) / 2;
-				spawn_z = (z + max_z) / 2;
-				sql_server.update("INSERT INTO towns (name, x, z, max_x, max_z, spawn_x, spawn_y, spawn_z, owner, height, y, world) VALUES('"
-						+ name + "', '" + x + "', '" + z + "', '" + max_x + "', '" + max_z + "', '" + spawn_x + "', '"
-						+ spawn_y + "', '" + spawn_z + "', '" + player.getName() + "', '0', '0', '" + player.getWorld() + "')");
-				sql_server.update("CREATE TABLE IF NOT EXISTS " + name + 
-						"(height INT, x INT, y INT, z INT, max_x INT, max_z INT, price INT, name VARCHAR(30), store_prop BOOLEAN)");
-				towns.add(new Town(name, player.getWorld()));
-				player.sendMessage("Town " + name + " created");
-			} else {
-				player.sendMessage(namer + " is in the process of creating a town - use /createtown to start a new creation");
+		} else if (isOpRestricted()) {
+			if (!player.isOp()) {
+				player.sendMessage("Only ops are allowed to create towns");
+				return;
 			}
 		}
+
+		if (start_locations.get(player.getName()) == null) {
+			player.sendMessage("You have to use /startcreate first...");
+			return;
+		}
+
+		Location start = start_locations.get(player.getName());
+		Location end = player.getLocation();
+		int x, z, max_x, max_z;
+		int spawn_x, spawn_y, spawn_z;
+		if (end.getX() > start.getX()) {
+			x = (int)start.getX();
+			max_x = (int)end.getX();
+		} else {
+			x = (int)end.getX();
+			max_x = (int)start.getX();
+		}
+		if (end.getZ() > start.getZ()) {
+			z = (int)start.getZ();
+			max_z = (int)end.getZ();
+		} else {
+			z = (int)end.getZ();
+			max_z = (int)start.getZ();
+		}
+		spawn_x = (x + max_x) / 2;
+		spawn_y = (int)(start.getY() + end.getY()) / 2;
+		spawn_z = (z + max_z) / 2;
+		if (MineQuest.getQuester(player).canPay((max_x - x) * (max_z - z) * town_cost)) {
+			sql_server.update("INSERT INTO towns (name, x, z, max_x, max_z, spawn_x, spawn_y, spawn_z, owner, height, y, world) VALUES('"
+					+ name + "', '" + x + "', '" + z + "', '" + max_x + "', '" + max_z + "', '" + spawn_x + "', '"
+					+ spawn_y + "', '" + spawn_z + "', '" + player.getName() + "', '0', '0', '" + player.getWorld() + "')");
+			sql_server.update("CREATE TABLE IF NOT EXISTS " + name + 
+					"(height INT, x INT, y INT, z INT, max_x INT, max_z INT, price INT, name VARCHAR(30), store_prop BOOLEAN)");
+			towns.add(new Town(name, player.getWorld()));
+			player.sendMessage("Town " + name + " created");
+		} else {
+			player.sendMessage("You cannot afford to buy a town of size " + (max_x - x) + " by " + (max_z - z));
+			player.sendMessage("It would cost " + ((max_x - x) * (max_z - z) * town_cost));
+		}
 	}
+
+	public static boolean isOpRestricted() {
+		return op_restricted;
+	}
+
+	public static boolean isMayorRestricted() {
+		return mayor_restricted;
+	}
+
 	public static AbilityConfigManager getAbilityConfiguration() {
 		return ability_config;
 	}
@@ -1600,7 +1731,6 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.CHUNK_LOAD, wl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.CHUNK_UNLOAD, wl, Priority.Monitor, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
-        start = null;
 
 		setupIConomy();
 		setupPermissions();
@@ -1628,6 +1758,17 @@ public class MineQuest extends JavaPlugin {
 		npc_cost = npc.getInt("npc_cost_level", 1000);
 		npc_cost_class = npc.getInt("npc_cost_class", 1000);
 		npc_attack_type = npc.getString("npc_attack_type", "Warrior");
+	}
+
+	private static void setupPropertyProperties() {
+		PropertiesFile property = new PropertiesFile("MineQuest/property.properties");
+		mayor_restricted = property.getBoolean("town_mayor_restricted", true);
+		op_restricted = property.getBoolean("town_op_restricted", false);
+		is_claim_restricted = property.getBoolean("is_claim_restricted", false);
+		is_village_restricted = property.getBoolean("is_village_restricted", false);
+		town_cost = property.getInt("town_cost", 0);
+		village_cost = property.getInt("village_cost", 0);
+		claim_cost = property.getInt("claim_cost", 0);
 	}
 
 	private static void setupGeneralProperties() {

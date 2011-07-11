@@ -460,9 +460,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
         		NPCQuester quester = (NPCQuester)MineQuest.getQuester(split[1]);
 	        	if (MineQuest.getQuester(player).canEdit(quester.getPlayer().getLocation().getBlock())) {
-	        		quester.setHealth(0);
-	        		MineQuest.remQuester(quester);
-	        		quester.removeSql();
+	        		quester.remNPC();
 	        	} else {
 	        		player.sendMessage("You don't have permission to edit their area");
 	        	}
@@ -849,14 +847,28 @@ public class MineQuestPlayerListener extends PlayerListener {
 			player.sendMessage("You are at " + player.getLocation().getX() + " " + player.getLocation().getY() + " " + 
 					player.getLocation().getZ() + " P:" + player.getLocation().getPitch() + " Y:" + player.getLocation().getYaw());
 			event.setCancelled(true);
-		}else if (split[0].equals("/createtown")) {
-        	MineQuest.createTown(player);
+		}else if (split[0].equals("/startcreate")) {
+        	MineQuest.startCreate(player);
 			event.setCancelled(true);
         } else if (split[0].equals("/finishtown")) {
         	if (split.length <= 1) {
         		player.sendMessage("Usage: /finishtown <name>");
         	} else {
         		MineQuest.finishTown(player, split[1]);
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/finishvillage")) {
+        	if (split.length <= 1) {
+        		player.sendMessage("Usage: /finishvillage <name>");
+        	} else {
+        		MineQuest.finishVillage(player, split[1]);
+        	}
+			event.setCancelled(true);
+        } else if (split[0].equals("/finishclaim")) {
+        	if (split.length <= 1) {
+        		player.sendMessage("Usage: /finishclaim <name>");
+        	} else {
+        		MineQuest.finishClaim(player, split[1]);
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/setmayor")) {

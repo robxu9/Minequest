@@ -870,7 +870,9 @@ public class NPCQuester extends Quester {
 			} else {
 				hand = null;
 			}
-			player.setHealth(0);
+			if (player != null) {
+				player.setHealth(0);
+			}
 			MineQuest.getNPCManager().despawn(name);
 			entity = null;
 			player = null;
@@ -979,6 +981,18 @@ public class NPCQuester extends Quester {
 		target = null;
 	}
 	
+	public void remNPC() {
+		if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
+			removeSql();
+		}
+		MineQuest.remQuester(this);
+		MineQuest.getNPCManager().despawn(name);
+//		NpcSpawner.RemoveBasicHumanNpc(this.entity);
+//		MineQuest.log("NPC Died");
+		entity = null;
+		player = null;
+	}
+	
 	@Override
 	public void setHealth(int i) {
 		super.setHealth(i);
@@ -1003,7 +1017,6 @@ public class NPCQuester extends Quester {
 				entity = null;
 				player = null;
 			} else {
-				MineQuest.log(name + ": " + mode + " death");
 				Location location = MineQuest.getTown(town).getNPCSpawn();
 
 				sendMessage("Died!");

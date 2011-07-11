@@ -70,20 +70,6 @@ public class MineQuestEntityListener extends EntityListener {
 		if (event.isCancelled()) return;
 		
 		if (event instanceof EntityDamageByProjectileEvent) {
-//			EntityDamageByProjectileEvent evente = ((EntityDamageByProjectileEvent)event);
-//            if (evente.getDamager() instanceof HumanEntity) {
-//                MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
-//            }
-//            if (!event.isCancelled()) {
-//	            if (event.getEntity() instanceof HumanEntity) {
-//	                MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
-//	            } else if ((event.getEntity() instanceof LivingEntity) && 
-//	            		(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
-//	            	evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
-//	            			(LivingEntity)evente.getDamager()));
-//	            }
-//            }
-//			event.setCancelled(true);
 			return;
 		}
 
