@@ -1562,6 +1562,7 @@ public class MineQuest extends JavaPlugin {
 			setupGeneralProperties();
 			setupNPCProperties();
 			setupEconomoyProperties();
+			setupPropertyProperties();
 	        
 	        combat_config = new CombatClassConfig();
 	        resource_config = new ResourceClassConfig();
@@ -2138,6 +2139,8 @@ public class MineQuest extends JavaPlugin {
 		setupExperienceProperties();
 		MineQuest.log("Loading General Properties");
 		setupGeneralProperties();
+		MineQuest.log("Loading Property Properties");
+		setupPropertyProperties();
 		MineQuest.log("Loading NPC Properties");
 		setupNPCProperties();
 
