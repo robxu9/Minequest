@@ -167,7 +167,6 @@ public class Quest {
 					parseLine(split);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				MineQuest.log("Unable to load Quest Problem on Line " + number);
 				MineQuest.log("  " + line);
 				try {
@@ -177,6 +176,7 @@ public class Quest {
 				}
 				return false;
 			}
+
 			if (world == null) {
 				world = MineQuest.getSServer().getWorlds().get(0);
 			}
@@ -223,6 +223,19 @@ public class Quest {
 				events.add(IdleEvent.newIdleEvent(this, split));
 			} else {
 				createEvent(split);
+			}
+		} else if (split[0].equals("PartyMinMax")) {
+			int min = Integer.parseInt(split[1]);
+			int max = Integer.parseInt(split[2]);
+			if (party.getQuesters().size() > max) {
+				(new MessageEvent(10, party, "This quest cannot have more than " + max + " people in a party")).activate(null);
+				MineQuest.log("Party was the wrong size");
+				throw new Exception();
+			}
+			if (party.getQuesters().size() < min) {
+				(new MessageEvent(10, party, "This quest cannot have less than " + min + " people in a party")).activate(null);
+				MineQuest.log("Party was the wrong size");
+				throw new Exception();
 			}
 		} else if (split[0].equals("Task")) {
 			createTask(split, false);

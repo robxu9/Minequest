@@ -98,6 +98,7 @@ public class NPCQuester extends Quester {
 	private int heal_amount;
 	private String start_quest;
 	private double start_quest_radius;
+	private int fix = 0;
 
 	
 	public NPCQuester(String name) {
@@ -367,6 +368,7 @@ public class NPCQuester extends Quester {
 		if (player == null) return false;
 		if (mode == NPCMode.QUEST_VULNERABLE) return false;
 		if (mode == NPCMode.QUEST_INVULNERABLE) return false;
+		if (mode == NPCMode.VULNERABLE) return false;
 		PlayerInventory inven = null;
 		if ((follow != null) && (follow.getPlayer() != null)) {
 			inven = follow.getPlayer().getInventory();
@@ -580,6 +582,8 @@ public class NPCQuester extends Quester {
 			MineQuest.log("Start quest " + value);
 		} else if (property.equals("next_task")) {
 			this.task = Integer.parseInt(value);
+		} else if (property.equals("fix_amount")) {
+			this.fix = Integer.parseInt(value);
 		} else if (property.equals("heal_amount")) {
 			this.heal_amount = Integer.parseInt(value);
 		} else if (property.equals("startle_task")) {
@@ -779,7 +783,7 @@ public class NPCQuester extends Quester {
 			}
 			if (getHealth() <= 0) {
 				setPlayer(null);
-				if (mode != NPCMode.QUEST_VULNERABLE) {
+				if ((mode != NPCMode.QUEST_VULNERABLE) && (mode != NPCMode.VULNERABLE)) {
 					if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE) && (mode != NPCMode.PARTY_STAND)) {
 						removeSql();
 						MineQuest.remQuester(this);
@@ -833,6 +837,15 @@ public class NPCQuester extends Quester {
 			MineQuest.getEventQueue().addEvent(new StartQuestEvent(10, new AreaTarget(player.getLocation(), start_quest_radius), start_quest));
 //			}
 		}
+		if (fix > 0) {
+			if (player.getItemInHand() != null) {
+				short newDurability = (short) (player.getItemInHand().getDurability() + fix);
+				if (newDurability > player.getItemInHand().getType().getMaxDurability()) {
+					newDurability = player.getItemInHand().getType().getMaxDurability();
+				}
+				player.getItemInHand().setDurability(newDurability);
+			}
+		}
 		quester.setHealth(quester.getHealth() + heal_amount);
 	}
 
@@ -840,6 +853,7 @@ public class NPCQuester extends Quester {
 		if ((mode != NPCMode.FOR_SALE) && 
 				(mode != NPCMode.PARTY) && 
 				(mode != NPCMode.QUEST_VULNERABLE) && 
+				(mode != NPCMode.VULNERABLE) && 
 				(mode != NPCMode.PARTY_STAND)) {
 			return true;
 		}
@@ -1006,7 +1020,11 @@ public class NPCQuester extends Quester {
 		}
 		if (getHealth() <= 0) {
 			setPlayer(null);
-			if ((mode != NPCMode.PARTY_STAND) && (mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
+			if (mode == NPCMode.VULNERABLE) {
+				MineQuest.getNPCManager().despawn(name);
+				MineQuest.getEventQueue().addEvent(new SpawnNPCEvent(MineQuest.getVulnerableDelay(), this, center.getWorld().getName(), center.getX(), center.getY(), 
+						center.getZ(), center.getPitch(), center.getYaw()));
+			} else if ((mode != NPCMode.PARTY_STAND) && (mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE)) {
 				if ((mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
 					removeSql();
 				}

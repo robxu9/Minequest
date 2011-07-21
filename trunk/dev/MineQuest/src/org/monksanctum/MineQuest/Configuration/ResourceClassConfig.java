@@ -21,7 +21,7 @@ public class ResourceClassConfig extends SkillClassConfig {
 	
 	@Override
 	protected void parseConfig(String name) {
-		blocks.add(intList(properties.getString(name + "_block_types", "")));
+		blocks.add(intList(name + "_block_types", properties.getString(name + "_block_types", "")));
 		
 		super.parseConfig(name);
 	}

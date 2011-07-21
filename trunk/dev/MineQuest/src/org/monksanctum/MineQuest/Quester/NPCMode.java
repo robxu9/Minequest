@@ -28,7 +28,8 @@ public enum NPCMode {
 	STORE,
 	PARTY_STAND,
 	QUEST_INVULNERABLE, 
-	QUEST_VULNERABLE;
+	QUEST_VULNERABLE, 
+	VULNERABLE;
 	
     private static final Map<String, NPCMode> lookupName = new HashMap<String, NPCMode>();
 

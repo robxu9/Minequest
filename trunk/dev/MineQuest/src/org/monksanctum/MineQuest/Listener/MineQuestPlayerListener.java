@@ -106,6 +106,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	@Override
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
+		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 	}
 	
