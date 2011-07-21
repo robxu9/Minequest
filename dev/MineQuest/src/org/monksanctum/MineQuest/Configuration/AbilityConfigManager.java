@@ -64,7 +64,7 @@ public class AbilityConfigManager {
 			cost.put(abil, cost_config.getString(abil, cost.get(abil)));
 			icons.put(abil, icon_config.getInt(abil, icons.get(abil)));
 			classes.put(abil, class_config.getString(abil, classes.get(abil)));
-			config.put(abil, SkillClassConfig.intList(abil_config.getString(abil, getConfigString(config.get(abil)))));
+			config.put(abil, SkillClassConfig.intList(abil, abil_config.getString(abil, getConfigString(config.get(abil)))));
 		}
 	}
 	
@@ -99,7 +99,7 @@ public class AbilityConfigManager {
 	}
 
 	public List<ItemStack> getCost(String name) {
-		int[] types = SkillClassConfig.intList(cost.get(name));
+		int[] types = SkillClassConfig.intList("Spell Cost String " + name, cost.get(name));
 		List<ItemStack> ret = new ArrayList<ItemStack>();
 		
 		if (types != null) {

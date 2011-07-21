@@ -873,7 +873,6 @@ public class MineQuest extends JavaPlugin {
 			}
 		}
 
-		log("[WARNING] Cannot find quester " + name);
 		return null;
 	}
 
@@ -1460,6 +1459,7 @@ public class MineQuest extends JavaPlugin {
 	private static int mana_event;
 	private static boolean spawning;
 	private static HealItemConfig heal_item_config;
+	private static long npc_vulnerable_delay;
 	
 	public MineQuest() {
 		heal_event = 0;
@@ -1620,6 +1620,7 @@ public class MineQuest extends JavaPlugin {
 		} catch (Exception e) {
 			MineQuest.log("Unable to initialize configuration");
         	MineQuest.log("Check configuration in MineQuest directory");
+        	e.printStackTrace();
         	setEnabled(false);
         	return;
         }
@@ -1758,6 +1759,7 @@ public class MineQuest extends JavaPlugin {
 
 		npc_cost = npc.getInt("npc_cost_level", 1000);
 		npc_cost_class = npc.getInt("npc_cost_class", 1000);
+		npc_vulnerable_delay = npc.getInt("npc_vulnerable_delay", 30000);
 		npc_attack_type = npc.getString("npc_attack_type", "Warrior");
 	}
 
@@ -2287,5 +2289,9 @@ public class MineQuest extends JavaPlugin {
 
 	public static HealItemConfig getHealthConfiguration() {
 		return heal_item_config;
+	}
+
+	public static long getVulnerableDelay() {
+		return npc_vulnerable_delay;
 	}
 }

@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import net.minecraft.server.CompressedStreamTools;
@@ -31,6 +32,7 @@ public class NewServerNBTManager implements PlayerFileData, IDataManager {
 
 	private File instance;
 	private String name;
+    private UUID uuid = null; // CraftBukkit
 
 	public NewServerNBTManager(File file, int instance, String s, boolean flag) {
         b = new File(file, s);
@@ -288,4 +290,28 @@ public class NewServerNBTManager implements PlayerFileData, IDataManager {
     private final File d;
     private final long e = System.currentTimeMillis();
 
+    // CraftBukkit start
+    public UUID getUUID() {
+        if (uuid != null) return uuid;
+        try {
+            File file1 = new File(this.b, "uid.dat");
+            if (!file1.exists()) {
+                DataOutputStream dos = new DataOutputStream(new FileOutputStream(file1));
+                uuid = UUID.randomUUID();
+                dos.writeLong(uuid.getMostSignificantBits());
+                dos.writeLong(uuid.getLeastSignificantBits());
+                dos.close();
+            }
+            else {
+                DataInputStream dis = new DataInputStream(new FileInputStream(file1));
+                uuid = new UUID(dis.readLong(), dis.readLong());
+                dis.close();
+            }
+            return uuid;
+        }
+        catch (IOException ex) {
+            return null;
+        }
+    }
+    // CraftBukkit end
 }

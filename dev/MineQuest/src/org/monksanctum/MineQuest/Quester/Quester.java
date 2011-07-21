@@ -1898,11 +1898,19 @@ public class Quester {
 	 */
 	private void levelUp() {
 		Random generator = new Random();
-		int add_health = generator.nextInt(MineQuest.getLevelHealth()) + 1;
 		level++;
 		exp -= (400 * level);
+		int add_health = 0;
+		if (MineQuest.getLevelHealth() > 0) {
+			add_health = generator.nextInt(MineQuest.getLevelHealth()) + 1;
+		} else if (MineQuest.getLevelHealth() == 0) {
+			add_health = 1;
+		}
 		max_health += add_health;
 		health += add_health;
+		if (add_health > 0) {
+			updateHealth();
+		}
 		
 		getPlayer().sendMessage("Congratulations on reaching character level " + level);
 	}

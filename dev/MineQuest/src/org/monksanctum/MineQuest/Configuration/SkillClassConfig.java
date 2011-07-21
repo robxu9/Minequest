@@ -45,17 +45,17 @@ public class SkillClassConfig {
 	}
 	
 	protected void parseConfig(String name) {
-		types.add(intList(properties.getString(name + "_types", "")));
+		types.add(intList(name + "_types", properties.getString(name + "_types", "")));
 
-		levels.add(intList(properties.getString(name + "_levels", "")));
+		levels.add(intList(name + "_levels", properties.getString(name + "_levels", "")));
 
-		armors.add(intList(properties.getString(name + "_armor", "")));
+		armors.add(intList(name + "_armor", properties.getString(name + "_armor", "")));
 
-		armor_levels.add(intList(properties.getString(name + "_armor_levels", "")));
+		armor_levels.add(intList(name + "_armor_levels", properties.getString(name + "_armor_levels", "")));
 
-		armor_defends.add(doubleList(properties.getString(name + "_armor_defend", "")));
+		armor_defends.add(doubleList(name + "_armor_defend", properties.getString(name + "_armor_defend", "")));
 
-		armor_blocks.add(intList(properties.getString(name + "_armor_blocks", "")));
+		armor_blocks.add(intList(name + "_armor_blocks", properties.getString(name + "_armor_blocks", "")));
 		
 		level_health.add(properties.getInt(name + "_level_health", 0));
 		
@@ -76,30 +76,40 @@ public class SkillClassConfig {
 		}
 	}
 	
-	public static int[] intList(String list) {
-		if (list.length() == 0) return null;
-		if (!list.contains(",")) return new int[] {Integer.parseInt(list)};
-		String[] strings = list.split(",");
-		int[] ints = new int[strings.length];
-		int i = 0;
-		for (String armor_level_string : strings) {
-			ints[i++] = Integer.parseInt(armor_level_string);
-		}
+	public static int[] intList(String field, String list) {
+		try {
+			if (list.length() == 0) return null;
+			if (!list.contains(",")) return new int[] {Integer.parseInt(list)};
+			String[] strings = list.split(",");
+			int[] ints = new int[strings.length];
+			int i = 0;
+			for (String armor_level_string : strings) {
+				ints[i++] = Integer.parseInt(armor_level_string);
+			}
 
-		return ints;
+			return ints;
+		} catch (Exception e) {
+			MineQuest.log("Generic problems reading field: " + field + " - list: " + list);
+			return null;
+		}
 	}
 	
-	public double[] doubleList(String list) {
-		if (list.length() == 0) return null;
-		if (!list.contains(",")) return new double[] {Double.parseDouble(list)};
-		String[] strings = list.split(",");
-		double[] doubles = new double[strings.length];
-		int i = 0;
-		for (String armor_level_string : strings) {
-			doubles[i++] = Double.parseDouble(armor_level_string);
+	public double[] doubleList(String field, String list) {
+		try {
+			if (list.length() == 0) return null;
+			if (!list.contains(",")) return new double[] {Double.parseDouble(list)};
+			String[] strings = list.split(",");
+			double[] doubles = new double[strings.length];
+			int i = 0;
+			for (String armor_level_string : strings) {
+				doubles[i++] = Double.parseDouble(armor_level_string);
+			}
+	
+			return doubles;
+		} catch (Exception e) {
+			MineQuest.log("Generic problems reading field: " + field + " - list: " + list);
+			return null;
 		}
-
-		return doubles;
 	}
 
 	protected void setupProperties() {

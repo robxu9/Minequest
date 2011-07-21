@@ -57,7 +57,9 @@ public class MineQuestEntityListener extends EntityListener {
 
 	@Override
 	public void onEntityRegainHealth(EntityRegainHealthEvent event) {
+		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.getEntity() instanceof Player) {
+			if (!MineQuest.isMQEnabled((Player) event.getEntity())) return;
 			Quester quester = MineQuest.getQuester((Player)event.getEntity());
 			
 			quester.regain(event);

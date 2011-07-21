@@ -78,6 +78,6 @@ public class DestroyIdleTask extends IdleTask {
 
 	@Override
 	public void setTarget(String target) {
-		targets = SkillClassConfig.intList(target);
+		targets = SkillClassConfig.intList("Destroy Idle Task", target);
 	}
 }

@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftBoat;
+import org.bukkit.entity.Boat;
 import org.monksanctum.MineQuest.Event.EventParser;
 import org.monksanctum.MineQuest.Event.NormalEvent;
 
@@ -24,7 +25,7 @@ public class CreateBoatEvent extends NormalEvent {
 	
 	@Override
 	public void activate(EventParser eventParser) {
-		this.boat = (CraftBoat) world.spawnBoat(new Location(world, x, y, z));
+		this.boat = (CraftBoat)world.spawn(new Location(world, x, y, z), Boat.class);
 		
 		super.activate(eventParser);
 	}
