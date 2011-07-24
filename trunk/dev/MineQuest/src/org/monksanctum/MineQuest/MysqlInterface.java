@@ -77,19 +77,19 @@ public class MysqlInterface {
 		this.real = real_sql;
 		this.user = user;
 		this.pass = pass;
-		reconnect();
 		if (silent > 0) {
 			this.silent = true;
-			return;
+		} else {
+			this.silent = false;
 		}
+		reconnect();
 		last = null;
-		this.silent = false;
 	}
 	
 	/**
 	 * Reconnect to the database with same parameters as before.
 	 */
-	public void reconnect() {
+	synchronized public void reconnect() {
 		try {
 			if (real) {
 				con = (Connection) DriverManager.getConnection(url, user, pass);
@@ -98,6 +98,9 @@ public class MysqlInterface {
 			}
 		} catch (SQLException e) {
 			MineQuest.log("[ERROR] Unable to Connect to MySQL Database");
+			if (!silent) {
+				e.printStackTrace();
+			}
 			return;
 		}
 		
@@ -105,6 +108,9 @@ public class MysqlInterface {
 			stmt = (Statement) con.createStatement();
 		} catch (SQLException e) {
 			MineQuest.log("[ERROR] Failed to setup MySQL Statement");
+			if (!silent) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -115,9 +121,9 @@ public class MysqlInterface {
 	 * @param the_query Query to Database.
 	 * @return ResultSet from query.
 	 */
-	public ResultSet query(String the_query) {
+	synchronized public ResultSet query(String the_query) {
 		if (stmt == null) {
-			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+			MineQuest.log("You are not connected to a database (try configuring MineQuest/main.properties)");
 			return null;
 		}
 		if (!silent) {
@@ -146,6 +152,9 @@ public class MysqlInterface {
 				last = stmt.executeQuery(the_query);
 				return last;
 			} catch (SQLException e1) {
+				if (!silent) {
+					e.printStackTrace();
+				}
 				return null;
 			}
 		}
@@ -158,10 +167,10 @@ public class MysqlInterface {
 	 * @param sql SQL Update String
 	 * @return Non-zero upon failure
 	 */
-	public int update(String sql) {
+	synchronized public int update(String sql) {
 		int ret;
 		if (stmt == null) {
-			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+			MineQuest.log("You are not connected to a database (try configuring MineQuest/main.properties)");
 			return 1;
 		}
 		if (!silent) {
@@ -198,10 +207,10 @@ public class MysqlInterface {
 		}
 	}
 
-	public int update(String sql, boolean extra_silent) {
+	synchronized public int update(String sql, boolean extra_silent) {
 		int ret;
 		if (stmt == null) {
-			MineQuest.log("You are not connected to a database (try configuring minequest.properties)");
+			MineQuest.log("You are not connected to a database (try configuring MineQuest/main.properties)");
 			return 1;
 		}
 		if (!silent) {

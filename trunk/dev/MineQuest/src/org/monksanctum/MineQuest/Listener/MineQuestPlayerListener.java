@@ -452,6 +452,18 @@ public class MineQuestPlayerListener extends PlayerListener {
         	} else {
         		player.sendMessage("You don't have permission to edit this area");
         	}
+        } else if (split[0].equals("/spawnnpcv")) {
+        	event.setCancelled(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /spawn_npcv <npc_name>");
+        		return;
+        	}
+        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
+            	Location location = player.getLocation();
+            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.VULNERABLE, player.getWorld(), location));
+        	} else {
+        		player.sendMessage("You don't have permission to edit this area");
+        	}
         } else if (split[0].equals("/removenpc")) {
         	event.setCancelled(true);
         	if (split.length < 2) {
