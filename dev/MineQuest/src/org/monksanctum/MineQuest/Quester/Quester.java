@@ -1719,6 +1719,10 @@ public class Quester {
         	health = max_health;
         }
         
+        if (newHealth < 0) {
+        	newHealth = 0;
+        }
+        
         EntityPlayer pl = ((CraftPlayer)player).getHandle();
         EntityTracker entitytracker = pl.b.getTracker(pl.dimension);
 
@@ -2287,9 +2291,8 @@ public class Quester {
 					world.manager.removePlayer(((CraftPlayer)player).getHandle());
 				}
 				try {
-//					event.setRespawnLocation(quest.getSpawn());
+					event.setRespawnLocation(quest.getSpawn());
 				} catch (Exception e) {
-					e.printStackTrace();
 				}
 				MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(500, this, quest.getSpawn()));
 			} else if (MineQuest.getSServer().getWorlds().get(0).getName().equals(quest.getWorld().getName())) {

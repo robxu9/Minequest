@@ -72,6 +72,28 @@ public class MineQuestEntityListener extends EntityListener {
 		if (event.isCancelled()) return;
 		
 		if (event instanceof EntityDamageByProjectileEvent) {
+			EntityDamageByEntityEvent evente = ((EntityDamageByProjectileEvent)event);
+
+			if (evente.getDamager() instanceof HumanEntity) {
+				if (MineQuest.getQuester((Player)evente.getEntity()) != null) {
+					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+				}
+			}
+
+			if (!event.isCancelled()) {
+				if (event.getEntity() instanceof HumanEntity) {
+					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+				} else if ((event.getEntity() instanceof LivingEntity) && 
+						(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
+					if (evente.getDamager() instanceof LivingEntity) {
+						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+								(LivingEntity)evente.getDamager()));
+					} else {
+						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+								null));
+					}
+				}
+			}
 			return;
 		}
 
@@ -84,7 +106,9 @@ public class MineQuestEntityListener extends EntityListener {
 
 			if (!event.isCancelled()) {
 				if (event.getEntity() instanceof HumanEntity) {
-					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+					if (MineQuest.getQuester((Player)evente.getEntity()) != null) {
+						MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+					}
 				} else if ((event.getEntity() instanceof LivingEntity) && 
 						(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
 					if (evente.getDamager() instanceof LivingEntity) {
