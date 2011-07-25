@@ -1,0 +1,4 @@
+name: MineQuest
+main: org.monksanctum.MineQuest.MineQuest
+version: 0.60
+author: Monk
