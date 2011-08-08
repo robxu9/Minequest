@@ -29,6 +29,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -74,14 +75,14 @@ public class MineQuestEntityListener extends EntityListener {
 		if (event instanceof EntityDamageByProjectileEvent) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByProjectileEvent)event);
 
-			if (evente.getDamager() instanceof HumanEntity) {
-				if (MineQuest.getQuester((Player)evente.getEntity()) != null) {
-					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+			if (evente.getDamager() instanceof Player) {
+				if (MineQuest.getQuester((Player)evente.getDamager()) != null) {
+					MineQuest.getQuester((Player)evente.getDamager()).attackEntity(evente.getEntity(), evente);
 				}
 			}
 
 			if (!event.isCancelled()) {
-				if (event.getEntity() instanceof HumanEntity) {
+				if (event.getEntity() instanceof Player) {
 					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
 				} else if ((event.getEntity() instanceof LivingEntity) && 
 						(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
@@ -100,12 +101,12 @@ public class MineQuestEntityListener extends EntityListener {
 		if (event instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
 
-			if (evente.getDamager() instanceof HumanEntity) {
+			if (evente.getDamager() instanceof Player) {
 			    MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
 			}
 
 			if (!event.isCancelled()) {
-				if (event.getEntity() instanceof HumanEntity) {
+				if (event.getEntity() instanceof Player) {
 					if (MineQuest.getQuester((Player)evente.getEntity()) != null) {
 						MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
 					}
@@ -152,6 +153,18 @@ public class MineQuestEntityListener extends EntityListener {
 			MQMob mob = MineQuest.getMob((LivingEntity)event.getEntity());
 			if (mob != null) {
 				mob.setHealth(0);
+			}
+		}
+	}
+	
+	@Override
+	public void onEntityDeath(EntityDeathEvent event) {
+		Entity entity = event.getEntity();
+		if (entity instanceof LivingEntity) {
+			MQMob mob = MineQuest.getMob((LivingEntity) entity);
+			
+			if (mob != null) {
+				MineQuest.killMob(mob);
 			}
 		}
 	}

@@ -18,6 +18,7 @@
  */
 package org.monksanctum.MineQuest.Mob;
 
+import org.bukkit.Chunk;
 import org.bukkit.entity.LivingEntity;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Quester.Quester;
@@ -115,5 +116,17 @@ public class MQMob {
 	
 	public void setSpawned() {
 		spawned = true;
+	}
+
+	public boolean inChunk(Chunk chunk) {
+		Chunk other = entity.getWorld().getChunkAt(entity.getLocation());
+		
+		if (chunk.getX() == other.getX()) {
+			if (chunk.getZ() == other.getZ()) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

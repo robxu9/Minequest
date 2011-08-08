@@ -33,6 +33,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Ability.Ability;
+import org.monksanctum.MineQuest.Event.NormalEvent;
 import org.monksanctum.MineQuest.Event.SpecialMobHandler;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
 
@@ -71,6 +72,7 @@ public class SpecialMob extends MQMob {
 	@Override
 	public void cancel() {
 		MineQuest.getEventQueue().cancel(id);
+		NormalEvent.count--;
 	}
 
 	@Override

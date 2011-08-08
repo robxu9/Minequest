@@ -857,7 +857,11 @@ public class NPCQuester extends Quester {
 	public boolean inChunk(Chunk chunk) {
 		if ((player == null) && (center == null)) return false;
 		if (chunk == null) return false;
-		if (center.getWorld() == null) return false;
+		if (player == null) {
+			if (center.getWorld() == null) return false;
+		} else {
+			if (player.getWorld() == null) return false;
+		}
 		Chunk my_chunk;
 		if (player != null) {
 			my_chunk = player.getWorld().getChunkAt(player.getLocation());
