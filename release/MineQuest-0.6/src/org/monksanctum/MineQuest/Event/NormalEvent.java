@@ -24,10 +24,12 @@ public abstract class NormalEvent implements Event {
 	protected long reset_time;
 	protected int id;
 	protected EventParser myParser;
+	public static int count = 0;
 	
 	public NormalEvent(long delay) {
 		this.delay = delay;
 		reset_time = 0;
+		count++;
 	}
 
 	@Override
@@ -65,6 +67,7 @@ public abstract class NormalEvent implements Event {
 
 	@Override
 	public void cancelEvent() {
+		NormalEvent.count--;
 		if (myParser != null) {
 			myParser.setComplete(true);
 		}

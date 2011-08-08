@@ -33,16 +33,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
-import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -61,6 +62,7 @@ import org.monksanctum.MineQuest.Configuration.SkillClassConfig;
 import org.monksanctum.MineQuest.Event.DelayedSQLEvent;
 import org.monksanctum.MineQuest.Event.EventQueue;
 import org.monksanctum.MineQuest.Event.NoMobs;
+import org.monksanctum.MineQuest.Event.NormalEvent;
 import org.monksanctum.MineQuest.Event.Absolute.HealEvent;
 import org.monksanctum.MineQuest.Event.Absolute.ManaEvent;
 import org.monksanctum.MineQuest.Listener.MineQuestBlockListener;
@@ -297,7 +299,7 @@ public class MineQuest extends JavaPlugin {
 	public static void checkAllMobs() {
     	for (World world : getSServer().getWorlds()) {
     		for (LivingEntity entity : world.getLivingEntities()) {
-    			if ((entity instanceof Monster) || (entity instanceof PigZombie) || (entity instanceof Ghast)) {
+    			if ((entity instanceof Monster) || (entity instanceof Ghast)) {
     				if (getMob(entity) == null) {
     					addMob(entity);
     				}
@@ -314,7 +316,7 @@ public class MineQuest extends JavaPlugin {
     	int i;
     	
     	for (i = 0; i < mobs.length; i++) {
-    		if ((mobs[i] != null) && ((mobs[i].getHealth() <= 0) || (mobs[i].isDead()))) {
+    		if ((mobs[i] != null) && ((mobs[i].getHealth() <= 0) || (mobs[i].isDead()) || notExists(mobs[i].getId()))) {
     			mobs[i].dropLoot();
     			if (mobs[i].getLastAttacker() != null) {
     				mobs[i].getLastAttacker().addKill(mobs[i]);
@@ -323,6 +325,60 @@ public class MineQuest extends JavaPlugin {
     		}
     	}
     }
+
+	private static boolean notExists(int id) {
+		for (World world : getSServer().getWorlds()) {
+			net.minecraft.server.World mworld = ((CraftWorld) world).getHandle();
+			for (Object obj : mworld.entityList) {
+				if (obj instanceof net.minecraft.server.Entity) {
+					net.minecraft.server.Entity entity = (net.minecraft.server.Entity) obj;
+
+					if (entity.id == id) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	public static void printMobs() {
+    	int i;
+    	
+    	for (i = 0; i < mobs.length; i++) {
+    		if (mobs[i] != null) {
+    			MineQuest.log("Mob:" + mobs[i].getId());
+    		}
+    	}
+	}
+	
+	public static void killMob(MQMob mob) {
+    	int i;
+    	
+    	for (i = 0; i < mobs.length; i++) {
+    		if ((mobs[i] != null) && (mobs[i].getId() == mob.getId())) {
+    			mobs[i].dropLoot();
+    			if (mobs[i].getLastAttacker() != null) {
+    				mobs[i].getLastAttacker().addKill(mobs[i]);
+    			}
+    			mobs[i] = null;
+    		}
+    	}
+	}
+	
+	public static void unloadMob(MQMob mob) {
+    	int i;
+    	
+    	for (i = 0; i < mobs.length; i++) {
+    		if ((mobs[i] != null) && (mobs[i].getId() == mob.getId())) {
+    			if (mobs[i].getLastAttacker() != null) {
+    				mobs[i].getLastAttacker().addKill(mobs[i]);
+    			}
+    			mobs[i] = null;
+    		}
+    	}
+	}
 	
 	/**
 	 * Starts the creation of town based on Player
@@ -1723,6 +1779,7 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_DAMAGE, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_TARGET, el, Priority.Highest, this);
+        pm.registerEvent(Event.Type.ENTITY_DEATH, el, Priority.Highest, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_REGAIN_HEALTH, el, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
@@ -1799,6 +1856,7 @@ public class MineQuest extends JavaPlugin {
 		} else {
 			if (heal_event != 0) {
 				MineQuest.getEventQueue().cancel(heal_event);
+				NormalEvent.count--;
 			}
 		}
 		boolean slow_mana = general.getBoolean("slow_mana", true);
@@ -1809,6 +1867,7 @@ public class MineQuest extends JavaPlugin {
 		} else {
 			if (mana_event != 0) {
 				MineQuest.getEventQueue().cancel(mana_event);
+				NormalEvent.count--;
 			}
 		}
 		server_owner = general.getString("mayor", "jmonk");
@@ -2293,5 +2352,15 @@ public class MineQuest extends JavaPlugin {
 
 	public static long getVulnerableDelay() {
 		return npc_vulnerable_delay;
+	}
+
+	public static void unloadMobs(Chunk chunk) {
+		for (MQMob mob : mobs) {
+			if (mob != null) {
+				if (mob.inChunk(chunk)) {
+					unloadMob(mob);
+				}
+			}
+		}
 	}
 }

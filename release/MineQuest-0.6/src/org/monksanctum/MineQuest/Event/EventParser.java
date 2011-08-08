@@ -62,6 +62,9 @@ public class EventParser implements java.lang.Runnable {
 			}
 		} else if (complete) {
 			MineQuest.getSServer().getScheduler().cancelTask(id);
+			if (event instanceof NormalEvent) {
+				NormalEvent.count--;
+			}
 		}
 	}
 

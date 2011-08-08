@@ -26,6 +26,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
@@ -40,6 +42,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Event.NormalEvent;
 import org.monksanctum.MineQuest.Event.Absolute.EntityTeleportEvent;
 import org.monksanctum.MineQuest.Quest.QuestProspect;
 import org.monksanctum.MineQuest.Quester.NPCMode;
@@ -87,7 +90,6 @@ public class MineQuestPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		MineQuest.checkMobs();
 		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		MineQuest.getQuester(event.getPlayer()).move(event.getFrom(), event.getTo());
 		super.onPlayerMove(event);
@@ -440,46 +442,6 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("You are not holding anything");
         	}
         	event.setCancelled(true);
-        } else if (split[0].equals("/spawnnpc")) {
-        	event.setCancelled(true);
-        	if (split.length < 2) {
-        		player.sendMessage("Usage: /spawn_npc <npc_name>");
-        		return;
-        	}
-        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
-            	Location location = player.getLocation();
-            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
-        	} else {
-        		player.sendMessage("You don't have permission to edit this area");
-        	}
-        } else if (split[0].equals("/spawnnpcv")) {
-        	event.setCancelled(true);
-        	if (split.length < 2) {
-        		player.sendMessage("Usage: /spawn_npcv <npc_name>");
-        		return;
-        	}
-        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
-            	Location location = player.getLocation();
-            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.VULNERABLE, player.getWorld(), location));
-        	} else {
-        		player.sendMessage("You don't have permission to edit this area");
-        	}
-        } else if (split[0].equals("/removenpc")) {
-        	event.setCancelled(true);
-        	if (split.length < 2) {
-        		player.sendMessage("Usage: /remove_npc <npc_name>");
-        		return;
-        	}
-        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
-        		NPCQuester quester = (NPCQuester)MineQuest.getQuester(split[1]);
-	        	if (MineQuest.getQuester(player).canEdit(quester.getPlayer().getLocation().getBlock())) {
-	        		quester.remNPC();
-	        	} else {
-	        		player.sendMessage("You don't have permission to edit their area");
-	        	}
-        	} else {
-        		player.sendMessage(split[1] + " is not a valid NPC to remove");
-        	}
         } else if (split[0].equals("/replace")) {
         	if (split.length < 3) {
         		player.sendMessage("Usage: /replace old_ability_name with new_ability_name");
@@ -1279,7 +1241,17 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (player.getWorld().getLivingEntities() == null) {
         		player.sendMessage("No Living Entities List");
         	} else {
-        		player.sendMessage("There are " + MineQuest.getMobSize() + " " + player.getWorld().getLivingEntities().size());
+        		int count = 0;
+        		int total = 0;
+        		for (World world : MineQuest.getSServer().getWorlds()) {
+	        		for (LivingEntity entity : world.getLivingEntities()) {
+	        			if (entity instanceof Monster) {
+	        				count++;
+	        			}
+	        		}
+	        		total += world.getLivingEntities().size();
+        		}
+        		player.sendMessage("There are " + MineQuest.getMobSize() + " " + count + " " + total);
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/recalculatehealth")) {
@@ -1322,6 +1294,52 @@ public class MineQuestPlayerListener extends PlayerListener {
         	int mana  = Integer.parseInt(split[1]);
         	int max = Integer.parseInt(split[2]);
         	player.sendMessage("MQ:Mana-" + mana + "/" + max);
+        	event.setCancelled(true);
+        } else if (split[0].equals("/spawnnpc")) {
+        	event.setCancelled(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /spawn_npc <npc_name>");
+        		return;
+        	}
+        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
+            	Location location = player.getLocation();
+            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
+        	} else {
+        		player.sendMessage("You don't have permission to edit this area");
+        	}
+        } else if (split[0].equals("/spawnnpcv")) {
+        	event.setCancelled(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /spawn_npcv <npc_name>");
+        		return;
+        	}
+        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
+            	Location location = player.getLocation();
+            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.VULNERABLE, player.getWorld(), location));
+        	} else {
+        		player.sendMessage("You don't have permission to edit this area");
+        	}
+        } else if (split[0].equals("/removenpc")) {
+        	event.setCancelled(true);
+        	if (split.length < 2) {
+        		player.sendMessage("Usage: /remove_npc <npc_name>");
+        		return;
+        	}
+        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
+        		NPCQuester quester = (NPCQuester)MineQuest.getQuester(split[1]);
+	        	if (MineQuest.getQuester(player).canEdit(quester.getPlayer().getLocation().getBlock())) {
+	        		quester.remNPC();
+	        	} else {
+	        		player.sendMessage("You don't have permission to edit their area");
+	        	}
+        	} else {
+        		player.sendMessage(split[1] + " is not a valid NPC to remove");
+        	}
+        } else if (split[0].equals("/getevents")) {
+        	player.sendMessage("I think there are " + NormalEvent.count + " Events");
+        	event.setCancelled(true);
+        } else if (split[0].equals("/printmobs")) {
+        	MineQuest.printMobs();
         	event.setCancelled(true);
         }
 	}
