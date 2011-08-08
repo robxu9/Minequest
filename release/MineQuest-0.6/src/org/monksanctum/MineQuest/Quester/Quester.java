@@ -2405,10 +2405,10 @@ public class Quester {
 	 * @param i New Health
 	 */
 	public void setHealth(int i) {
+		if (i > getMaxHealth()) {
+			i = getMaxHealth();
+		}
 		if (MineQuest.mqDamageEnabled(this)) {
-			if (i > max_health) {
-				i = max_health;
-			}
 			health = i;
 			
 			updateHealth();
