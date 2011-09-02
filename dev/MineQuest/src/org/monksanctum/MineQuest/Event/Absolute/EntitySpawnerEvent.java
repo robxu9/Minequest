@@ -22,7 +22,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Event.EventParser;
 import org.monksanctum.MineQuest.Event.PeriodicEvent;
@@ -62,21 +61,21 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 			if (creatureType == null) {
 				MineQuest.log("Null CreatureType!!");
 			}
-			MineQuest.setSpawning(true);
+			MineQuest.config.setSpawning(true);
 			entity = world.spawnCreature(location, creatureType);
-			MineQuest.setSpawning(false);
+			MineQuest.config.setSpawning(false);
 			if (entity != null) {
 				if (superm) {
-					MineQuest.setMQMob(new SpecialMob(entity));
+					MineQuest.mobHandler.setMQMob(new SpecialMob(entity));
 				} else {
-					MineQuest.setMQMob(new MQMob(entity));
+					MineQuest.mobHandler.setMQMob(new MQMob(entity));
 				}
 			}
-			MineQuest.getMob(entity).setSpawned();
+			MineQuest.mobHandler.getMob(entity).setSpawned();
 		}
 		
 		if (complete) {
-			MineQuest.getMob(entity).setHealth(0);
+			MineQuest.mobHandler.getMob(entity).setHealth(0);
 		}
 		eventParser.setComplete(complete);
 	}
@@ -91,8 +90,8 @@ public class EntitySpawnerEvent extends PeriodicEvent {
 		super.cancelEvent();
 		
 		if (entity != null) {
-			if (MineQuest.getMob(entity) != null) {
-				MineQuest.getMob(entity).setHealth(0);
+			if (MineQuest.mobHandler.getMob(entity) != null) {
+				MineQuest.mobHandler.getMob(entity).setHealth(0);
 			} else {
 				entity.setHealth(0);
 			}

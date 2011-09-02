@@ -36,8 +36,8 @@ public class NoMobs extends PeriodicEvent {
 		
 		for (LivingEntity entity : MineQuest.getSServer().getWorld(world).getLivingEntities()) {
 			if (!(entity instanceof Player)) {
-				if (MineQuest.getMob(entity) != null) {
-					MineQuest.getMob(entity).setHealth(0);
+				if (MineQuest.mobHandler.getMob(entity) != null) {
+					MineQuest.mobHandler.getMob(entity).setHealth(0);
 				} else {
 					entity.setHealth(0);
 				}

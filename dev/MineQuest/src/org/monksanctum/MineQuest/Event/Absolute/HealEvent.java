@@ -18,7 +18,7 @@ public class HealEvent extends PeriodicEvent {
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		for (Quester quester : MineQuest.getQuesters()) {
+		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 			if (!quester.inQuest()) {
 				quester.setHealth(quester.getHealth() + amount);
 			}

@@ -18,9 +18,9 @@
  */
 package org.monksanctum.MineQuest.Event;
 
+import org.monksanctum.MineQuest.Economy.StoreBlock;
 import org.monksanctum.MineQuest.Quest.Party;
 import org.monksanctum.MineQuest.Quester.Quester;
-import org.monksanctum.MineQuest.Store.StoreBlock;
 
 public class ExperienceEvent extends NormalEvent {
 	private int exp;

@@ -29,12 +29,12 @@ import org.bukkit.World;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Economy.NPCSignShop;
+import org.monksanctum.MineQuest.Economy.Store;
 import org.monksanctum.MineQuest.Event.CheckMobEvent;
 import org.monksanctum.MineQuest.Quester.NPCMode;
 import org.monksanctum.MineQuest.Quester.NPCQuester;
 import org.monksanctum.MineQuest.Quester.Quester;
-import org.monksanctum.MineQuest.Store.NPCSignShop;
-import org.monksanctum.MineQuest.Store.Store;
 
 public class Town extends Village {
 	private Location npc_spawn;
@@ -73,7 +73,7 @@ public class Town extends Village {
 			s.queryData();
 		}
 		
-		if (MineQuest.isTownNoMobs()) {
+		if (MineQuest.config.town_no_mobs) {
 			MineQuest.getEventQueue().addEvent(new CheckMobEvent(this));
 		}
 	}
@@ -83,7 +83,7 @@ public class Town extends Village {
 			quester.sendMessage("You are not authorized to edit town");
 			return;
 		}
-		if (MineQuest.getQuester(name) != null) {
+		if (MineQuest.questerHandler.getQuester(name) != null) {
 			quester.sendMessage("Quester with that name exists already");
 			return;
 		}
@@ -95,8 +95,8 @@ public class Town extends Village {
 		}
 		
 		World world = MineQuest.getSServer().getWorlds().get(0);
-		MineQuest.addQuester(new NPCQuester(name, NPCMode.FOR_SALE, world, getNPCSpawn()));
-		((NPCQuester)MineQuest.getQuester(name)).setTown(getName());
+		MineQuest.questerHandler.addQuester(new NPCQuester(name, NPCMode.FOR_SALE, world, getNPCSpawn()));
+		((NPCQuester)MineQuest.questerHandler.getQuester(name)).setTown(getName());
 	}
 
 	public void buy(Quester quester, Property prop) {
@@ -104,7 +104,7 @@ public class Town extends Village {
 		
 		prop.setOwner(quester);
 		
-		MineQuest.getSQLServer().update("UPDATE " + name + " SET name='" + quester.getName() 
+		MineQuest.getSQLServer().aupdate("UPDATE " + name + " SET name='" + quester.getName() 
 				+ "' WHERE x='" + prop.getX() + "' AND z='" + prop.getZ() + "' AND y='" + prop.getY() + "'");
 		quester.sendMessage("You now own this property");
 	}
@@ -118,7 +118,7 @@ public class Town extends Village {
 	}
 	
 	public void createProperty(Player player) {
-		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.questerHandler.getQuester(player))) {
 			player.getName();
 			start = player.getLocation();
 		} else {
@@ -127,7 +127,7 @@ public class Town extends Village {
 	}
 	
 	public void createStore(Player player) {
-		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.questerHandler.getQuester(player))) {
 			player.getName();
 			start = player.getLocation();
 		} else {
@@ -193,7 +193,7 @@ public class Town extends Village {
 	}
 	
 	public void finishProperty(Player player, boolean b) {
-		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.questerHandler.getQuester(player))) {
 			Location end = player.getLocation();
 			int x, y, z, max_x, max_z, height;
 			if (end.getX() > start.getX()) {
@@ -224,7 +224,7 @@ public class Town extends Village {
 			Location start = new Location(player.getWorld(), (double)x, (double)y, (double)z);
 			Location ends = new Location(player.getWorld(), max_x, (double)y + height, max_z);
 			properties.add(new Property(null, start, ends, height > 0, 10000000));
-			MineQuest.getSQLServer().update("INSERT INTO " + name + 
+			MineQuest.getSQLServer().aupdate("INSERT INTO " + name + 
 					" (name, x, y, z, max_x, max_z, height, store_prop, price) VALUES('null', '" + x + "', '" + y + "', '" + z
 					+ "', '" + max_x + "', '" + max_z + "', '" + height
 					+ "', '0', '10000000')");
@@ -235,7 +235,7 @@ public class Town extends Village {
 	}
 
 	public void finishStore(Player player, String name) {
-		if (getTownProperty().canEdit(MineQuest.getQuester(player))) {
+		if (getTownProperty().canEdit(MineQuest.questerHandler.getQuester(player))) {
 			Location end = player.getLocation();
 			int x, y, z, max_x, max_z, height;
 			if (end.getX() > start.getX()) {
@@ -259,12 +259,12 @@ public class Town extends Village {
 				y = (int)start.getY();
 				height = (int)(end.getY() - start.getY());;
 			}
-			MineQuest.getSQLServer().update("INSERT INTO " + this.name + 
+			MineQuest.getSQLServer().aupdate("INSERT INTO " + this.name + 
 					" (name, x, y, z, max_x, max_z, height, store_prop, price) VALUES('"
 					+ name + "', '" + x + "', '" + y + "', '" + z
 					+ "', '" + max_x + "', '" + max_z + "', '" + height
 					+ "', '1', '10000000')");
-			MineQuest.getSQLServer().update("CREATE TABLE IF NOT EXISTS " + name + " (item_id INT, price DOUBLE, quantity INT, type VARCHAR(30))");
+			MineQuest.getSQLServer().aupdate("CREATE TABLE IF NOT EXISTS " + name + " (item_id INT, price DOUBLE, quantity INT, type VARCHAR(30))");
 			stores.add(new NPCSignShop(name, this.name));
 			stores.get(stores.size() - 1).queryData();
 			player.sendMessage("Store " + name + " created");
@@ -276,7 +276,7 @@ public class Town extends Village {
 	public List<NPCQuester> getAvailableNPCs() {
 		List<NPCQuester> npcs = new ArrayList<NPCQuester>();
 		
-		for (Quester quester : MineQuest.getQuesters()) {
+		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 			if (quester instanceof NPCQuester) {
 				NPCQuester npc = (NPCQuester)quester;
 				if ((npc.getMode() == NPCMode.FOR_SALE) &&
@@ -371,7 +371,7 @@ public class Town extends Village {
 	public void setMERCSpawn(Location spawn) {
 		this.npc_spawn = new Location(spawn.getWorld(),
 				spawn.getX(), spawn.getY(), spawn.getZ());
-		MineQuest.getSQLServer().update("UPDATE towns SET merc_x='" + (int)spawn.getX() + "', merc_y='" + 
+		MineQuest.getSQLServer().aupdate("UPDATE towns SET merc_x='" + (int)spawn.getX() + "', merc_y='" + 
 				(int)spawn.getY() + "', merc_z='" + (int)spawn.getZ() + "' WHERE name='" + name + "'");
 	}
 	
@@ -385,17 +385,17 @@ public class Town extends Village {
 	}
 	
 	public void setOwner(String string) {
-		if (MineQuest.getQuester(string) != null) {
-			MineQuest.getSQLServer().update("UPDATE towns SET owner='" + string + "' WHERE name='" + name + "'");
+		if (MineQuest.questerHandler.getQuester(string) != null) {
+			MineQuest.getSQLServer().aupdate("UPDATE towns SET owner='" + string + "' WHERE name='" + name + "'");
 		}
-		getTownProperty().setOwner(MineQuest.getQuester(string));
+		getTownProperty().setOwner(MineQuest.questerHandler.getQuester(string));
 	}
 	
 	public void setPrice(Player player, long price) {
 		Property prop = getProperty(player);
 		if (prop != null) {
 			getProperty(player).setPrice(price);
-			MineQuest.getSQLServer().update("UPDATE " + name + " SET price='" + price + "' WHERE x='" + 
+			MineQuest.getSQLServer().aupdate("UPDATE " + name + " SET price='" + price + "' WHERE x='" + 
 					prop.getX() + "' AND y='" + prop.getY() + "' AND z='" + prop.getZ() + "'");
 			player.sendMessage("Price Set!");
 		}
@@ -403,12 +403,12 @@ public class Town extends Village {
 
 	public void setSpawn(Location spawn) {
 		this.spawn = spawn;
-		MineQuest.getSQLServer().update("UPDATE towns SET spawn_x='" + (int)spawn.getX() + "', spawn_y='" + 
+		MineQuest.getSQLServer().aupdate("UPDATE towns SET spawn_x='" + (int)spawn.getX() + "', spawn_y='" + 
 				(int)spawn.getY() + "', spawn_z='" + (int)spawn.getZ() + "' WHERE name='" + name + "'");
 	}
 
 	public void remove(Property prop) {
-		MineQuest.getSQLServer().update(
+		MineQuest.getSQLServer().aupdate(
 				"DELETE FROM " + name + " WHERE x='" + prop.getX()
 						+ "' AND y='" + prop.getY() + "' AND z='" + prop.getZ()
 						+ "' AND max_x='" + prop.getMaxX() + "' AND max_z='"

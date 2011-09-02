@@ -35,7 +35,7 @@ public class MineQuestBlockListener extends BlockListener {
 	@Override
 	public void onBlockDamage(org.bukkit.event.block.BlockDamageEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		Quester quester = MineQuest.getQuester(event.getPlayer());
+		Quester quester = MineQuest.questerHandler.getQuester(event.getPlayer());
 		
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 
@@ -61,7 +61,7 @@ public class MineQuestBlockListener extends BlockListener {
 	@Override
 	public void onBlockBreak(BlockBreakEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		Quester quester = MineQuest.getQuester(event.getPlayer());
+		Quester quester = MineQuest.questerHandler.getQuester(event.getPlayer());
 		
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 
@@ -86,7 +86,7 @@ public class MineQuestBlockListener extends BlockListener {
 	
 //	@Override
 //	public void onBlockRightClick(org.bukkit.event.block.BlockRightClickEvent event) {
-//		Quester quester = MineQuest.getQuester(event.getPlayer());
+//		Quester quester = MineQuest.questerHandler.getQuester(event.getPlayer());
 //		
 //		if (quester.inQuest()) {
 //			quester.getQuest().canEdit(quester, event.getBlock());
@@ -117,7 +117,7 @@ public class MineQuestBlockListener extends BlockListener {
 	@Override
 	public void onBlockPlace(org.bukkit.event.block.BlockPlaceEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		Quester quester = MineQuest.getQuester(event.getPlayer());
+		Quester quester = MineQuest.questerHandler.getQuester(event.getPlayer());
 		
 		if (quester.isDebug()) {
 			quester.sendMessage(event.getBlock().getX() + " " + 

@@ -525,16 +525,16 @@ public abstract class Ability {
 	 * @param player
 	 */
 	protected void giveCostNoExp(Player player) {
-		if (MineQuest.isSpellCompEnabled()) {
+		if (MineQuest.config.spell_comp) {
 			giveSpellComps(player);
 		}
-		if (MineQuest.isManaEnabled()) {
+		if (MineQuest.config.mana) {
 			giveManaCost(player);
 		}
 	}
 
 	private void giveManaCost(Player player) {
-		MineQuest.getQuester(player).addMana(getRealManaCost());
+		MineQuest.questerHandler.getQuester(player).addMana(getRealManaCost());
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -718,7 +718,7 @@ public abstract class Ability {
 		for (i = 0; i < entities.size(); i++) {
 			if (isType(entities.get(i), type)) {
 				moveOut(player, entities.get(i), distance);
-				MineQuest.damage(entities.get(i), 1, MineQuest.getQuester(player));
+				MineQuest.damage(entities.get(i), 1, MineQuest.questerHandler.getQuester(player));
 			}
 		}
 		

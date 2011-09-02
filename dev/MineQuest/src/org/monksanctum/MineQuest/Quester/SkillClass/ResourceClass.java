@@ -43,12 +43,12 @@ public class ResourceClass extends SkillClass {
 		super.blockBreak(event);
 		
 		if (isClassItem(event.getBlock().getType())) {
-			expAdd(MineQuest.getDestroyClassExp());
+			expAdd(MineQuest.config.destroy_class_exp);
 		} else {
-			expAdd(MineQuest.getDestroyNonClassExp());
+			expAdd(MineQuest.config.destroy_non_class_exp);
 		}
 
-		if (level >= MineQuest.getDestroyMaterialsLevel()) {
+		if (level >= MineQuest.config.destroy_materials_level) {
 			if (isStoneWoodenTool(quester.getPlayer().getItemInHand())) {
 				if (isBlockGiveType(event.getBlock().getTypeId())) {
 					quester.getPlayer().getInventory().addItem(getItemGive(event.getBlock().getTypeId()));

@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.monksanctum.MineQuest.Ability.AbilityBinder;
+import org.monksanctum.MineQuest.Event.SQLEvent;
 
 /**
  * MysqlInterface is a class that wraps the JDBC
@@ -247,5 +248,9 @@ public class MysqlInterface {
 				return 1;
 			}
 		}
+	}
+
+	public void aupdate(String string) {
+		MineQuest.getEventQueue().addEventAsync(new SQLEvent(10, string));
 	}
 }

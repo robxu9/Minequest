@@ -14,7 +14,7 @@ public class VillageArea extends Area {
 	 */
 	public void setX(int x) {
 		this.x = x;
-		Village village = MineQuest.getVillage(new Location(null, x + 1, y, z + 1));
+		Village village = MineQuest.townHandler.getVillage(new Location(null, x + 1, y, z + 1));
 		if (village == null) {
 			MineQuest.log("[ERROR] Property outside of Village...");
 			return;
@@ -28,7 +28,7 @@ public class VillageArea extends Area {
 	 */
 	public void setMaxX(int x) {
 		this.max_x = x;
-		Village village = MineQuest.getVillage(new Location(null, x + 1, y, z + 1));
+		Village village = MineQuest.townHandler.getVillage(new Location(null, x + 1, y, z + 1));
 		if (village == null) {
 			MineQuest.log("[ERROR] Property outside of Village...");
 			return;
@@ -42,7 +42,7 @@ public class VillageArea extends Area {
 	 */
 	public void setZ(int z) {
 		this.z = z;
-		Village village = MineQuest.getVillage(new Location(null, x + 1, y, z + 1));
+		Village village = MineQuest.townHandler.getVillage(new Location(null, x + 1, y, z + 1));
 		if (village == null) {
 			MineQuest.log("[ERROR] Property outside of Village...");
 			return;
@@ -56,7 +56,7 @@ public class VillageArea extends Area {
 	 */
 	public void setMaxZ(int z) {
 		this.max_z = z;
-		Village village = MineQuest.getVillage(new Location(null, x + 1, y, z + 1));
+		Village village = MineQuest.townHandler.getVillage(new Location(null, x + 1, y, z + 1));
 		if (village == null) {
 			MineQuest.log("[ERROR] Property outside of Village...");
 			return;
@@ -70,7 +70,7 @@ public class VillageArea extends Area {
 	 */
 	public void setY(int y) {
 		this.y = y;
-		Village village = MineQuest.getVillage(new Location(null, x + 1, y, z + 1));
+		Village village = MineQuest.townHandler.getVillage(new Location(null, x + 1, y, z + 1));
 		if (village == null) {
 			MineQuest.log("[ERROR] Property outside of Village...");
 			return;
@@ -84,7 +84,7 @@ public class VillageArea extends Area {
 	 */
 	public void setHeight(int h) {
 		this.height = h;
-		Village village = MineQuest.getVillage(new Location(null, x + 1, y, z + 1));
+		Village village = MineQuest.townHandler.getVillage(new Location(null, x + 1, y, z + 1));
 		if (village == null) {
 			MineQuest.log("[ERROR] Property outside of Village...");
 			return;

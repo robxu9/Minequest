@@ -48,7 +48,7 @@ public class CombatClass extends SkillClass {
 	public boolean attack(LivingEntity defend, EntityDamageByEntityEvent event) {
 		event.setDamage(getDamage());
 
-		expAdd(getExpMob(defend) + MineQuest.getAdjustment() * MineQuest.getAdjustmentMultiplier());
+		expAdd(getExpMob(defend) + MineQuest.questerHandler.getAdjustment() * MineQuest.config.adjustment_multiplier);
 		
 		return true;
 	}
@@ -61,7 +61,7 @@ public class CombatClass extends SkillClass {
 	 * @return Amount of experience
 	 */
 	protected int getExpMob(LivingEntity defend) {
-		return MineQuest.getExpMob();
+		return MineQuest.config.exp_damage;
 	}
 	
 	/**

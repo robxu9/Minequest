@@ -79,7 +79,7 @@ public class SpecialMob extends MQMob {
 	public int attack(int amount, LivingEntity player) {
 		if (entity instanceof Zombie) {
 			if (generator.nextDouble() < .8) {
-				MineQuest.getQuester((Player)player).poison();
+				MineQuest.questerHandler.getQuester((Player)player).poison();
 			}
 		} else if (entity instanceof Spider) {
 			if (generator.nextDouble() < .2) {
@@ -88,7 +88,7 @@ public class SpecialMob extends MQMob {
 			}
 		} else if (entity instanceof Skeleton) {
 			double num = generator.nextDouble();
-			SkillClass skill = SkillClass.newShell(MineQuest.getSkeletonType());
+			SkillClass skill = SkillClass.newShell(MineQuest.config.skeleton_type);
 			List<Ability> abilities = Ability.newAbilities(skill);
 			int index = (int)(num * abilities.size());
 			

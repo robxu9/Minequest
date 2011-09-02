@@ -99,7 +99,7 @@ public class SkillClass {
 		//Shell
 		this.type = type;
 		generator = new Random();
-		level = MineQuest.getAdjustmentMultiplier() * MineQuest.getAdjustment() * 10;
+		level = MineQuest.config.adjustment_multiplier * MineQuest.questerHandler.getAdjustment() * 10;
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class SkillClass {
 		if (quester != null) {
 			update();
 		} else {
-			level = MineQuest.getAdjustmentMultiplier() * MineQuest.getAdjustment() * 10;
+			level = MineQuest.config.adjustment_multiplier * MineQuest.questerHandler.getAdjustment() * 10;
 		}
 	}
 	
@@ -148,7 +148,7 @@ public class SkillClass {
 			if (!results.getString("abil" + i).equals("0")) {
 				list[count] = Ability.newAbility(results.getString("abil" + i), this);
 				if (list[count++] == null) {
-					MineQuest.getSQLServer().update(
+					MineQuest.getSQLServer().aupdate(
 							"UPDATE abilities SET abil" + i
 									+ "='0' WHERE abil_list_id='" + abilId
 									+ "'");
@@ -185,7 +185,7 @@ public class SkillClass {
 			
 			for (i = 0; i < 10; i++) {
 				if (results.getString("abil" + i).equals("0")) {
-					MineQuest.getSQLServer().update("UPDATE abilities SET abil" + i + "='" + string
+					MineQuest.getSQLServer().aupdate("UPDATE abilities SET abil" + i + "='" + string
 							+ "' WHERE abil_list_id='" + abil_list_id + "'");
 					break;
 				}
@@ -677,7 +677,6 @@ public class SkillClass {
 	 */
 	protected boolean isWearing(int i, boolean[] flags) {
 		if (quester.getPlayer() == null) return false;
-		int ct = 0;;
 
 		PlayerInventory equip = quester.getPlayer().getInventory();
 
@@ -688,7 +687,6 @@ public class SkillClass {
 					return true;
 				}
 			}
-			ct++;
 		}
 
 		return false;
@@ -790,7 +788,7 @@ public class SkillClass {
 		}
 		
 		ability_list[i] = new_ability;
-		MineQuest.getSQLServer().update("UPDATE abilities SET abil" + i + "='" + new_ability.getName()
+		MineQuest.getSQLServer().aupdate("UPDATE abilities SET abil" + i + "='" + new_ability.getName()
 				+ "' WHERE abil_list_id='" + abil_list_id + "'");
 		quester.sendMessage(old + " Ability has been replaced with " + new_ability.getName() + " Ability in your spellbook");
 	}

@@ -77,7 +77,7 @@ public class ChestSet {
 
 	public void clicked(Player player, Block chest) {
 		if (add) {
-			Town town = MineQuest.getTown(chest.getLocation());
+			Town town = MineQuest.townHandler.getTown(chest.getLocation());
 			
 			if (town != null) {
 				int i;
@@ -92,7 +92,7 @@ public class ChestSet {
 				}
 				
 				chests.add(chest.getLocation());
-				MineQuest.getSQLServer().update("INSERT INTO chests (name, town, x, y, z) VALUES('" + quester.getSName() + "', '" + town.getName() + "', '" 
+				MineQuest.getSQLServer().aupdate("INSERT INTO chests (name, town, x, y, z) VALUES('" + quester.getSName() + "', '" + town.getName() + "', '" 
 						+ chest.getX() + "', '" 
 						+ chest.getY() + "', '" + chest.getZ() + "')");
 			} else {
@@ -100,7 +100,7 @@ public class ChestSet {
 				boolean flag = false;
 				
 				for (i = 0; i < chests.size(); i++) {
-					Town this_town = MineQuest.getTown(chests.get(i));
+					Town this_town = MineQuest.townHandler.getTown(chests.get(i));
 					if (this_town == null) {
 						flag = true;
 					}
@@ -136,7 +136,7 @@ public class ChestSet {
 		}
 
 		selected = i;
-		Town town = MineQuest.getTown(chests.get(i));
+		Town town = MineQuest.townHandler.getTown(chests.get(i));
 		if (((town != null) && (MineQuest.getSQLServer().update("UPDATE questers SET selected_chest='" + town.getName() 
 					+ "' WHERE name='" + quester.getSName() + "'") == -1))) {
 			MineQuest.log("[ChestSet] Error: Unable to update selected chest");
@@ -205,7 +205,7 @@ public class ChestSet {
 		int i;
 		
 		for (i = 0; i < chests.size(); i++) {
-			if ((town == null) && (MineQuest.getTown(chests.get(i)) == null)) {
+			if ((town == null) && (MineQuest.townHandler.getTown(chests.get(i)) == null)) {
 				if (chests.size() > 1) {
 					if (i > 0) {
 						setSelected(0);

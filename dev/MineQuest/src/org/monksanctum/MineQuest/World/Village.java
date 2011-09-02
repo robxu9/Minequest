@@ -50,7 +50,7 @@ public class Village {
 			e.printStackTrace();
 		}
 		
-		if (MineQuest.isTownNoMobs()) {
+		if (MineQuest.config.town_no_mobs) {
 			MineQuest.getEventQueue().addEvent(new CheckMobEvent(this));
 		}
 	}
@@ -64,8 +64,8 @@ public class Village {
 
 	private void checkMob(Monster livingEntity) {
 		if (isWithin(livingEntity.getLocation()) && 
-				((MineQuest.getMob(livingEntity) == null) || 
-					!(MineQuest.getMob(livingEntity).isSpawned()))) {
+				((MineQuest.mobHandler.getMob(livingEntity) == null) || 
+					!(MineQuest.mobHandler.getMob(livingEntity).isSpawned()))) {
 			livingEntity.setHealth(0);
 		}
 	}

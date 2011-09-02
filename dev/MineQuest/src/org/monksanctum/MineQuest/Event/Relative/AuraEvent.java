@@ -54,9 +54,9 @@ public class AuraEvent extends RelativeEvent {
 		
 		for (LivingEntity entity : affected) {
 			if (players) {
-				MineQuest.getQuester((Player)entity).setHealth(MineQuest.getQuester((Player)entity).getHealth() + change);
+				MineQuest.questerHandler.getQuester((Player)entity).setHealth(MineQuest.questerHandler.getQuester((Player)entity).getHealth() + change);
 			} else {
-				MineQuest.getMob(entity).damage(change);
+				MineQuest.mobHandler.getMob(entity).damage(change);
 			}
 		}
 		

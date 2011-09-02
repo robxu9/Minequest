@@ -14,7 +14,7 @@ public class RespawnEvent extends PeriodicEvent {
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		for (Quester quester : MineQuest.getQuesters()) {
+		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 			if (quester instanceof NPCQuester) {
 				((NPCQuester)quester).redo();
 			}

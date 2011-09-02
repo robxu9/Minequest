@@ -48,7 +48,7 @@ public class HealthEntitySpawn extends QuestEvent {
 		if (entity == null) {
 			entity = location.getWorld().spawnCreature(location, creatureType);
 			if (entity != null) {
-				MineQuest.setMQMob(new HealthMob(entity, health));
+				MineQuest.mobHandler.setMQMob(new HealthMob(entity, health));
 			} else {
 				MineQuest.log("Unable to create Health Entity");
 				eventParser.setComplete(true);
