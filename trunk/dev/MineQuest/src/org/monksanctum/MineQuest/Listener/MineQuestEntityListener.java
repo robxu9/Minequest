@@ -46,10 +46,10 @@ public class MineQuestEntityListener extends EntityListener {
 		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		Entity entity = event.getEntity();
 		
-		if (MineQuest.canCreate(entity)) {
+		if (MineQuest.mobHandler.canCreate(entity)) {
 			if (entity instanceof Monster) {
-				MineQuest.addMob((Monster)entity);
-				MineQuest.checkMobs();
+				MineQuest.mobHandler.addMob((Monster)entity);
+				MineQuest.mobHandler.checkMobs();
 			}
 		} else {
 			event.setCancelled(true);
@@ -61,7 +61,7 @@ public class MineQuestEntityListener extends EntityListener {
 		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.getEntity() instanceof Player) {
 			if (!MineQuest.isMQEnabled((Player) event.getEntity())) return;
-			Quester quester = MineQuest.getQuester((Player)event.getEntity());
+			Quester quester = MineQuest.questerHandler.getQuester((Player)event.getEntity());
 			
 			quester.regain(event);
 		}
@@ -76,21 +76,21 @@ public class MineQuestEntityListener extends EntityListener {
 			EntityDamageByEntityEvent evente = ((EntityDamageByProjectileEvent)event);
 
 			if (evente.getDamager() instanceof Player) {
-				if (MineQuest.getQuester((Player)evente.getDamager()) != null) {
-					MineQuest.getQuester((Player)evente.getDamager()).attackEntity(evente.getEntity(), evente);
+				if (MineQuest.questerHandler.getQuester((Player)evente.getDamager()) != null) {
+					MineQuest.questerHandler.getQuester((Player)evente.getDamager()).attackEntity(evente.getEntity(), evente);
 				}
 			}
 
 			if (!event.isCancelled()) {
 				if (event.getEntity() instanceof Player) {
-					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+					MineQuest.questerHandler.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
 				} else if ((event.getEntity() instanceof LivingEntity) && 
-						(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
+						(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()) != null)) {
 					if (evente.getDamager() instanceof LivingEntity) {
-						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								(LivingEntity)evente.getDamager()));
 					} else {
-						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								null));
 					}
 				}
@@ -102,21 +102,21 @@ public class MineQuestEntityListener extends EntityListener {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
 
 			if (evente.getDamager() instanceof Player) {
-			    MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
+			    MineQuest.questerHandler.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
 			}
 
 			if (!event.isCancelled()) {
 				if (event.getEntity() instanceof Player) {
-					if (MineQuest.getQuester((Player)evente.getEntity()) != null) {
-						MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+					if (MineQuest.questerHandler.getQuester((Player)evente.getEntity()) != null) {
+						MineQuest.questerHandler.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
 					}
 				} else if ((event.getEntity() instanceof LivingEntity) && 
-						(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
+						(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()) != null)) {
 					if (evente.getDamager() instanceof LivingEntity) {
-						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								(LivingEntity)evente.getDamager()));
 					} else {
-						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								null));
 					}
 				}
@@ -126,11 +126,11 @@ public class MineQuestEntityListener extends EntityListener {
 		}
 		
 		if (event.getEntity() instanceof HumanEntity) {
-			if (MineQuest.getQuester((Player)event.getEntity()) != null) {
-				MineQuest.getQuester((Player)event.getEntity()).defend(event);
+			if (MineQuest.questerHandler.getQuester((Player)event.getEntity()) != null) {
+				MineQuest.questerHandler.getQuester((Player)event.getEntity()).defend(event);
 			}
-		} else if ((event.getEntity() instanceof LivingEntity) && MineQuest.getMob((LivingEntity)event.getEntity()) != null) {
-			MineQuest.getMob((LivingEntity)event.getEntity()).damage(event.getDamage());
+		} else if ((event.getEntity() instanceof LivingEntity) && MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()) != null) {
+			MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).damage(event.getDamage());
         }
 	}
 
@@ -140,8 +140,8 @@ public class MineQuestEntityListener extends EntityListener {
 		if (!(event.getTarget() instanceof LivingEntity)) return;
 		LivingEntity target = (LivingEntity) event.getTarget();
 		
-		if (MineQuest.getQuester(target) != null) {
-			MineQuest.getQuester(target).targeted(event);
+		if (MineQuest.questerHandler.getQuester(target) != null) {
+			MineQuest.questerHandler.getQuester(target).targeted(event);
 		}
 	}
 	
@@ -150,7 +150,7 @@ public class MineQuestEntityListener extends EntityListener {
 		if (event.getEntity() == null) return;
 		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.getEntity() instanceof Creeper) {
-			MQMob mob = MineQuest.getMob((LivingEntity)event.getEntity());
+			MQMob mob = MineQuest.mobHandler.getMob((LivingEntity)event.getEntity());
 			if (mob != null) {
 				mob.setHealth(0);
 			}
@@ -161,10 +161,10 @@ public class MineQuestEntityListener extends EntityListener {
 	public void onEntityDeath(EntityDeathEvent event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof LivingEntity) {
-			MQMob mob = MineQuest.getMob((LivingEntity) entity);
+			MQMob mob = MineQuest.mobHandler.getMob((LivingEntity) entity);
 			
 			if (mob != null) {
-				MineQuest.killMob(mob);
+				MineQuest.mobHandler.killMob(mob);
 			}
 		}
 	}

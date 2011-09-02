@@ -21,10 +21,10 @@ public class FullParty extends Party {
 	
 	@Override
 	public Quester[] getQuesterArray() {
-		Quester[] ret = new Quester[MineQuest.getRealQuesters().size()];
+		Quester[] ret = new Quester[MineQuest.questerHandler.getRealQuesters().size()];
 		int i = 0;
 		
-		for (Quester quester : MineQuest.getRealQuesters()) {
+		for (Quester quester : MineQuest.questerHandler.getRealQuesters()) {
 			ret[i++] = quester;
 		}
 		
@@ -33,7 +33,7 @@ public class FullParty extends Party {
 	
 	@Override
 	public List<Quester> getQuesters() {
-		return MineQuest.getRealQuesters();
+		return MineQuest.questerHandler.getRealQuesters();
 	}
 
 }

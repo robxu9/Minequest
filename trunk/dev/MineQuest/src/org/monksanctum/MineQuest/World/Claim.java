@@ -98,7 +98,7 @@ public class Claim extends Property {
 	 */
 	public void setHeight(int h) {
 		this.height = h;
-		Town claim = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		Town claim = MineQuest.townHandler.getTown(new Location(null, x + 1, y, z + 1));
 		if (claim == null) {
 			MineQuest.log("[ERROR] Property outside of claim...");
 			return;

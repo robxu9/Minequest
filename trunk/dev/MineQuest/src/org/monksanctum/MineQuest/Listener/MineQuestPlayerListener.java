@@ -42,6 +42,9 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.monksanctum.MineQuest.MineQuest;
+import org.monksanctum.MineQuest.Economy.NPCSignShop;
+import org.monksanctum.MineQuest.Economy.Store;
+import org.monksanctum.MineQuest.Economy.StoreBlock;
 import org.monksanctum.MineQuest.Event.NormalEvent;
 import org.monksanctum.MineQuest.Event.Absolute.EntityTeleportEvent;
 import org.monksanctum.MineQuest.Quest.QuestProspect;
@@ -49,9 +52,6 @@ import org.monksanctum.MineQuest.Quester.NPCMode;
 import org.monksanctum.MineQuest.Quester.NPCQuester;
 import org.monksanctum.MineQuest.Quester.Quester;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
-import org.monksanctum.MineQuest.Store.NPCSignShop;
-import org.monksanctum.MineQuest.Store.Store;
-import org.monksanctum.MineQuest.Store.StoreBlock;
 import org.monksanctum.MineQuest.World.Property;
 import org.monksanctum.MineQuest.World.Town;
 
@@ -60,9 +60,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		Quester quester = MineQuest.getQuester(event.getPlayer());
+		Quester quester = MineQuest.questerHandler.getQuester(event.getPlayer());
 		
-		if (!MineQuest.getQuester(event.getPlayer()).healthIncrease(event)) {
+		if (!MineQuest.questerHandler.getQuester(event.getPlayer()).healthIncrease(event)) {
 			event.setCancelled(!quester.canEdit(event.getClickedBlock()));
 		}
 		
@@ -79,7 +79,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 	public void onPlayerAnimation(PlayerAnimationEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
 		if (event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
-			Quester quester = MineQuest.getQuester(event.getPlayer());
+			Quester quester = MineQuest.questerHandler.getQuester(event.getPlayer());
 			
 			quester.armSwing();
 		}
@@ -90,17 +90,17 @@ public class MineQuestPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerMove(PlayerMoveEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
-		MineQuest.getQuester(event.getPlayer()).move(event.getFrom(), event.getTo());
+		MineQuest.questerHandler.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
+		MineQuest.questerHandler.getQuester(event.getPlayer()).move(event.getFrom(), event.getTo());
 		super.onPlayerMove(event);
 	}
 
 	@Override
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		if (MineQuest.getQuester(event.getPlayer()) == null) {
-			MineQuest.addQuester(new Quester(event.getPlayer(), 0));
+		if (MineQuest.questerHandler.getQuester(event.getPlayer()) == null) {
+			MineQuest.questerHandler.addQuester(new Quester(event.getPlayer(), 0));
 		}
-		MineQuest.getQuester(event.getPlayer()).update(event.getPlayer());
+		MineQuest.questerHandler.getQuester(event.getPlayer()).update(event.getPlayer());
 //		if (MineQuest.getSServer().getOnlinePlayers().length == 1) {
 //			MineQuest.respawnNPCs();
 //		}
@@ -109,31 +109,31 @@ public class MineQuestPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
+		MineQuest.questerHandler.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 	}
 	
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
-		if (MineQuest.getQuester(event.getPlayer()) != null) {
-			MineQuest.getQuester(event.getPlayer()).save();
-			MineQuest.getQuester(event.getPlayer()).setPlayer(null);
+		MineQuest.questerHandler.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
+		if (MineQuest.questerHandler.getQuester(event.getPlayer()) != null) {
+			MineQuest.questerHandler.getQuester(event.getPlayer()).save();
+			MineQuest.questerHandler.getQuester(event.getPlayer()).setPlayer(null);
 		}
 	}
 	
 	@Override
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		MineQuest.getQuester(event.getPlayer()).respawn(event);
-		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
+		MineQuest.questerHandler.getQuester(event.getPlayer()).respawn(event);
+		MineQuest.questerHandler.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 	}
 	
 	@Override
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
 		if (!MineQuest.isMQEnabled(event.getPlayer())) return;
-		MineQuest.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
+		MineQuest.questerHandler.getQuester(event.getPlayer()).setPlayer(event.getPlayer());
 		String split[] = event.getMessage().split(" ");
 		Player player = event.getPlayer();
-		Quester quester = MineQuest.getQuester(player);
+		Quester quester = MineQuest.questerHandler.getQuester(player);
 		
 		split[0] = split[0].toLowerCase().replaceAll("_", "");
 		try {
@@ -141,7 +141,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 				processQuester(split, player, event);
 			}
 			if (event.isCancelled()) return;
-			if (MineQuest.isCubonomyEnabled()) {
+			if (MineQuest.config.cubonomy_enable) {
 				if (quester.canCommand("Store")) {
 					processStore(split, player, event);
 				}
@@ -151,19 +151,19 @@ public class MineQuestPlayerListener extends PlayerListener {
 				processQuest(split, player, event);
 			}
 			if (event.isCancelled()) return;
-			if (MineQuest.isTownEnabled()) {
+			if (MineQuest.config.town_enable) {
 				if (quester.canCommand("Town")) {
 					processTown(split, player, event);
 				}
 				if (event.isCancelled()) return;
 			}
-			if (MineQuest.isMercEnabled()) {
+			if (MineQuest.config.npc_enabled) {
 				if (quester.canCommand("Merc")) {
 					processMerc(split, player, event);
 				}
 				if (event.isCancelled()) return;
 			}
-			if (MineQuest.isDebugEnabled()) {
+			if (MineQuest.config.debug_enable) {
 				if (quester.canCommand("Debug")) {
 					processDebug(split, player, event);
 				}
@@ -242,52 +242,52 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 2) {
         		player.sendMessage("Usage: /start_quest filename");
         	} else {
-        		if (MineQuest.getQuester(player).getParty() == null) {
-        			MineQuest.getQuester(player).createParty();
+        		if (MineQuest.questerHandler.getQuester(player).getParty() == null) {
+        			MineQuest.questerHandler.getQuester(player).createParty();
         		}
         		String qname = split[1];
         		int i;
         		for (i = 2; i < split.length; i++) qname = qname + " " + split[i];
-        		MineQuest.getQuester(player).startQuest(qname);
+        		MineQuest.questerHandler.getQuester(player).startQuest(qname);
         	}
            	event.setCancelled(true);
         } else if (split[0].equals("/classexp")) {
-        	MineQuest.getQuester(player).sendMessage("You have " + MineQuest.getQuester(player).getClassExp() + " unassigned experience");
+        	MineQuest.questerHandler.getQuester(player).sendMessage("You have " + MineQuest.questerHandler.getQuester(player).getClassExp() + " unassigned experience");
         	event.setCancelled(true);
         } else if (split[0].equals("/assignexp")) {
         	if (split.length < 3) {
         		player.sendMessage("Usage: /assign_exp class_name amount");
         	} else {
-        		MineQuest.getQuester(player).spendClassExp(split[1], Integer.parseInt(split[2]));
+        		MineQuest.questerHandler.getQuester(player).spendClassExp(split[1], Integer.parseInt(split[2]));
         	}
         	event.setCancelled(true);
         }  else if (split[0].equals("/createparty")) {
-        	MineQuest.getQuester(player).createParty();
+        	MineQuest.questerHandler.getQuester(player).createParty();
         	player.sendMessage("Party Created");
         	event.setCancelled(true);
         } else if (split[0].equals("/joinparty")) {
         	if (split.length < 2) {
         		player.sendMessage("Usage: /join_party player_name");
         	} else {
-        		if (MineQuest.getQuester(split[1]) == null) {
+        		if (MineQuest.questerHandler.getQuester(split[1]) == null) {
         			player.sendMessage(split[1] + " is not a valid quester");
-        		} else if (MineQuest.getQuester(split[1]).getParty() == null) {
+        		} else if (MineQuest.questerHandler.getQuester(split[1]).getParty() == null) {
         			player.sendMessage(split[1] + " is not in a party");
         		} else {
-        			MineQuest.getQuester(split[1]).getParty().addQuester(MineQuest.getQuester(player));
+        			MineQuest.questerHandler.getQuester(split[1]).getParty().addQuester(MineQuest.questerHandler.getQuester(player));
         		}
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/quitquest")) {
-        	if (MineQuest.getQuester(player).getQuest() != null) {
-        		MineQuest.getQuester(player).getQuest().removeQuester(MineQuest.getQuester(player));
+        	if (MineQuest.questerHandler.getQuester(player).getQuest() != null) {
+        		MineQuest.questerHandler.getQuester(player).getQuest().removeQuester(MineQuest.questerHandler.getQuester(player));
         	} else {
         		player.sendMessage("You are not in a quest...");
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/listparty")) {
-        	if (MineQuest.getQuester(player).getParty() != null) {
-            	for (Quester quester : MineQuest.getQuester(player).getParty().getQuesters()) {
+        	if (MineQuest.questerHandler.getQuester(player).getParty() != null) {
+            	for (Quester quester : MineQuest.questerHandler.getQuester(player).getParty().getQuesters()) {
             		player.sendMessage(quester.getName());
             	}
         	} else {
@@ -295,27 +295,27 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/listquest")) {
-        	for (QuestProspect qp : MineQuest.getQuester(player).getAvailableQuests()) {
+        	for (QuestProspect qp : MineQuest.questerHandler.getQuester(player).getAvailableQuests()) {
         		player.sendMessage(qp.getName());
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/listcompletequest")) {
-        	for (QuestProspect qp : MineQuest.getQuester(player).getCompletedQuests()) {
+        	for (QuestProspect qp : MineQuest.questerHandler.getQuester(player).getCompletedQuests()) {
         		player.sendMessage(qp.getName());
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/journal")) {
         	if (split.length == 1) {
-        		MineQuest.getQuester(player).journal();
+        		MineQuest.questerHandler.getQuester(player).journal();
         	} else {
     			String quest = split[1];
     			int i;
     			for (i = 2; i < split.length; i++) quest = quest + " " + split[i];
-        		MineQuest.getQuester(player).journal(quest);
+        		MineQuest.questerHandler.getQuester(player).journal(quest);
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/listidlequest")) {
-        	for (QuestProspect qp : MineQuest.getQuester(player).getIdleQuests()) {
+        	for (QuestProspect qp : MineQuest.questerHandler.getQuester(player).getIdleQuests()) {
         		player.sendMessage(qp.getName());
         	}
         	event.setCancelled(true);
@@ -324,20 +324,20 @@ public class MineQuestPlayerListener extends PlayerListener {
 	
 	private void processQuester(String[] split, Player player, PlayerChatEvent event) {
 		if (split[0].equals("/mystash")) {
-			MineQuest.getQuester(player).getChestSet().add(player);
+			MineQuest.questerHandler.getQuester(player).getChestSet().add(player);
 			event.setCancelled(true);
 		} else if (split[0].equals("/cancel")) {
-			MineQuest.getQuester(player).getChestSet().cancelAdd(player);
+			MineQuest.questerHandler.getQuester(player).getChestSet().cancelAdd(player);
 			event.setCancelled(true);
 		} else if (split[0].equals("/dropstash")) {
-			Town town = MineQuest.getTown(player);
-			MineQuest.getQuester(player).getChestSet().rem(player, town);
+			Town town = MineQuest.townHandler.getTown(player);
+			MineQuest.questerHandler.getQuester(player).getChestSet().rem(player, town);
 			event.setCancelled(true);
 		} else if (split[0].equals("/moddedclient")) {
-			MineQuest.getQuester(player).setModded();
+			MineQuest.questerHandler.getQuester(player).setModded();
 			event.setCancelled(true);
 		} else if (split[0].equals("/char")) {
-			Quester quester = MineQuest.getQuester(player);
+			Quester quester = MineQuest.questerHandler.getQuester(player);
 			player.sendMessage("You are level " + quester.getLevel() + " with " + quester.getExp() + "/" + (400 * (quester.getLevel() + 1)) + " Exp");
 
 			for (SkillClass skill : quester.getClasses()) {
@@ -345,38 +345,38 @@ public class MineQuestPlayerListener extends PlayerListener {
 			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/save")) {
-			MineQuest.getQuester(player).save();
+			MineQuest.questerHandler.getQuester(player).save();
 			event.setCancelled(true);
 		} else if (split[0].equals("/load")) {
-			MineQuest.getQuester(player).update();
+			MineQuest.questerHandler.getQuester(player).update();
 			event.setCancelled(true);
 		} else if (split[0].equals("/abillist")) {
 			if (split.length < 2) {
-				MineQuest.getQuester(player).listAbil();
+				MineQuest.questerHandler.getQuester(player).listAbil();
 			} else {
-				if (MineQuest.getQuester(player).getClass(split[1]) != null) {
-					MineQuest.getQuester(player).getClass(split[1]).listAbil();
+				if (MineQuest.questerHandler.getQuester(player).getClass(split[1]) != null) {
+					MineQuest.questerHandler.getQuester(player).getClass(split[1]).listAbil();
 				} else {
 					player.sendMessage(split[1] + " is not a valid class");
 				}
 			}
 			event.setCancelled(true);
 		} else if (split[0].equals("/unbind")) {
-			MineQuest.getQuester(player).unBind(player.getItemInHand());
+			MineQuest.questerHandler.getQuester(player).unBind(player.getItemInHand());
 			event.setCancelled(true);
 		} else if (split[0].equals("/enableabil")) {
 			if (split.length < 2) return;
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
-			MineQuest.getQuester(player).enableabil(abil);
+			MineQuest.questerHandler.getQuester(player).enableabil(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/disableabil")) {
 			if (split.length < 2) return;
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
-			MineQuest.getQuester(player).disableabil(abil);
+			MineQuest.questerHandler.getQuester(player).disableabil(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/bind")) {
 			if (split.length < 2) {
@@ -387,7 +387,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
-			MineQuest.getQuester(player).bind(abil);
+			MineQuest.questerHandler.getQuester(player).bind(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/lookbind")) {
 			if (split.length < 2) {
@@ -398,20 +398,20 @@ public class MineQuestPlayerListener extends PlayerListener {
 			String abil = split[1];
 			int i;
 			for (i = 2; i < split.length; i++) abil = abil + " " + split[i];
-			MineQuest.getQuester(player).lookBind(abil);
+			MineQuest.questerHandler.getQuester(player).lookBind(abil);
 			event.setCancelled(true);
 		} else if (split[0].equals("/class")) {
 			if (split.length < 2) {
 				player.sendMessage("Usage: /class <class_name>");
 				event.setCancelled(true);
 			}
-			MineQuest.getQuester(player).getClass(split[1]).display();
+			MineQuest.questerHandler.getQuester(player).getClass(split[1]).display();
 			event.setCancelled(true);
 		} else if (split[0].equals("/health")) {
-			player.sendMessage("Your health is " + MineQuest.getQuester(player).getHealth() + "/" + MineQuest.getQuester(player).getMaxHealth());
+			player.sendMessage("Your health is " + MineQuest.questerHandler.getQuester(player).getHealth() + "/" + MineQuest.questerHandler.getQuester(player).getMaxHealth());
 			event.setCancelled(true);
 		} else if (split[0].equals("/mana")) {
-			player.sendMessage("Your mana is " + MineQuest.getQuester(player).getMana() + "/" + MineQuest.getQuester(player).getMaxMana());
+			player.sendMessage("Your mana is " + MineQuest.questerHandler.getQuester(player).getMana() + "/" + MineQuest.questerHandler.getQuester(player).getMaxMana());
 			event.setCancelled(true);
 		} else if (split[0].equals("/spellcomp")) {
 			if (split.length < 2) {
@@ -431,7 +431,7 @@ public class MineQuestPlayerListener extends PlayerListener {
     			for (i = 2; i < split.length - 1; i++) abil = abil + " " + split[i];
             	int item = Integer.parseInt(split[i]);
             	
-            	MineQuest.getQuester(player).addBinder(abil, item);
+            	MineQuest.questerHandler.getQuester(player).addBinder(abil, item);
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/itemid")) {
@@ -462,11 +462,11 @@ public class MineQuestPlayerListener extends PlayerListener {
             		for (i = divider + 2; i < split.length; i++) {
             			second = second + " " + split[i];
             		}
-	        		SkillClass skill = MineQuest.getQuester(player).getClassFromAbil(first);
+	        		SkillClass skill = MineQuest.questerHandler.getQuester(player).getClassFromAbil(first);
 	        		if (skill == null) {
 	        			player.sendMessage(split[1] + " is not a valid ability");
 	        		} else {
-	        			if (MineQuest.isTownEnabled() && (MineQuest.getTown(player) == null)) {
+	        			if (MineQuest.config.town_enable && (MineQuest.townHandler.getTown(player) == null)) {
 	        				player.sendMessage("Must be in a town to modify spellbook");
 	        			} else {
 	        				skill.replaceAbil(first, second);
@@ -481,15 +481,15 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 2) {
         		player.sendMessage("Usage: /addclass <combat_class>");
         	} else {
-        		MineQuest.getQuester(player).addClass(split[1]);
+        		MineQuest.questerHandler.getQuester(player).addClass(split[1]);
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/prof") || split[0].equals("/proficiency")) {
         	if (split.length < 2) {
-	        	MineQuest.getQuester(player).listProf();
+	        	MineQuest.questerHandler.getQuester(player).listProf();
         	} else {
         		int id = Integer.parseInt(split[1]);
-        		MineQuest.getQuester(player).listProf(id);
+        		MineQuest.questerHandler.getQuester(player).listProf(id);
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/priorityclass")) {
@@ -497,7 +497,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /priority_class <class_name>");
         		return;
         	}
-        	MineQuest.getQuester(player).priorClass(split[1]);
+        	MineQuest.questerHandler.getQuester(player).priorClass(split[1]);
         	event.setCancelled(true);
         }
 	}
@@ -510,12 +510,12 @@ public class MineQuestPlayerListener extends PlayerListener {
     		} else {
     			page = 0;
     		}
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
     			
     			if (store != null) {
-    				store.displayPage(MineQuest.getQuester(player), page);
+    				store.displayPage(MineQuest.questerHandler.getQuester(player), page);
     			} else {
     				player.sendMessage("You are not in a store");
     			}
@@ -527,12 +527,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 3) {
         		return;
         	}
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
     			
     			if (store != null) {
-    				store.buy(MineQuest.getQuester(player), split[1], Integer.parseInt(split[2]));
+    				store.buy(MineQuest.questerHandler.getQuester(player), split[1], Integer.parseInt(split[2]));
     			} else {
     				player.sendMessage("You are not in a store");
     			}
@@ -545,12 +545,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 3) {
         		return;
         	}
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
     			
     			if (store != null) {
-    				store.buy(MineQuest.getQuester(player), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+    				store.buy(MineQuest.questerHandler.getQuester(player), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
     			} else {
     				player.sendMessage("You are not in a store");
     			}
@@ -563,12 +563,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 3) {
         		return;
         	}
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
     			
     			if (store != null) {
-    				store.cost(MineQuest.getQuester(player), split[1], Integer.parseInt(split[2]), true);
+    				store.cost(MineQuest.questerHandler.getQuester(player), split[1], Integer.parseInt(split[2]), true);
     			} else {
     				player.sendMessage("You are not in a store");
     			}
@@ -581,12 +581,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 3) {
         		return;
         	}
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
     			
     			if (store != null) {
-    				store.cost(MineQuest.getQuester(player), split[1], Integer.parseInt(split[2]), false);
+    				store.cost(MineQuest.questerHandler.getQuester(player), split[1], Integer.parseInt(split[2]), false);
     			} else {
     				player.sendMessage("You are not in a store");
     			}
@@ -599,12 +599,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 3) {
         		return;
         	}
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
     			
     			if (store != null) {
-    				store.sell(MineQuest.getQuester(player), split[1], Integer.parseInt(split[2]));
+    				store.sell(MineQuest.questerHandler.getQuester(player), split[1], Integer.parseInt(split[2]));
     			} else {
     				player.sendMessage("You are not in a store");
     			}
@@ -617,12 +617,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length < 3) {
         		return;
         	}
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
     			
     			if (store != null) {
-    				store.sell(MineQuest.getQuester(player), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+    				store.sell(MineQuest.questerHandler.getQuester(player), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
     			} else {
     				player.sendMessage("You are not in a store");
     			}
@@ -632,7 +632,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			event.setCancelled(true);
         	return;
         } else if (split[0].equals("/cubes") || split[0].equals("/mqmoney")) {
-        	String cubes_string = StoreBlock.convert((long)MineQuest.getQuester(player).getCubes());
+        	String cubes_string = StoreBlock.convert((long)MineQuest.questerHandler.getQuester(player).getCubes());
 	    	
 			player.sendMessage("You have " + cubes_string);
 			event.setCancelled(true);
@@ -643,13 +643,13 @@ public class MineQuestPlayerListener extends PlayerListener {
         		return;
         	}
         	
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
 
     			if (store != null) {
     				Block block = player.getWorld().getBlockAt(player.getLocation());
-    				if (MineQuest.getQuester(player).canEdit(block)) {
+    				if (MineQuest.questerHandler.getQuester(player).canEdit(block)) {
         				store.addBlock(split[1], split[2], split[3]);
         				player.sendMessage(split[1] + " added to store");
     				} else {
@@ -668,13 +668,13 @@ public class MineQuestPlayerListener extends PlayerListener {
         		return;
         	}
         	
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
 
     			if (store != null) {
     				Block block = player.getWorld().getBlockAt(player.getLocation());
-    				if (MineQuest.getQuester(player).canEdit(block)) {
+    				if (MineQuest.questerHandler.getQuester(player).canEdit(block)) {
         				store.remBlock(split[1]);
         				player.sendMessage(split[1] + " removed from store");
     				} else {
@@ -700,13 +700,13 @@ public class MineQuestPlayerListener extends PlayerListener {
         		return;
         	}
         	
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
 
     			if (store != null) {
     				Block block = player.getWorld().getBlockAt(player.getLocation());
-    				if (MineQuest.getQuester(player).canEdit(block)) {
+    				if (MineQuest.questerHandler.getQuester(player).canEdit(block)) {
         				store.setBlockQuant(split[1], amount);
         				player.sendMessage(split[1] + " removed from store");
     				} else {
@@ -720,59 +720,59 @@ public class MineQuestPlayerListener extends PlayerListener {
     		}
 			event.setCancelled(true);
         } else if (split[0].equals("/initstore")) {
-        	if (MineQuest.getTown(player) == null) {
+        	if (MineQuest.townHandler.getTown(player) == null) {
         		player.sendMessage("You are not in a town");
     			event.setCancelled(true);
     			return;
         	}
-        	if (MineQuest.getTown(player).getStore(player) == null) {
+        	if (MineQuest.townHandler.getTown(player).getStore(player) == null) {
         		player.sendMessage("You are not in a store");
     			event.setCancelled(true);
     			return;
         	}
-        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
+        	if (!MineQuest.townHandler.getTown(player).getTownProperty().canEdit(MineQuest.questerHandler.getQuester(player))) {
         		player.sendMessage("You do not have permission to edit town");
     			event.setCancelled(true);
     			return;
         	}
         	
-        	NPCSignShop shop = MineQuest.getTown(player).getStore(player);
-        	shop.intialize(MineQuest.getQuester(player));
+        	NPCSignShop shop = MineQuest.townHandler.getTown(player).getStore(player);
+        	shop.intialize(MineQuest.questerHandler.getQuester(player));
 			event.setCancelled(true);
         } else if (split[0].equals("/spawnstorenpc")) {
-        	if (MineQuest.getTown(player) == null) {
+        	if (MineQuest.townHandler.getTown(player) == null) {
         		player.sendMessage("You are not in a town");
     			event.setCancelled(true);
     			return;
         	}
-        	if (MineQuest.getTown(player).getStore(player) == null) {
+        	if (MineQuest.townHandler.getTown(player).getStore(player) == null) {
         		player.sendMessage("You are not in a store");
     			event.setCancelled(true);
     			return;
         	}
-        	if (!MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
+        	if (!MineQuest.townHandler.getTown(player).getTownProperty().canEdit(MineQuest.questerHandler.getQuester(player))) {
         		player.sendMessage("You do not have permission to edit town");
     			event.setCancelled(true);
     			return;
         	}
         	
         	Location location = player.getLocation();
-    		if (MineQuest.getQuester(split[1]) == null) {
+    		if (MineQuest.questerHandler.getQuester(split[1]) == null) {
     			if (nameCheck(split[1], player)) {
-    				MineQuest.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
+    				MineQuest.questerHandler.addQuester(new NPCQuester(split[1], NPCMode.STORE, player.getWorld(), location));
     			}
     		} else {
     			player.sendMessage("A quester with that name already exists!");
     		}
         	event.setCancelled(true);
         } else if (split[0].equals("/deletestore")) {
-    		Town town = MineQuest.getTown(player);
+    		Town town = MineQuest.townHandler.getTown(player);
     		if (town != null) {
     			Store store = town.getStore(player);
 
     			if (store != null) {
     				Block block = player.getWorld().getBlockAt(player.getLocation());
-    				if (MineQuest.getQuester(player).canEdit(block)) {
+    				if (MineQuest.questerHandler.getQuester(player).canEdit(block)) {
 	    				store.delete();
 	    				town.remove(store);
 	    				player.sendMessage("Store deleted");
@@ -791,9 +791,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 		if (split[0].equals("/townspawn")) {
 			int index, i;
 			double distance;
-			List<Town> towns = MineQuest.getTowns();
+			List<Town> towns = MineQuest.townHandler.getTowns();
 			
-			if (MineQuest.getQuester(player).inQuest()) {
+			if (MineQuest.questerHandler.getQuester(player).inQuest()) {
 				player.sendMessage("You cannot do that inside a quest");
 				event.setCancelled(true);
 				return;
@@ -813,8 +813,8 @@ public class MineQuestPlayerListener extends PlayerListener {
 			}
 			player.sendMessage("Welcome to " + towns.get(index).getName());
 			player.teleport(towns.get(index).getSpawn());
-			if (MineQuest.healSpawnEnable()) {
-				Quester quester = MineQuest.getQuester(player);
+			if (MineQuest.config.health_spawn_enable) {
+				Quester quester = MineQuest.questerHandler.getQuester(player);
 				quester.setHealth(quester.getMaxHealth());
 			}
 			event.setCancelled(true);
@@ -823,39 +823,39 @@ public class MineQuestPlayerListener extends PlayerListener {
 					player.getLocation().getZ() + " P:" + player.getLocation().getPitch() + " Y:" + player.getLocation().getYaw());
 			event.setCancelled(true);
 		}else if (split[0].equals("/startcreate")) {
-        	MineQuest.startCreate(player);
+        	MineQuest.townHandler.startCreate(player);
 			event.setCancelled(true);
         } else if (split[0].equals("/finishtown")) {
         	if (split.length <= 1) {
         		player.sendMessage("Usage: /finishtown <name>");
         	} else {
-        		MineQuest.finishTown(player, split[1]);
+        		MineQuest.townHandler.finishTown(player, split[1]);
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/finishvillage")) {
         	if (split.length <= 1) {
         		player.sendMessage("Usage: /finishvillage <name>");
         	} else {
-        		MineQuest.finishVillage(player, split[1]);
+        		MineQuest.townHandler.finishVillage(player, split[1]);
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/finishclaim")) {
         	if (split.length <= 1) {
         		player.sendMessage("Usage: /finishclaim <name>");
         	} else {
-        		MineQuest.finishClaim(player, split[1]);
+        		MineQuest.townHandler.finishClaim(player, split[1]);
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/setmayor")) {
-        	if ((MineQuest.getTown(player) != null) && (MineQuest.getTown(player).getTownProperty().getOwner().equals(MineQuest.getQuester(player)))) {
-        		MineQuest.getTown(player).setOwner(split[1]);
+        	if ((MineQuest.townHandler.getTown(player) != null) && (MineQuest.townHandler.getTown(player).getTownProperty().getOwner().equals(MineQuest.questerHandler.getQuester(player)))) {
+        		MineQuest.townHandler.getTown(player).setOwner(split[1]);
         	} else {
         		player.sendMessage("You are not in a town or you are not the mayor");
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/createproperty")) {
-        	if (MineQuest.getTown(player) != null) {
-        		MineQuest.getTown(player).createProperty(player);
+        	if (MineQuest.townHandler.getTown(player) != null) {
+        		MineQuest.townHandler.getTown(player).createProperty(player);
         	} else {
         		player.sendMessage("You are not in a town");
         	}
@@ -864,16 +864,16 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length <= 0) {
         		player.sendMessage("Usage: /finishproperty [set-height]");
         	} else {
-	        	if (MineQuest.getTown(player) != null) {
-	        		MineQuest.getTown(player).finishProperty(player, split.length > 1);
+	        	if (MineQuest.townHandler.getTown(player) != null) {
+	        		MineQuest.townHandler.getTown(player).finishProperty(player, split.length > 1);
 	        	} else {
 	        		player.sendMessage("You are not in a town");
 	        	}
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/createstore")) {
-        	if (MineQuest.getTown(player) != null) {
-        		MineQuest.getTown(player).createStore(player);
+        	if (MineQuest.townHandler.getTown(player) != null) {
+        		MineQuest.townHandler.getTown(player).createStore(player);
         	} else {
         		player.sendMessage("You are not in a town");
         	}
@@ -882,8 +882,8 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length <= 1) {
         		player.sendMessage("Usage: /finishstore <unique name>");
         	} else {
-	        	if (MineQuest.getTown(player) != null) {
-	        		MineQuest.getTown(player).finishStore(player, split[1]);
+	        	if (MineQuest.townHandler.getTown(player) != null) {
+	        		MineQuest.townHandler.getTown(player).finishStore(player, split[1]);
 	        	} else {
 	        		player.sendMessage("You are not in a town");
 	        	}
@@ -893,31 +893,31 @@ public class MineQuestPlayerListener extends PlayerListener {
         	if (split.length <= 1) {
         		player.sendMessage("Usage: /setprice <price>");
         	} else {
-	        	if (MineQuest.getTown(player) != null) {
-	        		MineQuest.getTown(player).setPrice(player, Long.parseLong(split[1]));
+	        	if (MineQuest.townHandler.getTown(player) != null) {
+	        		MineQuest.townHandler.getTown(player).setPrice(player, Long.parseLong(split[1]));
 	        	} else {
 	        		player.sendMessage("You are not in a town");
 	        	}
         	}
 			event.setCancelled(true);
         } else if (split[0].equals("/mqtown")) {
-			if (MineQuest.getTown(player) != null) {
-				player.sendMessage("You are in " + MineQuest.getTown(player).getName());
+			if (MineQuest.townHandler.getTown(player) != null) {
+				player.sendMessage("You are in " + MineQuest.townHandler.getTown(player).getName());
 			} else {
 				player.sendMessage("You are not in a town");
 			}
 			event.setCancelled(true);
         } else if (split[0].equals("/setspawn")) {
-			if (MineQuest.getTown(player) != null) {
-				MineQuest.getTown(player).setSpawn(player.getLocation());
+			if (MineQuest.townHandler.getTown(player) != null) {
+				MineQuest.townHandler.getTown(player).setSpawn(player.getLocation());
 				player.sendMessage("Spawn location set");
 			} else {
 				player.sendMessage("You are not in a town");
 			}
 			event.setCancelled(true);
         } else if (split[0].equals("/price")) {
-        	if ((MineQuest.getTown(player) != null) && (MineQuest.getTown(player).getProperty(player) != null)) {
-        		Property prop = MineQuest.getTown(player).getProperty(player);
+        	if ((MineQuest.townHandler.getTown(player) != null) && (MineQuest.townHandler.getTown(player).getProperty(player) != null)) {
+        		Property prop = MineQuest.townHandler.getTown(player).getProperty(player);
         		if (prop.getOwner() == null) {
         			player.sendMessage("The price of this property is " + StoreBlock.convert(prop.getPrice()));
         		} else {
@@ -928,14 +928,14 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/buyprop")) {
-        	Town town = MineQuest.getTown(player);
+        	Town town = MineQuest.townHandler.getTown(player);
         	if (town == null) {
         		player.sendMessage("You are not in a town");
             	event.setCancelled(true);
             	return;
         	}
         	Property prop = town.getProperty(player);
-        	Quester quester = MineQuest.getQuester(player);
+        	Quester quester = MineQuest.questerHandler.getQuester(player);
         	if (prop != null) {
 	        	if (prop.getOwner() == null) {
 	        		if (quester.getCubes() > prop.getPrice()) {
@@ -951,14 +951,14 @@ public class MineQuestPlayerListener extends PlayerListener {
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/remprop")) {
-        	Town town = MineQuest.getTown(player);
+        	Town town = MineQuest.townHandler.getTown(player);
         	if (town == null) {
         		player.sendMessage("You are not in a town");
             	event.setCancelled(true);
             	return;
         	}
         	Property prop = town.getProperty(player);
-        	Quester quester = MineQuest.getQuester(player);
+        	Quester quester = MineQuest.questerHandler.getQuester(player);
         	if (prop != null) {
 	        	if (town.getTownProperty().canEdit(quester)) {
 	        		town.remove(prop);
@@ -971,16 +971,16 @@ public class MineQuestPlayerListener extends PlayerListener {
         	event.setCancelled(true);
         } else if (split[0].equals("/addedit")) {
         	event.setCancelled(true);
-	    	if (MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
-	        	Town town = MineQuest.getTown(player);
+	    	if (MineQuest.questerHandler.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+	        	Town town = MineQuest.townHandler.getTown(player);
 	        	if (town != null) {
 	        		Property prop = town.getProperty(player);
 	        		if (prop == null) prop = town.getTownProperty();
 	        		
-	        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
+	        		if ((split.length < 2) || (MineQuest.questerHandler.getQuester(split[1]) == null)) {
 	        			player.sendMessage("Usage: /addedit <username>");
 	        		} else {
-	        			prop.addEdit(MineQuest.getQuester(split[1]));
+	        			prop.addEdit(MineQuest.questerHandler.getQuester(split[1]));
 	        			player.sendMessage("Editor " + split[1] + " added");
 	        		}
 	        	} else {
@@ -989,16 +989,16 @@ public class MineQuestPlayerListener extends PlayerListener {
 	    	}
         } else if (split[0].equals("/remedit")) {
         	event.setCancelled(true);
-	    	if (MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
-	        	Town town = MineQuest.getTown(player);
+	    	if (MineQuest.questerHandler.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+	        	Town town = MineQuest.townHandler.getTown(player);
 	        	if (town != null) {
 	        		Property prop = town.getProperty(player);
 	        		if (prop == null) prop = town.getTownProperty();
 	        		
-	        		if ((split.length < 2) || (MineQuest.getQuester(split[1]) == null)) {
+	        		if ((split.length < 2) || (MineQuest.questerHandler.getQuester(split[1]) == null)) {
 	        			player.sendMessage("Usage: /addedit <username>");
 	        		} else {
-	        			prop.remEdit(MineQuest.getQuester(split[1]));
+	        			prop.remEdit(MineQuest.questerHandler.getQuester(split[1]));
 	        			player.sendMessage("Editor " + split[1] + " removed");
 	        		}
 	        	} else {
@@ -1007,11 +1007,11 @@ public class MineQuestPlayerListener extends PlayerListener {
 	    	}
         } else if (split[0].equals("/deletetown")) {
         	event.setCancelled(true);
-	    	if (MineQuest.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
-	        	Town town = MineQuest.getTown(player);
+	    	if (MineQuest.questerHandler.getQuester(player).canEdit(player.getWorld().getBlockAt(player.getLocation()))) {
+	        	Town town = MineQuest.townHandler.getTown(player);
 	        	if (town != null) {
 	        		town.delete();
-	        		MineQuest.remTown(town);
+	        		MineQuest.townHandler.remTown(town);
 	        		player.sendMessage("Town deleted");
 	        	} else {
 	        		player.sendMessage("You are not in a town");
@@ -1023,12 +1023,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /expand_town <town_name>");
         		return;
         	}
-        	Town town = MineQuest.getTown(split[1]);
+        	Town town = MineQuest.townHandler.getTown(split[1]);
         	
         	if (town == null) {
         		player.sendMessage(split[1] + " is not a valid town");
         	} else {
-        		town.expand(MineQuest.getQuester(player));
+        		town.expand(MineQuest.questerHandler.getQuester(player));
         	}
         } else if (split[0].equals("/settowny")) {
         	event.setCancelled(true);
@@ -1036,12 +1036,12 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /set_town_y <town_name> <y>");
         		return;
         	}
-        	Town town = MineQuest.getTown(split[1]);
+        	Town town = MineQuest.townHandler.getTown(split[1]);
         	
         	if (town == null) {
         		player.sendMessage(split[1] + " is not a valid town");
         	} else {
-        		town.setMinY(MineQuest.getQuester(player), Integer.parseInt(split[2]));
+        		town.setMinY(MineQuest.questerHandler.getQuester(player), Integer.parseInt(split[2]));
         	}
         } else if (split[0].equals("/settownheight")) {
         	event.setCancelled(true);
@@ -1049,19 +1049,19 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /set_town_height <town_name> <height>");
         		return;
         	}
-        	Town town = MineQuest.getTown(split[1]);
+        	Town town = MineQuest.townHandler.getTown(split[1]);
         	
         	if (town == null) {
         		player.sendMessage(split[1] + " is not a valid town");
         	} else {
-        		town.setHeight(MineQuest.getQuester(player), Integer.parseInt(split[2]));
+        		town.setHeight(MineQuest.questerHandler.getQuester(player), Integer.parseInt(split[2]));
         	}
         }
 	}
 	
 	private void processMerc(String[] split, Player player, PlayerChatEvent event) {
 	    if (split[0].equals("/regroup")) {
-	    	MineQuest.getQuester(player).regroup();
+	    	MineQuest.questerHandler.getQuester(player).regroup();
 	    	event.setCancelled(true);
 	    } else if (split[0].equals("/npcproperty")) {
 	    	if (split.length < 4) {
@@ -1072,16 +1072,16 @@ public class MineQuestPlayerListener extends PlayerListener {
     		String value = split[3];
     		int i;
     		for (i = 4; i < split.length; i++) value = value + " " + split[i];
-    		if (MineQuest.getQuester(split[1].replaceAll("_", " ")) instanceof NPCQuester) {
-    			((NPCQuester)MineQuest.getQuester(split[1].replaceAll("_", " "))).setProperty(split[2], value);
+    		if (MineQuest.questerHandler.getQuester(split[1].replaceAll("_", " ")) instanceof NPCQuester) {
+    			((NPCQuester)MineQuest.questerHandler.getQuester(split[1].replaceAll("_", " "))).setProperty(split[2], value);
     		} else {
     			player.sendMessage(split[1].replaceAll("_", " ") + " is not a valid NPC");
     		}
 	    	event.setCancelled(true);
 	    } else if (split[0].equals("/listmercs")) {
-	    	if (MineQuest.getTown(player) != null) {
-	    		player.sendMessage("Available in " + MineQuest.getTown(player).getName() + ":");
-	    		for (NPCQuester quester : MineQuest.getTown(player).getAvailableNPCs()) {
+	    	if (MineQuest.townHandler.getTown(player) != null) {
+	    		player.sendMessage("Available in " + MineQuest.townHandler.getTown(player).getName() + ":");
+	    		for (NPCQuester quester : MineQuest.townHandler.getTown(player).getAvailableNPCs()) {
 	    			player.sendMessage(quester.getName() + " : " + quester.getCost());
 	    		}
 	    	} else {
@@ -1089,9 +1089,9 @@ public class MineQuestPlayerListener extends PlayerListener {
 	    	}
 	    	event.setCancelled(true);
 	    } else if (split[0].equals("/setmercspawn")) {
-	    	if (MineQuest.getTown(player) != null) {
-	    		if (MineQuest.getTown(player).getTownProperty().canEdit(MineQuest.getQuester(player))) {
-	        		MineQuest.getTown(player).setMERCSpawn(player.getLocation());
+	    	if (MineQuest.townHandler.getTown(player) != null) {
+	    		if (MineQuest.townHandler.getTown(player).getTownProperty().canEdit(MineQuest.questerHandler.getQuester(player))) {
+	        		MineQuest.townHandler.getTown(player).setMERCSpawn(player.getLocation());
 	        		player.sendMessage("Mercenary Spawn Set");
 	    		} else {
 	    			player.sendMessage("You do not have permission to edit town");
@@ -1102,10 +1102,10 @@ public class MineQuestPlayerListener extends PlayerListener {
 	    	event.setCancelled(true);
 	    } else if (split[0].equals("/spawnmerc")) {
 	    	if (split.length > 1) {
-	        	if (MineQuest.getTown(player) != null) {
-	        		if (MineQuest.getQuester(split[1]) == null) {
+	        	if (MineQuest.townHandler.getTown(player) != null) {
+	        		if (MineQuest.questerHandler.getQuester(split[1]) == null) {
 	        			if (nameCheck(split[1], player)) {
-	        				MineQuest.getTown(player).addMerc(split[1], MineQuest.getQuester(player));
+	        				MineQuest.townHandler.getTown(player).addMerc(split[1], MineQuest.questerHandler.getQuester(player));
 	        			}
 	        		} else {
 	        			player.sendMessage("A quester with that name already exists!");
@@ -1123,11 +1123,11 @@ public class MineQuestPlayerListener extends PlayerListener {
 				event.setCancelled(true);
 				return;
 			}
-			if ((MineQuest.getQuester(split[1]) instanceof NPCQuester)
+			if ((MineQuest.questerHandler.getQuester(split[1]) instanceof NPCQuester)
 					&& (NPCMode.FOR_SALE == ((NPCQuester) MineQuest
-							.getQuester(split[1])).getMode())) {
-				((NPCQuester) MineQuest.getQuester(split[1])).buyNPC(MineQuest
-						.getQuester(player));
+							.questerHandler.getQuester(split[1])).getMode())) {
+				((NPCQuester) MineQuest.questerHandler.getQuester(split[1])).buyNPC(MineQuest
+						.questerHandler.getQuester(player));
 			} else {
     			player.sendMessage(split[1] + " is not a mercenary for hire");
     		}
@@ -1138,13 +1138,13 @@ public class MineQuestPlayerListener extends PlayerListener {
 				event.setCancelled(true);
 				return;
 	    	}
-			Quester quester = MineQuest.getQuester(split[1]);
-			if (!(quester instanceof NPCQuester) || !(MineQuest.getQuester(player).hasQuester(quester))) {
+			Quester quester = MineQuest.questerHandler.getQuester(split[1]);
+			if (!(quester instanceof NPCQuester) || !(MineQuest.questerHandler.getQuester(player).hasQuester(quester))) {
 	    		player.sendMessage(split[1] + " is not one of your mercenaries");
 				event.setCancelled(true);
 				return;
 			}
-	    	((NPCQuester)quester).giveItem(MineQuest.getQuester(player));
+	    	((NPCQuester)quester).giveItem(MineQuest.questerHandler.getQuester(player));
 	    	event.setCancelled(true);
 	    } else if (split[0].equals("/npcchar") || split[0].equals("/mercchar")) {
 	    	if (split.length < 2) {
@@ -1152,8 +1152,8 @@ public class MineQuestPlayerListener extends PlayerListener {
 				event.setCancelled(true);
 				return;
 	    	}
-			Quester quester = MineQuest.getQuester(split[1]);
-			if (!(quester instanceof NPCQuester) || !(MineQuest.getQuester(player).hasQuester(quester))) {
+			Quester quester = MineQuest.questerHandler.getQuester(split[1]);
+			if (!(quester instanceof NPCQuester) || !(MineQuest.questerHandler.getQuester(player).hasQuester(quester))) {
 	    		player.sendMessage(split[1] + " is not one of your mercenaries");
 				event.setCancelled(true);
 				return;
@@ -1164,7 +1164,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 			quester.sendMessage(" Health: " + quester.getHealth() + "/" + quester.getMaxHealth());
 			event.setCancelled(true);
 	    } else if (split[0].equals("/mymercs")) {
-	    	MineQuest.getQuester(player).listMercs();
+	    	MineQuest.questerHandler.getQuester(player).listMercs();
 	    	event.setCancelled(true);
 	    }
 	}
@@ -1195,7 +1195,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         			}
         		}
         		MineQuest.getEventQueue().addEvent(new EntityTeleportEvent(10, 
-        				MineQuest.getQuester(player), world.getSpawnLocation()));
+        				MineQuest.questerHandler.getQuester(player), world.getSpawnLocation()));
         		event.setCancelled(true);
         	}
         } else if (split[0].equals("/setworldtime")) {
@@ -1203,7 +1203,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	world.setTime(Long.parseLong(split[2]));
         	event.setCancelled(true);
         } else if (split[0].equals("/debug")) {
-        	MineQuest.getQuester(player).debug();
+        	MineQuest.questerHandler.getQuester(player).debug();
         	event.setCancelled(true);
         } else if (split[0].equals("/nomobs")) {
         	if (split.length < 2) {
@@ -1214,7 +1214,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	World world = MineQuest.getSServer().getWorld(split[1]);
         	
         	if (world != null) {
-        		MineQuest.noMobs(world);
+        		MineQuest.mobHandler.noMobs(world);
         		player.sendMessage("No mobs activated for world: " + world.getName());
         	} else {
         		player.sendMessage(split[1] + " is not a valid world");
@@ -1230,7 +1230,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	World world = MineQuest.getSServer().getWorld(split[1]);
         	
         	if (world != null) {
-        		MineQuest.yesMobs(world);
+        		MineQuest.mobHandler.yesMobs(world);
         		player.sendMessage("Yes mobs activated for world: " + world.getName());
         	} else {
         		player.sendMessage(split[1] + " is not a valid world");
@@ -1251,13 +1251,13 @@ public class MineQuestPlayerListener extends PlayerListener {
 	        		}
 	        		total += world.getLivingEntities().size();
         		}
-        		player.sendMessage("There are " + MineQuest.getMobSize() + " " + count + " " + total);
+        		player.sendMessage("There are " + MineQuest.mobHandler.getMobSize() + " " + count + " " + total);
         	}
         	event.setCancelled(true);
         } else if (split[0].equals("/recalculatehealth")) {
         	if (player.isOp()) {
         		player.sendMessage("Recalculating all Health");
-        		for (Quester quester : MineQuest.getQuesters()) {
+        		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
         			player.sendMessage(quester.getName() + " - " + quester.recalculateHealth());
         			quester.save();
         		}
@@ -1269,7 +1269,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/recalculatemana")) {
         	if (player.isOp()) {
         		player.sendMessage("Recalculating all Mana");
-        		for (Quester quester : MineQuest.getQuesters()) {
+        		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
         			player.sendMessage(quester.getName() + " - " + quester.recalculateMana());
         			quester.save();
         		}
@@ -1284,7 +1284,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         } else if (split[0].equals("/reloadconfig")) {
         	if (player.isOp()) {
         		player.sendMessage("Reloading...");
-        		MineQuest.reloadConfig();
+        		MineQuest.config.reloadConfig();
         		player.sendMessage("MineQuest Configuration Reloaded");
         	} else {
         		player.sendMessage("Only OPs are allowed to reload config");
@@ -1301,9 +1301,9 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /spawn_npc <npc_name>");
         		return;
         	}
-        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
+        	if (MineQuest.questerHandler.getQuester(player).canEdit(player.getLocation().getBlock())) {
             	Location location = player.getLocation();
-            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
+            	MineQuest.questerHandler.addQuester(new NPCQuester(split[1], NPCMode.GENERIC, player.getWorld(), location));
         	} else {
         		player.sendMessage("You don't have permission to edit this area");
         	}
@@ -1313,9 +1313,9 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /spawn_npcv <npc_name>");
         		return;
         	}
-        	if (MineQuest.getQuester(player).canEdit(player.getLocation().getBlock())) {
+        	if (MineQuest.questerHandler.getQuester(player).canEdit(player.getLocation().getBlock())) {
             	Location location = player.getLocation();
-            	MineQuest.addQuester(new NPCQuester(split[1], NPCMode.VULNERABLE, player.getWorld(), location));
+            	MineQuest.questerHandler.addQuester(new NPCQuester(split[1], NPCMode.VULNERABLE, player.getWorld(), location));
         	} else {
         		player.sendMessage("You don't have permission to edit this area");
         	}
@@ -1325,9 +1325,9 @@ public class MineQuestPlayerListener extends PlayerListener {
         		player.sendMessage("Usage: /remove_npc <npc_name>");
         		return;
         	}
-        	if (MineQuest.getQuester(split[1]) instanceof NPCQuester) {
-        		NPCQuester quester = (NPCQuester)MineQuest.getQuester(split[1]);
-	        	if (MineQuest.getQuester(player).canEdit(quester.getPlayer().getLocation().getBlock())) {
+        	if (MineQuest.questerHandler.getQuester(split[1]) instanceof NPCQuester) {
+        		NPCQuester quester = (NPCQuester)MineQuest.questerHandler.getQuester(split[1]);
+	        	if (MineQuest.questerHandler.getQuester(player).canEdit(quester.getPlayer().getLocation().getBlock())) {
 	        		quester.remNPC();
 	        	} else {
 	        		player.sendMessage("You don't have permission to edit their area");
@@ -1339,7 +1339,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         	player.sendMessage("I think there are " + NormalEvent.count + " Events");
         	event.setCancelled(true);
         } else if (split[0].equals("/printmobs")) {
-        	MineQuest.printMobs();
+        	MineQuest.mobHandler.printMobs();
         	event.setCancelled(true);
         }
 	}

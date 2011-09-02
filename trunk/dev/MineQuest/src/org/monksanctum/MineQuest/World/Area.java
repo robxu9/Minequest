@@ -137,7 +137,7 @@ public class Area {
 	 */
 	public void setX(int x) {
 		this.x = x;
-		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		Town town = MineQuest.townHandler.getTown(new Location(null, x + 1, y, z + 1));
 		if (town == null) {
 			MineQuest.log("[ERROR] Property outside of town...");
 			return;
@@ -151,7 +151,7 @@ public class Area {
 	 */
 	public void setMaxX(int x) {
 		this.max_x = x;
-		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		Town town = MineQuest.townHandler.getTown(new Location(null, x + 1, y, z + 1));
 		if (town == null) {
 			MineQuest.log("[ERROR] Property outside of town...");
 			return;
@@ -165,7 +165,7 @@ public class Area {
 	 */
 	public void setZ(int z) {
 		this.z = z;
-		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		Town town = MineQuest.townHandler.getTown(new Location(null, x + 1, y, z + 1));
 		if (town == null) {
 			MineQuest.log("[ERROR] Property outside of town...");
 			return;
@@ -179,7 +179,7 @@ public class Area {
 	 */
 	public void setMaxZ(int z) {
 		this.max_z = z;
-		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		Town town = MineQuest.townHandler.getTown(new Location(null, x + 1, y, z + 1));
 		if (town == null) {
 			MineQuest.log("[ERROR] Property outside of town...");
 			return;
@@ -193,7 +193,7 @@ public class Area {
 	 */
 	public void setY(int y) {
 		this.y = y;
-		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		Town town = MineQuest.townHandler.getTown(new Location(null, x + 1, y, z + 1));
 		if (town == null) {
 			MineQuest.log("[ERROR] Property outside of town...");
 			return;
@@ -207,7 +207,7 @@ public class Area {
 	 */
 	public void setHeight(int h) {
 		this.height = h;
-		Town town = MineQuest.getTown(new Location(null, x + 1, y, z + 1));
+		Town town = MineQuest.townHandler.getTown(new Location(null, x + 1, y, z + 1));
 		if (town == null) {
 			MineQuest.log("[ERROR] Property outside of town...");
 			return;

@@ -20,14 +20,12 @@ package org.monksanctum.MineQuest.Listener;
 
 
 import org.bukkit.Chunk;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.monksanctum.MineQuest.MineQuest;
-import org.monksanctum.MineQuest.Mob.MQMob;
 import org.monksanctum.MineQuest.Quester.NPCQuester;
 import org.monksanctum.MineQuest.Quester.Quester;
 
@@ -36,7 +34,7 @@ public class MineQuestWorldListener extends WorldListener{
 	public void onChunkLoad(ChunkLoadEvent event) {
 		Chunk chunk = event.getChunk();
 		
-		for (Quester quester : MineQuest.getQuesters()) {
+		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 			if (quester instanceof NPCQuester) {
 				NPCQuester nquester = (NPCQuester)quester;
 				if (nquester.inChunk(chunk)) {
@@ -50,7 +48,7 @@ public class MineQuestWorldListener extends WorldListener{
 	public void onChunkUnload(ChunkUnloadEvent event) {
 		Chunk chunk = event.getChunk();
 		
-		for (Quester quester : MineQuest.getQuesters()) {
+		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 			if (quester instanceof NPCQuester) {
 				NPCQuester nquester = (NPCQuester)quester;
 				if (nquester.inChunk(chunk)) {
@@ -59,9 +57,10 @@ public class MineQuestWorldListener extends WorldListener{
 			}
 		}
 
-		MineQuest.unloadMobs(chunk);
+		MineQuest.mobHandler.unloadMobs(chunk);
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean inChunk(Chunk chunk, LivingEntity entity) {
 		Chunk other = entity.getWorld().getChunkAt(entity.getLocation());
 		

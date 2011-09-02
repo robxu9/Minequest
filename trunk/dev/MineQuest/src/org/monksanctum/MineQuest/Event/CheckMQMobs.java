@@ -12,7 +12,7 @@ public class CheckMQMobs extends PeriodicEvent {
 	public void activate(EventParser eventParser) {
 		super.activate(eventParser);
 		
-		MineQuest.checkMobs();
+		MineQuest.mobHandler.checkMobs();
 	}
 
 }

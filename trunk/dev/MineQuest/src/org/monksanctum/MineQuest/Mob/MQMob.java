@@ -66,8 +66,8 @@ public class MQMob {
 		if ((entity.getHealth() - damage) <= 0) {
 			dead = true;
 		}
-		if (MineQuest.getQuester(player) != null) {
-			last_attack = MineQuest.getQuester(player);
+		if (MineQuest.questerHandler.getQuester(player) != null) {
+			last_attack = MineQuest.questerHandler.getQuester(player);
 		}
 		return damage;
 	}

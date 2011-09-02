@@ -63,6 +63,7 @@ import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Ability.Ability;
 import org.monksanctum.MineQuest.Ability.AbilityBinder;
 import org.monksanctum.MineQuest.Ability.PassiveAbility;
+import org.monksanctum.MineQuest.Economy.NPCSignShop;
 import org.monksanctum.MineQuest.Event.Absolute.EntityTeleportEvent;
 import org.monksanctum.MineQuest.Mob.MQMob;
 import org.monksanctum.MineQuest.Quest.Party;
@@ -72,7 +73,6 @@ import org.monksanctum.MineQuest.Quest.Idle.IdleTask;
 import org.monksanctum.MineQuest.Quest.Idle.IdleType;
 import org.monksanctum.MineQuest.Quester.SkillClass.CombatClass;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
-import org.monksanctum.MineQuest.Store.NPCSignShop;
 import org.monksanctum.MineQuest.World.Claim;
 import org.monksanctum.MineQuest.World.Property;
 import org.monksanctum.MineQuest.World.Town;
@@ -242,7 +242,7 @@ public class Quester {
 			return;
 		}
 
-		if (getCombatClasses().size() == MineQuest.getMaxClasses()) {
+		if (getCombatClasses().size() == MineQuest.config.maxClass) {
 			sendMessage("You do not have space for any more combat classes");
 			return;
 		}
@@ -312,7 +312,7 @@ public class Quester {
 		}
 		new_idles[i++] = idleTask;
 		idles = new_idles;
-		MineQuest.getSQLServer().update("INSERT INTO idle (name, file, type, event_id, target)" + 
+		MineQuest.getSQLServer().aupdate("INSERT INTO idle (name, file, type, event_id, target)" + 
 				"VALUES('" + name + "', '" + idleTask.getQuest().getFile() + "', '" + idleTask.getTypeId()
 				+ "', '" + idleTask.getEventId() + "', '" + idleTask.getTarget() + "')");
 	}
@@ -346,7 +346,7 @@ public class Quester {
 	}
 
 	protected void addNewReputation(String type, int amount) {
-		MineQuest.getSQLServer().update(
+		MineQuest.getSQLServer().aupdate(
 				"INSERT INTO reps (name, type, amount) VALUES('" + name
 						+ "', '" + type + "', '" + amount + "')");
 		reputation.put(type, amount);
@@ -365,7 +365,7 @@ public class Quester {
 			return;
 		}
 		available.add(quest);
-		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'A', '" 
+		MineQuest.getSQLServer().aupdate("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'A', '" 
 				+ quest.getFile() + "')");
 		sendMessage("You now have access to the quest " + quest.getName());
 		
@@ -377,7 +377,7 @@ public class Quester {
 	public void addQuestCompleted(QuestProspect quest) {
 		if (isCompleted(quest)) return;
 		completed.add(quest);
-		MineQuest.getSQLServer().update("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'C', '" 
+		MineQuest.getSQLServer().aupdate("INSERT INTO quests (name, type, file) VALUES('" + getSName() + "', 'C', '" 
 				+ quest.getFile() + "')");
 		
 		if (isModded()) {
@@ -434,8 +434,8 @@ public class Quester {
 		if (checkItemInHand()) return;
 		if (!(entity instanceof LivingEntity)) return;
 		
-		if (MineQuest.getQuester((LivingEntity)entity) instanceof NPCQuester) {
-			NPCQuester quester = (NPCQuester)MineQuest.getQuester((LivingEntity)entity);
+		if (MineQuest.questerHandler.getQuester((LivingEntity)entity) instanceof NPCQuester) {
+			NPCQuester quester = (NPCQuester)MineQuest.questerHandler.getQuester((LivingEntity)entity);
 			if (hasQuester(quester)) {
 				return;
 			}
@@ -451,7 +451,7 @@ public class Quester {
 				if (entity instanceof LivingEntity) {
 					if (skill instanceof CombatClass) {
 						skill.callAbility(entity);
-						expGain(MineQuest.getCastAbilityExp());
+						expGain(MineQuest.config.cast_ability_exp);
 					} else {
 						skill.callAbility(entity);
 					}
@@ -484,14 +484,14 @@ public class Quester {
 				if (skill instanceof CombatClass) {
 					if (skill.isClassItem(player.getItemInHand())) {
 						((CombatClass)skill).attack((LivingEntity)entity, event);
-						expGain(MineQuest.getExpClassDamage());
+						expGain(MineQuest.config.exp_class_damage);
 						return;
 					}
 				}
 			}
-			if (MineQuest.halfDamageOn()) {
+			if (MineQuest.config.half_damage) {
 				event.setDamage(event.getDamage() / 2);
-				expGain(MineQuest.getExpClassDamage() / 3);
+				expGain(MineQuest.config.exp_class_damage / 3);
 			}
 		}
 	}
@@ -634,14 +634,14 @@ public class Quester {
 	 */
 	public boolean canCast(List<ItemStack> list, int mana) {
 		int i;
-		if (MineQuest.isManaEnabled()) {
+		if (MineQuest.config.mana) {
 			if (this.mana < mana) {
 				return false;
 			}
 			this.mana -= mana;
 		}
 		
-		if (MineQuest.isSpellCompEnabled()) {
+		if (MineQuest.config.spell_comp) {
 			PlayerInventory inven = player.getInventory();
 			
 			for (i = 0; i < list.size(); i++) {
@@ -651,7 +651,7 @@ public class Quester {
 					while (i-- > 0) {
 						inven.addItem(list.get(i));
 					}
-					if (MineQuest.isManaEnabled()) {
+					if (MineQuest.config.mana) {
 						this.mana += mana;
 					}
 					return false;
@@ -659,7 +659,7 @@ public class Quester {
 			}
 		}
 
-		if (MineQuest.isManaEnabled()) {
+		if (MineQuest.config.mana) {
 			updateMana();
 		}
 		
@@ -680,7 +680,7 @@ public class Quester {
 	public boolean canEdit(Block block) {
 		Town town = null;
 		if (block != null) {
-			town = MineQuest.getTown(block.getLocation());
+			town = MineQuest.townHandler.getTown(block.getLocation());
 		} else {
 			return true;
 		}
@@ -694,17 +694,17 @@ public class Quester {
 			}
 		}
 		
-		if (!MineQuest.isTownEnabled()) {
+		if (!MineQuest.config.town_enable) {
 			return true;
 		}
 		
-		if (!MineQuest.isTownProtect()) {
+		if (!MineQuest.config.town_protect) {
 			return true;
 		}
 
 		int id = block.getTypeId();
 		boolean flag = false;
-		for (int other_id : MineQuest.getTownExceptions()) {
+		for (int other_id : MineQuest.config.town_exceptions) {
 			if (id == other_id) flag = true;
 		}
 
@@ -735,7 +735,7 @@ public class Quester {
 					}
 				}
 			} else {
-				Claim claim = MineQuest.getClaim(block.getLocation());
+				Claim claim = MineQuest.townHandler.getClaim(block.getLocation());
 				
 				if (claim != null) {
 					if (!claim.canEdit(this)) {
@@ -765,7 +765,7 @@ public class Quester {
 	public boolean canUse(ItemStack item) {
 		boolean class_item = false;
 		boolean can_use = false;
-		for (String type : MineQuest.getFullClassNames()) {
+		for (String type : MineQuest.config.getFullClassNames()) {
 			SkillClass skill = getClass(type);
 			if (skill != null) {
 				if (skill.isClassItem(item)) {
@@ -782,7 +782,7 @@ public class Quester {
 			} else {
 				SkillClass shell = SkillClass.newShell(type);
 				if (shell.isClassItem(item)) {
-					if (MineQuest.denyNonClass() && !class_item) {
+					if (MineQuest.config.deny_non_class && !class_item) {
 						class_item = true;
 						can_use = false;
 					}
@@ -796,7 +796,7 @@ public class Quester {
     public boolean canWear(ItemStack item) {
 		boolean class_armor = false;
 		boolean can_use = false;
-		for (String type : MineQuest.getFullClassNames()) {
+		for (String type : MineQuest.config.getFullClassNames()) {
 			SkillClass skill = getClass(type);
 			if (skill != null) {
 				if (skill.isArmor(item)) {
@@ -813,7 +813,7 @@ public class Quester {
 			} else {
 				SkillClass shell = SkillClass.newShell(type);
 				if (shell.isArmor(item)) {
-					if (MineQuest.denyNonClass() && !class_armor) {
+					if (MineQuest.config.deny_non_class && !class_armor) {
 						class_armor = true;
 						can_use = false;
 					}
@@ -983,7 +983,7 @@ public class Quester {
 	}
 	
 	public void clearDestroyed() {
-		if (MineQuest.isTrackingDestroy()) {
+		if (MineQuest.config.track_destroy) {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
 			
 			ResultSet results = MineQuest.getSQLServer().query("SELECT * FROM kills WHERE name='" + getSName() + "'");
@@ -1007,7 +1007,7 @@ public class Quester {
 			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + getSName() + "'");
 			
 			for (CreatureType creature : kill_map.keySet()) {
-				MineQuest.getSQLServer().update(
+				MineQuest.getSQLServer().aupdate(
 						"INSERT INTO kills (name, type, count) VALUES('"
 								+ getSName() + "', '"
 								+ creature.getName() + "', '"
@@ -1015,7 +1015,7 @@ public class Quester {
 			}
 			
 			for (Material material : destroyed.keySet()) {
-				MineQuest.getSQLServer().update(
+				MineQuest.getSQLServer().aupdate(
 						"INSERT INTO kills (name, type, count) VALUES('"
 								+ getSName() + "', '"
 								+ material.name() + "', '"
@@ -1027,7 +1027,7 @@ public class Quester {
 	}
 	
 	public void clearKills() {
-		if (MineQuest.isTrackingKills()) {
+		if (MineQuest.config.track_kills) {
 			Map<CreatureType, Integer> kill_map = new HashMap<CreatureType, Integer>();
 			Map<Material, Integer> destroyed = new HashMap<Material, Integer>();
 			
@@ -1062,7 +1062,7 @@ public class Quester {
 			MineQuest.getSQLServer().update("DELETE FROM kills WHERE name='" + getSName() + "'");
 			
 			for (CreatureType creature : kill_map.keySet()) {
-				MineQuest.getSQLServer().update(
+				MineQuest.getSQLServer().aupdate(
 						"INSERT INTO kills (name, type, count) VALUES('"
 								+ getSName() + "', '"
 								+ creature.getName() + "', '"
@@ -1070,7 +1070,7 @@ public class Quester {
 			}
 			
 			for (Material material : destroyed.keySet()) {
-				MineQuest.getSQLServer().update(
+				MineQuest.getSQLServer().aupdate(
 						"INSERT INTO kills (name, type, count) VALUES('"
 								+ getSName() + "', '"
 								+ material.name() + "', '"
@@ -1110,7 +1110,7 @@ public class Quester {
 	 */
 	public void create() {
 		int num;
-		String[] class_names = MineQuest.getClassNames();
+		String[] class_names = MineQuest.config.starting_classes;
 		
 		String update_string = "INSERT INTO questers (name, selected_chest, cubes, exp, level, last_town, classes, health, max_health, mana, max_mana) VALUES('"
 			+ getSName() + "', '" + getSName() + "', '500000', '0', '0', 'Bitville', '";
@@ -1122,7 +1122,7 @@ public class Quester {
 				}
 			}
 		}
-		update_string = update_string + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingHealth() + "', '" + MineQuest.getStartingMana() + "', '" + MineQuest.getStartingMana() + "')";
+		update_string = update_string + "', '" + MineQuest.config.starting_health + "', '" + MineQuest.config.starting_health + "', '" + MineQuest.config.starting_mana + "', '" + MineQuest.config.starting_mana + "')";
 
 		MineQuest.getSQLServer().update(update_string);
 		
@@ -1218,7 +1218,7 @@ public class Quester {
 		} else {
 			amount = 5;
 		}
-		int levelAdj = MineQuest.getAdjustment();
+		int levelAdj = MineQuest.questerHandler.getAdjustment();
 		boolean flags[] = new boolean[] {false, false, false, false};
 		if (levelAdj == 0) {
 			levelAdj = 1;
@@ -1238,8 +1238,8 @@ public class Quester {
 		
 		if (entity instanceof LivingEntity) {
 			if (entity != null) {
-				if (MineQuest.getMob((LivingEntity)entity) != null) {
-					amount = MineQuest.getMob((LivingEntity)entity).attack(amount, player);
+				if (MineQuest.mobHandler.getMob((LivingEntity)entity) != null) {
+					amount = MineQuest.mobHandler.getMob((LivingEntity)entity).attack(amount, player);
 				}
 			}
 		}
@@ -1297,7 +1297,7 @@ public class Quester {
 		for (SkillClass skill : classes) {
 			if (skill.isClassItem(player.getItemInHand())) {
 				skill.blockBreak(event);
-				expGain(MineQuest.getDestroyBlockExp());
+				expGain(MineQuest.config.destroy_block_exp);
 				return;
 			}
 		}
@@ -1305,7 +1305,7 @@ public class Quester {
 		for (SkillClass skill : classes) {
 			if (skill.isClassBlock(event.getBlock())) {
 				skill.blockBreak(event);
-				expGain(MineQuest.getDestroyBlockExp());
+				expGain(MineQuest.config.destroy_block_exp);
 				return;
 			}
 		}
@@ -1673,7 +1673,7 @@ public class Quester {
 	 * @return
 	 */
 	public Town getTown() {
-		return MineQuest.getTown(last);
+		return MineQuest.townHandler.getTown(last);
 	}
 	
 	public boolean hasQuester(Quester quester) {
@@ -1704,7 +1704,7 @@ public class Quester {
         	return false;
         }
 
-        if (MineQuest.logHealthChange()) {
+        if (MineQuest.config.log_health_change) {
         	MineQuest.log(change + " damage to " + name);
         }
         health -= change;
@@ -1743,7 +1743,7 @@ public class Quester {
         	}
         }
 
-        if (MineQuest.logHealthChange()) {
+        if (MineQuest.config.log_health_change) {
         	MineQuest.log("[INFO] " + name + " - " + health + "/" + max_health);
         }
 
@@ -1905,9 +1905,9 @@ public class Quester {
 		level++;
 		exp -= (400 * level);
 		int add_health = 0;
-		if (MineQuest.getLevelHealth() > 0) {
-			add_health = generator.nextInt(MineQuest.getLevelHealth()) + 1;
-		} else if (MineQuest.getLevelHealth() == 0) {
+		if (MineQuest.config.getLevelHealth() > 0) {
+			add_health = generator.nextInt(MineQuest.config.getLevelHealth()) + 1;
+		} else if (MineQuest.config.getLevelHealth() == 0) {
 			add_health = 1;
 		}
 		max_health += add_health;
@@ -2079,12 +2079,12 @@ public class Quester {
 		
 		updateHealth();
 		
-		if (MineQuest.isTownEnabled()) {
-			Town last_town = MineQuest.getNearestTown(to);
+		if (MineQuest.config.town_enable) {
+			Town last_town = MineQuest.townHandler.getNearestTown(to);
 			if (last_town != null) {
 				if (!last_town.getName().equals(last)) {
 					last = last_town.getName();
-					MineQuest.getSQLServer().update("UPDATE questers SET last_town='" + last + "'");
+					MineQuest.getSQLServer().aupdate("UPDATE questers SET last_town='" + last + "'");
 				}
 			} else {
 				last = null;
@@ -2153,11 +2153,11 @@ public class Quester {
 	}
 
 	public int recalculateHealth() {
-		health = MineQuest.getStartingHealth();
+		health = MineQuest.config.starting_health;
 		Random generator = new Random();
 		
 		for (int i = 0; i < level; i++) {
-			int add_health = generator.nextInt(MineQuest.getLevelHealth()) + 1;
+			int add_health = generator.nextInt(MineQuest.config.getLevelHealth()) + 1;
 			health += add_health;
 		}
 		
@@ -2183,11 +2183,11 @@ public class Quester {
 	}
 
 	public int recalculateMana() {
-		mana = MineQuest.getStartingMana();
+		mana = MineQuest.config.starting_mana;
 		Random generator = new Random();
 		
 		for (int i = 0; i < level; i++) {
-			int add_health = generator.nextInt(MineQuest.getLevelMana()) + 1;
+			int add_health = generator.nextInt(MineQuest.config.getLevelMana()) + 1;
 			health += add_health;
 		}
 		
@@ -2301,8 +2301,8 @@ public class Quester {
 //				}
 			}
 		} else {
-			if (MineQuest.townRespawn() && (MineQuest.getTown(last) != null)) {
-				event.setRespawnLocation(MineQuest.getTown(last).getSpawn());
+			if (MineQuest.config.town_respawn && (MineQuest.townHandler.getTown(last) != null)) {
+				event.setRespawnLocation(MineQuest.townHandler.getTown(last).getSpawn());
 			}
 		}
 		return;
@@ -2435,10 +2435,10 @@ public class Quester {
 		updateMana();
 		updateQuests();
 		updateAbilities();
-		if (MineQuest.isManaEnabled()) {
+		if (MineQuest.config.mana) {
 			sendMessage("MQ:ManaSystem");
 		}
-		if (MineQuest.isSpellCompEnabled()) {
+		if (MineQuest.config.spell_comp) {
 			sendMessage("MQ:SpellCompSystem");
 		}
 	}
@@ -2504,7 +2504,7 @@ public class Quester {
 	}
 	
 	public void setReputation(String type, int amount) {
-		MineQuest.getSQLServer().update(
+		MineQuest.getSQLServer().aupdate(
 				"UPDATE reps SET amount='" + amount + "' WHERE name='" + name
 						+ "' AND type='" + type + "'");
 		reputation.put(type, amount);
@@ -2700,7 +2700,7 @@ public class Quester {
 		kills = new CreatureType[0];
 		destroyed = new HashMap<Material, Integer>();
 		if (npcParty != null) {
-			for (Quester quester : MineQuest.getQuesters()) {
+			for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 				if (quester instanceof NPCQuester) {
 					NPCQuester nquester = (NPCQuester)quester;
 					if ((nquester.getMode() == NPCMode.PARTY) 
@@ -2828,7 +2828,7 @@ public class Quester {
 	}
 
 	private void updateMana() {
-		if (MineQuest.isManaEnabled() && isModded()) {
+		if (MineQuest.config.mana && isModded()) {
 			sendMessage("MQ:Mana-" + mana + "/" + max_mana);
 		} else if (isModded()) {
 			sendMessage("MQ:Mana--1/1");

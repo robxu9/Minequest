@@ -192,7 +192,7 @@ public class Quest {
 //			}
 			
 			if (no_mobs) {
-				MineQuest.noMobs(world);
+				MineQuest.mobHandler.noMobs(world);
 			}
 			
 			return true;
@@ -264,8 +264,8 @@ public class Quest {
 					Float.parseFloat(split[5]),
 					Float.parseFloat(split[6]));
 			npcs.add(new NPCQuester(name, NPCMode.QUEST_INVULNERABLE, world, location));
-			MineQuest.addQuester(npcs.get(npcs.size() - 1));
-			MineQuest.getQuester(name).setQuest(this, world);
+			MineQuest.questerHandler.addQuester(npcs.get(npcs.size() - 1));
+			MineQuest.questerHandler.getQuester(name).setQuest(this, world);
 		} else if (split[0].equals("NPCV")) {
 			String name = split[1];
 			Location location = new Location(world,
@@ -275,8 +275,8 @@ public class Quest {
 					Float.parseFloat(split[5]),
 					Float.parseFloat(split[6]));
 			npcs.add(new NPCQuester(name, NPCMode.QUEST_VULNERABLE, world, location));
-			MineQuest.addQuester(npcs.get(npcs.size() - 1));
-			MineQuest.getQuester(name).setQuest(this, world);
+			MineQuest.questerHandler.addQuester(npcs.get(npcs.size() - 1));
+			MineQuest.questerHandler.getQuester(name).setQuest(this, world);
 		} else if (split[0].equals("Target")) {
 			targets.add(Target.newTarget(split, this));
 		} else if (split[0].equals("Edit")) {
@@ -922,7 +922,7 @@ public class Quest {
 			
 			for (NPCQuester quester : npcs) {
 				if ((quester != null) && (quester.getHealth() > 0)) {
-					MineQuest.remQuester(quester);
+					MineQuest.questerHandler.remQuester(quester);
 					quester.damage(200000);
 				}
 			}
@@ -934,7 +934,7 @@ public class Quest {
 			}
 			
 			if (no_mobs) {
-				MineQuest.yesMobs(world);
+				MineQuest.mobHandler.yesMobs(world);
 			}
 			
 			return;

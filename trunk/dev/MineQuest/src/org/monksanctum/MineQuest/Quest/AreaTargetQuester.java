@@ -39,7 +39,7 @@ public class AreaTargetQuester extends Target {
 		if (target.getTargets().size() != 0) {
 			Quester quester = target.getTargets().get(0);
 			
-			for (Quester q : MineQuest.getQuesters()) {
+			for (Quester q : MineQuest.questerHandler.getQuesters()) {
 				if (MineQuest.distance(q.getPlayer().getLocation(), quester.getPlayer().getLocation()) < radius) {
 					questers.add(q);
 				}

@@ -63,14 +63,14 @@ public class Property extends Area{
 	
 	
 	public Quester getOwner() {
-		return MineQuest.getQuester(owner);
+		return MineQuest.questerHandler.getQuester(owner);
 	}
 	
 	public void setOwner(Quester quester) {
 		if (quester != null) {	
 			owner = quester.getName();
 		} else {
-			MineQuest.getQuester(owner).sendMessage("Invalid Quester");
+			MineQuest.questerHandler.getQuester(owner).sendMessage("Invalid Quester");
 		}
 	}
 	
