@@ -1731,16 +1731,16 @@ public class Quester {
         
         if (player.getHealth() > newHealth) {
         	event.setDamage(player.getHealth() - newHealth);
-        	MineQuest.log("Difference damage set - " + (player.getHealth() - newHealth));
+//        	MineQuest.log("Difference damage set - " + (player.getHealth() - newHealth));
         } else {
-        	if (player.getHealth() < 20) {
-        		player.setHealth(player.getHealth() + 1);
-        		event.setDamage(1);
-        		MineQuest.log("Damage set to 1");
-        	} else {
+//        	if (player.getHealth() < 20) {
+//        		player.setHealth(player.getHealth() + 1);
+//        		event.setDamage(1);
+//        		MineQuest.log("Damage set to 1");
+//        	} else {
         		event.setDamage(0);
-        		MineQuest.log("Damage set to 0");
-        	}
+//        		MineQuest.log("Damage set to 0");
+//        	}
         }
 
         if (MineQuest.logHealthChange()) {
