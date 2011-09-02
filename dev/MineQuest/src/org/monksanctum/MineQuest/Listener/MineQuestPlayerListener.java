@@ -710,7 +710,7 @@ public class MineQuestPlayerListener extends PlayerListener {
         				store.setBlockQuant(split[1], amount);
         				player.sendMessage(split[1] + " removed from store");
     				} else {
-    					player.sendMessage("You are not permitted to edit this store");
+    					player.sendMessage("Item " + split[1] + " quantity set to: " + split[2]);
     				}
     			} else {
     				player.sendMessage("You are not in a store");
@@ -812,7 +812,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 				}
 			}
 			player.sendMessage("Welcome to " + towns.get(index).getName());
-			player.teleport(towns.get(index).getLocation());
+			player.teleport(towns.get(index).getSpawn());
 			if (MineQuest.healSpawnEnable()) {
 				Quester quester = MineQuest.getQuester(player);
 				quester.setHealth(quester.getMaxHealth());
