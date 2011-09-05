@@ -38,7 +38,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -714,9 +713,9 @@ public class NPCQuester extends Quester {
 				if (event instanceof EntityDamageByEntityEvent) {
 					entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
 				}
-				if (event instanceof EntityDamageByProjectileEvent) {
-					entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
-				}
+//				if (event instanceof EntityDamageByProjectileEvent) {
+//					entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
+//				}
 				if (entity instanceof HumanEntity) {
 					HumanEntity human = (HumanEntity)entity;
 					ItemStack hand = human.getItemInHand();
@@ -754,11 +753,11 @@ public class NPCQuester extends Quester {
 					entity = (LivingEntity) ((EntityDamageByEntityEvent)event).getDamager();
 				}
 			}
-			if (event instanceof EntityDamageByProjectileEvent) {
-				if (((EntityDamageByProjectileEvent)event).getDamager() instanceof LivingEntity) {
-					entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
-				}
-			}
+//			if (event instanceof EntityDamageByProjectileEvent) {
+//				if (((EntityDamageByProjectileEvent)event).getDamager() instanceof LivingEntity) {
+//					entity = (LivingEntity) ((EntityDamageByProjectileEvent)event).getDamager();
+//				}
+//			}
 			if ((follow != null) && (mode != NPCMode.QUEST_INVULNERABLE) && (mode != NPCMode.QUEST_VULNERABLE)) {
 				if ((entity instanceof Player) && ((Player)entity).getName().equals(follow.getName())) {
 					PlayerInteractEvent pie = new PlayerInteractEvent(getPlayer(), null, ((Player)entity).getItemInHand(), null, null);

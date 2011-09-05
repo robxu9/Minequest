@@ -22,7 +22,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Event.EventParser;
 import org.monksanctum.MineQuest.Event.PeriodicEvent;

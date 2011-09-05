@@ -20,7 +20,6 @@ package org.monksanctum.MineQuest.Quest;
 
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Event.Event;
-import org.monksanctum.MineQuest.Event.NormalEvent;
 
 public class QuestTask {
 	protected Event[] events;
