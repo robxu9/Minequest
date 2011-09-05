@@ -25,9 +25,9 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -72,34 +72,37 @@ public class MineQuestEntityListener extends EntityListener {
 		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.isCancelled()) return;
 		
-		if (event instanceof EntityDamageByProjectileEvent) {
-			EntityDamageByEntityEvent evente = ((EntityDamageByProjectileEvent)event);
-
-			if (evente.getDamager() instanceof Player) {
-				if (MineQuest.getQuester((Player)evente.getDamager()) != null) {
-					MineQuest.getQuester((Player)evente.getDamager()).attackEntity(evente.getEntity(), evente);
-				}
-			}
-
-			if (!event.isCancelled()) {
-				if (event.getEntity() instanceof Player) {
-					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
-				} else if ((event.getEntity() instanceof LivingEntity) && 
-						(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
-					if (evente.getDamager() instanceof LivingEntity) {
-						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
-								(LivingEntity)evente.getDamager()));
-					} else {
-						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
-								null));
-					}
-				}
-			}
-			return;
-		}
+//		if (event instanceof EntityDamageByProjectileEvent) {
+//			EntityDamageByEntityEvent evente = ((EntityDamageByProjectileEvent)event);
+//
+//			if (evente.getDamager() instanceof Player) {
+//				if (MineQuest.getQuester((Player)evente.getDamager()) != null) {
+//					MineQuest.getQuester((Player)evente.getDamager()).attackEntity(evente.getEntity(), evente);
+//				}
+//			}
+//
+//			if (!event.isCancelled()) {
+//				if (event.getEntity() instanceof Player) {
+//					MineQuest.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+//				} else if ((event.getEntity() instanceof LivingEntity) && 
+//						(MineQuest.getMob((LivingEntity)event.getEntity()) != null)) {
+//					if (evente.getDamager() instanceof LivingEntity) {
+//						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+//								(LivingEntity)evente.getDamager()));
+//					} else {
+//						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+//								null));
+//					}
+//				}
+//			}
+//			return;
+//		}
 
 		if (event instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
+			if (evente.getDamager() instanceof Projectile) {
+				return;
+			}
 
 			if (evente.getDamager() instanceof Player) {
 			    MineQuest.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);

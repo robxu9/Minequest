@@ -20,14 +20,11 @@ package org.monksanctum.MineQuest.Listener;
 
 
 import org.bukkit.Chunk;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.monksanctum.MineQuest.MineQuest;
-import org.monksanctum.MineQuest.Mob.MQMob;
 import org.monksanctum.MineQuest.Quester.NPCQuester;
 import org.monksanctum.MineQuest.Quester.Quester;
 
@@ -62,17 +59,17 @@ public class MineQuestWorldListener extends WorldListener{
 		MineQuest.unloadMobs(chunk);
 	}
 	
-	private boolean inChunk(Chunk chunk, LivingEntity entity) {
-		Chunk other = entity.getWorld().getChunkAt(entity.getLocation());
-		
-		if (other.getX() == chunk.getX()) {
-			if (other.getZ() == chunk.getZ()) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
+//	private boolean inChunk(Chunk chunk, LivingEntity entity) {
+//		Chunk other = entity.getWorld().getChunkAt(entity.getLocation());
+//		
+//		if (other.getX() == chunk.getX()) {
+//			if (other.getZ() == chunk.getZ()) {
+//				return true;
+//			}
+//		}
+//		
+//		return false;
+//	}
 
 	@Override
 	public void onWorldUnload(WorldUnloadEvent event) {
