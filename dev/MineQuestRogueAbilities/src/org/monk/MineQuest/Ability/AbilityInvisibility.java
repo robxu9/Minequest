@@ -125,7 +125,7 @@ public class AbilityInvisibility extends Ability {
 
 	private void checkInvisible() {
 		if (caster.getPlayer().isSneaking()) {
-			for (Quester quester : MineQuest.getQuesters()) {
+			for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 				if ((quester.getPlayer() != null) && (caster.getPlayer() != null)) {
 					if (!outsideSight(caster.getPlayer().getLocation(), quester.getPlayer().getLocation())) {
 						invisible(caster.getPlayer(), quester.getPlayer());
@@ -133,7 +133,7 @@ public class AbilityInvisibility extends Ability {
 				}
 			}
 		} else {
-			for (Quester quester : MineQuest.getQuesters()) {
+			for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 				if ((quester.getPlayer() != null) && (caster.getPlayer() != null)) {
 					uninvisible(caster.getPlayer(), quester.getPlayer());
 				}
@@ -142,7 +142,7 @@ public class AbilityInvisibility extends Ability {
 	}
 
 	private void complete() {
-		for (Quester quester : MineQuest.getQuesters()) {
+		for (Quester quester : MineQuest.questerHandler.getQuesters()) {
 			if ((quester.getPlayer() != null) && (caster.getPlayer() != null)) {
 				uninvisible(caster.getPlayer(), quester.getPlayer());
 			}
