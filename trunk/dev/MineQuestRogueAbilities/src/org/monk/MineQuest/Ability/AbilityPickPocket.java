@@ -38,7 +38,7 @@ public class AbilityPickPocket extends Ability {
 			double chance = ((double)ch) / 100;
 			
 			if (myclass.getGenerator().nextDouble() < chance) {
-				Quester victim = MineQuest.getQuester(entity);
+				Quester victim = MineQuest.questerHandler.getQuester(entity);
 				if (victim != null) {
 					ItemStack item = victim.stolen();
 					if (item != null) {
@@ -50,7 +50,7 @@ public class AbilityPickPocket extends Ability {
 					}
 				}
 			} else {
-				Quester victim = MineQuest.getQuester(entity);
+				Quester victim = MineQuest.questerHandler.getQuester(entity);
 				if (victim != null) {
 					victim.startled();
 				}
