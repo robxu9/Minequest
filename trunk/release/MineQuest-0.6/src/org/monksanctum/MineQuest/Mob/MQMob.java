@@ -63,11 +63,13 @@ public class MQMob {
 	}
 
 	public int defend(int damage, LivingEntity player) {
+		MineQuest.log("MQMob Defend");
 		if ((entity.getHealth() - damage) <= 0) {
 			dead = true;
 		}
 		if (MineQuest.getQuester(player) != null) {
 			last_attack = MineQuest.getQuester(player);
+			MineQuest.log("Last Damaged by: " + last_attack.getName());
 		}
 		return damage;
 	}
@@ -99,6 +101,7 @@ public class MQMob {
 	public void damage(int i, Quester source) {
 		if (source != null) {
 			this.last_attack = source;
+			MineQuest.log("Last Damaged by: " + last_attack.getName());
 		}
 		if ((entity.getHealth() - i) <= 0) {
 			dead = true;

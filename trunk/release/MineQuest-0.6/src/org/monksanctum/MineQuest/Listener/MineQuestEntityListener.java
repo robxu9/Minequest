@@ -100,7 +100,7 @@ public class MineQuestEntityListener extends EntityListener {
 
 		if (event instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
-			if (evente.getDamager() instanceof Projectile) {
+			if ((evente.getDamager() instanceof Projectile) && (event.getEntity() instanceof HumanEntity)) {
 				return;
 			}
 
@@ -122,6 +122,8 @@ public class MineQuestEntityListener extends EntityListener {
 						evente.setDamage(MineQuest.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								null));
 					}
+				} else if (event.getEntity() instanceof Monster) {
+					MineQuest.log("MQMob not found problem");
 				}
 			}
 

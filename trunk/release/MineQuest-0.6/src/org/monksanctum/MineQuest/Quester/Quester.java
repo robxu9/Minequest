@@ -321,6 +321,8 @@ public class Quester {
 		CreatureType[] new_kills = new CreatureType[kills.length + 1];
 		int i;
 		
+		MineQuest.log(name + " killed " + kill.toString());
+		
 		for (i = 0; i < kills.length; i++) {
 			new_kills[i] = kills[i];
 		}
