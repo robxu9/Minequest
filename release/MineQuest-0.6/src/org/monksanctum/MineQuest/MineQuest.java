@@ -327,20 +327,24 @@ public class MineQuest extends JavaPlugin {
     }
 
 	private static boolean notExists(int id) {
+		int count = 0;
 		for (World world : getSServer().getWorlds()) {
 			net.minecraft.server.World mworld = ((CraftWorld) world).getHandle();
-			for (Object obj : mworld.entityList) {
-				if (obj instanceof net.minecraft.server.Entity) {
-					net.minecraft.server.Entity entity = (net.minecraft.server.Entity) obj;
+			for (Object obj : world.getLivingEntities()) {
+				count++;
+				if (obj instanceof LivingEntity) {
+					LivingEntity entity = (LivingEntity) obj;
 
-					if (entity.id == id) {
+					if (entity.getEntityId() == id) {
 						return false;
 					}
 				}
 			}
 		}
+//		MineQuest.log("Mob Doesn't Exist! Checked " + count + " entities for id " + id);
 
 		return true;
+//		return false;
 	}
 
 	public static void printMobs() {
