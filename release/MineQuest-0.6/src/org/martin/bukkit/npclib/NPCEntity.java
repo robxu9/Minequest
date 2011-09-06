@@ -6,7 +6,6 @@ package org.martin.bukkit.npclib;
 
 import net.minecraft.server.Entity;
 import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityLiving;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EntityTracker;
 import net.minecraft.server.ItemInWorldManager;
@@ -62,7 +61,8 @@ public class NPCEntity extends EntityPlayer {
         entitytracker.a(this, new Packet18ArmAnimation(this, 2));
     }
 
-    @Override
+    @SuppressWarnings("unused")
+	@Override
     public boolean a(EntityHuman entity) {
         EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
         CraftServer server = ((WorldServer) this.world).getServer();
@@ -70,9 +70,8 @@ public class NPCEntity extends EntityPlayer {
 
         if (entity != null) {
         	return super.a(entity);
-        } else {
-        	return false;
         }
+    	return false;
     }
 
     @Override

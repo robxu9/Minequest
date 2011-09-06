@@ -16,16 +16,24 @@ import java.net.Socket;
  * @author martin
  */
 public class NullSocket extends Socket {
+	private InputStream is;
+	private OutputStream os;
+	
+	public NullSocket() {
+        byte[] buf = new byte[1];
+        is = new ByteArrayInputStream(buf);
+        os = new ByteArrayOutputStream();
+	}
+
     @Override
     public InputStream getInputStream()
     {
-        byte[] buf = new byte[1];
-        return new ByteArrayInputStream(buf);
+        return is;
     }
 
     @Override
     public OutputStream getOutputStream()
     {
-        return new ByteArrayOutputStream();
+        return os;
     }
 }
