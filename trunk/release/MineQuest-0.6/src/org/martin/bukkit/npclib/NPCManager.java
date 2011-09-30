@@ -32,7 +32,7 @@ public class NPCManager {
 
     public NPCEntity spawnNPC(String name, Location l) {
         BWorld world = new BWorld(l.getWorld());
-        NPCEntity npcEntity = new NPCEntity(server.getMCServer(), world.getWorldServer(), name, new ItemInWorldManager(world.getWorldServer()));
+        NPCEntity npcEntity = new NPCEntity(server.getMCServer(), world.getWorldServer(), name, new ItemInWorldManager(world.getMCWorld()));
         npcEntity.setPositionRotation(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
         npcEntity.setLocation(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
         world.getWorldServer().getChunkAt(l.getWorld().getChunkAt(l).getX(), l.getWorld().getChunkAt(l).getZ()).a(npcEntity);

@@ -20,7 +20,9 @@ import net.minecraft.server.World;
 import net.minecraft.server.WorldLoaderServer;
 import net.minecraft.server.WorldManager;
 import net.minecraft.server.WorldServer;
+import net.minecraft.server.WorldSettings;
 
+import org.bukkit.GameMode;
 import org.bukkit.World.Environment;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -43,7 +45,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
         CraftWorld world = (CraftWorld) MineQuest.getSServer().getWorld(name);
 
 		if (world != null) {
-			((NewChunkRegionLoader) world.getHandle().p().a(world.getHandle().worldProvider)).reloadChunks(world.getHandle(), name + instance);
+			((NewChunkRegionLoader) world.getHandle().o().a(world.getHandle().worldProvider)).reloadChunks(world.getHandle(), name + instance);
 			return world;
 		}
 
@@ -58,8 +60,9 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
             converter.convert(name, new ConvertProgressUpdater(console));
         }
 
-        int dimension = 200 + console.worlds.size();
-        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name, dimension, seed, environment, null);
+        int dimension = 10 + console.worlds.size();
+        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name, dimension, new WorldSettings(seed, GameMode.getByValue(console.worlds.get(0).worldData.p).getValue(), true), environment, null);
+        
         internal.worldMaps = console.worlds.get(0).worldMaps;
 
         internal.tracker = new EntityTracker(console, dimension);
@@ -71,31 +74,33 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
         MineQuest.getSServer().getPluginManager().callEvent(new WorldInitEvent(internal.getWorld()));
         System.out.print("Preparing start region for level " + (console.worlds.size() -1) + " (Seed: " + internal.getSeed() + ")");
 
-        short short1 = 196;
-        long i = System.currentTimeMillis();
-        for (int j = -short1; j <= short1; j += 16) {
-            for (int k = -short1; k <= short1; k += 16) {
-                long l = System.currentTimeMillis();
-
-                if (l < i) {
-                    i = l;
-                }
-
-                if (l > i + 1000L) {
-                    int i1 = (short1 * 2 + 1) * (short1 * 2 + 1);
-                    int j1 = (j + short1) * (short1 * 2 + 1) + k + 1;
-
-                    System.out.println("Preparing spawn area for " + name + ", " + (j1 * 100 / i1) + "%");
-                    i = l;
-                }
-
-                ChunkCoordinates chunkcoordinates = internal.getSpawn();
-                internal.chunkProviderServer.getChunkAt(chunkcoordinates.x + j >> 4, chunkcoordinates.z + k >> 4);
-
-                while (internal.doLighting()) {
-                    ;
-                }
-            }
+        if (internal.getWorld().getKeepSpawnInMemory()) {
+	        short short1 = 196;
+	        long i = System.currentTimeMillis();
+	        for (int j = -short1; j <= short1; j += 16) {
+	            for (int k = -short1; k <= short1; k += 16) {
+	                long l = System.currentTimeMillis();
+	
+	                if (l < i) {
+	                    i = l;
+	                }
+	
+	                if (l > i + 1000L) {
+	                    int i1 = (short1 * 2 + 1) * (short1 * 2 + 1);
+	                    int j1 = (j + short1) * (short1 * 2 + 1) + k + 1;
+	
+	                    System.out.println("Preparing spawn area for " + name + ", " + (j1 * 100 / i1) + "%");
+	                    i = l;
+	                }
+	
+	                ChunkCoordinates chunkcoordinates = internal.getSpawn();
+	                internal.chunkProviderServer.getChunkAt(chunkcoordinates.x + j >> 4, chunkcoordinates.z + k >> 4);
+	
+	                while (internal.v()) {
+	                    ;
+	                }
+	            }
+	        }
         }
         MineQuest.getSServer().getPluginManager().callEvent(new WorldLoadEvent(internal.getWorld()));
         return internal.getWorld();
@@ -138,7 +143,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
             nbttagcompound.a("zPos", j);
             chunk = ChunkLoader.a(world, nbttagcompound.k("Level"));
         }
-        chunk.h();
+        chunk.g();
         return chunk;
     }
 
@@ -171,7 +176,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
                 ChunkCoordinates chunkcoordinates = world.getSpawn();
                 world.chunkProviderServer.getChunkAt(chunkcoordinates.x + j >> 4, chunkcoordinates.z + k >> 4);
 
-                while (world.doLighting()) {
+                while (world.v()) {
                     ;
                 }
             }

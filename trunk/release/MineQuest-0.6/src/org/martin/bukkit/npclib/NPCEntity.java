@@ -60,46 +60,48 @@ public class NPCEntity extends EntityPlayer {
 
         entitytracker.a(this, new Packet18ArmAnimation(this, 2));
     }
+    
+    
 
-    @SuppressWarnings("unused")
-	@Override
-    public boolean a(EntityHuman entity) {
-        EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
-        CraftServer server = ((WorldServer) this.world).getServer();
-        server.getPluginManager().callEvent(event);
-
-        if (entity != null) {
-        	return super.a(entity);
-        }
-    	return false;
-    }
-
-    @Override
-    public void b(EntityHuman entity) {
-        if (lastTargetId == -1 || lastTargetId != entity.id) {
-            EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.CLOSEST_PLAYER);
-            CraftServer server = ((WorldServer) this.world).getServer();
-            server.getPluginManager().callEvent(event);
-        }
-        lastTargetId = entity.id;
-
-        super.b(entity);
-    }
-
-    @Override
-    public void c(Entity entity) {
-        if (lastBounceId != entity.id || System.currentTimeMillis() - lastBounceTick > 1000) {
-            EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_BOUNCED);
-            CraftServer server = ((WorldServer) this.world).getServer();
-            server.getPluginManager().callEvent(event);
-
-            lastBounceTick = System.currentTimeMillis();
-        }
-
-        lastBounceId = entity.id;
-
-        super.c(entity);
-    }
+//    @SuppressWarnings("unused")
+//	@Override
+//    public boolean a(EntityHuman entity) {
+//        EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
+//        CraftServer server = ((WorldServer) this.world).getServer();
+//        server.getPluginManager().callEvent(event);
+//
+//        if (entity != null) {
+//        	return super.a(entity);
+//        }
+//    	return false;
+//    }
+//
+//    @Override
+//    public void b(EntityHuman entity) {
+//        if (lastTargetId == -1 || lastTargetId != entity.id) {
+//            EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.CLOSEST_PLAYER);
+//            CraftServer server = ((WorldServer) this.world).getServer();
+//            server.getPluginManager().callEvent(event);
+//        }
+//        lastTargetId = entity.id;
+//
+//        super.b(entity);
+//    }
+//
+//    @Override
+//    public void c(Entity entity) {
+//        if (lastBounceId != entity.id || System.currentTimeMillis() - lastBounceTick > 1000) {
+//            EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_BOUNCED);
+//            CraftServer server = ((WorldServer) this.world).getServer();
+//            server.getPluginManager().callEvent(event);
+//
+//            lastBounceTick = System.currentTimeMillis();
+//        }
+//
+//        lastBounceId = entity.id;
+//
+//        super.c(entity);
+//    }
 
     @Override
     public void setPositionRotation(double x, double y, double z, float yaw, float pitch) {
