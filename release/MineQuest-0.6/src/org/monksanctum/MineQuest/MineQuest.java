@@ -38,7 +38,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
@@ -316,7 +315,7 @@ public class MineQuest extends JavaPlugin {
     	int i;
     	
     	for (i = 0; i < mobs.length; i++) {
-    		if ((mobs[i] != null) && ((mobs[i].getHealth() <= 0) || (mobs[i].isDead()) || notExists(mobs[i].getId()))) {
+    		if ((mobs[i] != null) && ((mobs[i].getHealth() <= 0) || (mobs[i].isDead()))) {// || notExists(mobs[i].getId()))) {
     			mobs[i].dropLoot();
     			if (mobs[i].getLastAttacker() != null) {
     				mobs[i].getLastAttacker().addKill(mobs[i]);
@@ -327,11 +326,11 @@ public class MineQuest extends JavaPlugin {
     }
 
 	private static boolean notExists(int id) {
-		int count = 0;
+//		int count = 0;
 		for (World world : getSServer().getWorlds()) {
-			net.minecraft.server.World mworld = ((CraftWorld) world).getHandle();
+//			net.minecraft.server.World mworld = ((CraftWorld) world).getHandle();
 			for (Object obj : world.getLivingEntities()) {
-				count++;
+//				count++;
 				if (obj instanceof LivingEntity) {
 					LivingEntity entity = (LivingEntity) obj;
 

@@ -677,7 +677,7 @@ public class SkillClass {
 	 */
 	protected boolean isWearing(int i, boolean[] flags) {
 		if (quester.getPlayer() == null) return false;
-		int ct = 0;;
+//		int ct = 0;
 
 		PlayerInventory equip = quester.getPlayer().getInventory();
 
@@ -688,7 +688,7 @@ public class SkillClass {
 					return true;
 				}
 			}
-			ct++;
+//			ct++;
 		}
 
 		return false;
