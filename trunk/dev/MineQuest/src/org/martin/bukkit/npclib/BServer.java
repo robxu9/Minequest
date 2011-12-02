@@ -70,19 +70,19 @@ public class BServer {
         cServer.loadPlugins();
     }
 
-    public void stop() {
-        mcServer.a();
-    }
-
-    public void sendConsoleCommand(String cmd) {
-        if (!mcServer.isStopped && MinecraftServer.isRunning(mcServer)) {
-            mcServer.issueCommand(cmd, mcServer);
-        }
-    }
-
-    public List<WorldServer> getWorldServers(){
-        return mcServer.worlds;
-    }
+//    public void stop() {
+//        mcServer.a();
+//    }
+//
+//    public void sendConsoleCommand(String cmd) {
+//        if (!mcServer.isStopped && MinecraftServer.isRunning(mcServer)) {
+//            mcServer.issueCommand(cmd, mcServer);
+//        }
+//    }
+//
+//    public List<WorldServer> getWorldServers(){
+//        return mcServer.worlds;
+//    }
 
 //    public int getSpawnProtationRadius(){
 //        return mcServer.spawnProtection;

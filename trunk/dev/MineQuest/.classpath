@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="C:/Users/Jason/Documents/craftbukkit/craftbukkit-0.0.1-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jason/Documents/craftbukkit/minecraft_server.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jason/Documents/craftbukkit/Permissions.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jason/Documents/craftbukkit/iConomy.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jason/Documents/craftbukkit/ebean-2.7.3/ebean-2.7.3/ebean-2.7.3.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="/home/jmonk/.m2/repository/org/bukkit/minecraft-server/1.9.RC1/minecraft-server-1.9.RC1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bukkit"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/craftbukkit"/>
+	<classpathentry kind="lib" path="/home/jmonk/.m2/repository/org/avaje/ebean/2.7.3/ebean-2.7.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
