@@ -25,9 +25,9 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -72,50 +72,58 @@ public class MineQuestEntityListener extends EntityListener {
 		if (!MineQuest.isWorldEnabled(event.getEntity().getWorld())) return;
 		if (event.isCancelled()) return;
 		
-		if (event instanceof EntityDamageByProjectileEvent) {
-			EntityDamageByEntityEvent evente = ((EntityDamageByProjectileEvent)event);
-
-			if (evente.getDamager() instanceof Player) {
-				if (MineQuest.questerHandler.getQuester((Player)evente.getDamager()) != null) {
-					MineQuest.questerHandler.getQuester((Player)evente.getDamager()).attackEntity(evente.getEntity(), evente);
-				}
-			}
-
-			if (!event.isCancelled()) {
-				if (event.getEntity() instanceof Player) {
-					MineQuest.questerHandler.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
-				} else if ((event.getEntity() instanceof LivingEntity) && 
-						(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()) != null)) {
-					if (evente.getDamager() instanceof LivingEntity) {
-						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
-								(LivingEntity)evente.getDamager()));
-					} else {
-						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
-								null));
-					}
-				}
-			}
-			return;
-		}
+		// old way of getting ranged attacks
+//		if (event instanceof EntityDamageByProjectileEvent) {
+//			EntityDamageByEntityEvent evente = ((EntityDamageByProjectileEvent)event);
+//
+//			if (evente.getDamager() instanceof Player) {
+//				if (MineQuest.questerHandler.getQuester((Player)evente.getDamager()) != null) {
+//					MineQuest.questerHandler.getQuester((Player)evente.getDamager()).attackEntity(evente.getEntity(), evente);
+//				}
+//			}
+//
+//			if (!event.isCancelled()) {
+//				if (event.getEntity() instanceof Player) {
+//					MineQuest.questerHandler.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+//				} else if ((event.getEntity() instanceof LivingEntity) && 
+//						(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()) != null)) {
+//					if (evente.getDamager() instanceof LivingEntity) {
+//						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+//								(LivingEntity)evente.getDamager()));
+//					} else {
+//						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
+//								null));
+//					}
+//				}
+//			}
+//			return;
+//		}
 
 		if (event instanceof EntityDamageByEntityEvent) {
-			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);
+			EntityDamageByEntityEvent evente = ((EntityDamageByEntityEvent)event);	// Change event type
+			Entity damager = evente.getDamager();	// Get the attacker
+			Entity damagee = evente.getEntity();	// Get the victim
 
-			if (evente.getDamager() instanceof Player) {
-			    MineQuest.questerHandler.getQuester((Player)evente.getDamager()).attackEntity(event.getEntity(), evente);
+			if (damager instanceof Projectile) {	// Check for ranged attacks
+				damager = ((Projectile)damager).getShooter();	// MineQuest attack/defend system expects a shooter not a projectile
 			}
 
-			if (!event.isCancelled()) {
-				if (event.getEntity() instanceof Player) {
-					if (MineQuest.questerHandler.getQuester((Player)evente.getEntity()) != null) {
-						MineQuest.questerHandler.getQuester((Player)evente.getEntity()).defendEntity(evente.getDamager(), evente);
+			if (damager instanceof Player) {		// Attacker is a quester (parse damage hooks and abilities)
+			    MineQuest.questerHandler.getQuester((Player)damager).attackEntity(damagee, evente);
+			}
+
+			if (!event.isCancelled()) {				// Damage still in effect
+				
+				if (damagee instanceof Player) {	// Victim is a player (Quester?) (parse defensive abilities and health changes)
+					if (MineQuest.questerHandler.getQuester((Player)damagee) != null) {
+						MineQuest.questerHandler.getQuester((Player)damagee).defendEntity(damager, evente);
 					}
-				} else if ((event.getEntity() instanceof LivingEntity) && 
-						(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()) != null)) {
-					if (evente.getDamager() instanceof LivingEntity) {
+				} else if ((damagee instanceof LivingEntity) && 
+						(MineQuest.mobHandler.getMob((LivingEntity)damagee) != null)) {
+					if (damager instanceof LivingEntity) {	// Defender is a living entity
 						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
-								(LivingEntity)evente.getDamager()));
-					} else {
+								(LivingEntity)damager));
+					} else {								// Defender is something else (something else)
 						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								null));
 					}
