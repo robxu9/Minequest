@@ -123,7 +123,7 @@ public class MineQuestEntityListener extends EntityListener {
 					if (damager instanceof LivingEntity) {	// Defender is a living entity
 						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								(LivingEntity)damager));
-					} else {								// Defender is something else (something else)
+					} else {								// Defender is something else (slime)
 						evente.setDamage(MineQuest.mobHandler.getMob((LivingEntity)event.getEntity()).defend(evente.getDamage(), 
 								null));
 					}
