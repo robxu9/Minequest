@@ -1181,6 +1181,7 @@ public class MineQuestPlayerListener extends PlayerListener {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void processDebug(String[] split, Player player, PlayerChatEvent event) {
 		if (split[0].equals("/goto")) {
         	if (split.length < 2) {

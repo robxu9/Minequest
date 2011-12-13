@@ -304,6 +304,7 @@ public class Quest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void createWorld(String[] split) throws Exception {
 		if (split[0].equals("World")) {
 			World world = null;
@@ -375,6 +376,7 @@ public class Quest {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void copyWorld(String orig, String cp, boolean normal) throws Exception {
 		World world = MineQuest.getSServer().getWorld(orig);
 		if (world == null) {
