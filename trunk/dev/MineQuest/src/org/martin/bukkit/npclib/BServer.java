@@ -1,7 +1,6 @@
 package org.martin.bukkit.npclib;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,7 +8,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.NetworkListenThread;
 import net.minecraft.server.PropertyManager;
 import net.minecraft.server.ServerConfigurationManager;
-import net.minecraft.server.WorldServer;
 
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;

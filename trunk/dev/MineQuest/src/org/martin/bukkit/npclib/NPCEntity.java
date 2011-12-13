@@ -63,20 +63,20 @@ public class NPCEntity extends EntityPlayer {
 
     @SuppressWarnings("unused")
 	@Override
-    public boolean a(EntityHuman entity) {
+    public boolean b(EntityHuman entity) {
         EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
         CraftServer server = ((WorldServer) this.world).getServer();
         server.getPluginManager().callEvent(event);
 
         if (entity != null) {
-        	return super.a(entity);
+        	return super.b(entity);
         } else {
         	return false;
         }
     }
 
     @Override
-    public void b(EntityHuman entity) {
+    public int a(EntityHuman entity) {
         if (lastTargetId == -1 || lastTargetId != entity.id) {
             EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.CLOSEST_PLAYER);
             CraftServer server = ((WorldServer) this.world).getServer();
@@ -84,7 +84,7 @@ public class NPCEntity extends EntityPlayer {
         }
         lastTargetId = entity.id;
 
-        super.b(entity);
+        return super.a(entity);
     }
 
     @Override

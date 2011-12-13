@@ -8,18 +8,19 @@ import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkCoordinates;
 import net.minecraft.server.ChunkLoader;
 import net.minecraft.server.ChunkRegionLoader;
-import net.minecraft.server.CompressedStreamTools;
 import net.minecraft.server.ConvertProgressUpdater;
 import net.minecraft.server.Convertable;
 import net.minecraft.server.EntityTracker;
 import net.minecraft.server.IWorldAccess;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.NBTCompressedStreamTools;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.RegionFileCache;
 import net.minecraft.server.World;
 import net.minecraft.server.WorldLoaderServer;
 import net.minecraft.server.WorldManager;
 import net.minecraft.server.WorldServer;
+import net.minecraft.server.WorldSettings;
 
 import org.bukkit.World.Environment;
 import org.bukkit.craftbukkit.CraftServer;
@@ -43,7 +44,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
         CraftWorld world = (CraftWorld) MineQuest.getSServer().getWorld(name);
 
 		if (world != null) {
-			((NewChunkRegionLoader) world.getHandle().p().a(world.getHandle().worldProvider)).reloadChunks(world.getHandle(), name + instance);
+			((NewChunkRegionLoader) world.getHandle().worldProvider.getChunkProvider()).reloadChunks(world.getHandle(), name + instance);
 			return world;
 		}
 
@@ -59,12 +60,12 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
         }
 
         int dimension = 200 + console.worlds.size();
-        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name, dimension, seed, environment, null);
+        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name, dimension, new WorldSettings(seed, MineQuest.getSServer().getDefaultGameMode().getValue(), true, false), environment, null);
         internal.worldMaps = console.worlds.get(0).worldMaps;
 
-        internal.tracker = new EntityTracker(console, dimension);
+        internal.tracker = new EntityTracker(console, internal);
         internal.addIWorldAccess((IWorldAccess) new WorldManager(console, internal));
-        internal.spawnMonsters = 1;
+        internal.difficulty = 1;
         internal.setSpawnFlags(true, true);
         console.worlds.add(internal);
 
@@ -92,9 +93,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
                 ChunkCoordinates chunkcoordinates = internal.getSpawn();
                 internal.chunkProviderServer.getChunkAt(chunkcoordinates.x + j >> 4, chunkcoordinates.z + k >> 4);
 
-                while (internal.doLighting()) {
-                    ;
-                }
+                while (internal.updateLights());
             }
         }
         MineQuest.getSServer().getPluginManager().callEvent(new WorldLoadEvent(internal.getWorld()));
@@ -111,11 +110,11 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
 	@Override
     public Chunk a(World world, int i, int j)
     {
-        java.io.DataInputStream datainputstream = RegionFileCache.c(file2, i, j);
+        java.io.DataInputStream datainputstream = RegionFileCache.b(file2, i, j);
         NBTTagCompound nbttagcompound;
         if(datainputstream != null)
         {
-            nbttagcompound = CompressedStreamTools.a((DataInput)datainputstream);
+            nbttagcompound = NBTCompressedStreamTools.a((DataInput)datainputstream);
         } else
         {
             return null;
@@ -125,18 +124,18 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
             System.out.println((new StringBuilder()).append("Chunk file at ").append(i).append(",").append(j).append(" is missing level data, skipping").toString());
             return null;
         }
-        if(!nbttagcompound.k("Level").hasKey("Blocks"))
+        if(!nbttagcompound.getCompound("Level").hasKey("Blocks"))
         {
             System.out.println((new StringBuilder()).append("Chunk file at ").append(i).append(",").append(j).append(" is missing block data, skipping").toString());
             return null;
         }
-        Chunk chunk = ChunkLoader.a(world, nbttagcompound.k("Level"));
+        Chunk chunk = ChunkLoader.a(world, nbttagcompound.getCompound("Level"));
         if(!chunk.a(i, j))
         {
             System.out.println((new StringBuilder()).append("Chunk file at ").append(i).append(",").append(j).append(" is in the wrong location; relocating. (Expected ").append(i).append(", ").append(j).append(", got ").append(chunk.x).append(", ").append(chunk.z).append(")").toString());
-            nbttagcompound.a("xPos", i);
-            nbttagcompound.a("zPos", j);
-            chunk = ChunkLoader.a(world, nbttagcompound.k("Level"));
+            nbttagcompound.setInt("xPos", i);
+            nbttagcompound.setInt("zPos", j);
+            chunk = ChunkLoader.a(world, nbttagcompound.getCompound("Level"));
         }
         chunk.h();
         return chunk;
@@ -171,9 +170,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
                 ChunkCoordinates chunkcoordinates = world.getSpawn();
                 world.chunkProviderServer.getChunkAt(chunkcoordinates.x + j >> 4, chunkcoordinates.z + k >> 4);
 
-                while (world.doLighting()) {
-                    ;
-                }
+                while (world.updateLights());
             }
         }
 	}
