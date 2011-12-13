@@ -14,10 +14,13 @@ public class QuesterHandler {
 	private List<Quester> questers = new ArrayList<Quester>(); 
 	
 	public QuesterHandler() {
+	}
+	
+	public void query() {
 		ResultSet results = MineQuest.config.sql_server.query("SELECT * FROM questers");
 		List<String> names = new ArrayList<String>();
 		List<String> npcs = new ArrayList<String>();
-		
+
 		try {
 			while (results.next()) {
 				if (results.getString("mode").equals("Quester")) {
