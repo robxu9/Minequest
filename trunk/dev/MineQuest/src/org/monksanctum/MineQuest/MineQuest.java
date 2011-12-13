@@ -667,10 +667,14 @@ public class MineQuest extends JavaPlugin {
         }
         
 //        getEventQueue().addEvent(new RespawnEvent(300000));
-        mobHandler = new MobHandler();
 
         try {
+            mobHandler = new MobHandler();
         	config = new ConfigHandler();
+            questerHandler = new QuesterHandler();
+            mobHandler.checkAllMobs();
+            townHandler = new TownHandler();
+            
 			
 			config.sql_server.update("CREATE TABLE IF NOT EXISTS"
 							+ " npc (name VARCHAR(30), property VARCHAR(30), value VARCHAR(300))");

@@ -23,9 +23,6 @@ public class MobHandler {
 		mobs = new MQMob[128];
         
         noMobs = new ArrayList<String>();
-        
-        checkAllMobs();
-		
 	}
 	
 	/**
