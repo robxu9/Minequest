@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+
 import org.monksanctum.MineQuest.World.Claim;
 import org.monksanctum.MineQuest.World.Town;
 import org.monksanctum.MineQuest.World.Village;
@@ -57,7 +59,8 @@ public class TownHandler {
 	 */
 	public void finishClaim(Player player, String name) {
 		if (MineQuest.config.is_claim_restricted) {
-			if (!MineQuest.isPermissionsEnabled() || !MineQuest.permissionHandler.has(player, "MineQuest.Claim")) {
+			
+			if (!MineQuest.isPermissionsEnabled() || !MineQuest.permission.playerHas(player, "MineQuest.Claim")) {
 				if (!player.isOp()) {
 					player.sendMessage("You do not have permission to create a claim");
 					return;
@@ -167,7 +170,7 @@ public class TownHandler {
 	 */
 	public void finishVillage(Player player, String name) {
 		if (MineQuest.config.is_village_restricted) {
-			if (!MineQuest.isPermissionsEnabled() || !MineQuest.permissionHandler.has(player, "MineQuest.Village")) {
+			if (!MineQuest.isPermissionsEnabled() || !MineQuest.permission.playerHas(player, "MineQuest.Village")) {
 				if (!player.isOp()) {
 					player.sendMessage("You do not have permission to create a village");
 					return;

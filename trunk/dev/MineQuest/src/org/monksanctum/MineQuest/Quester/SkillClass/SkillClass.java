@@ -843,7 +843,7 @@ public class SkillClass {
 				abil_list_id = results.getInt("abil_list_id");
 				
 				if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
-					if (MineQuest.getPermissions().has(quester.getPlayer(), "MineQuest.Abilities")) {
+					if (MineQuest.permission.playerHas(quester.getPlayer(), "MineQuest.Abilities")) {
 						ability_list = abilListSQL(abil_list_id);
 					} else {
 						ability_list = new Ability[0];
@@ -861,7 +861,7 @@ public class SkillClass {
 		}
 		
 		if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
-			if (MineQuest.getPermissions().has(quester.getPlayer(), "MineQuest.Abilities")) {
+			if (MineQuest.permission.playerHas(quester.getPlayer(), "MineQuest.Abilities")) {
 				fillAbilities();
 			}
 		} else if (!MineQuest.isPermissionsEnabled()) {

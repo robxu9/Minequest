@@ -17,7 +17,7 @@ public class TownProperty extends Property {
 	@Override
 	public boolean canEdit(Quester quester) {
 		if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
-			if (MineQuest.getPermissions().has(quester.getPlayer(), "MineQuest.Town." + town.getName())) {
+			if (MineQuest.permission.playerHas(quester.getPlayer(), "MineQuest.Town." + town.getName())) {
 				return true;
 			}
 		}

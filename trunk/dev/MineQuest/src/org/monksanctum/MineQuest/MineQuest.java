@@ -40,7 +40,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
+
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -57,7 +57,7 @@ import org.monksanctum.MineQuest.Event.EventQueue;
 import org.monksanctum.MineQuest.Listener.MineQuestBlockListener;
 import org.monksanctum.MineQuest.Listener.MineQuestEntityListener;
 import org.monksanctum.MineQuest.Listener.MineQuestPlayerListener;
-import org.monksanctum.MineQuest.Listener.MineQuestServerListener;
+
 import org.monksanctum.MineQuest.Listener.MineQuestWorldListener;
 import org.monksanctum.MineQuest.Quest.FullParty;
 import org.monksanctum.MineQuest.Quest.Quest;
@@ -67,9 +67,7 @@ import org.monksanctum.MineQuest.World.Town;
 
 //Vault imports. Used to find and hook into permissions and economy. 
 import net.milkbowl.vault.economy.*;
-import net.milkbowl.vault.economy.plugins.*;
 import net.milkbowl.vault.permission.*;
-import net.milkbowl.vault.permission.plugins.*;
 
 
 /**
@@ -231,7 +229,8 @@ public class MineQuest extends JavaPlugin {
     static public EventQueue getEventQueue() {
     	return eventQueue;
     }
-
+//old Iconomy code. To be removed later
+    
 /*	public static iConomy getIConomy() {
 		return IConomy;
 	}
@@ -241,16 +240,16 @@ public class MineQuest extends JavaPlugin {
 	}
 */
     
-	private Boolean setupEconomy()
-	    {
-	        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
-	        if (economyProvider != null) 
-	        {
-	            economy = economyProvider.getProvider();
-	        }
+    public Boolean setupEconomy()
+    {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) 
+        {
+            economy = economyProvider.getProvider();
+        }
 
-	        return (economy != null);
-	    }
+        return (economy != null);
+    }
 	
 	/**
 	 * Determines the next available ability id in the abilities SQL table.
@@ -279,7 +278,7 @@ public class MineQuest extends JavaPlugin {
 		return npc_strings;
 	}
 	
-	 private Boolean setupPermissions()
+	 public Boolean setupPermissions()
 	    {
 	        RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
 	        if (permissionProvider != null) {
@@ -597,7 +596,7 @@ public class MineQuest extends JavaPlugin {
 	private MineQuestBlockListener bl;
 	private MineQuestEntityListener el;
 	private MineQuestPlayerListener pl;
-	private MineQuestServerListener sl;
+//	private MineQuestServerListener sl;
 	private MineQuestWorldListener wl;
 	private String version;
 	public static QuesterHandler questerHandler;
@@ -805,7 +804,7 @@ public class MineQuest extends JavaPlugin {
 		bl = new MineQuestBlockListener();
 		el = new MineQuestEntityListener();
 		pl = new MineQuestPlayerListener();
-		sl = new MineQuestServerListener();
+//		sl = new MineQuestServerListener();
 		wl = new MineQuestWorldListener();
 //		vl = new MineQuestVehicleListener();
 		
@@ -829,8 +828,8 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
-        pm.registerEvent(Event.Type.PLUGIN_DISABLE, sl, Priority.Monitor, this);
-        pm.registerEvent(Event.Type.PLUGIN_ENABLE, sl, Priority.Monitor, this);
+ //       pm.registerEvent(Event.Type.PLUGIN_DISABLE, sl, Priority.Monitor, this);
+ //      pm.registerEvent(Event.Type.PLUGIN_ENABLE, sl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.CHUNK_LOAD, wl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.CHUNK_UNLOAD, wl, Priority.Monitor, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");

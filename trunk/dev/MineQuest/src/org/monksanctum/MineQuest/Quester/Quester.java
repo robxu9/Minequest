@@ -669,7 +669,7 @@ public class Quester {
 	
 	public boolean canCommand(String string) {
 		if (MineQuest.isPermissionsEnabled() && (player != null)) {
-			if (!MineQuest.getPermissions().has((Player) player, "MineQuest.Command." + string)) {
+			if (!MineQuest.permission.playerHas((Player) player, "MineQuest.Command." + string)) {
 				return false;
 			}
 		}
@@ -1488,17 +1488,15 @@ public class Quester {
 	 * 
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
+
 	public double getCubes() {
-		if (MineQuest.getIsConomyOn()) {
-			if (MineQuest.getIConomy().hasAccount(getSName())) {
-				Holdings balance = MineQuest.getIConomy().getAccount(getSName()).getHoldings();
-				return balance.balance();
+		if (MineQuest.economy != null) {
+				double balance = MineQuest.economy.getBalance(getSName());
+				return balance;
 			}
-		}
 		return cubes;
 	}
-
+	
 	public Map<Material, Integer> getDestroyed() {
 		return destroyed;
 	}
@@ -2389,16 +2387,10 @@ public class Quester {
 	 * 
 	 * @param d New Cubes
 	 */
-	@SuppressWarnings("static-access")
+
 	public void setCubes(double d) {
-		cubes = d;
-		if (MineQuest.getIsConomyOn()) {
-			if (MineQuest.getIConomy().hasAccount(getSName())) {
-				Holdings balance = MineQuest.getIConomy().getAccount(getSName()).getHoldings();
-				balance.set(d);
-			}
+		cubes = d;		
 		}
-	}
 
 	/**
 	 * Sets the Health of the Quester.

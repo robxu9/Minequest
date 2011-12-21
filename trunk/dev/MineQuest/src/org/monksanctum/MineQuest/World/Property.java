@@ -82,7 +82,7 @@ public class Property extends Area{
 		}
 		
 		if (MineQuest.isPermissionsEnabled() && (quester.getPlayer() != null)) {
-			if (MineQuest.getPermissions().has(quester.getPlayer(), "MineQuest.Property." + owner)) {
+			if (MineQuest.permission.playerHas(quester.getPlayer(), "MineQuest.Property." + owner)) {
 				return true;
 			}
 		}
