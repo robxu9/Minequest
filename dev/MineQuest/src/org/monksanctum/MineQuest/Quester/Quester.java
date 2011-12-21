@@ -77,7 +77,8 @@ import org.monksanctum.MineQuest.World.Claim;
 import org.monksanctum.MineQuest.World.Property;
 import org.monksanctum.MineQuest.World.Town;
 
-import com.iConomy.system.Holdings;
+//Add Vault Imports Here
+
 
 /**
  * This is a wrapper around bukkit's player class.

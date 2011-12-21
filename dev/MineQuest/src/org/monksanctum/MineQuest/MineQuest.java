@@ -43,6 +43,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.martin.bukkit.npclib.NPCManager;
 import org.monksanctum.MineQuest.Ability.Ability;
@@ -64,9 +65,12 @@ import org.monksanctum.MineQuest.Quester.Quester;
 import org.monksanctum.MineQuest.Quester.SkillClass.SkillClass;
 import org.monksanctum.MineQuest.World.Town;
 
-import com.iConomy.iConomy;
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
+//Vault imports. Used to find and hook into permissions and economy. 
+import net.milkbowl.vault.economy.*;
+import net.milkbowl.vault.economy.plugins.*;
+import net.milkbowl.vault.permission.*;
+import net.milkbowl.vault.permission.plugins.*;
+
 
 /**
  * This is the main class of MineQuest. It holds static lists of players in the server,
@@ -77,18 +81,20 @@ import com.nijikokun.bukkit.Permissions.Permissions;
  * @author jmonk
  *
  */
+
 public class MineQuest extends JavaPlugin {
 	private static EventQueue eventQueue;
-	private static iConomy IConomy = null;
 	private static NPCManager npc_m;
 	private static NPCStringConfig npc_strings = new NPCStringConfig();
-	static PermissionHandler permissionHandler;
 	private static Quest[] quests;
 	private static Server server;
 //	private MineQuestVehicleListener vl;
 //	private MineQuestWorldListener wl;
 	public static ConfigHandler config;
 	public static MobHandler mobHandler;
+	public static Permission permission = null;
+	public static Economy economy = null;
+	
 	
 	/**
 	 * This function adds a quest to the list of quests that MineQuest knows
@@ -221,17 +227,30 @@ public class MineQuest extends JavaPlugin {
      * 
      * @return EventParser
      */
+	
     static public EventQueue getEventQueue() {
     	return eventQueue;
     }
 
-	public static iConomy getIConomy() {
+/*	public static iConomy getIConomy() {
 		return IConomy;
 	}
 
 	public static boolean getIsConomyOn() {
 		return IConomy != null;
 	}
+*/
+    
+	private Boolean setupEconomy()
+	    {
+	        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+	        if (economyProvider != null) 
+	        {
+	            economy = economyProvider.getProvider();
+	        }
+
+	        return (economy != null);
+	    }
 	
 	/**
 	 * Determines the next available ability id in the abilities SQL table.
@@ -260,9 +279,14 @@ public class MineQuest extends JavaPlugin {
 		return npc_strings;
 	}
 	
-	public static PermissionHandler getPermissions() {
-		return permissionHandler;
-	}
+	 private Boolean setupPermissions()
+	    {
+	        RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+	        if (permissionProvider != null) {
+	            permission = permissionProvider.getProvider();
+	        }
+	        return (permission != null);
+	    }
 	
 	public static Quest[] getQuests() {
 		return quests;
@@ -327,7 +351,7 @@ public class MineQuest extends JavaPlugin {
 		}
 		if (quester.getPlayer() != null) {
 			if (isPermissionsEnabled()) {
-				if (permissionHandler.has(quester.getPlayer(), "MineQuest.Mayor")) {
+				if (permission.playerHas(quester.getPlayer(), "MineQuest.Mayor")) {
 					return true;
 				}
 			}
@@ -359,7 +383,7 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		if (isPermissionsEnabled()) {
-			if (!permissionHandler.has(player, "MineQuest.Quester")) {
+			if (!permission.playerHas(player.getWorld(), player.getName(), "MineQuest.Quester")) {
 				return false;
 			}
 		}
@@ -404,7 +428,7 @@ public class MineQuest extends JavaPlugin {
 	}
 	
 	public static boolean isPermissionsEnabled() {
-		return permissionHandler != null;
+		return permission != null;
 	}
 	
 	/**
@@ -475,7 +499,7 @@ public class MineQuest extends JavaPlugin {
 		}
 		
 		if (isPermissionsEnabled() && (quester.getPlayer() != null)) {
-			if (permissionHandler.has(quester.getPlayer(), "MineQuest.NormalHealth")) {
+			if (permission.playerHas(quester.getPlayer(), "MineQuest.NormalHealth")) {
 				return false;
 			}
 		}
@@ -569,9 +593,6 @@ public class MineQuest extends JavaPlugin {
 		}
 	}
 
-	public static void setIConomy(Plugin object) {
-		MineQuest.IConomy = ((iConomy)object);
-	}
 	
 	private MineQuestBlockListener bl;
 	private MineQuestEntityListener el;
@@ -813,39 +834,9 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.CHUNK_LOAD, wl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.CHUNK_UNLOAD, wl, Priority.Monitor, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
-
-		setupIConomy();
-		setupPermissions();
 		
 		if (new File("MineQuest/main.script").exists()) {
 			MineQuest.addQuest(new Quest("MineQuest/main.script", new FullParty()));
-		}
-	}
-
-	private void setupIConomy() {
-		Plugin test = this.getServer().getPluginManager().getPlugin(
-				"iConomy");
-
-		if (MineQuest.IConomy == null) {
-			if (test != null) {
-			} else {
-				log("iConomy system not detected, defaulting to MineQuest Storage");
-			}
-		}
-	}
-	
-	private void setupPermissions() {
-		Plugin permissionsPlugin = this.getServer().getPluginManager()
-				.getPlugin("Permissions");
-
-		if (permissionHandler == null) {
-			if (permissionsPlugin != null) {
-				permissionHandler = ((Permissions) permissionsPlugin)
-						.getHandler();
-			} else {
-				permissionHandler = null;
-				log("Permission system not detected");
-			}
 		}
 	}
 
