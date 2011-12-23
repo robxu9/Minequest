@@ -100,7 +100,14 @@ public class Town extends Village {
 	}
 
 	public void buy(Quester quester, Property prop) {
-		quester.setCubes(quester.getCubes() - prop.getPrice());
+		if (MineQuest.economy != null)
+		{
+			quester.withdrawBalance(prop.getPrice());
+		}
+		else
+		{
+			quester.setCubes(quester.getCubes() - prop.getPrice());
+		} 
 		
 		prop.setOwner(quester);
 		

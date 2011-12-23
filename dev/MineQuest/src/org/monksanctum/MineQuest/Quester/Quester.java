@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import net.milkbowl.vault.economy.EconomyResponse;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EntityTracker;
 import net.minecraft.server.Packet18ArmAnimation;
@@ -755,7 +756,16 @@ public class Quester {
 	}
 	
 	public boolean canPay(long cost) {
-		if (getCubes() >= cost) {
+		if (MineQuest.economy != null)
+		{
+			if (getCubes() >= cost)
+			{
+				withdrawBalance(cost);
+				return true;
+			}
+		}
+		if (getCubes() >= cost) 
+		{
 			setCubes(getCubes() - cost);
 			return true;
 		}
@@ -2389,9 +2399,31 @@ public class Quester {
 	 */
 
 	public void setCubes(double d) {
-		cubes = d;		
+		cubes = d;
 		}
-
+	
+	/**
+	 * This code is to add money to the specified player when using vault's
+	 * economy system. This requires a double to be supplied to work.
+	 */
+	
+	public void addBalance(double money)
+	{
+		MineQuest.economy.depositPlayer(getSName(), money);
+	}
+	
+	/**
+	 * This withdraws the given amount from the player. 
+	 */
+	
+	public void withdrawBalance(double cost)
+	{
+		EconomyResponse Amount = MineQuest.economy.bankHas(getSName(), cost);
+		if (Amount != null){
+			MineQuest.economy.bankWithdraw(getSName(), cost);
+		}
+	}
+	
 	/**
 	 * Sets the Health of the Quester.
 	 * 

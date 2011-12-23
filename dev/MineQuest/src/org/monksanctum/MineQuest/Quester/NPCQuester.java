@@ -343,7 +343,14 @@ public class NPCQuester extends Quester {
 	
 	public void buyNPC(Quester quester) {
 		if (quester.getCubes() > getCost()) {
-			quester.setCubes(quester.getCubes() - getCost());
+			if (MineQuest.economy != null)
+			{
+				quester.withdrawBalance(cubes);
+			}
+			else
+			{
+				quester.setCubes(quester.getCubes() - cubes);
+			}
 			quester.addNPC(this);
 			setMode(NPCMode.PARTY);
 			quester.sendMessage(name + " joined your party!");

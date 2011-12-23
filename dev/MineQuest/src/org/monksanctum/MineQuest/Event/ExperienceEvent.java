@@ -18,6 +18,7 @@
  */
 package org.monksanctum.MineQuest.Event;
 
+import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Economy.StoreBlock;
 import org.monksanctum.MineQuest.Quest.Party;
 import org.monksanctum.MineQuest.Quester.Quester;
@@ -46,8 +47,16 @@ public class ExperienceEvent extends NormalEvent {
 			quester.sendMessage("You gained " + class_exp + " unassigned exp from a quest");
 			quester.expClassGain(class_exp / party.getQuesters().size());
 			if (cubes > 0) {
-				quester.setCubes(quester.getCubes() + (cubes / party.getQuesters().size()));
-				quester.sendMessage("You gained " + StoreBlock.convert(cubes / party.getQuesters().size()) + " from a quest");
+				if (MineQuest.economy != null)
+				{
+					quester.addBalance(cubes / party.getQuesters().size());
+					quester.sendMessage("You gained " + StoreBlock.convert(cubes / party.getQuesters().size()) + " from a quest");
+				}
+				else
+				{
+						quester.setCubes(quester.getCubes() + (cubes / party.getQuesters().size()));
+						quester.sendMessage("You gained " + StoreBlock.convert(cubes / party.getQuesters().size()) + " from a quest");
+				}
 			}
 		}
 	}
