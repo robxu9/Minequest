@@ -139,8 +139,15 @@ public class StoreBlock {
 		}
 		
 		quantity -= block_quantity;
-		
-		quester.setCubes(quester.getCubes() - cubes);
+		if (MineQuest.economy != null)
+		{
+			quester.withdrawBalance(cubes);
+		}
+		else
+		{
+			quester.setCubes(quester.getCubes() - cubes);
+		}
+
 		update();
 		
 
@@ -271,8 +278,15 @@ public class StoreBlock {
 		price = new_price;
 		
 		quantity += block_quantity;
-
-		quester.setCubes(quester.getCubes() + cubes);
+		
+		if (MineQuest.economy != null)
+		{
+			quester.withdrawBalance(cubes);
+		}
+		else
+		{
+			quester.setCubes(quester.getCubes() - cubes);
+		}
 		update();
 		
     	String cubes_string = convert(cubes);
