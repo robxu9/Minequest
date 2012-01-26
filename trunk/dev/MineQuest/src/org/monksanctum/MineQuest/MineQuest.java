@@ -661,6 +661,7 @@ public class MineQuest extends JavaPlugin {
 	 * This loads all adjustable parameters from minequest.properties, including
 	 * database location and login parameters.
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onEnable() {	
         
@@ -828,8 +829,8 @@ public class MineQuest extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_DAMAGE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE, bl, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, bl, Priority.Normal, this);
- //       pm.registerEvent(Event.Type.PLUGIN_DISABLE, sl, Priority.Monitor, this);
- //      pm.registerEvent(Event.Type.PLUGIN_ENABLE, sl, Priority.Monitor, this);
+ //     pm.registerEvent(Event.Type.PLUGIN_DISABLE, sl, Priority.Monitor, this);
+ //     pm.registerEvent(Event.Type.PLUGIN_ENABLE, sl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.CHUNK_LOAD, wl, Priority.Monitor, this);
         pm.registerEvent(Event.Type.CHUNK_UNLOAD, wl, Priority.Monitor, this);
         System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");

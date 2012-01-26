@@ -5,11 +5,17 @@
 
 package org.martin.bukkit.npclib;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.concurrent.Callable;
 
-import net.minecraft.server.EnumSkyBlock;
+import net.minecraft.server.AxisAlignedBB;
+import net.minecraft.server.Entity;
+import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.EnumSkyBlock;
 import net.minecraft.server.WorldProvider;
 import net.minecraft.server.WorldServer;
 
@@ -17,6 +23,9 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  *
@@ -24,14 +33,14 @@ import org.bukkit.craftbukkit.CraftWorld;
  */
 public class BWorld {
 
-//    private BServer server;
+    private BServer server;
     private World world;
     private CraftWorld cWorld;
     private net.minecraft.server.World mcWorld;
     private WorldServer wServer;
     private WorldProvider wProvider;
     public BWorld(BServer server, String worldName){
-//        this.server = server;
+        this.server = server;
         world = server.getServer().getWorld(worldName);
         try {
             cWorld = (CraftWorld) world;
@@ -85,30 +94,32 @@ public class BWorld {
         wServer.a(EnumSkyBlock.BLOCK, block.getX(), block.getY(), block.getZ(), level);
     }
 
-//    @SuppressWarnings({ "unchecked", "rawtypes" })
-//	public void removeEntity(String name,final Player player,JavaPlugin plugin){
-//        server.getServer().getScheduler().callSyncMethod(plugin, new Callable() {
-//
-//            public Object call() throws Exception {
-//
-//                Location loc = player.getLocation();
-//                CraftWorld craftWorld = (CraftWorld) player.getWorld();
-//                CraftPlayer craftPlayer = (CraftPlayer) player;
-//                double x = loc.getX() + 0.5;
-//                double y = loc.getY() + 0.5;
-//                double z = loc.getZ() + 0.5;
-//                double radius = 10;
-//
-//                List<Entity> entities = new ArrayList();
-//                AxisAlignedBB bb = AxisAlignedBB.a(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
-//                entities = craftWorld.getHandle().b(craftPlayer.getHandle(), bb);
-//                for (Entity o : entities) {
-//                    if (!(o instanceof EntityPlayer)) {
-//                        o.getBukkitEntity().remove();
-//                    }
-//                }
-//                return null;
-//            }
-//        });
-//    }
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void removeEntity(String name,final Player player,JavaPlugin plugin){
+        server.getServer().getScheduler().callSyncMethod(plugin, new Callable() {
+
+            public Object call() throws Exception {
+
+                Location loc = player.getLocation();
+                CraftWorld craftWorld = (CraftWorld) player.getWorld();
+                CraftPlayer craftPlayer = (CraftPlayer) player;
+                
+                double x = loc.getX() + 0.5;
+                double y = loc.getY() + 0.5;
+                double z = loc.getZ() + 0.5;
+                double radius = 10;
+
+                List<Entity> entities = new ArrayList();
+                AxisAlignedBB bb = AxisAlignedBB.a(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
+                entities = craftWorld.getHandle().a(craftPlayer.getHandle(), bb);
+                for (Entity o : entities) {
+                    if (!(o instanceof EntityPlayer)) {
+                        o.getBukkitEntity().remove();
+                    }
+                }
+                return null;
+            }
+        });
+    }
 }
+       
