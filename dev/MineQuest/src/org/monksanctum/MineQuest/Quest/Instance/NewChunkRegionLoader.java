@@ -60,7 +60,7 @@ public class NewChunkRegionLoader extends ChunkRegionLoader {
         }
 
         int dimension = 200 + console.worlds.size();
-        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name, dimension, new WorldSettings(seed, MineQuest.getSServer().getDefaultGameMode().getValue(), true, false), environment, null);
+        WorldServer internal = new WorldServer(console, new NewServerNBTManager(new File("."), instance, name, true), name, dimension, new WorldSettings(seed, MineQuest.getSServer().getDefaultGameMode().getValue(), true, false, null), environment, null);
         internal.worldMaps = console.worlds.get(0).worldMaps;
 
         internal.tracker = new EntityTracker(console, internal);

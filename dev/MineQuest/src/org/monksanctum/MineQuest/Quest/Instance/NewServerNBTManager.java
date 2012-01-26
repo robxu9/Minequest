@@ -291,4 +291,16 @@ public class NewServerNBTManager implements PlayerFileData, IDataManager {
 	public File getPlayerDir() {
 		return this.playerDir;
 	}
+
+	@Override
+	public void load(EntityHuman arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void save(EntityHuman arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 }

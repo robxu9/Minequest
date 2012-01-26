@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.monksanctum.MineQuest.MineQuest;
 
 /**
  *
@@ -31,17 +32,27 @@ public class NPCManager {
     }
 
     public NPCEntity spawnNPC(String name, Location l) {
+    	 if (npcs.containsKey(name)) {
+ 			MineQuest.log("NPC with that id already exists, existing NPC returned");
+ 			return npcs.get(name);
+ 		} else {
+ 		// Check and shorten name if name is too long. Spawn NPC anyway with shortened name.
+ 			if (name.length() > 16) { 
+ 				String tmp = name.substring(0, 16);
+ 				MineQuest.log("NPCs can't have names longer than 16 characters,");
+ 				MineQuest.log(name + " has been shortened to " + tmp);
+ 				name = tmp;
+ 			}
         BWorld world = new BWorld(l.getWorld());
         NPCEntity npcEntity = new NPCEntity(server.getMCServer(), world.getWorldServer(), name, new ItemInWorldManager(world.getWorldServer()));
         npcEntity.setPositionRotation(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
         npcEntity.setLocation(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
         world.getWorldServer().getChunkAt(l.getWorld().getChunkAt(l).getX(), l.getWorld().getChunkAt(l).getZ()).a(npcEntity);
-        //world.getWorldServer().manager.addPlayer(npcEntity);
-        //server.getEntityTracker().a(npcEntity);
-        //server.getEntityTracker().trackPlayer(npcEntity);
-        world.getWorldServer().addEntity(npcEntity); //the right way
+        world.getWorldServer().addEntity(npcEntity);
         npcs.put(name, npcEntity);
+        MineQuest.log("New NPC spawned with the name: " + name);
         return npcEntity;
+ 		}
     }
 
     public void despawn(String id) {
