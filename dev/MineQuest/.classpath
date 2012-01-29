@@ -2,8 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="/home/jmonk/Downloads/craftbukkit-1.0.1-R1.jar"/>
-	<classpathentry kind="lib" path="/home/jmonk/Downloads/Permissions.jar"/>
-	<classpathentry kind="lib" path="/home/jmonk/Downloads/iConomy.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Alan/Desktop/Minequest Development/Requirements for MQ/bukkit.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Alan/Desktop/Minequest Development/Requirements for MQ/craftbukkit.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Alan/Desktop/Minequest Development/Requirements for MQ/ebean-2.7.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Alan/Desktop/Minequest Development/Requirements for MQ/minecraft_server.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Alan/Desktop/Minequest Development/Requirements for MQ/Vault.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

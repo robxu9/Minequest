@@ -47,45 +47,44 @@ public class NPCEntity extends EntityPlayer {
         this.lastBounceTick = 0;
     }
 
+	public void setBukkitEntity(org.bukkit.entity.Entity entity) {
+		bukkitEntity = entity;
+	}
+	    
     public void animateArmSwing() {
 //        this.b.tracker.a(this, new Packet18ArmAnimation(this, 1));
-        EntityTracker entitytracker = this.b.getTracker(this.dimension);
+        EntityTracker entitytracker = this.server.getTracker(this.dimension);
 
         entitytracker.a(this, new Packet18ArmAnimation(this, 1));
     }
 
     public void actAsHurt(){
-//        this.b.tracker.a(this, new Packet18ArmAnimation(this, 2));
-        EntityTracker entitytracker = this.b.getTracker(this.dimension);
+//        this.a.tracker.a(this, new Packet18ArmAnimation(this, 2));
+        EntityTracker entitytracker = this.server.getTracker(this.dimension);
 
         entitytracker.a(this, new Packet18ArmAnimation(this, 2));
     }
-
-    @SuppressWarnings("unused")
+    
 	@Override
-    public boolean b(EntityHuman entity) {
-        EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
-        CraftServer server = ((WorldServer) this.world).getServer();
-        server.getPluginManager().callEvent(event);
+	public boolean b(EntityHuman entity) {
+		EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
+		CraftServer server = ((WorldServer) world).getServer();
+		server.getPluginManager().callEvent(event);
 
-        if (entity != null) {
-        	return super.b(entity);
-        } else {
-        	return false;
-        }
-    }
+		return super.b(entity);
+	}
 
-    @Override
-    public int a(EntityHuman entity) {
-        if (lastTargetId == -1 || lastTargetId != entity.id) {
-            EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.CLOSEST_PLAYER);
-            CraftServer server = ((WorldServer) this.world).getServer();
-            server.getPluginManager().callEvent(event);
-        }
-        lastTargetId = entity.id;
+	@Override
+	public void a_(EntityHuman entity) {
+		if (lastTargetId == -1 || lastTargetId != entity.id) {
+			EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.CLOSEST_PLAYER);
+			CraftServer server = ((WorldServer) world).getServer();
+			server.getPluginManager().callEvent(event);
+		}
+		lastTargetId = entity.id;
 
-        return super.a(entity);
-    }
+		super.a_(entity);
+}
 
     @Override
     public void c(Entity entity) {
