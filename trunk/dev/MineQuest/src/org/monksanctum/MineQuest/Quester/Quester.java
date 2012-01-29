@@ -1733,7 +1733,7 @@ public class Quester {
         }
         
         EntityPlayer pl = ((CraftPlayer)player).getHandle();
-        EntityTracker entitytracker = pl.b.getTracker(pl.dimension);
+        EntityTracker entitytracker = pl.server.getTracker(pl.dimension);
 
         entitytracker.a(pl, new Packet18ArmAnimation(pl, 2));
         pl.world.a(pl, (byte) 2);
@@ -2110,7 +2110,7 @@ public class Quester {
 			setHealth(getHealth() - 1);
 	        
 	        EntityPlayer pl = ((CraftPlayer)player).getHandle();
-	        EntityTracker entitytracker = pl.b.getTracker(pl.dimension);
+	        EntityTracker entitytracker = pl.server.getTracker(pl.dimension);
 
 	        entitytracker.a(pl, new Packet18ArmAnimation(pl, 3));
 		}
