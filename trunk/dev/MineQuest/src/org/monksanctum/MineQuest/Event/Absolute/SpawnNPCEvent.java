@@ -56,7 +56,7 @@ public class SpawnNPCEvent extends NormalEvent {
 			if (!npcQuester.isRemoved()) {
 				Location l = new Location(MineQuest.getSServer().getWorld(world), 
 						x, y, z, yaw, pitch);
-				npcQuester.setEntity(MineQuest.getNPCManager().spawnNPC(npcQuester.getName(), l));
+				npcQuester.setEntity(MineQuest.getNPCManager().spawnHumanNPC(npcQuester.getName(), l));
 			}
 //			npcQuester.setEntity(NpcSpawner.SpawnBasicHumanNpc(npcQuester.getName(), 
 //					npcQuester.getName(), MineQuest.getSServer().getWorld(world), 

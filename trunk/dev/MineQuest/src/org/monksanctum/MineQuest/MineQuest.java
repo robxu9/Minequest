@@ -45,7 +45,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.martin.bukkit.npclib.NPCManager;
+import org.npclib.NPCManager;
 import org.monksanctum.MineQuest.Ability.Ability;
 import org.monksanctum.MineQuest.Configuration.AbilityConfigManager;
 import org.monksanctum.MineQuest.Configuration.CombatClassConfig;
