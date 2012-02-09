@@ -1,13 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package org.martin.bukkit.npclib;
+package  org.npclib.nms;
 
 import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.NetServerHandler;
-import net.minecraft.server.NetworkManager;
 import net.minecraft.server.Packet;
 import net.minecraft.server.Packet101CloseWindow;
 import net.minecraft.server.Packet102WindowClick;
@@ -24,8 +18,11 @@ import net.minecraft.server.Packet3Chat;
 import net.minecraft.server.Packet7UseEntity;
 import net.minecraft.server.Packet9Respawn;
 
-import org.bukkit.Location;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+
+import org.npclib.NPCManager;
 
 /**
  *
@@ -33,13 +30,14 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
  */
 public class NPCNetHandler extends NetServerHandler {
 
-    public NPCNetHandler(MinecraftServer minecraftserver, NetworkManager networkmanager, EntityPlayer entityplayer) {
-        super(minecraftserver, networkmanager, entityplayer);
-    }
-    @Override
-    public CraftPlayer getPlayer() {
-        return null;
-    }
+	public NPCNetHandler(NPCManager npcManager, EntityPlayer entityplayer) {
+		super(npcManager.getServer().getMCServer(), npcManager.getNPCNetworkManager(), entityplayer);
+	}
+
+	@Override
+	public CraftPlayer getPlayer() {
+		return new CraftPlayer((CraftServer) Bukkit.getServer(), player); //Fake player prevents spout NPEs
+	}
 
 	@Override
 	public void a() {
@@ -117,15 +115,13 @@ public class NPCNetHandler extends NetServerHandler {
 	public void a(Packet106Transaction packet106transaction) {
 	};
 
-    @Override
-    public void a(Packet130UpdateSign packet130updatesign) {
-    }
-    
-    @Override
-    public void disconnect(String s) {
-    }
-    
-    @Override
-    public void teleport(Location dest) {
-    }
+	@Override
+	public int lowPriorityCount() {
+		return super.lowPriorityCount();
+	}
+
+	@Override
+	public void a(Packet130UpdateSign packet130updatesign) {
+	};
+
 }
