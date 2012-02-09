@@ -45,7 +45,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.MaterialData;
-import org.martin.bukkit.npclib.NPCEntity;
+import org.npclib.entity.NPC;
+import org.npclib.nms.NPCEntity;
 import org.monksanctum.MineQuest.MineQuest;
 import org.monksanctum.MineQuest.Ability.Ability;
 import org.monksanctum.MineQuest.Economy.Store;
@@ -309,7 +310,6 @@ public class NPCQuester extends Quester {
 
     	if (now - last_attack > 500) {
     		last_attack = now;
-	    	entity.animateArmSwing();
 	    	if (isDead(attackTarget)) {
 	    		if (center != null) {
 	    			target = center;
@@ -476,7 +476,7 @@ public class NPCQuester extends Quester {
 			hand = null;
 		}
 		player.setHealth(0);
-		MineQuest.getNPCManager().despawn(name);
+		MineQuest.getNPCManager().despawnHumanByName(name);
 		entity = null;
 		player = null;
 	}
@@ -837,7 +837,7 @@ public class NPCQuester extends Quester {
 					if ((mode != NPCMode.PARTY) && (mode != NPCMode.FOR_SALE) && (mode != NPCMode.PARTY_STAND)) {
 						removeSql();
 						MineQuest.questerHandler.remQuester(this);
-						MineQuest.getNPCManager().despawn(name);
+						MineQuest.getNPCManager().despawnHumanByName(name);
 						player = null;
 						entity = null;
 					} else {
@@ -926,7 +926,7 @@ public class NPCQuester extends Quester {
 			if (player != null) {
 				player.setHealth(0);
 			}
-			MineQuest.getNPCManager().despawn(name);
+			MineQuest.getNPCManager().despawnHumanByName(name);
 			entity = null;
 			player = null;
 		}
@@ -1012,7 +1012,7 @@ public class NPCQuester extends Quester {
 			removeSql();
 		}
 		MineQuest.questerHandler.remQuester(this);
-		MineQuest.getNPCManager().despawn(name);
+		MineQuest.getNPCManager().despawnHumanByName(name);
 //		NpcSpawner.RemoveBasicHumanNpc(this.entity);
 //		MineQuest.log("NPC Died");
 		entity = null;
@@ -1083,18 +1083,28 @@ public class NPCQuester extends Quester {
 		}
 	}
 	
-	public void setEntity(NPCEntity entity) {
+	public void setEntity(NPCEntity npc) {
 		if (removed) return;
 		if (this.entity != null) {
-			MineQuest.getNPCManager().despawn(name);
+			MineQuest.getNPCManager().despawnHumanByName(name);
 			this.entity = null;
 			player = null;
 		}
-		this.entity = entity;
-		setPlayer((Player)entity.getBukkitEntity());
+		this.entity = npc;
+		setPlayer((Player)npc.getBukkitEntity());
 		if (hand != null) {
 			player.setItemInHand(hand);
 			hand = null;
+		}
+		newLocation(player.getLocation());
+	}
+	
+	public void setEntity(NPC npc) {
+		if (removed) return;
+		if (this.entity != null) {
+			MineQuest.getNPCManager().despawnHumanByName(name);
+			this.entity = null;
+			player = null;
 		}
 		newLocation(player.getLocation());
 	}
@@ -1128,7 +1138,7 @@ public class NPCQuester extends Quester {
 					player.setHealth(0);
 				}
 				entity = null;
-				MineQuest.getNPCManager().despawn(name);
+				MineQuest.getNPCManager().despawnHumanByName(name);
 				MineQuest.getEventQueue().addEvent(new SpawnNPCEvent(MineQuest.config.npc_vulnerable_delay, this, center.getWorld().getName(), center.getX(), center.getY(), 
 						center.getZ(), center.getPitch(), center.getYaw()));
 //				makeNPC(center.getWorld().getName(), center.getX(), center.getY(), 
@@ -1138,7 +1148,7 @@ public class NPCQuester extends Quester {
 					removeSql();
 				}
 				MineQuest.questerHandler.remQuester(this);
-				MineQuest.getNPCManager().despawn(name);
+				MineQuest.getNPCManager().despawnHumanByName(name);
 //				NpcSpawner.RemoveBasicHumanNpc(this.entity);
 //				MineQuest.log("NPC Died");
 				entity = null;
